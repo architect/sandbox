@@ -1,0 +1,7 @@
+{
+  "name": "get-api",
+  "dependencies": {
+    "@architect/data": "latest",
+    "@architect/functions": "latest"
+  }
+}

@@ -48,6 +48,7 @@ function start(callback) {
     // ends our little web server
     close = function _closer() {
       try {
+        console.log('calling event server close')
         server.close()
       }
       catch(e) {
