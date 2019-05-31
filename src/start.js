@@ -3,9 +3,8 @@ let chalk = require('chalk')
 let db = require('./db')
 let events = require('./events')
 let http = require('./http')
-let canUse = require('@architect/utils/port-in-use')
-let env = require('@architect/utils/populate-env')
-let readArc = require('@architect/utils/read-arc')
+let utils = require('@architect/utils')
+let hydrate = require('@architect/hydrate')
 
 module.exports = function start(callback) {
 
@@ -24,17 +23,19 @@ module.exports = function start(callback) {
   series([
     // hulk smash
     function _banner(callback) {
-      let {arc} = readArc()
-      process.env.ARC_APP_NAME = arc.app[0]//name
-      //FIXME tmp patch for process.env.SESSION_TABLE_NAME = 'jwe'
-      process.env.SESSION_TABLE_NAME = 'arc-sessions'
-      if (!process.env.hasOwnProperty('NODE_ENV'))
-        process.env.NODE_ENV = 'testing'
-      canUse(process.env.PORT || 3333, callback)
+      utils.portInUse(process.env.PORT || 3333, callback)
+    },
+    function _hydrate(callback) {
+      hydrate({install: false}, callback)
     },
     function _env(callback) {
       // populates additional environment variables
-      env(callback)
+      let {arc} = utils.readArc()
+      process.env.ARC_APP_NAME = arc.app[0]
+      process.env.SESSION_TABLE_NAME = 'jwe'
+      if (!process.env.hasOwnProperty('NODE_ENV'))
+        process.env.NODE_ENV = 'testing'
+      utils.populateEnv(callback)
     },
     function _db(callback) {
       // start dynalite with tables enumerated in .arc
