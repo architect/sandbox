@@ -1,5 +1,4 @@
 let path = require('path')
-let aws = require('aws-sdk')
 let test = require('tape')
 let {db} = require('../src')
 let client = require('../src/db/_get-db-client')

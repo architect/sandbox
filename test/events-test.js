@@ -1,8 +1,6 @@
 let arc = require('@architect/functions')
-let init = require('@architect/utils/init')
 let test = require('tape')
 let path = require('path')
-let fs = require('fs')
 let {events} = require('../src')
 
 let client

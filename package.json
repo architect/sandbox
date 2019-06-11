@@ -13,7 +13,7 @@
   "dependencies": {
     "@architect/hydrate": "^1.0.1",
     "@architect/parser": "^1.1.7",
-    "@architect/utils": "^1.0.5",
+    "@architect/utils": "^1.0.6",
     "aws-sdk": "^2.473.0",
     "body-parser": "^1.19.0",
     "chalk": "^2.4.2",
