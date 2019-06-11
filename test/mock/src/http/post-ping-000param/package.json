@@ -1,7 +1,0 @@
-{
-  "name": "post-ping-000param",
-  "dependencies": {
-    "@architect/data": "latest",
-    "@architect/functions": "latest"
-  }
-}
