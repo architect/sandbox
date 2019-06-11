@@ -2,6 +2,14 @@
 
 ---
 
+## [1.0.3] 2019-06-11
+
+### Changes
+
+- Tidies up test suite and adds a few new tests
+
+---
+
 ## [1.0.2] 2019-05-29
 
 ### Fixes
