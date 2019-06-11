@@ -1,7 +1,7 @@
 {
   "name": "@architect/sandbox",
   "version": "1.0.2",
-  "description": "Run .arc locally",
+  "description": "Run Architect projects locally",
   "main": "src/index.js",
   "scripts": {
     "t": "tape test/events-test.js | tap-spec",
@@ -13,8 +13,8 @@
   "dependencies": {
     "@architect/hydrate": "^1.0.1",
     "@architect/parser": "^1.1.7",
-    "@architect/utils": "^1.0.3",
-    "aws-sdk": "^2.464.0",
+    "@architect/utils": "^1.0.5",
+    "aws-sdk": "^2.473.0",
     "body-parser": "^1.19.0",
     "chalk": "^2.4.2",
     "dynalite": "^2.3.1",
@@ -28,7 +28,7 @@
     "ws": "^7.0.0"
   },
   "devDependencies": {
-    "@architect/functions": "^3.0.8",
+    "@architect/functions": "^3.1.0",
     "eslint": "^5.16.0",
     "tap-spec": "^5.0.0",
     "tape": "^4.10.2",

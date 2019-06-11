@@ -1,4 +1,4 @@
- # Architect Sandbox changelog
+# Architect Sandbox changelog
 
 ---
 
@@ -7,6 +7,7 @@
 ### Changes
 
 - Tidies up test suite and adds a few new tests
+- Updates dependencies
 
 ---
 
