@@ -7,9 +7,11 @@ let utils = require('@architect/utils')
 let hydrate = require('@architect/hydrate')
 
 module.exports = function start(callback) {
+  // Set up default sandbox port
+  let port = process.env.PORT || 3333
 
-  // setup promise if there is no callback
-  var promise
+  // Set up promise if there is no callback
+  let promise
   if (!callback) {
     promise = new Promise(function(res, rej) {
       callback = function(err, result) {
@@ -22,8 +24,12 @@ module.exports = function start(callback) {
   let bus
   series([
     // hulk smash
-    function _banner(callback) {
-      utils.portInUse(process.env.PORT || 3333, callback)
+    function _checkPort(callback) {
+      utils.portInUse(port, callback)
+    },
+    function _printBanner(callback) {
+      utils.banner()
+      callback()
     },
     function _hydrate(callback) {
       hydrate({install: false}, callback)
@@ -57,7 +63,7 @@ module.exports = function start(callback) {
       // vanilla af http server that mounts routes defined by .arc
       http.start(function() {
         let start = chalk.grey('\n', 'Started HTTP "server" @ ')
-        let end = chalk.cyan.underline(`http://localhost:${process.env.PORT}`)
+        let end = chalk.cyan.underline(`http://localhost:${port}`)
         console.log(`${start} ${end}`)
         callback()
       })
