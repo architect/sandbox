@@ -6,6 +6,7 @@
 
 ### Changes
 
+- Uses shared banner printer
 - Tidies up test suite and adds a few new tests
 - Updates dependencies
 

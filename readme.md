@@ -1,14 +1,15 @@
 # `@architect/sandbox`
 
-Run a `.arc` file in a local sandbox.
+Run an Architect project in a local sandbox
 
-## install
+
+## Install
 
 ```bash
 npm i @architect/sandbox
 ```
 
-### example usage
+### Example usage
 
 ```javascript
 let sandbox = require('@architect/sandbox')
