@@ -3,7 +3,7 @@ let init = require('@architect/utils/init')
 let test = require('tape')
 let path = require('path')
 let fs = require('fs')
-let {events} = require('../')
+let {events} = require('../src')
 
 let client
 test('events.start', t=> {
@@ -21,7 +21,7 @@ test('events.start', t=> {
 test('arc.events.publish', t=> {
   t.plan(1)
   arc.events.publish({
-    name: 'ping', 
+    name: 'ping',
     payload: {
       yay: true,
       yas: 'queen'
@@ -29,21 +29,25 @@ test('arc.events.publish', t=> {
   },
   function done(err) {
     if (err) t.fail(err)
-    t.ok(true, 'published')
+    else {
+      t.ok(true, 'published')
+    }
   })
 })
 
 test('arc.queues.publish', t=> {
   t.plan(1)
   arc.queues.publish({
-    name: 'pong', 
+    name: 'pong',
     payload: {
       most: 'bes'
     }
   },
   function done(err) {
     if (err) t.fail(err)
-    t.ok(true, 'published')
+    else {
+      t.ok(true, 'published')
+    }
   })
 })
 

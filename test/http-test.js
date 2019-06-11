@@ -1,16 +1,7 @@
-let url = require('url')
-let aws = require('aws-sdk')
 let path = require('path')
-let fs = require('fs')
-let rm = require('rimraf')
-let mkdir = require('mkdirp')
-let {get} = require('http')
+let tiny = require('tiny-json-http')
 let test = require('tape')
-let {http} = require('../')
-let init = require('@architect/utils/init')
-
-let mockFile = path.join(process.cwd(), 'src', 'http', 'get-index', 'index.js')
-let mockFun = `exports.handler = async ()=> ({body:JSON.stringify({yay:true})})`
+let {http} = require('../src')
 
 let client
 test('http.start', t=> {
@@ -25,20 +16,21 @@ test('http.start', t=> {
   })
 })
 
-test('get /health', t=> {
+test('get /', t=> {
   t.plan(2)
-  var req = get('http://localhost:3333/health', function done(res) {
-    var raw = []
-    res.on('data', function data(d) {raw.push(d)})
-    res.on('end', function end() {
-      let result = Buffer.concat(raw).toString()
-      t.ok(res.statusCode === 200, 'got 200 response')
-      t.ok(true, 'ok')
-      console.log(result)
-    })
+  tiny.get({
+    url: 'http://localhost:3333/'
+  }, function _got(err, data) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'got /')
+      t.ok(data.body.startsWith('Hello world!'), 'is hello world')
+      console.log({data})
+    }
   })
-  req.on('error', t.fail)
 })
+
+// TODO possibly some POST/PUT/PATCH/DELETE tests?
 
 test('http.close', t=> {
   t.plan(1)

@@ -30,9 +30,8 @@
   "devDependencies": {
     "@architect/functions": "^3.0.8",
     "eslint": "^5.16.0",
-    "mkdirp": "^0.5.1",
-    "rimraf": "^2.6.3",
     "tap-spec": "^5.0.0",
-    "tape": "^4.10.2"
+    "tape": "^4.10.2",
+    "tiny-json-http": "^7.1.2"
   }
 }

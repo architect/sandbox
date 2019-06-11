@@ -1,6 +1,6 @@
 let path = require('path')
 let test = require('tape')
-let sandbox = require('../')
+let sandbox = require('../src')
 
 test('sandbox.start', t=> {
   t.plan(2)

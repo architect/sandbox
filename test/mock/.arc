@@ -9,11 +9,11 @@ pong
 
 @http
 get /
-get /api
-get /health
-post /ping/:param
-post /pong/:param
 
 @tables
-cats
-  catID *String
+accounts
+  accountID *String
+
+@indexes
+accounts
+  email *String
