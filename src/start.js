@@ -6,9 +6,10 @@ let http = require('./http')
 let utils = require('@architect/utils')
 let hydrate = require('@architect/hydrate')
 
-module.exports = function start(callback) {
+module.exports = function start(params, callback) {
   // Set up default sandbox port
-  let port = process.env.PORT || 3333
+  process.env.PORT = process.env.PORT || params && params.port || 3333
+  let port = process.env.PORT
 
   // Set up promise if there is no callback
   let promise
@@ -28,7 +29,7 @@ module.exports = function start(callback) {
       utils.portInUse(port, callback)
     },
     function _printBanner(callback) {
-      utils.banner()
+      utils.banner(params)
       callback()
     },
     function _hydrate(callback) {

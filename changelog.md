@@ -2,6 +2,14 @@
 
 ---
 
+## [1.0.4] 2019-06-12
+
+### Added
+
+- Enables sandbox to run independently via CLI (`npx sandbox`)
+
+---
+
 ## [1.0.3] 2019-06-11
 
 ### Changes
