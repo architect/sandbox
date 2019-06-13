@@ -34,7 +34,7 @@ module.exports = function start(params, callback) {
         callback()
       }
       catch(e) {
-        callback(chalk.white(chalk.red.bold('Error!'), 'No Architect project found'))
+        callback(chalk.white(chalk.red.bold('Sandbox error!'), 'No Architect manifest found, cannot start'))
       }
     },
     function _printBanner(callback) {
