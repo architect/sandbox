@@ -34,8 +34,7 @@ module.exports = function start(params, callback) {
         callback()
       }
       catch(e) {
-        console.log(chalk.yellow.bold('Error!'), 'No Architect project found')
-        process.exit(1)
+        callback(chalk.white(chalk.red.bold('Error!'), 'No Architect project found'))
       }
     },
     function _printBanner(callback) {
