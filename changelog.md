@@ -2,6 +2,19 @@
 
 ---
 
+## [1.0.5] 2019-06-13
+
+### Changed
+
+- Updates `utils`, moves some project config bootstrapping out of `sandbox` into `utils`
+
+
+## Fixed
+
+- Better handling of missing project manifest
+
+---
+
 ## [1.0.4] 2019-06-12
 
 ### Added
@@ -12,7 +25,7 @@
 
 ## [1.0.3] 2019-06-11
 
-### Changes
+### Changed
 
 - Uses shared banner printer
 - Tidies up test suite and adds a few new tests
