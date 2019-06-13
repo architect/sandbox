@@ -28,6 +28,16 @@ module.exports = function start(params, callback) {
     function _checkPort(callback) {
       utils.portInUse(port, callback)
     },
+    function _checkArc(callback) {
+      try {
+        utils.readArc()
+        callback()
+      }
+      catch(e) {
+        console.log(chalk.yellow.bold('Error!'), 'No Architect project found')
+        process.exit(1)
+      }
+    },
     function _printBanner(callback) {
       utils.banner(params)
       callback()
@@ -37,8 +47,6 @@ module.exports = function start(params, callback) {
     },
     function _env(callback) {
       // populates additional environment variables
-      let {arc} = utils.readArc()
-      process.env.ARC_APP_NAME = arc.app[0]
       process.env.SESSION_TABLE_NAME = 'jwe'
       if (!process.env.hasOwnProperty('NODE_ENV'))
         process.env.NODE_ENV = 'testing'
