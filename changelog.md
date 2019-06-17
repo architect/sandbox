@@ -2,6 +2,19 @@
 
 ---
 
+## [1.0.7] 2019-06-17
+
+### Changed
+
+- Print earlier, faster, more helpful startup messages
+
+
+### Fixed
+
+- Fixed gnarly little bug with missing Arc-supported runtimes
+
+---
+
 ## [1.0.5-6] 2019-06-13
 
 ### Changed
