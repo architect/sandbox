@@ -34,15 +34,15 @@ module.exports = function start(params, callback) {
         callback()
       }
       catch(e) {
-        callback(chalk.white(chalk.red.bold('Sandbox error!'), 'No Architect manifest found, cannot start'))
+        let msg = chalk.white(chalk.red.bold('Sandbox error!'), 'No Architect manifest found, cannot start')
+        callback(msg)
       }
     },
     function _printBanner(callback) {
       utils.banner(params)
+      let msg = chalk.grey(chalk.green.dim('✓'), 'Found Architect manifest, starting up')
+      console.log(msg)
       callback()
-    },
-    function _hydrate(callback) {
-      hydrate({install: false}, callback)
     },
     function _env(callback) {
       // populates additional environment variables
@@ -51,28 +51,38 @@ module.exports = function start(params, callback) {
         process.env.NODE_ENV = 'testing'
       utils.populateEnv(callback)
     },
+    function _hydrate(callback) {
+      hydrate({install: false}, function next(err) {
+        if (err) callback(err)
+        else {
+          let msg = chalk.grey(chalk.green.dim('✓'), 'Project files hydrated into functions')
+          console.log(msg)
+          callback()
+        }
+      })
+    },
     function _db(callback) {
       // start dynalite with tables enumerated in .arc
       client = db.start(function() {
-        let start = chalk.grey(chalk.green.dim('✓'), '@tables created in local database')
-        console.log(`${start}`)
+        let msg = chalk.grey(chalk.green.dim('✓'), '@tables created in local database')
+        console.log(msg)
         callback()
       })
     },
     function _events(callback) {
       // listens for arc.event.publish events on 3334 and runs them in a child process
       bus = events.start(function() {
-        let start = chalk.grey(chalk.green.dim('✓'), '@events and @queues ready on local event bus')
-        console.log(`${start}`)
+        let msg = chalk.grey(chalk.green.dim('✓'), '@events and @queues ready on local event bus')
+        console.log(msg)
         callback()
       })
     },
     function _http(callback) {
       // vanilla af http server that mounts routes defined by .arc
       http.start(function() {
-        let start = chalk.grey('\n', 'Started HTTP "server" @ ')
-        let end = chalk.cyan.underline(`http://localhost:${port}`)
-        console.log(`${start} ${end}`)
+        let msg = chalk.grey('\n', 'Started HTTP "server" @ ')
+        let info = chalk.cyan.underline(`http://localhost:${port}`)
+        console.log(`${msg} ${info}`)
         callback()
       })
     }
