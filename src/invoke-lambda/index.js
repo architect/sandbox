@@ -4,9 +4,15 @@ let runInPython = require('./run-in-python')
 let runInRuby = require('./run-in-ruby')
 
 let runtimes = {
-  'ruby2.5': runInRuby,
-  'python3.7': runInPython,
   'nodejs10.x': runInNode,
+  'nodejs8.10': runInNode,
+  'python3.6': runInPython,
+  'python3.7': runInPython,
+  'ruby2.5': runInRuby,
+  // TODO
+  // 'go1.x': runInGo,
+  // 'dotnetcore2.1': runInDotNet,
+  // 'java8': runInJava,
 }
 
 /**
