@@ -7,9 +7,23 @@ let utils = require('@architect/utils')
 let hydrate = require('@architect/hydrate')
 
 module.exports = function start(params, callback) {
-  // Set up default sandbox port
-  process.env.PORT = process.env.PORT || params && params.port || 3333
-  let port = process.env.PORT
+  params = params || {}
+  let {port, options} = params
+  /**
+   * Set up default sandbox port
+   * CLI args > env var > passed arg
+   */
+  let findPort = option => option === '-p' || option === '--port' || option === 'port'
+  if (options && options.some(findPort)) {
+    if (options.indexOf('-p') >= 0)
+      process.env.PORT = options[options.indexOf('-p') + 1]
+    if (options.indexOf('--port') >= 0)
+      process.env.PORT = options[options.indexOf('--port') + 1]
+    if (options.indexOf('port') >= 0)
+      process.env.PORT = options[options.indexOf('port') + 1]
+  }
+  port = process.env.PORT || port || 3333
+  if (typeof port !== 'number') port = 3333
 
   // Set up promise if there is no callback
   let promise

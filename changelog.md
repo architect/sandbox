@@ -2,6 +2,14 @@
 
 ---
 
+## [1.0.8] 2019-06-18
+
+### Changed
+
+- Moves `sandbox` port assignment logic into this module (as opposed to various caller implementations)
+
+---
+
 ## [1.0.7] 2019-06-17
 
 ### Changed

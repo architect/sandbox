@@ -2,4 +2,5 @@
 let sandbox = require('./index')
 let ver = require('../package.json').version
 let version = `Sandbox ${ver}`
-sandbox.start({version})
+let options = process.argv
+sandbox.start({version, options})
