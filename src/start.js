@@ -22,8 +22,8 @@ module.exports = function start(params, callback) {
     if (options.indexOf('port') >= 0)
       process.env.PORT = options[options.indexOf('port') + 1]
   }
-  port = process.env.PORT || port || 3333
-  if (typeof port !== 'number') port = 3333
+  process.env.PORT = process.env.PORT || port || 3333
+  if (typeof process.env.PORT !== 'number') process.env.PORT = 3333
 
   // Set up promise if there is no callback
   let promise
@@ -40,7 +40,7 @@ module.exports = function start(params, callback) {
   series([
     // hulk smash
     function _checkPort(callback) {
-      utils.portInUse(port, callback)
+      utils.portInUse(process.env.PORT, callback)
     },
     function _checkArc(callback) {
       try {
