@@ -2,7 +2,7 @@
 
 ---
 
-## [1.0.11] 2019-06-24
+## [1.0.11-12] 2019-06-24
 
 ### Added
 
@@ -11,7 +11,7 @@
 
 ### Fixed
 
-- Ensures env vars are present for local db init, possibly fixes #382, 391
+- Ensures local db can init without local AWS credentials file, possibly fixes #382, 391
 
 ---
 

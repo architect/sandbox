@@ -3,19 +3,16 @@ let endpoint = new AWS.Endpoint('http://localhost:5000')
 let region = 'us-west-2'
 
 /**
- * Populate AWS env vars necessary to init
- * Technically only AWS_SECRET_ACCESS_KEY + AWS_ACCESS_KEY_ID required, but populate AWS_PROFILE + AWS_REGION jic
+ * Populate AWS env vars necessary to init if not loaded from local AWS credentials file
+ * (Technically only AWS_SECRET_ACCESS_KEY + AWS_ACCESS_KEY_ID required to initialize db)
+ * TODO this impl assumes that the presence of AWS_PROFILE means the sdk successfully loaded credentials, which may not be the case; need to add actual creds check and set dummy AWS_SECRET_ACCESS_KEY + AWS_ACCESS_KEY_ID if necessary
  */
-if (process.env.AWS_PROFILE) {
+let missingProfile = !process.env.AWS_PROFILE
+let missingSecretAccessKey = !process.env.AWS_SECRET_ACCESS_KEY
+let missingAccessKeyId = !process.env.AWS_ACCESS_KEY_ID
+if (missingProfile && missingSecretAccessKey && missingAccessKeyId) {
   process.env.AWS_PROFILE = 'xxx'
-}
-if (!process.env.AWS_REGION) {
-  process.env.AWS_REGION = 'us-west-2'
-}
-if (!process.env.AWS_SECRET_ACCESS_KEY) {
   process.env.AWS_SECRET_ACCESS_KEY = 'xxx'
-}
-if (!process.env.AWS_ACCESS_KEY_ID) {
   process.env.AWS_ACCESS_KEY_ID = 'xxx'
 }
 
