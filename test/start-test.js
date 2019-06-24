@@ -13,7 +13,7 @@ test('async sandbox.start test/mock', async t=> {
   t.plan(1)
   process.chdir(path.join(__dirname, 'mock'))
   asyncClose = await sandbox.start()
-  t.ok(true, 'started')
+  t.ok(asyncClose, 'started')
 })
 
 test('async sandbox.close', async t=> {
@@ -25,12 +25,11 @@ test('async sandbox.close', async t=> {
 let syncClose
 test('sync sandbox.start test/mock', t=> {
   t.plan(1)
-  process.chdir(path.join(__dirname, 'mock'))
   sandbox.start({}, function (err, end) {
     if (err) t.fail('Sandbox startup failure')
     else {
       syncClose = end
-      t.ok(true, 'started')
+      t.ok(syncClose, 'started')
     }
   })
 })
