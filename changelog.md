@@ -2,7 +2,7 @@
 
 ---
 
-## [1.0.11-12] 2019-06-24
+## [1.0.11-13] 2019-06-24
 
 ### Added
 
@@ -11,7 +11,10 @@
 
 ### Fixed
 
-- Ensures local db can init without local AWS credentials file, possibly fixes #382, 391
+- Ensures `sandbox` starts when local db initializes in the cases of:
+  - No local AWS credentials file (e.g `~/.aws/credentials`)
+  - The local AWS credentials file is present, but is missing the requested profile name
+  - Fixes #382, 391
 
 ---
 
