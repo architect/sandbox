@@ -8,16 +8,35 @@ test('sandbox.start', t=> {
   t.ok(sandbox.start, 'has sandbox.start')
 })
 
-let close
-test('sandbox.start test/mock', async t=> {
+let asyncClose
+test('async sandbox.start test/mock', async t=> {
   t.plan(1)
   process.chdir(path.join(__dirname, 'mock'))
-  close = await sandbox.start()
+  asyncClose = await sandbox.start()
   t.ok(true, 'started')
 })
 
-test('sandbox.close', async t=> {
+test('async sandbox.close', async t=> {
   t.plan(1)
-  close()
+  asyncClose()
+  t.ok(true, 'closed')
+})
+
+let syncClose
+test('sync sandbox.start test/mock', t=> {
+  t.plan(1)
+  process.chdir(path.join(__dirname, 'mock'))
+  sandbox.start({}, function (err, end) {
+    if (err) t.fail('Sandbox startup failure')
+    else {
+      syncClose = end
+      t.ok(true, 'started')
+    }
+  })
+})
+
+test('sync sandbox.close', t=> {
+  t.plan(1)
+  syncClose()
   t.ok(true, 'closed')
 })
