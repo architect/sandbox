@@ -1,13 +1,15 @@
 let readArc = require('@architect/utils/read-arc')
 let waterfall = require('run-waterfall')
-
-let dynamo = require('./_get-db-client')
 let getAttributeDefinitions = require('./create-table/_get-attribute-definitions')
 let getKeySchema = require('./create-table/_get-key-schema')
 let clean = require('./create-table/_remove-ttl-and-lambda')
 let createTable = require('./create-table')
+let dynamo
 
 module.exports = function init(callback) {
+  // Don't load dynamo client with global requires, it may not yet have env vars loaded
+  // eslint-disable-next-line
+  dynamo = require('./_get-db-client')
 
   let {arc} = readArc()
   let app = arc.app[0]
