@@ -2,6 +2,19 @@
 
 ---
 
+## [1.0.11] 2019-06-24
+
+### Added
+
+- Additional testing for `sandbox` CLI, and of sync and async calls as a module
+
+
+### Fixed
+
+- Ensures env vars are present for local db init, possibly fixes #382, 391
+
+---
+
 ## [1.0.8-10] 2019-06-18
 
 ### Changed

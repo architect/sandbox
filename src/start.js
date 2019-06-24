@@ -61,8 +61,9 @@ module.exports = function start(params, callback) {
     function _env(callback) {
       // populates additional environment variables
       process.env.SESSION_TABLE_NAME = 'jwe'
-      if (!process.env.hasOwnProperty('NODE_ENV'))
+      if (!process.env.NODE_ENV) {
         process.env.NODE_ENV = 'testing'
+      }
       utils.populateEnv(callback)
     },
     function _hydrate(callback) {
