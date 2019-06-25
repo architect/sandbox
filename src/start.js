@@ -103,7 +103,7 @@ module.exports = function start(params, callback) {
     function _http(callback) {
       // Vanilla af http server that mounts routes defined by .arc
       http.start(function() {
-        let msg = chalk.grey('\n', 'Started HTTP "server" @ ')
+        let msg = chalk.grey('\n  Started HTTP "server" @ ')
         let info = chalk.cyan.underline(`http://localhost:${port}`)
         console.log(`${msg} ${info}`)
         callback()
