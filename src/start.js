@@ -1,10 +1,11 @@
-let series = require('run-series')
 let chalk = require('chalk')
 let db = require('./db')
 let events = require('./events')
 let http = require('./http')
-let utils = require('@architect/utils')
 let hydrate = require('@architect/hydrate')
+let maybeHydrate = require('./http/maybe-hydrate')
+let series = require('run-series')
+let utils = require('@architect/utils')
 
 module.exports = function start(params, callback) {
   params = params || {}
@@ -38,11 +39,12 @@ module.exports = function start(params, callback) {
   let client
   let bus
   series([
-    // hulk smash
     function _checkPort(callback) {
+      // Make sure we have access to the desired port
       utils.portInUse(port, callback)
     },
     function _checkArc(callback) {
+      // Ensure there's an Architect project manifest present
       try {
         utils.readArc()
         callback()
@@ -53,20 +55,26 @@ module.exports = function start(params, callback) {
       }
     },
     function _printBanner(callback) {
+      // Print the banner (which also loads some boostrap env vars)
       utils.banner(params)
       let msg = chalk.grey(chalk.green.dim('✓'), 'Found Architect manifest, starting up')
       console.log(msg)
       callback()
     },
     function _env(callback) {
-      // populates additional environment variables
+      // Populates additional environment variables
       process.env.SESSION_TABLE_NAME = 'jwe'
       if (!process.env.NODE_ENV) {
         process.env.NODE_ENV = 'testing'
       }
       utils.populateEnv(callback)
     },
-    function _hydrate(callback) {
+    function _maybeHydrate(callback) {
+      // Loop through functions and see if any need dependency hydration
+      maybeHydrate(callback)
+    },
+    function _hydrateShared(callback) {
+      // ... then hydrate in Architect project files
       hydrate({install: false}, function next(err) {
         if (err) callback(err)
         else {
@@ -77,7 +85,7 @@ module.exports = function start(params, callback) {
       })
     },
     function _db(callback) {
-      // start dynalite with tables enumerated in .arc
+      // Start dynalite with tables enumerated in .arc
       client = db.start(function() {
         let msg = chalk.grey(chalk.green.dim('✓'), '@tables created in local database')
         console.log(msg)
@@ -85,7 +93,7 @@ module.exports = function start(params, callback) {
       })
     },
     function _events(callback) {
-      // listens for arc.event.publish events on 3334 and runs them in a child process
+      // Listens for arc.event.publish events on 3334 and runs them in a child process
       bus = events.start(function() {
         let msg = chalk.grey(chalk.green.dim('✓'), '@events and @queues ready on local event bus')
         console.log(msg)
@@ -93,7 +101,7 @@ module.exports = function start(params, callback) {
       })
     },
     function _http(callback) {
-      // vanilla af http server that mounts routes defined by .arc
+      // Vanilla af http server that mounts routes defined by .arc
       http.start(function() {
         let msg = chalk.grey('\n', 'Started HTTP "server" @ ')
         let info = chalk.cyan.underline(`http://localhost:${port}`)
@@ -110,7 +118,7 @@ module.exports = function start(params, callback) {
         http.close()
         bus.close()
       }
-      // pass a function to shut everything down if this is being used as a module
+      // Pass a function to shut everything down if this is being used as a module
       callback(null, end)
     }
   })
