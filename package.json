@@ -14,7 +14,7 @@
     "sandbox": "./src/cli.js"
   },
   "dependencies": {
-    "@architect/hydrate": "^1.1.0",
+    "@architect/hydrate": "^1.1.1",
     "@architect/parser": "^1.1.7",
     "@architect/utils": "^1.0.12",
     "aws-sdk": "^2.477.0",
