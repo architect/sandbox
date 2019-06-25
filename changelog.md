@@ -2,6 +2,16 @@
 
 ---
 
+## [1.1.0] 2019-06-25
+
+### Added
+
+- Auto-hydration!
+  - Say goodbye to running `npx hydrate` before starting new projects, cloning existing projects, or pulling down new functions
+  - On startup, any functions missing dependencies on the local filesystem will now be auto-hydrated
+
+---
+
 ## [1.0.11-13] 2019-06-24
 
 ### Added
