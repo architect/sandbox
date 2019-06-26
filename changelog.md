@@ -2,6 +2,23 @@
 
 ---
 
+## [1.2.0] 2019-06-26
+
+### Added
+
+- Auto-refresh! `sandbox` now keeps an eye out for the following changes to your project:
+  - Edits to your Architect project manifest will mount or unmount HTTP routes without having to restart `sandbox`
+  - Changes to `src/shared` and `src/views` will automatically rehydrate your functions' shared code
+  - More to come!
+
+
+### Changed
+
+- Prettied up initialization printing
+- Improved CLI tests
+
+---
+
 ## [1.1.0-1] 2019-06-25
 
 ### Added
