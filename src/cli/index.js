@@ -1,23 +1,27 @@
-#!/usr/bin/env node
 let chalk = require('chalk')
 let hydrate = require('@architect/hydrate')
-let http = require('./http')
 let path = require('path')
-let sandbox = require('./index')
-let ver = require('../package.json').version
-let version = `Sandbox ${ver}`
+let pkgVer = require('../../package.json').version
+let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
-let options = process.argv
 
-start()
-function start() {
-  sandbox.start({version, options}, function watching(err) {
+module.exports = function cli (params={}) {
+  // Calling the CLI as a module from a parent package causes a require race, so we have to call them at execution time
+  // eslint-disable-next-line
+  let http = require('../http')
+  // eslint-disable-next-line
+  let sandbox = require('../index')
+
+  if (!params.version) params.version = ver
+  sandbox.start(params, function watching(err, close) {
     if (err && err.message === 'hydration_error') {
       // Hydration errors already reported, no need to log
+      if (close) close()
       process.exit(1)
     }
     if (err) {
       console.log(err)
+      if (close) close()
       process.exit(1)
     }
     let watcher = watch(process.cwd(), { recursive: true })
