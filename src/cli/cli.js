@@ -6,4 +6,4 @@ let params = {
   options,
   version: `Sandbox ${ver}`
 }
-cli(params, console.log)
+cli(params)

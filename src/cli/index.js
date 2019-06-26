@@ -5,8 +5,8 @@ let pkgVer = require('../../package.json').version
 let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
 
-module.exports = function cli (params={}) {
-  // Calling the CLI as a module from a parent package causes a require race, so we have to call them at execution time
+module.exports = function cli (params={}, callback) {
+  // Calling the CLI as a module from a parent package causes some strange require race behavior against relative paths, so we have to call them at execution time
   // eslint-disable-next-line
   let http = require('../http')
   // eslint-disable-next-line
@@ -17,13 +17,16 @@ module.exports = function cli (params={}) {
     if (err && err.message === 'hydration_error') {
       // Hydration errors already reported, no need to log
       if (close) close()
-      process.exit(1)
+      if (callback) callback(err)
+      else process.exit(1)
     }
     if (err) {
       console.log(err)
       if (close) close()
-      process.exit(1)
+      if (callback) callback(err)
+      else process.exit(1)
     }
+    if (callback) callback(null, close)
     let watcher = watch(process.cwd(), { recursive: true })
     let arcFile = new RegExp(`${process.cwd()}${path.sep}(\\.arc|app\\.arc|arc\\.yaml|arc\\.json)`)
 

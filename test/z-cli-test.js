@@ -1,3 +1,4 @@
+let cli = require('../src/cli')
 let join = require('path').join
 let test = require('tape')
 let exists = require('fs').existsSync
@@ -11,22 +12,18 @@ test('CLI env', t=> {
   t.plan(1)
   // Assumes previous tests may have already set working dir to `mock`
   process.chdir(join(__dirname, 'mock'))
-  t.ok(exists(join(process.cwd(), '..', '..', 'src', 'cli', 'cli.js')), 'Has CLI')
+  t.ok(cli, 'Has CLI')
 })
 
 test('CLI sandbox', t => {
   t.plan(1)
-  let result = spawn('../../src/cli/cli.js')
-  let output = ''
-  result.stdout.on('data', (data) => {
-    output += data
-    if (output.includes(`Local environment ready!`)) {
-      console.log(output)
-      result.kill('SIGTERM')
+  cli({}, function done (err, close) {
+    if (err) t.fail(err)
+    else {
+      if (close) close()
       t.ok(true, 'Sandbox CLI started')
+      t.end()
+      process.exit(0) // CLI holds process open, ofc
     }
-  })
-  result.on('error', err => {
-    t.fail(err)
   })
 })
