@@ -11,7 +11,7 @@
   "author": "Brian LeRoux <b@brian.io>",
   "license": "Apache-2.0",
   "bin": {
-    "sandbox": "./src/cli.js"
+    "sandbox": "./src/cli/cli.js"
   },
   "dependencies": {
     "@architect/hydrate": "^1.1.1",

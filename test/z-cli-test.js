@@ -11,12 +11,12 @@ test('CLI env', t=> {
   t.plan(1)
   // Assumes previous tests may have already set working dir to `mock`
   process.chdir(join(__dirname, 'mock'))
-  t.ok(exists(join(process.cwd(), '..', '..', 'src', 'cli.js')), 'Has CLI')
+  t.ok(exists(join(process.cwd(), '..', '..', 'src', 'cli', 'cli.js')), 'Has CLI')
 })
 
 test('CLI sandbox', t => {
   t.plan(1)
-  let result = spawn('../../src/cli.js')
+  let result = spawn('../../src/cli/cli.js')
   let output = ''
   result.stdout.on('data', (data) => {
     output += data
