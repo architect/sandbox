@@ -6,9 +6,9 @@ let chalk = require('chalk')
 module.exports = function log(params) {
   if (!process.env.QUIET) {
     let {verb, route, path} = params
-    let httpVerb = chalk.dim(verb.padStart(7)) // 'delete' + 1
-    let lambda = chalk.dim(`${verb}${path}`)
+    let httpVerb = chalk.grey(verb.padStart(7)) // 'delete' + 1
     let routePath = chalk.cyan(route) + ' '
+    let lambda = chalk.grey(`${verb}${path}`)
     console.log(chalk.grey(`${httpVerb} ${routePath.padEnd(45, '.')} ${lambda}`))
   }
 }

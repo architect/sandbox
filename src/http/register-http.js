@@ -1,3 +1,4 @@
+let chalk = require('chalk')
 let join = require('path').join
 let name = require('@architect/utils/get-lambda-name')
 let log = require('./pretty-print-route')
@@ -5,7 +6,10 @@ let invoker = require('./invoke-http')
 
 module.exports = function reg(app, api, type, routes) {
   if (routes) {
-    if (!process.env.QUIET) console.log('')
+    if (!process.env.QUIET) {
+      let msg = chalk.grey(chalk.green.dim('✓'), 'Loaded routes:')
+      console.log(`${msg}`)
+    }
 
     // walk all the routes
     routes.forEach(r=> {
