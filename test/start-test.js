@@ -1,6 +1,5 @@
 let path = require('path')
 let test = require('tape')
-let spawn = require('child_process').spawn
 let sandbox = require('../src')
 
 test('sandbox.start', t=> {
@@ -39,22 +38,4 @@ test('Sync sandbox.close', t=> {
   t.plan(1)
   syncClose()
   t.ok(true, 'Sandbox closed')
-})
-
-test('CLI sandbox', t => {
-  t.plan(1)
-  let result = spawn('../../src/cli.js')
-  let output = ''
-  result.stdout.on('data', (data) => {
-    output += data
-    if (output.includes(`Started HTTP "server"`)) {
-      console.log(output)
-      result.kill('SIGINT')
-      t.ok(true, 'Sandbox CLI started')
-    }
-  })
-  result.on('error', err => {
-    console.log('', err)
-    t.fail()
-  })
 })
