@@ -1,8 +1,6 @@
 let cli = require('../src/cli')
 let join = require('path').join
 let test = require('tape')
-let exists = require('fs').existsSync
-let spawn = require('child_process').spawn
 
 /**
  * May take a few seconds to close all related threads
