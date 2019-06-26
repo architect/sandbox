@@ -5,7 +5,7 @@ let invoker = require('./invoke-http')
 
 module.exports = function reg(app, api, type, routes) {
   if (routes) {
-    console.log('')
+    if (!process.env.QUIET) console.log('')
 
     // walk all the routes
     routes.forEach(r=> {
