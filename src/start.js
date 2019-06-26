@@ -8,6 +8,7 @@ let series = require('run-series')
 let utils = require('@architect/utils')
 
 module.exports = function start(params, callback) {
+  let start = Date.now()
   params = params || {}
   let {port, options} = params
   /**
@@ -103,9 +104,16 @@ module.exports = function start(params, callback) {
     function _http(callback) {
       // Vanilla af http server that mounts routes defined by .arc
       http.start(function() {
-        let msg = chalk.grey('\n  Started HTTP "server" @ ')
-        let info = chalk.cyan.underline(`http://localhost:${port}`)
-        console.log(`${msg} ${info}`)
+        let end = Date.now()
+        let startIndicator = chalk.green.dim('✓')
+        let startMsg = chalk.grey(`Sandbox started in ${end - start}ms`)
+        console.log(`\n${startIndicator} ${startMsg}`)
+
+        let readyIndicator = chalk.green.dim('✈︎')
+        let readyMsg = chalk.white('Local environment ready!')
+        let link = chalk.green.bold.underline(`http://localhost:${port}\n`)
+        console.log(`${readyIndicator} ${readyMsg}`)
+        console.log(`\n    ${link}`)
         callback()
       })
     }
