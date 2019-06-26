@@ -1,6 +1,6 @@
 {
   "name": "@architect/sandbox",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Run Architect projects locally",
   "main": "src/index.js",
   "scripts": {
