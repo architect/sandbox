@@ -4,8 +4,16 @@ let invoke = require('../invoke-lambda')
 let fs = require('fs')
 let uuid = require('uuid/v4')
 
+let paths = {
+  original: ['ws-connect', 'ws-disconnect', 'ws-default'],
+  classic: ['ws-$connect', 'ws-$disconnect', 'ws-$default'],
+  clean: ['connect', 'disconnect', 'default']
+}
+
 module.exports = function registerWebSocket({app, server}) {
 
+  let cwd = name=> join(process.cwd(), 'src', 'ws', name)
+  let choice = fs.existsSync(cwd('connect')) ? 'clean' : (fs.existsSync(cwd('ws-connect'))? 'original' : 'classic')
   let wss = new WebSocket.Server({server})
   let connections = []
 
@@ -13,10 +21,9 @@ module.exports = function registerWebSocket({app, server}) {
 
     // build paths to default ws lambdas
     // we're guaranteed that these routes will exist
-    let cwd = name=> join(process.cwd(), 'src', 'ws', name)
-    let $connect = cwd('ws-$connect')
-    let $disconnect = cwd('ws-$disconnect')
-    let $default = cwd('ws-$default')
+    let $connect = cwd(paths[choice][0])
+    let $disconnect = cwd(paths[choice][1])
+    let $default = cwd(paths[choice][2])
 
     // create a connectionId uuid
     let connectionId = uuid()
@@ -33,14 +40,24 @@ module.exports = function registerWebSocket({app, server}) {
     }, noop)
 
     ws.on('message', function message(msg) {
+
       let payload = JSON.parse(msg)
       let action = payload.action || null
       let localAction = `ws-${action}`
 
-      if (action === null || !fs.existsSync(cwd(localAction))) {
+      let notFound = action === null || (!fs.existsSync(cwd(localAction)) && !fs.existsSync(cwd(action)))
+      if (notFound) {
         // invoke src/ws/ws-$default
         console.log('lambda not found, invoking $default route')
         invoke($default, {
+          body: msg,
+          requestContext: {connectionId}
+        }, noop)
+      }
+      else if (fs.existsSync(cwd(action))) {
+        // invoke src/ws/${action}
+        console.log(`lambda found, routing to ${action}`)
+        invoke(cwd(action), {
           body: msg,
           requestContext: {connectionId}
         }, noop)
