@@ -5,7 +5,13 @@ let pkgVer = require('../../package.json').version
 let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
 
-module.exports = function cli (params={}, callback) {
+// Just use Unix seperators on Windows - path.posix.normalize(process.cwd()) doesn't do what we want
+// So we normalise to slash file names (C:/foo/bar) for regex tests, etc.
+const pathToUnix = function (string) {
+  return string.replace(/\\/g, "/");
+}
+
+module.exports = function cli(params = {}, callback) {
   // Calling the CLI as a module from a parent package causes some strange require race behavior against relative paths, so we have to call them at execution time
   // eslint-disable-next-line
   let http = require('../http')
@@ -28,12 +34,19 @@ module.exports = function cli (params={}, callback) {
     }
     if (callback) callback(null, close)
     let watcher = watch(process.cwd(), { recursive: true })
-    let arcFile = new RegExp(`${process.cwd()}${path.sep}(\\.arc|app\\.arc|arc\\.yaml|arc\\.json)`)
 
-    watcher.on('change', function(event, name) {
+    let workingDirectory = pathToUnix(process.cwd())
+    let separator = path.posix.sep
+
+    let arcFile = new RegExp(`${workingDirectory}${separator}(\\.arc|app\\.arc|arc\\.yaml|arc\\.json)`)
+
+    watcher.on('change', function (event, fileName) {
+
+      fileName = pathToUnix(fileName)
+
       if (event === 'update' &&
-          name.includes(`${process.cwd()}/src/shared`) ||
-          name.includes(`${process.cwd()}/src/views`)) {
+        fileName.includes(`${workingDirectory}/src/shared`) ||
+        fileName.includes(`${workingDirectory}/src/views`)) {
         let indicator = chalk.green.dim('⚬')
         let status = chalk.grey('Shared file changed, rehydrating functions...')
         console.log(`${indicator} ${status}`)
@@ -47,7 +60,7 @@ module.exports = function cli (params={}, callback) {
         })
       }
       if (event === 'update' &&
-          name.match(arcFile)) {
+        fileName.match(arcFile)) {
         let indicator = chalk.green.dim('⚬')
         let status = chalk.grey('Architect project manifest changed, reloading HTTP routes...')
         console.log(`${indicator} ${status}`)
