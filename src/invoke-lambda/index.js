@@ -1,3 +1,5 @@
+let path = require('path')
+
 let getConfig = require('./get-config')
 let runInNode = require('./run-in-node')
 let runInPython = require('./run-in-python')
@@ -26,7 +28,8 @@ module.exports = function invokeLambda(pathToLambda, event, callback) {
 
   let defaults = {
     __ARC_REQ__: JSON.stringify(event),
-    PYTHONUNBUFFERED: true
+    PYTHONUNBUFFERED: true,
+    PYTHONPATH: path.join(pathToLambda, 'vendor')
   }
 
   let options = {
