@@ -4,8 +4,9 @@
   "description": "Run Architect projects locally",
   "main": "src/index.js",
   "scripts": {
-    "t": "tape test/events-test.js | tap-spec",
-    "test": "tape test/*-test.js | tap-spec",
+    "test": "npm run lint && npm run test:unit",
+    "test:unit": "tape test/*-test.js | tap-spec",
+    "coverage": "istanbul cover tape test/*-test.js",
     "lint": "eslint src --fix"
   },
   "author": "Brian LeRoux <b@brian.io>",
@@ -35,6 +36,7 @@
   "devDependencies": {
     "@architect/functions": "^3.2.0",
     "eslint": "^5.16.0",
+    "istanbul": "^0.4.5",
     "tap-spec": "^5.0.0",
     "tape": "^4.10.2",
     "tiny-json-http": "^7.1.2"

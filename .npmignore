@@ -1,3 +1,7 @@
 .git
 .eslintrc.js
 test/
+.travis.yml
+appveyor.yml
+codecov.yaml
+coverage/
