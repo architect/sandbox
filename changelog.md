@@ -2,6 +2,41 @@
 
 ---
 
+## [1.2.3] 2019-07-12
+
+### Added
+
+- Expanded tests, code coverage, and Appveyor testing for Windows
+
+
+### Fixed
+
+- Fixes crashing when `get /` and other functions aren't defined in `.arc` or present in the filesystem, but are requested by a client
+- Prevents startup of http server if `@http` isn't defined in `.arc`
+
+---
+
+## [1.2.2] 2019-07-12
+
+### Added
+
+- Adds PYTHONPATH to `sandbox` Lambda invocation for `/vendor` modules
+
+
+### Fixed
+
+- Fix sandbox working on Windows by normalizing seperators to Unix
+
+---
+
+## [1.2.1] 2019-07-03
+
+### Added
+
+- Support naked WebSocket paths
+
+---
+
 ## [1.2.0] 2019-06-26
 
 ### Added
