@@ -11,6 +11,7 @@ module.exports = function start(params, callback) {
   let start = Date.now()
   params = params || {}
   let {port, options} = params
+  let arc
   /**
    * Set up default sandbox port
    * CLI args > env var > passed arg
@@ -47,7 +48,7 @@ module.exports = function start(params, callback) {
     function _checkArc(callback) {
       // Ensure there's an Architect project manifest present
       try {
-        utils.readArc()
+        arc = utils.readArc().arc
         callback()
       }
       catch(e) {
@@ -102,8 +103,7 @@ module.exports = function start(params, callback) {
       })
     },
     function _http(callback) {
-      // Vanilla af http server that mounts routes defined by .arc
-      http.start(function() {
+      let ok = () => {
         let end = Date.now()
         let startIndicator = chalk.green.dim('✓')
         let startMsg = chalk.grey(`Sandbox started in ${end - start}ms`)
@@ -111,11 +111,21 @@ module.exports = function start(params, callback) {
 
         let readyIndicator = chalk.green.dim('✈︎')
         let readyMsg = chalk.white('Local environment ready!')
-        let link = chalk.green.bold.underline(`http://localhost:${port}\n`)
         console.log(`${readyIndicator} ${readyMsg}`)
-        console.log(`\n    ${link}`)
+      }
+      if (arc.http) {
+        // Vanilla af http server that mounts routes defined by .arc
+        http.start(function() {
+          ok()
+          let link = chalk.green.bold.underline(`http://localhost:${port}\n`)
+          console.log(`\n    ${link}`)
+          callback()
+        })
+      }
+      else {
+        ok()
         callback()
-      })
+      }
     }
   ],
   function _done(err) {
