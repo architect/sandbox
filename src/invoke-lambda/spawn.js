@@ -7,6 +7,7 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
   let child = spawn(command, args, options)
   let stdout = ''
   let stderr = ''
+  let error
 
   // bake a timeout
   let to = setTimeout(function () {
@@ -22,6 +23,10 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
 
   child.stderr.on('data', data => {
     stderr += data
+  })
+
+  child.on('error', err => {
+    error = err
   })
 
   child.on('close', function done (code) {
@@ -43,6 +48,14 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
         type: 'text/html',
         body: `<h1>Timeout Error</h1>
         <p>Lambda <code>${cwd}</code> timed out after <b>${timeout / 1000} seconds</b></p>`
+      })
+    } else if (error) {
+      callback(null, {
+        statusCode: 502,
+        type: 'text/html',
+        body: `<h1>Requested function is missing or not defined, or unknown error</h1>
+        <p>${error}</p>
+        `
       })
     } else if (code === 0) {
       // extract the __ARC__ line
