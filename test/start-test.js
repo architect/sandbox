@@ -11,7 +11,7 @@ test('sandbox.start', t=> {
 let asyncClose
 test('Async sandbox.start test/mock', async t=> {
   t.plan(1)
-  process.chdir(path.join(__dirname, 'mock'))
+  process.chdir(path.join(__dirname, 'mock', 'normal'))
   asyncClose = await sandbox.start()
   t.ok(asyncClose, 'Sandbox started (async)')
 })
@@ -38,4 +38,10 @@ test('Sync sandbox.close', t=> {
   t.plan(1)
   syncClose()
   t.ok(true, 'Sandbox closed')
+})
+
+test('reset env', t=> {
+  t.plan(1)
+  process.chdir(__dirname)
+  t.ok(true, 'reset env')
 })

@@ -9,7 +9,7 @@ let test = require('tape')
 test('CLI env', t=> {
   t.plan(1)
   // Assumes previous tests may have already set working dir to `mock`
-  process.chdir(join(__dirname, 'mock'))
+  process.chdir(join(__dirname, 'mock', 'normal'))
   t.ok(cli, 'Has CLI')
 })
 

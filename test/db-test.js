@@ -8,7 +8,7 @@ test('db.start', t=> {
   t.plan(2)
   t.ok(db, 'got db')
   // move the current process into the mock dir
-  process.chdir(path.join(__dirname, 'mock'))
+  process.chdir(path.join(__dirname, 'mock', 'normal'))
   server = db.start(function() {
     t.ok(true, '@tables created in local database')
   })
@@ -101,4 +101,10 @@ test('db.close', t=> {
   t.plan(1)
   server.close()
   t.ok(true, 'db closed')
+})
+
+test('reset env', t=> {
+  t.plan(1)
+  process.chdir(__dirname)
+  t.ok(true, 'reset env')
 })

@@ -10,7 +10,7 @@ test('events.start', t=> {
   // ensure we are testing
   process.env.NODE_ENV = 'testing'
   // move to test/mock
-  process.chdir(path.join(__dirname, 'mock'))
+  process.chdir(path.join(__dirname, 'mock', 'normal'))
   client = events.start(function() {
     t.ok(true, '@events mounted')
   })
@@ -55,4 +55,10 @@ test('events.close', t=> {
     client.close()
     t.ok(true, '@events closed')
   }, 1000)
+})
+
+test('reset env', t=> {
+  t.plan(1)
+  process.chdir(__dirname)
+  t.ok(true, 'reset env')
 })
