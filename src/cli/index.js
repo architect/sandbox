@@ -1,8 +1,10 @@
 let chalk = require('chalk')
+let fingerprint = require('@architect/utils').fingerprint
 let hydrate = require('@architect/hydrate')
 let path = require('path')
 let pkgVer = require('../../package.json').version
 let ver = `Sandbox ${pkgVer}`
+let utils = require('@architect/utils')
 let watch = require('node-watch')
 
 // Just use Unix seperators on Windows - path.posix.normalize(process.cwd()) doesn't do what we want
@@ -38,45 +40,86 @@ module.exports = function cli(params = {}, callback) {
     let workingDirectory = pathToUnix(process.cwd())
     let separator = path.posix.sep
 
+    let {arc} = utils.readArc()
     let arcFile = new RegExp(`${workingDirectory}${separator}(\\.arc|app\\.arc|arc\\.yaml|arc\\.json)`)
 
+    /**
+     * Watch for pertinent filesystem changes
+     */
     watcher.on('change', function (event, fileName) {
 
+      // Event criteria
+      let update = event === 'update'
+      let updateOrRemove = event === 'update' || event === 'remove'
+
       fileName = pathToUnix(fileName)
+      let startIndicator = chalk.green.dim('⚬')
+      let doneIndicator = chalk.green.dim('✓')
 
-      if (event === 'update' &&
-        fileName.includes(`${workingDirectory}/src/shared`) ||
-        fileName.includes(`${workingDirectory}/src/views`)) {
-        let indicator = chalk.green.dim('⚬')
-        let status = chalk.grey('Shared file changed, rehydrating functions...')
-        console.log(`${indicator} ${status}`)
-
+      let rehydrate = () => {
         let start = Date.now()
+        let status = chalk.grey('Shared file changed, rehydrating functions...')
+        console.log(`${startIndicator} ${status}`)
         hydrate.shared(() => {
-          let indicator = chalk.green.dim('✓')
           let end = Date.now()
           let status = chalk.grey(`Project files rehydrated into functions in ${end - start}ms`)
-          console.log(`${indicator} ${status}`)
+          console.log(`${doneIndicator} ${status}`)
         })
       }
-      if (event === 'update' &&
-        fileName.match(arcFile)) {
-        let indicator = chalk.green.dim('⚬')
+
+      /**
+       * Reload routes upon changes to Architect project manifest
+       */
+      if (update && fileName.match(arcFile)) {
         let status = chalk.grey('Architect project manifest changed, reloading HTTP routes...')
-        console.log(`${indicator} ${status}`)
+        console.log(`${startIndicator} ${status}`)
 
         let start = Date.now()
         process.env.QUIET = true
         http.close()
         http.start(function () {
-          let indicator = chalk.green.dim('✓')
           let end = Date.now()
           let status = chalk.grey(`HTTP routes reloaded in ${end - start}ms`)
-          console.log(`${indicator} ${status}`)
+          console.log(`${doneIndicator} ${status}`)
         })
       }
+
+      /**
+       * Rehydrate functions with shared files upon changes to src/shared and src/views
+       */
+      if (updateOrRemove &&
+        fileName.includes(`${workingDirectory}/src/shared`) ||
+        fileName.includes(`${workingDirectory}/src/views`)) {
+        let status = chalk.grey('Shared file changed, rehydrating functions...')
+        console.log(`${startIndicator} ${status}`)
+        rehydrate()
+      }
+
+
+      /**
+       * Regenerate public/static.json upon changes to src/shared and src/views
+       */
+      if (updateOrRemove && arc.static &&
+          fileName.includes(`${workingDirectory}/public`) &&
+          !fileName.includes(`${workingDirectory}/public/static.json`)) {
+        let start = Date.now()
+        fingerprint({}, function next(err, result) {
+          if (err) console.log(err)
+          else {
+            if (result) {
+              let end = Date.now()
+              console.log(doneIndicator, chalk.grey(`Regenerated public/static.json in ${end - start}ms`))
+              rehydrate()
+            }
+          }
+        })
+      }
+
     })
 
+    /**
+     * Watch for sandbox errors
+     */
     watcher.on('error', function(err) {
       console.log(`Sandbox error:`, err)
     })
