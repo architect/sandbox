@@ -2,6 +2,21 @@
 
 ---
 
+## [1.2.4] 2019-07-15
+
+### Added
+
+- Expanded support for static asset fingerprinting! If you've enabled fingerprinting (`@static fingerprint true`):
+  - `sandbox` will regenerate your `public/static.json` file on startup
+  - And whenever making any changes to your `public/` dir, `sandbox` auto-refresh will automatically regenerate `public/static.json` and re-hydrate your shared files with the latest version
+
+
+### Fixed
+
+- Auto-refresh now detects file deletions from `src/shared` and `src/views`
+
+---
+
 ## [1.2.3] 2019-07-12
 
 ### Added
