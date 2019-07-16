@@ -38,15 +38,23 @@ module.exports = function start(params, callback) {
     })
   }
 
+  // Printer
+  let doneIndicator = chalk.green.dim('✓')
+
   let client
   let bus
   series([
+    /**
+     * Make sure we have access to the desired port
+     */
     function _checkPort(callback) {
-      // Make sure we have access to the desired port
       utils.portInUse(port, callback)
     },
+
+    /**
+     * Ensure there's an Architect project manifest present
+     */
     function _checkArc(callback) {
-      // Ensure there's an Architect project manifest present
       try {
         arc = utils.readArc().arc
         callback()
@@ -56,65 +64,106 @@ module.exports = function start(params, callback) {
         callback(msg)
       }
     },
+
+    /**
+     * Print the banner (which also loads some boostrap env vars)
+     */
     function _printBanner(callback) {
-      // Print the banner (which also loads some boostrap env vars)
       utils.banner(params)
-      let msg = chalk.grey(chalk.green.dim('✓'), 'Found Architect manifest, starting up')
+      let msg = chalk.grey(doneIndicator, 'Found Architect manifest, starting up')
       console.log(msg)
       callback()
     },
+
+    /**
+     * Populate additional environment variables
+     */
     function _env(callback) {
-      // Populates additional environment variables
       process.env.SESSION_TABLE_NAME = 'jwe'
       if (!process.env.NODE_ENV) {
         process.env.NODE_ENV = 'testing'
       }
       utils.populateEnv(callback)
     },
+
+    /**
+     * Check to see if @static fingerprint is enabled, and maybe generate public/static.json
+     */
+    function _maybeWriteStaticManifest(callback) {
+      let {static} = arc
+      if (!static) {
+        callback()
+      }
+      else {
+        utils.fingerprint({}, function next(err, result) {
+          if (err) callback(err)
+          else {
+            if (result) {
+              console.log(doneIndicator, chalk.grey(`Static asset fingerpringing enabled, public/static.json generated`))
+            }
+            callback()
+          }
+        })
+      }
+    },
+
+    /**
+     * Loop through functions and see if any need dependency hydration
+     */
     function _maybeHydrate(callback) {
-      // Loop through functions and see if any need dependency hydration
       maybeHydrate(callback)
     },
+
+    /**
+     * ... then hydrate Architect project files into functions
+     */
     function _hydrateShared(callback) {
-      // ... then hydrate in Architect project files
       hydrate({install: false}, function next(err) {
         if (err) callback(err)
         else {
-          let msg = chalk.grey(chalk.green.dim('✓'), 'Project files hydrated into functions')
+          let msg = chalk.grey(doneIndicator, 'Project files hydrated into functions')
           console.log(msg)
           callback()
         }
       })
     },
+
+    /**
+     * Start dynalite with tables enumerated in .arc (if any)
+     */
     function _db(callback) {
-      // Start dynalite with tables enumerated in .arc
       client = db.start(function() {
-        let msg = chalk.grey(chalk.green.dim('✓'), '@tables created in local database')
+        let msg = chalk.grey(doneIndicator, '@tables created in local database')
         console.log(msg)
         callback()
       })
     },
+
+    /**
+     * Start event bus to listen for arc.event.publish events on 3334
+     */
     function _events(callback) {
-      // Listens for arc.event.publish events on 3334 and runs them in a child process
       bus = events.start(function() {
-        let msg = chalk.grey(chalk.green.dim('✓'), '@events and @queues ready on local event bus')
+        let msg = chalk.grey(doneIndicator, '@events and @queues ready on local event bus')
         console.log(msg)
         callback()
       })
     },
+
+    /**
+     * Start http server with routes enumerated in .arc (if any)
+     */
     function _http(callback) {
       let ok = () => {
         let end = Date.now()
-        let startIndicator = chalk.green.dim('✓')
         let startMsg = chalk.grey(`Sandbox started in ${end - start}ms`)
-        console.log(`\n${startIndicator} ${startMsg}`)
+        console.log(`\n${doneIndicator} ${startMsg}`)
 
         let readyIndicator = chalk.green.dim('✈︎')
         let readyMsg = chalk.white('Local environment ready!')
         console.log(`${readyIndicator} ${readyMsg}`)
       }
       if (arc.http) {
-        // Vanilla af http server that mounts routes defined by .arc
         http.start(function() {
           ok()
           let link = chalk.green.bold.underline(`http://localhost:${port}\n`)
@@ -136,7 +185,9 @@ module.exports = function start(params, callback) {
         http.close()
         bus.close()
       }
-      // Pass a function to shut everything down if this is being used as a module
+      /**
+       * Finally, pass a function to shut everything down if this is being used as a module
+       */
       callback(null, end)
     }
   })
