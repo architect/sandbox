@@ -2,6 +2,19 @@
 
 ---
 
+## [1.2.5] 2019-07-17
+
+### Added
+
+- Adds auto-hydration to new functions without restarting `sandbox`
+
+
+### Fixed
+
+- Fixes issue with auto-hydration on `sandbox` startup
+
+---
+
 ## [1.2.4] 2019-07-15
 
 ### Added

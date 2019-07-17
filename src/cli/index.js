@@ -1,6 +1,7 @@
 let chalk = require('chalk')
 let fingerprint = require('@architect/utils').fingerprint
 let hydrate = require('@architect/hydrate')
+let maybeHydrate = require('../http/maybe-hydrate')
 let path = require('path')
 let pkgVer = require('../../package.json').version
 let ver = `Sandbox ${pkgVer}`
@@ -81,6 +82,16 @@ module.exports = function cli(params = {}, callback) {
           let end = Date.now()
           let status = chalk.grey(`HTTP routes reloaded in ${end - start}ms`)
           console.log(`${doneIndicator} ${status}`)
+        })
+        maybeHydrate(function (err) {
+          if (err) {
+            let status = chalk.grey(`Error hydrating new functions:`, err)
+            console.log(status)
+          }
+          else {
+            let status = chalk.grey(`New functions ready to go!`)
+            console.log(`${doneIndicator} ${status}`)
+          }
         })
       }
 

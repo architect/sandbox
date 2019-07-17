@@ -40,7 +40,8 @@ module.exports = function maybeHydrate (callback) {
               if (!hydrated) {
                 if (!notified) notify()
                 notified = true
-                hydrate.install(path, callback)
+                let basepath = path
+                hydrate.install({basepath}, callback)
               }
               else callback()
             }
@@ -55,7 +56,8 @@ module.exports = function maybeHydrate (callback) {
               if (!hydrated) {
                 if (!notified) notify()
                 notified = true
-                hydrate.install(path, callback)
+                let basepath = path
+                hydrate.install({basepath}, callback)
               }
               else callback()
             }
@@ -70,7 +72,8 @@ module.exports = function maybeHydrate (callback) {
               if (!hydrated) {
                 if (!notified) notify()
                 notified = true
-                hydrate.install(path, callback)
+                let basepath = path
+                hydrate.install({basepath}, callback)
               }
               else callback()
             }
