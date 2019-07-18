@@ -1,5 +1,5 @@
 let test = require('tape')
-let sandbox = require('../src')
+let sandbox = require('../../src')
 
 test('sandbox', t=> {
   t.plan(2)

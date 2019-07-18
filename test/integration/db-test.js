@@ -1,7 +1,7 @@
 let path = require('path')
 let test = require('tape')
-let {db} = require('../src')
-let client = require('../src/db/_get-db-client')
+let {db} = require('../../src')
+let client = require('../../src/db/_get-db-client')
 let server
 
 test('db.start', t=> {
@@ -101,10 +101,4 @@ test('db.close', t=> {
   t.plan(1)
   server.close()
   t.ok(true, 'db closed')
-})
-
-test('reset env', t=> {
-  t.plan(1)
-  process.chdir(__dirname)
-  t.ok(true, 'reset env')
 })

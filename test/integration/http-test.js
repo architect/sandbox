@@ -1,8 +1,8 @@
 let path = require('path')
 let tiny = require('tiny-json-http')
 let test = require('tape')
-let sandbox = require('../src')
-let {http} = require('../src')
+let sandbox = require('../../src')
+let {http} = require('../../src')
 
 let client
 test('env', t=> {
@@ -108,10 +108,4 @@ test('sandbox.close', t=> {
   t.plan(1)
   end()
   t.ok(true, 'http connection closed')
-})
-
-test('reset env', t=> {
-  t.plan(1)
-  process.chdir(__dirname)
-  t.ok(true, 'reset env')
 })

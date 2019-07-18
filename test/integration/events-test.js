@@ -1,7 +1,7 @@
 let arc = require('@architect/functions')
 let test = require('tape')
 let path = require('path')
-let {events} = require('../src')
+let {events} = require('../../src')
 
 let client
 test('events.start', t=> {
@@ -55,10 +55,4 @@ test('events.close', t=> {
     client.close()
     t.ok(true, '@events closed')
   }, 1000)
-})
-
-test('reset env', t=> {
-  t.plan(1)
-  process.chdir(__dirname)
-  t.ok(true, 'reset env')
 })
