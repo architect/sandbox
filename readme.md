@@ -8,7 +8,7 @@ Run an @architect project in a local sandbox.
 
 ## API
 
-### sandbox.cli({ver}, callback)
+### `sandbox.cli({ver}, callback)`
 
 Will use specified `ver` or use the version string defined in this project's
 `package.json`.
@@ -21,7 +21,7 @@ object in. Then sets up a filesystem watcher for changes to:
 2. the `.arc` file, in which case it will re-start the HTTP server by calling
    into [`http()`][http].
 
-### sandbox.db.start(callback)
+### `sandbox.db.start(callback)`
 
 Starts a singleton in-memory dynalite dynamodb server, automatically creating any
 tables or indexes defined by the `.arc` file. Also creates a local session table.
@@ -30,7 +30,7 @@ Returns an object with a `close()` method that shuts the server down.
 
 Invokes `callback` once the db is up and listening.
 
-### sandbox.events.start(callback)
+### `sandbox.events.start(callback)`
 
 If the `.arc` file defines [queues][queues] or [events][events], sets up
 interprocess communication between your events and queues via a tiny web server.
@@ -39,18 +39,18 @@ Returns an object with a `close()` method that shuts the server down.
 
 Invokes `callback` once the servers are listening.
 
-### sandbox.http.start(callback)
+### `sandbox.http.start(callback)`
 
 If the `.arc` file defines http or websocket routes, starts the necessary
 servers and sets up routes as defined in the `.arc` file.
 
 Invokes `callback` once the servers are listening.
 
-### sandbox.http.close()
+### `sandbox.http.close()`
 
 Closes any servers started via [`sandbox.http.start()`][start].
 
-### sandbox.start({port, options}, callback)
+### `sandbox.start({port, options}, callback)`
 
 Checks that ports are available to consume, prints a banner, and sets up any
 local DBs via [`sandbox.db.start()`][db], events or queues via
