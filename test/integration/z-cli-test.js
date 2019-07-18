@@ -1,4 +1,4 @@
-let cli = require('../src/cli')
+let cli = require('../../src/cli')
 let join = require('path').join
 let test = require('tape')
 

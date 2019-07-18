@@ -1,6 +1,6 @@
 let path = require('path')
 let test = require('tape')
-let sandbox = require('../src')
+let sandbox = require('../../src')
 
 test('sandbox.start', t=> {
   t.plan(2)
@@ -38,10 +38,4 @@ test('Sync sandbox.close', t=> {
   t.plan(1)
   syncClose()
   t.ok(true, 'Sandbox closed')
-})
-
-test('reset env', t=> {
-  t.plan(1)
-  process.chdir(__dirname)
-  t.ok(true, 'reset env')
 })
