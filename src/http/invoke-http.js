@@ -45,7 +45,11 @@ module.exports = function invokeHTTP({verb, pathToFunction}) {
 
         if (result.headers) {
           Object.keys(result.headers).forEach(k=> {
-            res.setHeader(k, result.headers[k])
+            if (k.toLowerCase() === 'set-cookie' && result.headers[k]) {
+              res.setHeader(k, result.headers[k].replace('; Secure', '; Path=/'))
+            } else {
+              res.setHeader(k, result.headers[k])
+            }
           })
         }
 
