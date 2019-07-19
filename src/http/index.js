@@ -11,7 +11,7 @@ let http = require('http')
 let registerHTTP = require('./register-http')
 let registerWS = require('./register-websocket')
 let binary = require('./binary-handler')
-let public = require('./public-middleware')
+let publicMiddleware = require('./public-middleware')
 let fallback = require('./fallback')
 
 // config arcana
@@ -28,9 +28,6 @@ app.use(body.urlencoded({
   limit,
 }))
 
-app.use(public)
-app.use(fallback)
-
 // keep a reference up here for fns below
 let server
 let websocket
@@ -40,6 +37,10 @@ app.start = function start(callback) {
 
   // read the arc file
   var web = readArc().arc
+
+  app.use(publicMiddleware(web))
+  app.use(fallback)
+
 
   // build the routes
   if (web.http) {
