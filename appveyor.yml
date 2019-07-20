@@ -26,16 +26,13 @@ platform: Any CPU
 
 environment:
   nodejs_version: "10"
-  PYTHON: "C:\\Python36-x64"
-  PYTHON_VERSION: "3.6.4"
-  PYTHON_ARCH: "64"
 
 # scripts that are called at very beginning, before repo cloning
 init:
   - git config --global core.autocrlf input
 
 # clone directory
-clone_folder: c:\projects\hydrate
+clone_folder: c:\projects\sandbox
 
 # fetch repository as zip archive
 shallow_clone: true                 # default is "false"
@@ -51,8 +48,6 @@ cache:
 install:
   # Get the latest stable version of Node.js
   - ps: Install-Product node $env:nodejs_version
-  - set PATH=C:\Ruby22\bin;%PATH%
-  - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   # Set the appveyor version to match whats in package.json
   - ps: $env:package_version = (Get-Content -Raw -Path package.json | ConvertFrom-Json).version
   - ps: Update-AppveyorBuild -Version "$env:package_version-rc$env:APPVEYOR_BUILD_NUMBER"
@@ -63,11 +58,6 @@ before_test:
   # Output useful info for debugging.
   - node --version
   - npm --version
-  - ruby -v
-  - gem -v
-  - bundle -v
-  - python -V
-  - pip3 -V
 
 # Post-install test scripts.
 test_script:

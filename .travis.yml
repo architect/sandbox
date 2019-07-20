@@ -2,10 +2,8 @@ language: node_js
 node_js: "lts/*"
 before_install:
   - npm i -g npm@latest
-  - npm i -g codecov
 install:
   - npm i
 script:
   - npm test
-  - npm run coverage
   - codecov
