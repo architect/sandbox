@@ -4,10 +4,10 @@
   "description": "Run Architect projects locally",
   "main": "src/index.js",
   "scripts": {
-    "test": "npm run lint && npm run test:unit && npm run test:integration",
-    "test:unit": "tape test/unit/*-test.js test/unit/**/*-test.js | tap-spec",
+    "test": "npm run lint && npm run test:integration && npm run coverage",
+    "test:unit": "tape test/unit/*-test.js test/unit/**/*-test.js test/unit/**/**/*-test.js | tap-spec",
     "test:integration": "tape test/integration/*-test.js | tap-spec",
-    "coverage": "istanbul cover tape test/unit/*-test.js test/unit/**/*-test.js",
+    "coverage": "nyc --reporter=lcov --reporter=text-summary npm run test:unit",
     "lint": "eslint src --fix"
   },
   "author": "Brian LeRoux <b@brian.io>",
@@ -36,8 +36,9 @@
   },
   "devDependencies": {
     "@architect/functions": "^3.2.0",
+    "codecov": "^3.5.0",
     "eslint": "^5.16.0",
-    "istanbul": "^0.4.5",
+    "nyc": "^14.1.1",
     "proxyquire": "^2.1.1",
     "sinon": "^7.3.2",
     "tap-spec": "^5.0.0",
