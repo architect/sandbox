@@ -10,6 +10,10 @@
     "coverage": "nyc --reporter=lcov --reporter=text-summary npm run test:unit",
     "lint": "eslint src --fix"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/architect/sandbox.git"
+  },
   "author": "Brian LeRoux <b@brian.io>",
   "license": "Apache-2.0",
   "bin": {
