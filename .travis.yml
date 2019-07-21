@@ -6,4 +6,4 @@ install:
   - npm i
 script:
   - npm test
-  - codecov
+after_success: codecov
