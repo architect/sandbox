@@ -70,6 +70,8 @@ before_test:
   - gem -v
   - bundle -v
   - python -V
+  - python -help
+  - python --help
   - pip3 -V
 
 # Post-install test scripts.
