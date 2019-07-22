@@ -31,7 +31,7 @@ environment:
   PYTHON: "C:\\Python36-x64"
   PYTHON_VERSION: "3.6.4"
   PYTHON_ARCH: "64"
-  RUBY: "C:\\Ruby25-x64\\bin"
+  RUBY: "C:\\Ruby25-x64"
 
 # scripts that are called at very beginning, before repo cloning
 init:
@@ -54,7 +54,8 @@ cache:
 install:
   # Get the latest stable version of Node.js
   - ps: Install-Product node $env:nodejs_version
-  - set PATH="%PYTHON%;%PYTHON%\\Scripts;%RUBY%;%PATH%"
+  - set PATH=%RUBY%\\bin;%PATH%
+  - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   # Set the appveyor version to match whats in package.json
   - ps: $env:package_version = (Get-Content -Raw -Path package.json | ConvertFrom-Json).version
   - ps: Update-AppveyorBuild -Version "$env:package_version-rc$env:APPVEYOR_BUILD_NUMBER"
