@@ -33,7 +33,63 @@ test('get /', t=> {
     if (err) t.fail(err)
     else {
       t.ok(true, 'got /')
-      t.ok(data.body.startsWith('Hello world!'), 'is hello world')
+      t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs10.x!'), 'is hello world')
+      console.log({data})
+    }
+  })
+})
+
+test('get /nodejs8.10', t=> {
+  t.plan(2)
+  tiny.get({
+    url: 'http://localhost:3333/nodejs8.10'
+  }, function _got(err, data) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'got /')
+      t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs8.10!'), 'is hello world')
+      console.log({data})
+    }
+  })
+})
+
+test('get /python3.7', t=> {
+  t.plan(2)
+  tiny.get({
+    url: 'http://localhost:3333/python3.7'
+  }, function _got(err, data) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'got /')
+      t.ok(data.body.startsWith('Hello from Architect Sandbox running python3.7!'), 'is hello world')
+      console.log({data})
+    }
+  })
+})
+
+test('get /python3.6', t=> {
+  t.plan(2)
+  tiny.get({
+    url: 'http://localhost:3333/python3.6'
+  }, function _got(err, data) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'got /')
+      t.ok(data.body.startsWith('Hello from Architect Sandbox running python3.6!'), 'is hello world')
+      console.log({data})
+    }
+  })
+})
+
+test('get /ruby2.5', t=> {
+  t.plan(2)
+  tiny.get({
+    url: 'http://localhost:3333/ruby2.5'
+  }, function _got(err, data) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'got /')
+      t.ok(data.body.startsWith('Hello from Architect Sandbox running ruby2.5!'), 'is hello world')
       console.log({data})
     }
   })

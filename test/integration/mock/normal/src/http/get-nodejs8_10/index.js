@@ -2,7 +2,7 @@
 exports.handler = async (event) => {
   const response = {
       statusCode: 200,
-      body: JSON.stringify('Hello from Architect Sandbox running nodejs10.x!'),
+      body: JSON.stringify('Hello from Architect Sandbox running nodejs8.10!'),
   };
   return response;
 };
