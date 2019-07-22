@@ -4,7 +4,7 @@ let spawn = require('./spawn')
 
 module.exports = function runInPython(options, timeout, callback) {
   let python = path.join(__dirname, 'runtimes', 'python.py')
-  let py = process.platform === 'win32' ? 'python.exe' : 'python3'
+  let py = process.platform === 'win32' ? 'py' : 'python3'
   fs.readFile(python, 'utf8', function done(err, data) {
     if (err) callback(err)
     else {
