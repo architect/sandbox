@@ -8,7 +8,7 @@ test('db.start', t=> {
   t.plan(2)
   t.ok(db, 'got db')
   // move the current process into the mock dir
-  process.chdir(path.join(__dirname, 'mock', 'normal'))
+  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
   server = db.start(function() {
     t.ok(true, '@tables created in local database')
   })

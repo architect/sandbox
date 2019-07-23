@@ -10,7 +10,7 @@ test('events.start', t=> {
   // ensure we are testing
   process.env.NODE_ENV = 'testing'
   // move to test/mock
-  process.chdir(path.join(__dirname, 'mock', 'normal'))
+  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
   client = events.start(function() {
     t.ok(true, '@events mounted')
   })

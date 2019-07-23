@@ -11,7 +11,7 @@ test('sandbox.start', t=> {
 let asyncClose
 test('Async sandbox.start test/mock', async t=> {
   t.plan(1)
-  process.chdir(path.join(__dirname, 'mock', 'normal'))
+  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
   asyncClose = await sandbox.start()
   t.ok(asyncClose, 'Sandbox started (async)')
 })

@@ -19,7 +19,7 @@ test('env', t=> {
 test('http.start', t=> {
   t.plan(1)
   // move to test/mock
-  process.chdir(path.join(__dirname, 'mock', 'normal'))
+  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
   client = http.start(function() {
     t.ok(true, '@http mounted')
   })
@@ -108,7 +108,7 @@ test('http.close', t=> {
  */
 test('http.start', t=> {
   t.plan(1)
-  process.chdir(path.join(__dirname, 'mock', 'no-index'))
+  process.chdir(path.join(__dirname, '..', 'mock', 'no-index'))
   client = http.start(function() {
     t.ok(true, '@http mounted')
   })
@@ -138,7 +138,7 @@ test('http.close', t=> {
 let end
 test('sandbox.start', t=> {
   t.plan(1)
-  process.chdir(path.join(__dirname, 'mock', 'no-http'))
+  process.chdir(path.join(__dirname, '..', 'mock', 'no-http'))
   sandbox.start({}, function(err, close) {
     if (err) t.fail(err)
     else {
