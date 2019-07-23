@@ -1,5 +1,6 @@
 let AWS = require('aws-sdk')
 let chalk = require('chalk')
+let chars = require('@architect/utils').chars
 let endpoint = new AWS.Endpoint('http://localhost:5000')
 let region = 'us-west-2'
 
@@ -21,7 +22,7 @@ let dynamo = new AWS.DynamoDB({endpoint, region})
 
 // Backstop missing credentials so aws-sdk doesn't stall sandbox initialization
 if (dynamo.config && !dynamo.config.credentials) {
-  console.log(chalk.grey(chalk.green.dim('✓'), 'Starting up without AWS credentials'))
+  console.log(chalk.grey(chars.done, 'Starting up without AWS credentials'))
   process.env.AWS_SECRET_ACCESS_KEY = 'xxx'
   process.env.AWS_ACCESS_KEY_ID = 'xxx'
 }

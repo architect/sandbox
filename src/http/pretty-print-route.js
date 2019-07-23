@@ -1,7 +1,7 @@
 let chalk = require('chalk')
 
 /**
- * print a route as its being registered
+ * print a route as it's being registered
  */
 module.exports = function log(params) {
   if (!process.env.QUIET) {

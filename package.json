@@ -20,9 +20,9 @@
     "sandbox": "./src/cli/cli.js"
   },
   "dependencies": {
-    "@architect/hydrate": "^1.2.2",
+    "@architect/hydrate": "^1.2.4",
     "@architect/parser": "^1.1.7",
-    "@architect/utils": "^1.2.2",
+    "@architect/utils": "^1.2.3",
     "aws-sdk": "^2.477.0",
     "body-parser": "^1.19.0",
     "chalk": "^2.4.2",

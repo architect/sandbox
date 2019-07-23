@@ -5,6 +5,7 @@ let join = require('path').join
 let hydrate = require('@architect/hydrate')
 let series = require('run-series')
 let utils = require('@architect/utils')
+let chars = utils.chars
 
 /**
  * Checks for the existence of supported dependency manifests, and auto-hydrates each function's dependencies as necessary
@@ -20,7 +21,7 @@ module.exports = function maybeHydrate (callback) {
     callback()
   }
   else {
-    let notify = () => console.log(chalk.grey(chalk.green.dim('✓'), 'Found new functions to hydrate!'))
+    let notify = () => console.log(chalk.grey(chars.done, 'Found new functions to hydrate!'))
     let notified = false
     let ops = arc.localPaths.map(path => {
       return function (callback) {
