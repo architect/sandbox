@@ -7,6 +7,7 @@ let pkgVer = require('../../package.json').version
 let ver = `Sandbox ${pkgVer}`
 let utils = require('@architect/utils')
 let watch = require('node-watch')
+let chars = utils.chars
 
 // Just use Unix seperators on Windows - path.posix.normalize(process.cwd()) doesn't do what we want
 // So we normalise to slash file names (C:/foo/bar) for regex tests, etc.
@@ -54,17 +55,15 @@ module.exports = function cli(params = {}, callback) {
       let updateOrRemove = event === 'update' || event === 'remove'
 
       fileName = pathToUnix(fileName)
-      let startIndicator = chalk.green.dim('⚬')
-      let doneIndicator = chalk.green.dim('✓')
 
       let rehydrate = () => {
         let start = Date.now()
         let status = chalk.grey('Shared file changed, rehydrating functions...')
-        console.log(`${startIndicator} ${status}`)
+        console.log(`${chars.start} ${status}`)
         hydrate.shared(() => {
           let end = Date.now()
           let status = chalk.grey(`Project files rehydrated into functions in ${end - start}ms`)
-          console.log(`${doneIndicator} ${status}`)
+          console.log(`${chars.done} ${status}`)
         })
       }
 
@@ -73,7 +72,7 @@ module.exports = function cli(params = {}, callback) {
        */
       if (update && fileName.match(arcFile)) {
         let status = chalk.grey('Architect project manifest changed, reloading HTTP routes...')
-        console.log(`${startIndicator} ${status}`)
+        console.log(`${chars.start} ${status}`)
 
         let start = Date.now()
         process.env.QUIET = true
@@ -81,7 +80,7 @@ module.exports = function cli(params = {}, callback) {
         http.start(function () {
           let end = Date.now()
           let status = chalk.grey(`HTTP routes reloaded in ${end - start}ms`)
-          console.log(`${doneIndicator} ${status}`)
+          console.log(`${chars.done} ${status}`)
         })
         maybeHydrate(function (err) {
           if (err) {
@@ -90,7 +89,7 @@ module.exports = function cli(params = {}, callback) {
           }
           else {
             let status = chalk.grey(`New functions ready to go!`)
-            console.log(`${doneIndicator} ${status}`)
+            console.log(`${chars.done} ${status}`)
           }
         })
       }
@@ -102,7 +101,7 @@ module.exports = function cli(params = {}, callback) {
         fileName.includes(`${workingDirectory}/src/shared`) ||
         fileName.includes(`${workingDirectory}/src/views`)) {
         let status = chalk.grey('Shared file changed, rehydrating functions...')
-        console.log(`${startIndicator} ${status}`)
+        console.log(`${chars.start} ${status}`)
         rehydrate()
       }
 
@@ -119,7 +118,7 @@ module.exports = function cli(params = {}, callback) {
           else {
             if (result) {
               let end = Date.now()
-              console.log(doneIndicator, chalk.grey(`Regenerated public/static.json in ${end - start}ms`))
+              console.log(chars.done, chalk.grey(`Regenerated public/static.json in ${end - start}ms`))
               rehydrate()
             }
           }

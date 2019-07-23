@@ -6,6 +6,7 @@ let hydrate = require('@architect/hydrate')
 let maybeHydrate = require('./http/maybe-hydrate')
 let series = require('run-series')
 let utils = require('@architect/utils')
+let chars = utils.chars
 
 module.exports = function start(params, callback) {
   let start = Date.now()
@@ -38,9 +39,6 @@ module.exports = function start(params, callback) {
     })
   }
 
-  // Printer
-  let doneIndicator = chalk.green.dim('✓')
-
   let client
   let bus
   series([
@@ -70,7 +68,7 @@ module.exports = function start(params, callback) {
      */
     function _printBanner(callback) {
       utils.banner(params)
-      let msg = chalk.grey(doneIndicator, 'Found Architect manifest, starting up')
+      let msg = chalk.grey(chars.done, 'Found Architect manifest, starting up')
       console.log(msg)
       callback()
     },
@@ -99,7 +97,7 @@ module.exports = function start(params, callback) {
           if (err) callback(err)
           else {
             if (result) {
-              console.log(doneIndicator, chalk.grey(`Static asset fingerpringing enabled, public/static.json generated`))
+              console.log(chars.done, chalk.grey(`Static asset fingerpringing enabled, public/static.json generated`))
             }
             callback()
           }
@@ -121,7 +119,7 @@ module.exports = function start(params, callback) {
       hydrate({install: false}, function next(err) {
         if (err) callback(err)
         else {
-          let msg = chalk.grey(doneIndicator, 'Project files hydrated into functions')
+          let msg = chalk.grey(chars.done, 'Project files hydrated into functions')
           console.log(msg)
           callback()
         }
@@ -133,7 +131,7 @@ module.exports = function start(params, callback) {
      */
     function _db(callback) {
       client = db.start(function() {
-        let msg = chalk.grey(doneIndicator, '@tables created in local database')
+        let msg = chalk.grey(chars.done, '@tables created in local database')
         console.log(msg)
         callback()
       })
@@ -144,7 +142,7 @@ module.exports = function start(params, callback) {
      */
     function _events(callback) {
       bus = events.start(function() {
-        let msg = chalk.grey(doneIndicator, '@events and @queues ready on local event bus')
+        let msg = chalk.grey(chars.done, '@events and @queues ready on local event bus')
         console.log(msg)
         callback()
       })
@@ -157,11 +155,14 @@ module.exports = function start(params, callback) {
       let ok = () => {
         let end = Date.now()
         let startMsg = chalk.grey(`Sandbox started in ${end - start}ms`)
-        console.log(`\n${doneIndicator} ${startMsg}`)
+        console.log(`\n${chars.done} ${startMsg}`)
 
-        let readyIndicator = chalk.green.dim('✈︎')
+        let isWin = process.platform.startsWith('win')
+        let ready = isWin
+          ? chars.done
+          : chalk.green.dim('✈︎')
         let readyMsg = chalk.white('Local environment ready!')
-        console.log(`${readyIndicator} ${readyMsg}`)
+        console.log(`${ready} ${readyMsg}`)
       }
       if (arc.http) {
         http.start(function() {
