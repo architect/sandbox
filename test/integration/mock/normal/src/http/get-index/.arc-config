@@ -1,5 +1,5 @@
 @aws
 runtime nodejs10.x
-# timeout 30
+timeout 10
 # concurrency 1
 # memory 1152
