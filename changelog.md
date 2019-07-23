@@ -2,19 +2,19 @@
 
 ---
 
-## [On master] 2019-07-23
+## [1.2.6] 2019-07-23
 
 ### Fixed
 
 - Fixed issue preventing Ruby functions from properly executing
 - Fixed issue prevent Python functions from properly executing in Windows
-
+- Fix broken characters in Windows console
 
 ### Changed
 
-- Context now passes an empty object to all runtimes
+- Context now passes an empty object (to be mocked soon!) to all runtimes
   - This deprecates the legacy AWS implementation of `context` (since retired in production) passed to `sandbox` Node functions
-- Reorganized tests, adds code coverage reports
+- Reorganized tests, added code coverage reports
 
 ---
 
