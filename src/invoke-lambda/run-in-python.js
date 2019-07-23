@@ -8,7 +8,8 @@ module.exports = function runInPython(options, timeout, callback) {
   fs.readFile(python, 'utf8', function done(err, data) {
     if (err) callback(err)
     else {
-      data = data.toString().split('\n').filter(l => l !== '').join(';')
+      // Windows `python -c` doesn't like multi-liners, so serialize script
+      data = data.toString().split('\n').filter(l => l.trim() !== '').join(';')
       let script = `"${data}"`
       spawn(py, ['-c', script], options, timeout, callback)
     }
