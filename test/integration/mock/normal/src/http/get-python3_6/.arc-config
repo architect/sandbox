@@ -1,5 +1,5 @@
 @aws
-runtime nodejs10.x
-timeout 10
+runtime python3.6
+timeout 36
 # concurrency 1
 # memory 1152

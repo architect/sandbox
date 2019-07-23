@@ -2,8 +2,8 @@ let fs = require('fs')
 let path = require('path')
 let spawn = require('./spawn')
 
-module.exports = function runInPython(options, timeout, callback) {
-  let ruby = path.join(__dirname, '/runtimes/ruby.rb')
+module.exports = function runInRuby(options, timeout, callback) {
+  let ruby = path.join(__dirname, 'runtimes', 'ruby.rb')
   fs.readFile(ruby, 'utf8', function done(err, data) {
     if (err) callback(err)
     else {
