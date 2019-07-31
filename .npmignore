@@ -5,3 +5,4 @@ test/
 appveyor.yml
 codecov.yaml
 coverage/
+.nyc_output
