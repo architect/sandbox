@@ -14,7 +14,7 @@ module.exports = function _public(req, res, next) {
   else {
     let arc = readArc().arc
     // reads all routes
-    let routes = arc.http
+    let routes = arc.http || []
     // add websocket route if necessary
     if (arc.ws) routes.push(['post', '/__arc'])
     // tokenize them [['get', '/']]

@@ -68,8 +68,6 @@ module.exports = function start(params, callback) {
      */
     function _printBanner(callback) {
       utils.banner(params)
-      let msg = chalk.grey(chars.done, 'Found Architect manifest, starting up')
-      console.log(msg)
       callback()
     },
 
@@ -119,8 +117,6 @@ module.exports = function start(params, callback) {
       hydrate({install: false}, function next(err) {
         if (err) callback(err)
         else {
-          let msg = chalk.grey(chars.done, 'Project files hydrated into functions')
-          console.log(msg)
           callback()
         }
       })
@@ -131,8 +127,10 @@ module.exports = function start(params, callback) {
      */
     function _db(callback) {
       client = db.start(function() {
-        let msg = chalk.grey(chars.done, '@tables created in local database')
-        console.log(msg)
+        if (arc.tables) {
+          let msg = chalk.grey(chars.done, '@tables created in local database')
+          console.log(msg)
+        }
         callback()
       })
     },
@@ -142,8 +140,10 @@ module.exports = function start(params, callback) {
      */
     function _events(callback) {
       bus = events.start(function() {
-        let msg = chalk.grey(chars.done, '@events and @queues ready on local event bus')
-        console.log(msg)
+        if (arc.events || arc.queues) {
+          let msg = chalk.grey(chars.done, '@events and @queues ready on local event bus')
+          console.log(msg)
+        }
         callback()
       })
     },
@@ -155,14 +155,7 @@ module.exports = function start(params, callback) {
       let ok = () => {
         let end = Date.now()
         let startMsg = chalk.grey(`Sandbox started in ${end - start}ms`)
-        console.log(`\n${chars.done} ${startMsg}`)
-
-        let isWin = process.platform.startsWith('win')
-        let ready = isWin
-          ? chars.done
-          : chalk.green.dim('✈︎')
-        let readyMsg = chalk.white('Local environment ready!')
-        console.log(`${ready} ${readyMsg}`)
+        console.log(`${chars.done} ${startMsg}`)
       }
       // two ways in
       if (arc.static || arc.http) {

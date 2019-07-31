@@ -41,11 +41,7 @@ app.start = function start(callback) {
   app.use(publicMiddleware(web))
   app.use(fallback)
 
-
-  // build the routes
-  if (web.http) {
-    registerHTTP(app, '@http', 'http', web.http)
-  }
+  registerHTTP(app, '@http', 'http', web.http || [])
 
   // create an actual server; how quaint!
   server = http.createServer(function _request(req, res) {
