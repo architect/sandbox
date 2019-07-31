@@ -164,7 +164,8 @@ module.exports = function start(params, callback) {
         let readyMsg = chalk.white('Local environment ready!')
         console.log(`${ready} ${readyMsg}`)
       }
-      if (arc.http) {
+      // two ways in
+      if (arc.static || arc.http) {
         http.start(function() {
           ok()
           let link = chalk.green.bold.underline(`http://localhost:${port}\n`)
