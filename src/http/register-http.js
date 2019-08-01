@@ -1,10 +1,8 @@
-let chalk = require('chalk')
 let join = require('path').join
 let utils = require('@architect/utils')
 let log = require('./pretty-print-route')
 let invoker = require('./invoke-http')
 let name = utils.getLambdaName
-let chars = utils.chars
 
 module.exports = function reg(app, api, type, routes) {
 
@@ -12,10 +10,12 @@ module.exports = function reg(app, api, type, routes) {
   let hasGetIndex = routes.some(tuple=> tuple[0].toLowerCase() === 'get' && tuple[1] === '/')
   if (!hasGetIndex) {
     // mount the vendored get /
-    app.get('/', invoker({
-      verb: 'get', 
-      pathToFunction: join(__dirname, '..', '..', 'vendor', 'arc-proxy-3.2.2')
-    }))
+    // IMPORTANT this needs to be a closure.. to ensure this function only gets called ONCE
+    let exec = invoker({
+      verb: 'get',
+      pathToFunction: join(__dirname, '..', '..', 'vendor', 'arc-proxy-3.2.3')
+    })
+    app.get('/', exec)
   }
 
   routes.forEach(r=> {

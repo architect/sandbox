@@ -3,20 +3,17 @@ let url = require('url')
 let send = require('send')
 let path = require('path')
 let exists = fs.existsSync
-let pathToRegExp = require('path-to-regexp')
 
 /**
  * serves static assets found in ./public at /_static
  */
-module.exports = function publicMiddleware(arc) {
-  return function(req, res, next) {
-    let isStatic = req.url.startsWith('/_static')
-    if (isStatic) {
-      sends(req, res, next)
-    }
-    else {
-      next()
-    }
+module.exports = function publicMiddleware(req, res, next) {
+  let isStatic = req.url.startsWith('/_static')
+  if (isStatic) {
+    sends(req, res, next)
+  }
+  else {
+    next()
   }
 }
 
@@ -26,8 +23,9 @@ function sends(req, res, next) {
   if (!basePath || basePath === '/')
     basePath = 'index.html'
 
+  let root = process.env.ARC_SANDBOX_PATH_TO_STATIC
   let pathToFile = url.parse(basePath).pathname
-  let fullPath = path.join(process.cwd(), 'public', decodeURI(pathToFile))
+  let fullPath = path.join(process.cwd(), root, decodeURI(pathToFile))
 
   let found = exists(fullPath) && fs.statSync(fullPath).isFile()
   if (!found) {
@@ -45,7 +43,7 @@ function sends(req, res, next) {
       res.end('\n')
     }
 
-    send(req, pathToFile, {root: 'public'})
+    send(req, pathToFile, {root})
       .on('error', error)
       .on('directory', redirect)
       .pipe(res)

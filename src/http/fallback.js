@@ -26,8 +26,10 @@ module.exports = function _public(req, res, next) {
     let exact = tokens.filter(t=> !t.some(v=> v.startsWith(':')))
     // get all wildcard routes
     let wild = tokens.filter(t=> t.some(v=> v.startsWith(':')))
+
     // look for an exact match
     let exactMatch = exact.some(t=> t.join('') === current.join(''))
+
     // look for a wildcard match
     let wildMatch = wild.filter(t=> t.length === current.length).some(t=> {
       // turn :foo tokens into (\S+) regexp
@@ -35,10 +37,25 @@ module.exports = function _public(req, res, next) {
       let reg = new RegExp(exp)
       return reg.test(current.join('/'))
     })
+
+    // check to see if we are using the vendored proxy
+    let findGetIndex = tuple=> tuple[0].toLowerCase() === 'get' && tuple[1] === '/'
+    let proxyAtRoot = (!arc.http) || (arc.http && !arc.http.some(findGetIndex))
+
     // if either exact or wildcard match bail
     let match = exactMatch || wildMatch
     if (match) {
       next()
+    }
+    else if (proxyAtRoot) {
+
+      let exec = invoker({
+        verb: 'get',
+        pathToFunction: path.join(__dirname, '..', '..', 'vendor', 'arc-proxy-3.2.3')
+      })
+      req.requestContext = {}
+      exec(req, res)
+
     }
     else {
       // invoke the get-index lambda function with a proxy payload

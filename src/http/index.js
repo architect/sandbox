@@ -6,6 +6,7 @@ let readArc = require('@architect/utils/read-arc')
 
 // built ins
 let http = require('http')
+let join = require('path').join
 
 // local modules
 let registerHTTP = require('./register-http')
@@ -18,15 +19,21 @@ let fallback = require('./fallback')
 let jsonTypes = /^application\/.*json/
 let limit = '6mb';
 let app = Router({mergeParams: true})
+
 app.use(binary)
+
 app.use(body.json({
   limit,
   type: req => jsonTypes.test(req.headers['content-type'])
 }))
+
 app.use(body.urlencoded({
   extended: false,
   limit,
 }))
+
+app.use(publicMiddleware)
+app.use(fallback)
 
 // keep a reference up here for fns below
 let server
@@ -36,11 +43,14 @@ let websocket
 app.start = function start(callback) {
 
   // read the arc file
-  var web = readArc().arc
+  let web = readArc().arc
+  let staticFolder = tuple=> tuple[0] === 'folder'
+  let folder = web.static && web.static.some(staticFolder)? web.static.find(staticFolder)[1] : 'public'
 
-  app.use(publicMiddleware(web))
-  app.use(fallback)
+  // allow override of 'public' folder
+  process.env.ARC_SANDBOX_PATH_TO_STATIC = join(process.cwd(), folder)
 
+  // always registering http routes (falling back to get / proxy)
   registerHTTP(app, '@http', 'http', web.http || [])
 
   // create an actual server; how quaint!

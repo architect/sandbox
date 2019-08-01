@@ -1,6 +1,7 @@
 let spawn = require('child_process').spawn
 
 module.exports = function spawnChild(command, args, options, timeout, callback) {
+
   let cwd = options.cwd
   let timedout = false
   // run the show

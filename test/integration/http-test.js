@@ -122,7 +122,10 @@ test('get / without defining get /', t=> {
     if (err) {
       t.equals(err.statusCode, 502, 'Got 502 for missing function')
     }
-    else t.fail(data)
+    else {
+      t.ok(data, 'proxy mounted')
+      console.log(data)
+    }
   })
 })
 
