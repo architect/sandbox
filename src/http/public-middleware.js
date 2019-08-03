@@ -25,7 +25,7 @@ function sends(req, res, next) {
 
   let root = process.env.ARC_SANDBOX_PATH_TO_STATIC
   let pathToFile = url.parse(basePath).pathname
-  let fullPath = path.join(process.cwd(), root, decodeURI(pathToFile))
+  let fullPath = path.join(root, decodeURI(pathToFile))
 
   let found = exists(fullPath) && fs.statSync(fullPath).isFile()
   if (!found) {
