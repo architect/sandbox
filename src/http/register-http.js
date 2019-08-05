@@ -1,10 +1,17 @@
+let chalk = require('chalk')
 let join = require('path').join
 let utils = require('@architect/utils')
+let chars = utils.chars
 let log = require('./pretty-print-route')
 let invoker = require('./invoke-http')
 let name = utils.getLambdaName
+let quiet = process.env.QUIET
 
 module.exports = function reg(app, api, type, routes) {
+  if (!quiet) {
+    let msg = chalk.grey(chars.done, 'Loaded routes:')
+    console.log(`${msg}`)
+  }
 
   // adds default get / aka 'proxy at root'
   let hasGetIndex = routes.some(tuple=> tuple[0].toLowerCase() === 'get' && tuple[1] === '/')
