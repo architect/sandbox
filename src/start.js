@@ -7,6 +7,7 @@ let maybeHydrate = require('./http/maybe-hydrate')
 let series = require('run-series')
 let utils = require('@architect/utils')
 let chars = utils.chars
+let quiet = process.env.QUIET
 
 module.exports = function start(params, callback) {
   let start = Date.now()
@@ -68,6 +69,10 @@ module.exports = function start(params, callback) {
      */
     function _printBanner(callback) {
       utils.banner(params)
+      if (!quiet) {
+        let msg = chalk.grey(chars.done, 'Found Architect manifest, starting up')
+        console.log(msg)
+      }
       callback()
     },
 
@@ -117,6 +122,10 @@ module.exports = function start(params, callback) {
       hydrate({install: false}, function next(err) {
         if (err) callback(err)
         else {
+          if (!quiet) {
+            let msg = chalk.grey(chars.done, 'Project files hydrated into functions')
+            console.log(msg)
+          }
           callback()
         }
       })
@@ -155,7 +164,15 @@ module.exports = function start(params, callback) {
       let ok = () => {
         let end = Date.now()
         let startMsg = chalk.grey(`Sandbox started in ${end - start}ms`)
-        console.log(`${chars.done} ${startMsg}`)
+        console.log(`\n${chars.done} ${startMsg}`)
+        if (!quiet) {
+          let isWin = process.platform.startsWith('win')
+          let ready = isWin
+            ? chars.done
+            : chalk.green.dim('✈︎')
+          let readyMsg = chalk.white('Local environment ready!')
+          console.log(`${ready} ${readyMsg}`)
+        }
       }
       // two ways in
       if (arc.static || arc.http) {

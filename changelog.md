@@ -2,6 +2,24 @@
 
 ---
 
+## [1.2.10] 2019-08-05
+
+### Fixed
+
+- Resolves issue where static assets aren't loading from `_static/`, fixes #416
+
+---
+
+
+## [1.2.7 - 8] 2019-07-31
+
+### Added
+
+- Enables easier creation of static web apps by allowing `sandbox` to run only with `@static`
+  - In Architect 6, you will not need to specify or use `@http` routes in order to deliver web apps
+
+---
+
 ## [1.2.6] 2019-07-23
 
 ### Fixed
