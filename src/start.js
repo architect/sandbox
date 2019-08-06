@@ -83,7 +83,7 @@ module.exports = function start(params, callback) {
       process.env.SESSION_TABLE_NAME = 'jwe' // Default
       if (!process.env.NODE_ENV)
         process.env.NODE_ENV = 'testing'
-      if (version.startsWith('Architect') &&
+      if (version && version.startsWith('Architect') &&
           Number(version.split(' ')[1].substr(0,1)) >= 6)
         process.env.ARC_CFN = true
       utils.populateEnv(callback)

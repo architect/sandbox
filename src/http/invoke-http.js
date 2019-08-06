@@ -5,7 +5,7 @@ let invoke = require('../invoke-lambda')
  * builds response middleware for invoke
  */
 module.exports = function invokeHTTP({verb, pathToFunction, route}) {
-  verb = verb.toUpperCase()
+  if (verb) verb = verb.toUpperCase()
 
   return function respond(req, res) {
 
