@@ -80,10 +80,9 @@ module.exports = function start(params, callback) {
      * Populate additional environment variables
      */
     function _env(callback) {
-      process.env.SESSION_TABLE_NAME = 'jwe'
-      if (!process.env.NODE_ENV) {
+      process.env.SESSION_TABLE_NAME = 'jwe' // Default
+      if (!process.env.NODE_ENV)
         process.env.NODE_ENV = 'testing'
-      }
       utils.populateEnv(callback)
     },
 
@@ -100,7 +99,8 @@ module.exports = function start(params, callback) {
           if (err) callback(err)
           else {
             if (result) {
-              console.log(chars.done, chalk.grey(`Static asset fingerpringing enabled, public/static.json generated`))
+              let msg = chalk.grey(chars.done, 'Static asset fingerpringing enabled, public/static.json generated')
+              console.log(msg)
             }
             callback()
           }

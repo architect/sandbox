@@ -41,7 +41,7 @@ module.exports = function invokeHTTP({verb, pathToFunction}) {
           res.setHeader('Access-Control-Allow-Origin', '*')
 
         if (result.cacheControl)
-          res.setHeader('cache-control', result.cacheControl)
+          res.setHeader('Cache-Control', result.cacheControl)
 
         if (result.headers) {
           Object.keys(result.headers).forEach(k=> {

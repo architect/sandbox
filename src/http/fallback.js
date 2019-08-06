@@ -48,14 +48,12 @@ module.exports = function _public(req, res, next) {
       next()
     }
     else if (proxyAtRoot) {
-
       let exec = invoker({
         verb: 'get',
         pathToFunction: path.join(__dirname, '..', '..', 'vendor', 'arc-proxy-3.2.3')
       })
       req.requestContext = {}
       exec(req, res)
-
     }
     else {
       // invoke the get-index lambda function with a proxy payload

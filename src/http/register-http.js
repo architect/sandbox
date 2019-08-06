@@ -26,7 +26,6 @@ module.exports = function reg(app, api, type, routes) {
   }
 
   routes.forEach(r=> {
-
     let verb = r[0].toLowerCase()
     let route = r[1]
     let path = name(route)
