@@ -67,9 +67,9 @@ module.exports = function invokeHTTP({verb, pathToFunction}) {
           // Gross but it works
           if (documents.some(d => {
             let isText =
-              result.headers && typeof result.headers['content-type'] === 'string' &&
+              result.headers && result.headers['content-type'] &&
                 result.headers['content-type'].startsWith(d) ||
-              result.headers && typeof result.headers['Content-Type'] === 'string' &&
+              result.headers && result.headers['Content-Type'] &&
                 result.headers['Content-Type'].startsWith(d) ||
               result.type && result.type.startsWith(d)
             return isText

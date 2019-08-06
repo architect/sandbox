@@ -2,6 +2,14 @@
 
 ---
 
+## [On master] 2019-08-06
+
+### Fixed
+
+- Fixes dependency-free responses with `content-type` header set /ht @herschel666
+
+---
+
 ## [1.2.10] 2019-08-05
 
 ### Fixed
