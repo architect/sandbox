@@ -10,7 +10,7 @@ module.exports = function binary(req, res, next) {
     return false
   }
 
-  if (isBinary(req.headers)) {
+  if (isBinary(req.headers) || process.env.ARC_CFN) {
     let body = []
     req.on('data', chunk => {
       body.push(chunk)
@@ -18,7 +18,10 @@ module.exports = function binary(req, res, next) {
     })
     req.on('end', () => {
       let base64 = Buffer.concat(body).toString('base64')
-      req.body = { base64 } || {}
+      req.body = process.env.ARC_CFN
+        ? base64 || {}
+        : { base64 } || {}
+      if (process.env.ARC_CFN) req.isBase64Encoded = true
       next()
     })
   }

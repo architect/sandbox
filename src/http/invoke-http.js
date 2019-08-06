@@ -4,7 +4,8 @@ let invoke = require('../invoke-lambda')
 /**
  * builds response middleware for invoke
  */
-module.exports = function invokeHTTP({verb, pathToFunction}) {
+module.exports = function invokeHTTP({verb, pathToFunction, route}) {
+  verb = verb.toUpperCase()
 
   return function respond(req, res) {
 
@@ -12,15 +13,46 @@ module.exports = function invokeHTTP({verb, pathToFunction}) {
     req.headers.Cookie = req.headers.cookie
     delete req.headers.cookie
 
+    let nullify = i => Object.getOwnPropertyNames(i).length ? i : null
+
+    let path = url.parse(req.url).pathname
+    let body = req.body
+    let headers = req.headers
+    let params = req.params
+    let query = url.parse(req.url, true).query
+
     let request = {
       method: verb,
       httpMethod: verb,
-      path: url.parse(req.url).pathname,
-      headers: req.headers,
-      query: url.parse(req.url, true).query,
-      queryStringParameters: url.parse(req.url, true).query,
-      body: req.body,
-      params: req.params,
+      path,
+      body,
+      headers,
+      params,
+      query,
+      queryStringParameters: query
+    }
+
+    if (process.env.ARC_CFN) {
+      // Maybe de-interpolate path into resource
+      let resource = path
+      if (route && route.includes(':')) {
+        resource = route.split('/')
+          .map(part => part.startsWith(':')
+            ? `{${part.replace(':','')}}`
+            : part)
+          .join('/')
+      }
+      request = {
+        httpMethod: verb,
+        path,
+        resource,
+        body: nullify(body),
+        headers,
+        pathParameters: nullify(params),
+        queryStringParameters: nullify(query),
+      }
+      // Base64 encoding status set by binary handler middleware
+      if (req.isBase64Encoded) request.isBase64Encoded = true
     }
 
     // run the lambda sig locally
