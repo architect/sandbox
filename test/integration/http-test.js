@@ -39,6 +39,21 @@ test('get /', t=> {
   })
 })
 
+test('get /binary', t=> {
+  t.plan(2)
+  tiny.get({
+    url: 'http://localhost:3333/binary'
+  }, function _got(err, data) {
+    if (err) t.fail(err)
+    else {
+      const img = Buffer.from(data.body).toString('base64');
+      t.ok(true, 'got /binary')
+      t.ok(img.startsWith('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
+      console.log({data})
+    }
+  })
+})
+
 test('get /nodejs8.10', t=> {
   t.plan(2)
   tiny.get({
