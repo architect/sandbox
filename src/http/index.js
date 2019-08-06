@@ -24,7 +24,8 @@ app.use(binary)
 
 app.use(body.json({
   limit,
-  type: req => jsonTypes.test(req.headers['content-type'])
+  type: req => jsonTypes.test(req.headers['content-type']) &&
+               !req.isBase64Encoded
 }))
 
 app.use(body.urlencoded({

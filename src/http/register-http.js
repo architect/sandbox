@@ -17,9 +17,9 @@ module.exports = function reg(app, api, type, routes) {
   let hasGetIndex = routes.some(tuple=> tuple[0].toLowerCase() === 'get' && tuple[1] === '/')
   if (!hasGetIndex) {
     // mount the vendored get /
-    // IMPORTANT this needs to be a closure.. to ensure this function only gets called ONCE
+    // IMPORTANT this needs to be a closure to ensure this function only gets called ONCE
     let exec = invoker({
-      verb: 'get',
+      verb: 'GET',
       pathToFunction: join(__dirname, '..', '..', 'vendor', 'arc-proxy-3.2.3')
     })
     app.get('/', exec)
@@ -35,7 +35,7 @@ module.exports = function reg(app, api, type, routes) {
     log({verb, route, path})
 
     // reg the route with the Router instance
-    let exec = invoker({verb, pathToFunction})
+    let exec = invoker({verb, pathToFunction, route})
     app[verb](route, exec)
   })
 }

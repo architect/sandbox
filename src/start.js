@@ -12,7 +12,7 @@ let quiet = process.env.QUIET
 module.exports = function start(params, callback) {
   let start = Date.now()
   params = params || {}
-  let {port, options} = params
+  let {port, options, version} = params
   let arc
   /**
    * Set up default sandbox port
@@ -83,6 +83,9 @@ module.exports = function start(params, callback) {
       process.env.SESSION_TABLE_NAME = 'jwe' // Default
       if (!process.env.NODE_ENV)
         process.env.NODE_ENV = 'testing'
+      if (version.startsWith('Architect') &&
+          Number(version.split(' ')[1].substr(0,1)) >= 6)
+        process.env.ARC_CFN = true
       utils.populateEnv(callback)
     },
 
