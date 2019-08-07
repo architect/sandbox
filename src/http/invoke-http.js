@@ -12,6 +12,7 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
     // HACK api gateway 'Cookie' from express 'cookie'
     req.headers.Cookie = req.headers.cookie
     delete req.headers.cookie
+    if (!req.headers.Cookie) delete req.headers.Cookie
 
     let nullify = i => Object.getOwnPropertyNames(i).length ? i : null
 
