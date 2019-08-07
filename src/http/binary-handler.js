@@ -20,8 +20,8 @@ module.exports = function binary(req, res, next) {
       let base64 = Buffer.concat(body).toString('base64')
       req.body = process.env.ARC_CFN
         ? base64 || {}
-        : { base64 } || {}
-      if (process.env.ARC_CFN) req.isBase64Encoded = true
+        : base64 ? { base64 } : {}
+      if (process.env.ARC_CFN && base64) req.isBase64Encoded = true
       next()
     })
   }
