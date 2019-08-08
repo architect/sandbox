@@ -13,11 +13,15 @@ let url = i => `http://localhost:3333${i ? i : ''}`
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${str(item)}`
 let response = {
+  getHeader: sinon.fake(header => {
+    if (header && header.toLowerCase() === 'cache-control') return undefined
+    if (header && header.toLowerCase() === 'content-type') return 'application/json; charset=utf-8'
+  }),
   setHeader: sinon.fake.returns(),
   end: sinon.fake.returns()
 }
 let teardown = () => {
-  lambdaStub.reset()
+  lambdaStub.reset() // mostly jic
   delete process.env.ARC_CFN
 }
 
@@ -119,7 +123,7 @@ test('Architect v6: post /form (JSON)', t => {
   t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
   lambdaStub.reset()
   t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  delete process.env.ARC_CFN
+  teardown()
 })
 
 test('Architect v6: post /form (form URL encoded)', t => {
@@ -301,7 +305,7 @@ test('Architect v5: get /', t => {
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
   if (str(request.query) === str(req.query))
     t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  lambdaStub.reset()
+  teardown()
 })
 
 test('Architect v5: get /?whats=up', t => {
@@ -326,7 +330,7 @@ test('Architect v5: get /?whats=up', t => {
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
   if (str(request.query) === str(req.query))
     t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  lambdaStub.reset()
+  teardown()
 })
 
 test('Architect v5: get /nature/hiking', t => {
@@ -351,7 +355,7 @@ test('Architect v5: get /nature/hiking', t => {
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
   if (str(request.query) === str(req.query))
     t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  lambdaStub.reset()
+  teardown()
 })
 
 test('Architect v5: post /form (JSON / form URL-encoded)', t => {
@@ -376,7 +380,7 @@ test('Architect v5: post /form (JSON / form URL-encoded)', t => {
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
   if (str(request.query) === str(req.query))
     t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  lambdaStub.reset()
+  teardown()
 })
 
 test('Architect v5: post /form (multipart form data-encoded)', t => {
@@ -401,7 +405,7 @@ test('Architect v5: post /form (multipart form data-encoded)', t => {
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
   if (str(request.query) === str(req.query))
     t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  lambdaStub.reset()
+  teardown()
 })
 
 test('Architect v5: put /form', t => {
@@ -426,7 +430,7 @@ test('Architect v5: put /form', t => {
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
   if (str(request.query) === str(req.query))
     t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  lambdaStub.reset()
+  teardown()
 })
 
 test('Architect v5: patch /form', t => {
@@ -451,7 +455,7 @@ test('Architect v5: patch /form', t => {
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
   if (str(request.query) === str(req.query))
     t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  lambdaStub.reset()
+  teardown()
 })
 
 test('Architect v5: delete /form', t => {
@@ -476,5 +480,5 @@ test('Architect v5: delete /form', t => {
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
   if (str(request.query) === str(req.query))
     t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  lambdaStub.reset()
+  teardown()
 })
