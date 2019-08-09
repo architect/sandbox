@@ -120,18 +120,18 @@ test('http.close', t=> {
 })
 
 /**
- * Test loading index without defining get /
+ * Test failing to load index.html without get / defined
  */
 test('http.start', t=> {
   t.plan(2)
-  process.chdir(path.join(__dirname, '..', 'mock', 'no-index'))
+  process.chdir(path.join(__dirname, '..', 'mock', 'no-index-fail'))
   client = http.start(function() {
     t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
     t.ok(true, '@http mounted')
   })
 })
 
-test('get / without defining get /', t=> {
+test('get / without defining get / should fail if index.html not present', t=> {
   t.plan(1)
   tiny.get({
     url: 'http://localhost:3333/'
@@ -141,6 +141,37 @@ test('get / without defining get /', t=> {
     }
     else {
       t.ok(data, 'proxy mounted')
+      console.log(data)
+    }
+  })
+})
+
+test('http.close', t=> {
+  t.plan(1)
+  client.close()
+  t.ok(true, 'http connection closed')
+})
+
+/**
+ * Test successfully loading index.html without get / defined
+ */
+test('http.start', t=> {
+  t.plan(2)
+  process.chdir(path.join(__dirname, '..', 'mock', 'no-index-pass'))
+  client = http.start(function() {
+    t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+    t.ok(true, '@http mounted')
+  })
+})
+
+test('get / without defining get / should succeed if index.html is present', t=> {
+  t.plan(1)
+  tiny.get({
+    url: 'http://localhost:3333/'
+  }, function _got(err, data) {
+    if (err) t.fail('Should not have received error')
+    else {
+      t.ok(data.body.startsWith('Hello world!'), 'Proxy mounted and delivered index.html')
       console.log(data)
     }
   })
