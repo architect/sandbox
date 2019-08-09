@@ -17,10 +17,11 @@ test('env', t=> {
  * Test sandbox http in isolation
  */
 test('http.start', t=> {
-  t.plan(1)
+  t.plan(2)
   // move to test/mock
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
   client = http.start(function() {
+    t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
     t.ok(true, '@http mounted')
   })
 })
@@ -41,11 +42,9 @@ test('get /', t=> {
 
 test('get /binary', t=> {
   t.plan(2)
-  process.env.DEPRECATED = true
   tiny.get({
     url: 'http://localhost:3333/binary'
   }, function _got(err, data) {
-    delete process.env.DEPRECATED
     if (err) t.fail(err)
     else {
       const img = Buffer.from(data.body).toString('base64');
@@ -124,9 +123,10 @@ test('http.close', t=> {
  * Test loading index without defining get /
  */
 test('http.start', t=> {
-  t.plan(1)
+  t.plan(2)
   process.chdir(path.join(__dirname, '..', 'mock', 'no-index'))
   client = http.start(function() {
+    t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
     t.ok(true, '@http mounted')
   })
 })
@@ -177,6 +177,57 @@ test('get / without defining @http', t=> {
       t.equals(err.code, 'ECONNREFUSED', 'Connection refused')
     }
     else t.fail(data)
+  })
+})
+
+test('sandbox.close', t=> {
+  t.plan(1)
+  end()
+  t.ok(true, 'http connection closed')
+})
+
+/**
+ * Arc 5 compatibility tests
+ */
+test('sandbox.start', t=> {
+  t.plan(2)
+  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
+  sandbox.start({version: 'Architect 5.x'}, function(err, close) {
+    if (err) t.fail(err)
+    else {
+      end = close
+      t.ok(process.env.DEPRECATED, 'Arc v5 deprecated status set')
+      t.ok(true, 'sandbox started')
+    }
+  })
+})
+
+test('get /', t=> {
+  t.plan(2)
+  tiny.get({
+    url: 'http://localhost:3333/'
+  }, function _got(err, data) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'got /')
+      t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs10.x!'), 'is hello world')
+      console.log({data})
+    }
+  })
+})
+
+test('get /binary', t=> {
+  t.plan(2)
+  tiny.get({
+    url: 'http://localhost:3333/binary'
+  }, function _got(err, data) {
+    if (err) t.fail(err)
+    else {
+      const img = Buffer.from(data.body).toString('base64');
+      t.ok(true, 'got /binary')
+      t.ok(img.startsWith('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
+      console.log({data})
+    }
   })
 })
 
