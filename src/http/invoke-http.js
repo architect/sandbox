@@ -109,8 +109,32 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
         /**
          * Body handling
          */
-        // Handle v5 egress decoding of base64-encoded responses for the consuming client
-        if (result.isBase64Encoded && result.body && process.env.DEPRECATED) {
+        // Reject raw, unencoded buffers (as does APIG)
+        let isBuffer = () => {
+          let body = result.body
+          if (body && body instanceof Buffer) return true
+          if (body && body.type && body.type === 'Buffer' && body.data instanceof Array) return true
+          return false
+        }
+        if (isBuffer() && !process.env.DEPRECATED) {
+          res.statusCode = 502
+          res.removeHeader('Content-Type')
+          result.body =
+`Cannot respond with a raw buffer.
+
+Please base64 encode your response and include a 'isBase64Encoded: true' parameter, or run your response through @architect/functions`
+        }
+
+        /**
+         * Arc v5 proxy binary responses
+         * - Selective encoding pattern based on path:
+         *   - /{proxy+} (possibly also paired with arc.proxy()) can emit binary responses via base64-encoded body + isBase64Encoded: true
+         *   - Specified doc types convert to strings
+         */
+        let base64EncodedBody = result.isBase64Encoded &&
+                                result.body &&
+                                typeof result.body === 'string'
+        if (base64EncodedBody && process.env.DEPRECATED) {
           // Doc types defined in Arc v5 for conversion
           //   all other doc types
           let documents = [
@@ -136,26 +160,16 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
           else // It's a binary
             result.body = Buffer.from(result.body, 'base64')
         }
+        /**
+         * Arc v6 endpoint binary responses
+         * - Any endpoint can emit binary responses via base64-encoded body + isBase64Encoded: true
+         */
+        if (base64EncodedBody && !process.env.DEPRECATED)
+          result.body = Buffer.from(result.body, 'base64')
 
         // isBase64Encoded flag passthrough
         if (result.isBase64Encoded)
           res.isBase64Encoded = true
-
-        // Deal with raw, unencoded buffers
-        let isBuffer = () => {
-          let body = result.body
-          if (body && body instanceof Buffer) return true
-          if (body && body.type && body.type === 'Buffer' && body.data instanceof Array) return true
-          return false
-        }
-        if (isBuffer() && !process.env.DEPRECATED) {
-          res.statusCode = 502
-          res.removeHeader('Content-Type')
-          result.body =
-`Cannot respond with a raw buffer.
-
-Please base64 encode your response and include a 'isBase64Encoded: true' parameter, or run your response through @architect/functions`
-        }
 
         // Re-encode nested JSON responses
         if (typeof result.json !== 'undefined') {

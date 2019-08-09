@@ -19,6 +19,7 @@ module.exports = function binary(req, res, next) {
     })
     req.on('end', () => {
       let base64 = Buffer.concat(body).toString('base64')
+      // Fallback to empty object (emulates `body-parser`)
       req.body = process.env.DEPRECATED
         ? base64 ? { base64 } : {}
         : base64 || {}
