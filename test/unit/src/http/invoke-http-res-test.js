@@ -37,12 +37,11 @@ let parseOutput = output => {
 }
 let teardown = () => {
   lambdaStub.reset() // mostly jic
-  delete process.env.ARC_CFN
+  delete process.env.DEPRECATED
 }
 
 test('Architect v6 dependency-free responses', t => {
   t.plan(9)
-  process.env.ARC_CFN = true
   let run = (response, callback) => {
     let output = {
       getHeader: sinon.fake(getHeader.bind({}, null)),
@@ -77,6 +76,7 @@ test('Architect v6 dependency-free responses', t => {
 
 test('Architect v5 dependency-free responses', t => {
   t.plan(9)
+  process.env.DEPRECATED = true
   let run = (response, callback) => {
     let output = {
       getHeader: sinon.fake(getHeader.bind({}, null)),
@@ -116,6 +116,7 @@ test('Architect v5 dependency-free responses', t => {
 
 test('Architect v5 + Functions', t => {
   t.plan(11)
+  process.env.DEPRECATED = true
   let antiCache = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
   // Output able to be out of run()'s scope here to be mutated by tests
   let output = {
@@ -166,6 +167,7 @@ test('Architect v5 + Functions', t => {
 
 test('Architect <6 + Functions response params', t => {
   t.plan(4)
+  process.env.DEPRECATED = true
   let run = (response, callback) => {
     let output = {
       getHeader: sinon.fake(getHeader.bind({}, null)),

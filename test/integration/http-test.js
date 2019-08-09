@@ -41,9 +41,11 @@ test('get /', t=> {
 
 test('get /binary', t=> {
   t.plan(2)
+  process.env.DEPRECATED = true
   tiny.get({
     url: 'http://localhost:3333/binary'
   }, function _got(err, data) {
+    delete process.env.DEPRECATED
     if (err) t.fail(err)
     else {
       const img = Buffer.from(data.body).toString('base64');
