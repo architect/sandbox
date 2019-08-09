@@ -1,5 +1,5 @@
 /**
- * Emaultes our API Gateway binary → base64 handling
+ * Emulates our API Gateway binary → base64 handling
  */
 module.exports = function binary(req, res, next) {
   function isBinary(headers) {
@@ -10,7 +10,8 @@ module.exports = function binary(req, res, next) {
     return false
   }
 
-  if (isBinary(req.headers) || process.env.ARC_CFN) {
+  // Arc 6-only impl: always base64-encode all bodies
+  if (isBinary(req.headers) || !process.env.DEPRECATED) {
     let body = []
     req.on('data', chunk => {
       body.push(chunk)
@@ -18,10 +19,11 @@ module.exports = function binary(req, res, next) {
     })
     req.on('end', () => {
       let base64 = Buffer.concat(body).toString('base64')
-      req.body = process.env.ARC_CFN
-        ? base64 || {}
-        : base64 ? { base64 } : {}
-      if (process.env.ARC_CFN && base64) req.isBase64Encoded = true
+      req.body = process.env.DEPRECATED
+        ? base64 ? { base64 } : {}
+        : base64 || {}
+      if (!process.env.DEPRECATED && base64)
+        req.isBase64Encoded = true
       next()
     })
   }

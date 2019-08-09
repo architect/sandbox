@@ -22,13 +22,12 @@ let response = {
 }
 let teardown = () => {
   lambdaStub.reset() // mostly jic
-  delete process.env.ARC_CFN
+  delete process.env.DEPRECATED
 }
 
 test('Architect v6: get /', t => {
   t.plan(6)
   let request = reqs.arc6.getIndex
-  process.env.ARC_CFN = true
   let verb = 'GET'
   let route = '/'
   let handler = invoke({verb, route})
@@ -53,7 +52,6 @@ test('Architect v6: get /', t => {
 test('Architect v6: get /?whats=up', t => {
   t.plan(6)
   let request = reqs.arc6.getWithQueryString
-  process.env.ARC_CFN = true
   let verb = 'GET'
   let route = '/'
   let handler = invoke({verb, route})
@@ -77,7 +75,6 @@ test('Architect v6: get /?whats=up', t => {
 test('Architect v6: get /nature/hiking', t => {
   t.plan(7)
   let request = reqs.arc6.getWithParam
-  process.env.ARC_CFN = true
   let verb = 'GET'
   let route = '/nature/:activities'
   let handler = invoke({verb, route})
@@ -102,7 +99,6 @@ test('Architect v6: get /nature/hiking', t => {
 test('Architect v6: post /form (JSON)', t => {
   t.plan(7)
   let request = reqs.arc6.postJson
-  process.env.ARC_CFN = true
   let verb = 'POST'
   let route = '/form'
   let handler = invoke({verb, route})
@@ -129,7 +125,6 @@ test('Architect v6: post /form (JSON)', t => {
 test('Architect v6: post /form (form URL encoded)', t => {
   t.plan(7)
   let request = reqs.arc6.postFormURL
-  process.env.ARC_CFN = true
   let verb = 'POST'
   let route = '/form'
   let handler = invoke({verb, route})
@@ -155,7 +150,6 @@ test('Architect v6: post /form (form URL encoded)', t => {
 test('Architect v6: post /form (multipart form data)', t => {
   t.plan(7)
   let request = reqs.arc6.postMultiPartFormData
-  process.env.ARC_CFN = true
   let verb = 'POST'
   let route = '/form'
   let handler = invoke({verb, route})
@@ -181,7 +175,6 @@ test('Architect v6: post /form (multipart form data)', t => {
 test('Architect v6: post /form (octet stream)', t => {
   t.plan(7)
   let request = reqs.arc6.postOctetStream
-  process.env.ARC_CFN = true
   let verb = 'POST'
   let route = '/form'
   let handler = invoke({verb, route})
@@ -207,7 +200,6 @@ test('Architect v6: post /form (octet stream)', t => {
 test('Architect v6: put /form (JSON)', t => {
   t.plan(7)
   let request = reqs.arc6.putJson
-  process.env.ARC_CFN = true
   let verb = 'PUT'
   let route = '/form'
   let handler = invoke({verb, route})
@@ -233,7 +225,6 @@ test('Architect v6: put /form (JSON)', t => {
 test('Architect v6: patch /form (JSON)', t => {
   t.plan(7)
   let request = reqs.arc6.patchJson
-  process.env.ARC_CFN = true
   let verb = 'PATCH'
   let route = '/form'
   let handler = invoke({verb, route})
@@ -259,7 +250,6 @@ test('Architect v6: patch /form (JSON)', t => {
 test('Architect v6: delete /form (JSON)', t => {
   t.plan(7)
   let request = reqs.arc6.deleteJson
-  process.env.ARC_CFN = true
   let verb = 'DELETE'
   let route = '/form'
   let handler = invoke({verb, route})
@@ -285,6 +275,7 @@ test('Architect v6: delete /form (JSON)', t => {
 test('Architect v5: get /', t => {
   t.plan(6)
   let request = reqs.arc5.getIndex
+  process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/'
   let handler = invoke({verb, route})
@@ -311,6 +302,7 @@ test('Architect v5: get /', t => {
 test('Architect v5: get /?whats=up', t => {
   t.plan(6)
   let request = reqs.arc5.getWithQueryString
+  process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/'
   let handler = invoke({verb, route})
@@ -336,6 +328,7 @@ test('Architect v5: get /?whats=up', t => {
 test('Architect v5: get /nature/hiking', t => {
   t.plan(6)
   let request = reqs.arc5.getWithParam
+  process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/nature/:activities'
   let handler = invoke({verb, route})
@@ -361,6 +354,7 @@ test('Architect v5: get /nature/hiking', t => {
 test('Architect v5: post /form (JSON / form URL-encoded)', t => {
   t.plan(6)
   let request = reqs.arc5.post
+  process.env.DEPRECATED = true
   let verb = 'POST'
   let route = '/form'
   let handler = invoke({verb, route})
@@ -386,6 +380,7 @@ test('Architect v5: post /form (JSON / form URL-encoded)', t => {
 test('Architect v5: post /form (multipart form data-encoded)', t => {
   t.plan(6)
   let request = reqs.arc5.postBinary
+  process.env.DEPRECATED = true
   let verb = 'POST'
   let route = '/form'
   let handler = invoke({verb, route})
@@ -411,6 +406,7 @@ test('Architect v5: post /form (multipart form data-encoded)', t => {
 test('Architect v5: put /form', t => {
   t.plan(6)
   let request = reqs.arc5.put
+  process.env.DEPRECATED = true
   let verb = 'PUT'
   let route = '/form'
   let handler = invoke({verb, route})
@@ -436,6 +432,7 @@ test('Architect v5: put /form', t => {
 test('Architect v5: patch /form', t => {
   t.plan(6)
   let request = reqs.arc5.patch
+  process.env.DEPRECATED = true
   let verb = 'PATCH'
   let route = '/form'
   let handler = invoke({verb, route})
@@ -461,6 +458,7 @@ test('Architect v5: patch /form', t => {
 test('Architect v5: delete /form', t => {
   t.plan(6)
   let request = reqs.arc5.delete
+  process.env.DEPRECATED = true
   let verb = 'DELETE'
   let route = '/form'
   let handler = invoke({verb, route})

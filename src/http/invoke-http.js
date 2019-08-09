@@ -22,38 +22,38 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
     let params = req.params
     let query = url.parse(req.url, true).query
 
+    // Maybe de-interpolate path into resource
+    let resource = path
+    if (route && route.includes(':')) {
+      resource = route.split('/')
+        .map(part => part.startsWith(':')
+          ? `{${part.replace(':','')}}`
+          : part)
+        .join('/')
+    }
     let request = {
-      method: verb,
       httpMethod: verb,
       path,
-      body,
+      resource,
+      body: nullify(body),
       headers,
-      params,
-      query,
-      queryStringParameters: query
+      pathParameters: nullify(params),
+      queryStringParameters: nullify(query),
     }
+    // Base64 encoding status set by binary handler middleware
+    if (req.isBase64Encoded && !process.env.DEPRECATED) request.isBase64Encoded = true
 
-    if (process.env.ARC_CFN) {
-      // Maybe de-interpolate path into resource
-      let resource = path
-      if (route && route.includes(':')) {
-        resource = route.split('/')
-          .map(part => part.startsWith(':')
-            ? `{${part.replace(':','')}}`
-            : part)
-          .join('/')
-      }
+    if (process.env.DEPRECATED) {
       request = {
+        method: verb,
         httpMethod: verb,
         path,
-        resource,
-        body: nullify(body),
+        body,
         headers,
-        pathParameters: nullify(params),
-        queryStringParameters: nullify(query),
+        params,
+        query,
+        queryStringParameters: query
       }
-      // Base64 encoding status set by binary handler middleware
-      if (req.isBase64Encoded) request.isBase64Encoded = true
     }
 
     // run the lambda sig locally
@@ -110,7 +110,7 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
          * Body handling
          */
         // Handle v5 egress decoding of base64-encoded responses for the consuming client
-        if (result.isBase64Encoded && result.body && !process.env.ARC_CFN) {
+        if (result.isBase64Encoded && result.body && process.env.DEPRECATED) {
           // Doc types defined in Arc v5 for conversion
           //   all other doc types
           let documents = [
@@ -148,7 +148,7 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
           if (body && body.type && body.type === 'Buffer' && body.data instanceof Array) return true
           return false
         }
-        if (isBuffer() && process.env.ARC_CFN) {
+        if (isBuffer() && !process.env.DEPRECATED) {
           res.statusCode = 502
           res.removeHeader('Content-Type')
           result.body =
