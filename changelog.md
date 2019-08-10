@@ -19,7 +19,7 @@
 ### Changed
 
 - Hopefully nothing breaking – please send feedback on the RC!
-  - 1.3 RC: https://github.com/architect/functions/issues/57
+  - 1.3 RC: https://github.com/architect/sandbox/issues/36
   - Slack: https://architecture-as-text.slack.com
 
 ---
