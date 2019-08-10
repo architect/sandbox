@@ -2,6 +2,28 @@
 
 ---
 
+## [On master]
+
+### Added
+
+- Support for Architect 6
+  - Includes complete compatibility for Architect 4 + 5 users
+  - Adds new built-in body parser for Arc 6 emulation
+- Responses now include the same content type aware `Cache-Control` defaults as found in Architect 5
+  - As always, they're able to be overriden with `cacheControl` param in Functions, or `headers['Cache-Control']`
+
+### Fixes
+
+- Better emulation of proper AWS behavior when delivering binary responses
+
+### Changed
+
+- Hopefully nothing breaking – please send feedback on the RC!
+  - 1.3 RC: https://github.com/architect/functions/issues/57
+  - Slack: https://architecture-as-text.slack.com
+
+---
+
 ## [1.2.11] 2019-08-06
 
 ### Fixed
