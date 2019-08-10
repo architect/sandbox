@@ -1,8 +1,14 @@
+_mock
+.arc
+.DS_Store
+.eslintignore
 .eslintrc.js
 .git
-.nyc_output
+.nyc_output/
 .travis.yml
 appveyor.yml
+changelog.md
 codecov.yaml
+contributing.md
 coverage/
 test/
