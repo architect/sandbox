@@ -59,7 +59,7 @@ module.exports = function start(params, callback) {
         callback()
       }
       catch(e) {
-        let msg = chalk.white(chalk.red.bold('Sandbox error!'), 'No Architect manifest found, cannot start')
+        let msg = chalk.white(chalk.red.bold('Sandbox error!'), e.message)
         callback(msg)
       }
     },
