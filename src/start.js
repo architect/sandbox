@@ -85,7 +85,7 @@ module.exports = function start(params, callback) {
         process.env.NODE_ENV = 'testing'
       if (version && version.startsWith('Architect 5'))
         process.env.DEPRECATED = true
-      utils.populateEnv(callback)
+      utils.initEnv(callback)
     },
 
     /**
