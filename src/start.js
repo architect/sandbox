@@ -111,6 +111,16 @@ module.exports = function start(params, callback) {
     },
 
     /**
+     *
+     */
+    function _maybeInit(callback) {
+      if (!process.env.DEPRECATED) {
+        utils.init(null, callback)
+      }
+      else callback()
+    },
+
+    /**
      * Loop through functions and see if any need dependency hydration
      */
     function _maybeHydrate(callback) {
@@ -120,17 +130,20 @@ module.exports = function start(params, callback) {
     /**
      * ... then hydrate Architect project files into functions
      */
-    function _hydrateShared(callback) {
-      hydrate({install: false}, function next(err) {
-        if (err) callback(err)
-        else {
-          if (!quiet) {
-            let msg = chalk.grey(chars.done, 'Project files hydrated into functions')
-            console.log(msg)
+    function _maybeHydrateShared(callback) {
+      if (process.env.DEPRECATED) {
+        hydrate({install: false}, function next(err) {
+          if (err) callback(err)
+          else {
+            if (!quiet) {
+              let msg = chalk.grey(chars.done, 'Project files hydrated into functions')
+              console.log(msg)
+            }
+            callback()
           }
-          callback()
-        }
-      })
+        })
+      }
+      else callback()
     },
 
     /**
