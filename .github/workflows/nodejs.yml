@@ -23,6 +23,7 @@ jobs:
         npm test
   codecov:
     name: codecov
+    runs-on: ubuntu-latest
     needs: test
     steps:
     - name: Run codecov
