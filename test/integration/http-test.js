@@ -4,6 +4,8 @@ let test = require('tape')
 let sandbox = require('../../src')
 let {http} = require('../../src')
 
+let b64dec = i => Buffer.from(i, 'base64').toString()
+
 let client
 test('env', t=> {
   t.plan(2)
@@ -111,7 +113,79 @@ test('get /ruby2.5', t=> {
   })
 })
 
-// TODO possibly some POST/PUT/PATCH/DELETE tests?
+test('post /post', t=> {
+  t.plan(3)
+  let data = {hi: 'there'}
+  tiny.post({
+    url: 'http://localhost:3333/post',
+    data,
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+  }, function _got(err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'posted /post')
+      t.equal(b64dec(result.body.body), 'hi=there', 'Got base64-encoded form URL-encoded body payload')
+      t.ok(result.body.isBase64Encoded, 'Got isBase64Encoded flag')
+      console.log(result.body)
+    }
+  })
+})
+
+test('put /put', t=> {
+  t.plan(3)
+  let data = {hi: 'there'}
+  tiny.put({
+    url: 'http://localhost:3333/put',
+    data,
+  }, function _got(err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'put /put')
+      t.equal(b64dec(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
+      t.ok(result.body.isBase64Encoded, 'Got isBase64Encoded flag')
+      console.log(result.body)
+    }
+  })
+})
+
+/**
+ * Uncomment this when tiny supports patch :)
+ */
+/*
+test('patch /patch', t=> {
+  t.plan(3)
+  let data = {hi: 'there'}
+  tiny.patch({
+    url: 'http://localhost:3333/patch',
+    data,
+  }, function _got(err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'patched /patch')
+      t.equal(b64dec(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
+      t.ok(result.body.isBase64Encoded, 'Got isBase64Encoded flag')
+      console.log(result.body)
+    }
+  })
+})
+*/
+
+test('delete /delete', t=> {
+  t.plan(3)
+  let data = {hi: 'there'}
+  tiny.del({
+    url: 'http://localhost:3333/delete',
+    data,
+  }, function _got(err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'deleted /delete')
+      t.equal(b64dec(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
+      t.ok(result.body.isBase64Encoded, 'Got isBase64Encoded flag')
+      console.log(result.body)
+    }
+  })
+})
 
 test('http.close', t=> {
   t.plan(1)
@@ -258,6 +332,84 @@ test('get /binary', t=> {
       t.ok(true, 'got /binary')
       t.ok(img.startsWith('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
       console.log({data})
+    }
+  })
+})
+
+test('post /post', t=> {
+  t.plan(3)
+  let data = {hi: 'there'}
+  tiny.post({
+    url: 'http://localhost:3333/post',
+    data,
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+  }, function _got(err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'posted /post')
+      t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
+      t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
+      console.log(result.body)
+      t.end()
+    }
+  })
+})
+
+test('put /put', t=> {
+  t.plan(3)
+  let data = {hi: 'there'}
+  tiny.put({
+    url: 'http://localhost:3333/put',
+    data,
+  }, function _got(err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'put /put')
+      t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
+      t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
+      console.log(result.body)
+      t.end()
+    }
+  })
+})
+
+/**
+ * Uncomment this when tiny supports patch :)
+ */
+/*
+test('patch /patch', t=> {
+  t.plan(3)
+  let data = {hi: 'there'}
+  tiny.patch({
+    url: 'http://localhost:3333/patch',
+    data,
+  }, function _got(err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'patched /patch')
+      t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
+      t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
+      console.log(result.body)
+      t.end()
+    }
+  })
+})
+*/
+
+test('delete /delete', t=> {
+  t.plan(3)
+  let data = {hi: 'there'}
+  tiny.del({
+    url: 'http://localhost:3333/delete',
+    data,
+  }, function _got(err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(true, 'deleted /delete')
+      t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
+      t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
+      console.log(result.body)
+      t.end()
     }
   })
 })
