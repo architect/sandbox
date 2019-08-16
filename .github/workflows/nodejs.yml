@@ -13,8 +13,8 @@ jobs:
         os: [windows-latest, ubuntu-latest, macOS-latest]
 
     steps:
-    - name: Use Node.js ${{ matrix.node-version }}
     - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
