@@ -32,7 +32,6 @@ jobs:
         npm test
   codecov:
     name: codecov
-    runs-on: 
     needs: build
     steps:
     - name: Run codecov
