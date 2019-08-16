@@ -30,10 +30,14 @@ jobs:
       with:
         ruby-version: '2.5'
 
-    - name: versions, install, test
+    - name: Versions
       run: |
         node --version
         python --version
         ruby --version
-        npm install
-        npm test
+
+    - name: Install
+      run: npm install
+
+    - name: Test
+      run: npm test
