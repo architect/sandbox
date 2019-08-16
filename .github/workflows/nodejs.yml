@@ -10,6 +10,7 @@ jobs:
     strategy:
       matrix:
         node-version: [8.x, 10.x, 12.x]
+        os: [windows-latest, ubuntu-latest, macOS-latest]
 
     steps:
     - uses: actions/checkout@v1
@@ -17,13 +18,19 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+      uses: actions/setup-ruby@v1
+      with:
+        ruby-version: '2.5'
     - name: npm install & test
       run: |
         npm install
         npm test
   codecov:
     name: codecov
-    runs-on: ubuntu-latest
+    runs-on: 
     needs: build
     steps:
     - name: Run codecov
