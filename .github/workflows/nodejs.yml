@@ -18,9 +18,11 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+    - name: Use Python
       uses: actions/setup-python@v1
       with:
         python-version: '3.x'
+    - name: Use Ruby
       uses: actions/setup-ruby@v1
       with:
         ruby-version: '2.5'
