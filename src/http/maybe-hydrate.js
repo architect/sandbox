@@ -30,13 +30,13 @@ module.exports = function maybeHydrate (callback) {
          * - Try not to go any deeper into the filesystem than necessary (dep trees can take a long time to walk!)
          * - Assumes Architect deps will have their own deps, helping indicate hydration status
          */
-        path = join(process.cwd(), path)
+        let fullpath = join(process.cwd(), path)
         series([
           function _packageJson (callback) {
-            let packageJson = exists(join(path, 'package.json'))
+            let packageJson = exists(join(fullpath, 'package.json'))
             if (packageJson) {
-              let pattern = join(path, 'node_modules', '*')
-              let arcDir = join(path, 'node_modules', '@architect')
+              let pattern = join(fullpath, 'node_modules', '*')
+              let arcDir = join(fullpath, 'node_modules', '@architect')
               let hydrated = glob.sync(pattern).some(file => !file.includes(arcDir))
               if (!hydrated) {
                 if (!notified) notify()
@@ -49,10 +49,10 @@ module.exports = function maybeHydrate (callback) {
             else callback()
           },
           function _requirementsTxt (callback) {
-            let requirementsTxt = exists(join(path, 'requirements.txt'))
+            let requirementsTxt = exists(join(fullpath, 'requirements.txt'))
             if (requirementsTxt) {
-              let pattern = join(path, 'vendor', '*')
-              let arcDir = join(path, 'vendor', 'architect-functions')
+              let pattern = join(fullpath, 'vendor', '*')
+              let arcDir = join(fullpath, 'vendor', 'architect-functions')
               let hydrated = glob.sync(pattern).some(file => !file.includes(arcDir))
               if (!hydrated) {
                 if (!notified) notify()
@@ -65,10 +65,10 @@ module.exports = function maybeHydrate (callback) {
             else callback()
           },
           function _gemfile (callback) {
-            let gemfile = exists(join(path, 'Gemfile'))
+            let gemfile = exists(join(fullpath, 'Gemfile'))
             if (gemfile) {
-              let pattern = join(path, 'vendor', 'bundle', '*')
-              let arcDir = join(path, 'vendor', 'bundle', 'architect-functions')
+              let pattern = join(fullpath, 'vendor', 'bundle', '*')
+              let arcDir = join(fullpath, 'vendor', 'bundle', 'architect-functions')
               let hydrated = glob.sync(pattern).some(file => !file.includes(arcDir))
               if (!hydrated) {
                 if (!notified) notify()
