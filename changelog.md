@@ -2,7 +2,21 @@
 
 ---
 
-## [On master]
+## [1.3.7] 2019-08-22
+
+### Fixed
+
+- Fixes automatic dependency hydration during startup
+
+---
+
+## [1.3.1 - 1.3.6]
+
+Notes coming shortly!
+
+---
+
+## [1.3.0]
 
 ### Added
 
