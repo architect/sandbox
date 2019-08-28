@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "npm run lint && npm run test:integration && npm run coverage",
-    "test:unit": "tape test/unit/*-test.js test/unit/**/*-test.js test/unit/**/**/*-test.js | tap-spec",
-    "test:integration": "tape test/integration/*-test.js | tap-spec",
+    "test:unit": "PORT=6666 tape test/unit/*-test.js test/unit/**/*-test.js test/unit/**/**/*-test.js | tap-spec",
+    "test:integration": "PORT=6666 tape test/integration/*-test.js | tap-spec",
     "coverage": "nyc --reporter=lcov --reporter=text npm run test:unit",
     "lint": "eslint src --fix"
   },
