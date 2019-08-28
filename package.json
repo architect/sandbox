@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "npm run lint && npm run test:integration && npm run coverage",
-    "test:unit": "PORT=6666 tape test/unit/*-test.js test/unit/**/*-test.js test/unit/**/**/*-test.js | tap-spec",
-    "test:integration": "PORT=6666 tape test/integration/*-test.js | tap-spec",
+    "test:unit": "cross-env PORT=6666 tape test/unit/*-test.js test/unit/**/*-test.js test/unit/**/**/*-test.js | tap-spec",
+    "test:integration": "cross-env PORT=6666 tape test/integration/*-test.js | tap-spec",
     "coverage": "nyc --reporter=lcov --reporter=text npm run test:unit",
     "lint": "eslint src --fix"
   },
@@ -41,6 +41,7 @@
   "devDependencies": {
     "@architect/functions": "^3.3.3",
     "codecov": "^3.5.0",
+    "cross-env": "^5.2.0",
     "eslint": "^5.16.0",
     "nyc": "^14.1.1",
     "proxyquire": "^2.1.3",
