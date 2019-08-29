@@ -20,7 +20,7 @@ module.exports = function reg(app, api, type, routes) {
     // IMPORTANT this needs to be a closure to ensure this function only gets called ONCE
     let exec = invoker({
       verb: 'GET',
-      pathToFunction: join(__dirname, '..', '..', 'vendor', 'arc-proxy-3.2.3')
+      pathToFunction: join(__dirname, '..', '..', 'vendor', 'arc-proxy-3.3.7')
     })
     app.get('/', exec)
   }
