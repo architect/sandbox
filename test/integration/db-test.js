@@ -80,7 +80,7 @@ test('can query the row', t=> {
   t.plan(1)
   client.query({
     TableName,
-    IndexName: 'mockapp-production-accounts-email-index',
+    IndexName: 'email-index',
     KeyConditions: {
       email: {
         AttributeValueList: [{S: 'person@email.lol'}],
