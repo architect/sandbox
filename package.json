@@ -1,6 +1,6 @@
 {
   "name": "@architect/sandbox",
-  "version": "1.3.7",
+  "version": "1.3.8",
   "description": "Architect dev server: run full Architect projects locally & offline",
   "main": "src/index.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "@architect/hydrate": "^1.3.2",
     "@architect/parser": "^1.1.7",
     "@architect/utils": "^1.3.2",
-    "aws-sdk": "^2.509.0",
+    "aws-sdk": "^2.517.0",
     "body-parser": "^1.19.0",
     "chalk": "^2.4.2",
     "dynalite": "^2.3.2",
@@ -39,7 +39,7 @@
     "ws": "^7.1.2"
   },
   "devDependencies": {
-    "@architect/functions": "^3.3.3",
+    "@architect/functions": "^3.3.4",
     "codecov": "^3.5.0",
     "eslint": "^5.16.0",
     "nyc": "^14.1.1",
