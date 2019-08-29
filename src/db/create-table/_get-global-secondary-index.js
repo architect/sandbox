@@ -9,7 +9,17 @@ module.exports = function _getGSI(name, indexes) {
       }
       var hasOne = keys.length === 1
       var hasTwo = keys.length === 2
-      var IndexName = hasOne? `${name}-${keys[0]}-index` : `${name}-${keys[0]}-${keys[1]}-index`
+      var IndexName =
+      // is this a correct way to know this is arc@5?
+        process.env.DEPRICATED
+          ? (hasOne
+            ? `${name}-${keys[0]}-index`
+            : `${name}-${keys[0]}-${keys[1]}-index`
+          )
+          : (hasOne
+              ? `${keys[0]}-index`
+              : `${keys[0]}-${keys[1]}-index`
+          );
       // always add the HASH key (partition)
       var KeySchema = [{
         AttributeName: keys[0],
