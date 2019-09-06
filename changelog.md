@@ -2,6 +2,23 @@
 
 ---
 
+## [1.3.9] 2019-08-28
+
+### Changed
+
+- Patches vendored proxy bundle to 3.3.7
+- Updated deps
+
+---
+
+## [1.3.8] 2019-08-24
+
+### Changed
+
+- Tweaks Ruby execution to more closely align with cloud vendor behavior
+
+---
+
 ## [1.3.7] 2019-08-22
 
 ### Fixed
