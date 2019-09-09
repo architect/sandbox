@@ -26,8 +26,11 @@ test('Arc v5: base64 encode body', t => {
   let body = 'hi there'
   let e = new events()
   let stream = new Readable()
-  stream.headers = {'content-type': 'application/octet-stream'}
-  stream.body = ''
+  stream.headers = {
+    'content-type': 'application/octet-stream',
+    'content-length': '8'
+  }
+  stream.body = 'hi there'
   stream.push(body)
   stream.push(null)
   e.addListener('data', binaryHandler)
@@ -45,8 +48,11 @@ test('Arc v5: handle empty body', t => {
   process.env.DEPRECATED = true
   let e = new events()
   let stream = new Readable()
-  stream.headers = {'content-type': 'multipart/form-data'}
-  stream.body = ''
+  stream.headers = {
+    'content-type': 'multipart/form-data',
+    'content-length': '8'
+  }
+  stream.body = 'hi there'
   stream.push(null)
   e.addListener('data', binaryHandler)
   e.emit('data', stream, {}, () => {
@@ -63,7 +69,7 @@ test('Arc v6: base64 encode body & flag', t => {
   let body = 'hi there'
   let e = new events()
   let stream = new Readable()
-  stream.headers = {}
+  stream.headers = {'content-length': '8'}
   stream.body = ''
   stream.push(body)
   stream.push(null)
@@ -86,7 +92,7 @@ test('Arc v6: base64 encode body & flag', t => {
   e.addListener('data', binaryHandler)
   e.emit('data', stream, {}, () => {
     let result = stream.body
-    t.ok(result, 'Gott body back')
+    t.ok(result, 'Got body back')
     t.notOk(Object.getOwnPropertyNames(stream.body).length, 'Body object is empty')
     t.notOk(stream.isBase64Encoded, 'isBase64Encoded param NOT set')
   })
