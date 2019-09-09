@@ -209,8 +209,9 @@ module.exports = function start(params, callback) {
     else {
       function end() {
         client.close()
-        http.close()
         bus.close()
+        if (arc.http || arc.ws)
+          http.close()
       }
       /**
        * Finally, pass a function to shut everything down if this is being used as a module

@@ -2,11 +2,12 @@
 
 ---
 
-## [1.3.10] 2019-09-09
+## [1.3.10 - 1.3.11] 2019-09-09
 
 ### Fixed
 
 - HTTP posts with empty bodies will no longer hang on request
+- `sandbox.close` will no longer throw an error if project doesn't use `@http` or `@ws`
 
 ---
 
