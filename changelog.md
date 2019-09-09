@@ -2,6 +2,14 @@
 
 ---
 
+## [1.3.10] 2019-09-09
+
+### Fixed
+
+- HTTP posts with empty bodies will no longer hang on request
+
+---
+
 ## [1.3.9] 2019-08-28
 
 ### Changed
