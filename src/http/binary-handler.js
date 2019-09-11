@@ -10,8 +10,13 @@ module.exports = function binary(req, res, next) {
     return false
   }
 
+  let contentLength = req.headers && req.headers['content-length']
+  if (!contentLength || Number(contentLength) === 0) {
+    req.body = {}
+    next()
+  }
   // Arc 6-only impl: always base64-encode all bodies
-  if (isBinary(req.headers) || !process.env.DEPRECATED) {
+  else if (isBinary(req.headers) || !process.env.DEPRECATED) {
     let body = []
     req.on('data', chunk => {
       body.push(chunk)
