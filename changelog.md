@@ -2,6 +2,14 @@
 
 ---
 
+## [1.3.12] 2019-09-13
+
+### Fixed
+
+- Fixes empty mock `context` object encoding
+
+---
+
 ## [1.3.10 - 1.3.11] 2019-09-09
 
 ### Fixed
