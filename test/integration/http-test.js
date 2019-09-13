@@ -5,14 +5,13 @@ let sandbox = require('../../src')
 let {http} = require('../../src')
 
 let b64dec = i => Buffer.from(i, 'base64').toString()
+let url = 'http://localhost:6666'
 
 let client
 test('env', t=> {
   t.plan(2)
   t.ok(sandbox, 'got sandbox')
   t.ok(http, 'got http')
-  // set the default port
-  process.env.PORT = 3333
 })
 
 /**
@@ -30,9 +29,8 @@ test('http.start', t=> {
 
 test('get /', t=> {
   t.plan(2)
-  tiny.get({
-    url: 'http://localhost:3333/'
-  }, function _got(err, data) {
+  tiny.get({url},
+  function _got(err, data) {
     if (err) t.fail(err)
     else {
       t.ok(true, 'got /')
@@ -45,7 +43,7 @@ test('get /', t=> {
 test('get /binary', t=> {
   t.plan(2)
   tiny.get({
-    url: 'http://localhost:3333/binary'
+    url: url + '/binary'
   }, function _got(err, data) {
     if (err) t.fail(err)
     else {
@@ -60,7 +58,7 @@ test('get /binary', t=> {
 test('get /nodejs8.10', t=> {
   t.plan(2)
   tiny.get({
-    url: 'http://localhost:3333/nodejs8.10'
+    url: url + '/nodejs8.10'
   }, function _got(err, data) {
     if (err) t.fail(err)
     else {
@@ -74,7 +72,7 @@ test('get /nodejs8.10', t=> {
 test('get /python3.7', t=> {
   t.plan(2)
   tiny.get({
-    url: 'http://localhost:3333/python3.7'
+    url: url + '/python3.7'
   }, function _got(err, data) {
     if (err) t.fail(err)
     else {
@@ -88,7 +86,7 @@ test('get /python3.7', t=> {
 test('get /python3.6', t=> {
   t.plan(2)
   tiny.get({
-    url: 'http://localhost:3333/python3.6'
+    url: url + '/python3.6'
   }, function _got(err, data) {
     if (err) t.fail(err)
     else {
@@ -102,7 +100,7 @@ test('get /python3.6', t=> {
 test('get /ruby2.5', t=> {
   t.plan(2)
   tiny.get({
-    url: 'http://localhost:3333/ruby2.5'
+    url: url + '/ruby2.5'
   }, function _got(err, data) {
     if (err) t.fail(err)
     else {
@@ -117,7 +115,7 @@ test('post /post', t=> {
   t.plan(3)
   let data = {hi: 'there'}
   tiny.post({
-    url: 'http://localhost:3333/post',
+    url: url + '/post',
     data,
     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
   }, function _got(err, result) {
@@ -135,7 +133,7 @@ test('put /put', t=> {
   t.plan(3)
   let data = {hi: 'there'}
   tiny.put({
-    url: 'http://localhost:3333/put',
+    url: url + '/put',
     data,
   }, function _got(err, result) {
     if (err) t.fail(err)
@@ -156,7 +154,7 @@ test('patch /patch', t=> {
   t.plan(3)
   let data = {hi: 'there'}
   tiny.patch({
-    url: 'http://localhost:3333/patch',
+    url: url + '/patch',
     data,
   }, function _got(err, result) {
     if (err) t.fail(err)
@@ -174,7 +172,7 @@ test('delete /delete', t=> {
   t.plan(3)
   let data = {hi: 'there'}
   tiny.del({
-    url: 'http://localhost:3333/delete',
+    url: url + '/delete',
     data,
   }, function _got(err, result) {
     if (err) t.fail(err)
@@ -207,9 +205,8 @@ test('http.start', t=> {
 
 test('get / without defining get / should fail if index.html not present', t=> {
   t.plan(1)
-  tiny.get({
-    url: 'http://localhost:3333/'
-  }, function _got(err, data) {
+  tiny.get({url},
+  function _got(err, data) {
     if (err) {
       t.equals(err.statusCode, 502, 'Got 502 for missing function')
     }
@@ -240,9 +237,8 @@ test('http.start', t=> {
 
 test('get / without defining get / should succeed if index.html is present', t=> {
   t.plan(1)
-  tiny.get({
-    url: 'http://localhost:3333/'
-  }, function _got(err, data) {
+  tiny.get({url},
+  function _got(err, data) {
     if (err) t.fail('Should not have received error')
     else {
       t.ok(data.body.startsWith('Hello world!'), 'Proxy mounted and delivered index.html')
@@ -275,9 +271,8 @@ test('sandbox.start', t=> {
 
 test('get / without defining @http', t=> {
   t.plan(1)
-  tiny.get({
-    url: 'http://localhost:3333/'
-  }, function _got(err, data) {
+  tiny.get({url},
+  function _got(err, data) {
     if (err) {
       t.equals(err.code, 'ECONNREFUSED', 'Connection refused')
     }
@@ -309,9 +304,8 @@ test('sandbox.start', t=> {
 
 test('get /', t=> {
   t.plan(2)
-  tiny.get({
-    url: 'http://localhost:3333/'
-  }, function _got(err, data) {
+  tiny.get({url},
+  function _got(err, data) {
     if (err) t.fail(err)
     else {
       t.ok(true, 'got /')
@@ -324,7 +318,7 @@ test('get /', t=> {
 test('get /binary', t=> {
   t.plan(2)
   tiny.get({
-    url: 'http://localhost:3333/binary'
+    url: url + '/binary'
   }, function _got(err, data) {
     if (err) t.fail(err)
     else {
@@ -340,7 +334,7 @@ test('post /post', t=> {
   t.plan(3)
   let data = {hi: 'there'}
   tiny.post({
-    url: 'http://localhost:3333/post',
+    url: url + '/post',
     data,
     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
   }, function _got(err, result) {
@@ -359,7 +353,7 @@ test('put /put', t=> {
   t.plan(3)
   let data = {hi: 'there'}
   tiny.put({
-    url: 'http://localhost:3333/put',
+    url: url + '/put',
     data,
   }, function _got(err, result) {
     if (err) t.fail(err)
@@ -381,7 +375,7 @@ test('patch /patch', t=> {
   t.plan(3)
   let data = {hi: 'there'}
   tiny.patch({
-    url: 'http://localhost:3333/patch',
+    url: url + '/patch',
     data,
   }, function _got(err, result) {
     if (err) t.fail(err)
@@ -400,7 +394,7 @@ test('delete /delete', t=> {
   t.plan(3)
   let data = {hi: 'there'}
   tiny.del({
-    url: 'http://localhost:3333/delete',
+    url: url + '/delete',
     data,
   }, function _got(err, result) {
     if (err) t.fail(err)

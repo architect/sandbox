@@ -1,6 +1,6 @@
 let fn = require('./index').handler;
 let event = JSON.parse(process.env.__ARC_REQ__);
-let context = process.env.__ARC_CONTEXT__;
+let context = JSON.parse(process.env.__ARC_CONTEXT__);
 
 function callback(err, result) {
   let payload = err? {name:err.name, message:err.message, stack:err.stack} : result;
