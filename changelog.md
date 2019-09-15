@@ -2,6 +2,14 @@
 
 ---
 
+## [1.3.13] 2019-09-15
+
+### Fixed
+
+- Fixes callback error when auto-rehydrating `src/shared` and `src/views`
+
+---
+
 ## [1.3.12] 2019-09-13
 
 ### Fixed
