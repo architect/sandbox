@@ -1,5 +1,6 @@
 module.exports = function _getGSI(name, indexes) {
   var tableName = name.split(/staging-|production-/)[1]
+  // eslint-disable-next-line
   var actual = indexes.filter(index=> index.hasOwnProperty(tableName))
   if (actual.length >= 1) {
     return actual.map(idx=> {

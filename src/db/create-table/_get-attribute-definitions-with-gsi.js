@@ -18,6 +18,7 @@ module.exports = function getAttributeDefinitions(attr, name, indexes) {
   var tableName = name.split(/staging-|production-/)[1]
 
   // an array of attributes from indexes [idx:'*String', ts:'**Number}] for example
+  // eslint-disable-next-line
   var actual = indexes.filter(index=> index.hasOwnProperty(tableName)).map(x=> x[tableName])
 
   // interpolates attrs from table definitions and indexes

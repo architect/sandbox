@@ -60,7 +60,7 @@ module.exports = function cli(params = {}, callback) {
         let start = Date.now()
         let status = chalk.grey('Shared file changed, rehydrating functions...')
         console.log(`${chars.start} ${status}`)
-        hydrate.shared(() => {
+        hydrate.shared({}, () => {
           let end = Date.now()
           let status = chalk.grey(`Project files rehydrated into functions in ${end - start}ms`)
           console.log(`${chars.done} ${status}`)
