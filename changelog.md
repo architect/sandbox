@@ -2,6 +2,14 @@
 
 ---
 
+## [1.3.14] 2019-09-16
+
+### Changed
+
+- Internal change: moves vendored HTTP proxy bundle into node module
+
+---
+
 ## [1.3.13] 2019-09-15
 
 ### Fixed
