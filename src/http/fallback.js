@@ -1,5 +1,6 @@
 let readArc = require('@architect/utils/read-arc')
-let path = require('path')
+let exists = require('fs').existsSync
+let join = require('path').join
 let {parse} = require('url')
 let invoker = require('./invoke-http')
 
@@ -48,9 +49,13 @@ module.exports = function _public(req, res, next) {
       next()
     }
     else if (proxyAtRoot) {
+      let arcProxy = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
+      let local = join(__dirname, '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
+      // Check to see if sandbox is being called from a local (symlink) context
+      if (exists(local)) arcProxy = local
       let exec = invoker({
         verb: 'GET',
-        pathToFunction: path.join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
+        pathToFunction: arcProxy
       })
       req.requestContext = {}
       exec(req, res)
@@ -59,7 +64,7 @@ module.exports = function _public(req, res, next) {
       // invoke the get-index lambda function with a proxy payload
       let exec = invoker({
         verb: req.method.toLowerCase(),
-        pathToFunction: path.join(process.cwd(), 'src', 'http', `get-index`)
+        pathToFunction: join(process.cwd(), 'src', 'http', `get-index`)
       })
       // TODO mock a {proxy+} request payload
       req.requestContext = {}

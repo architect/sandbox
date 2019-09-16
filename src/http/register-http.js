@@ -1,4 +1,5 @@
 let chalk = require('chalk')
+let exists = require('fs').existsSync
 let join = require('path').join
 let utils = require('@architect/utils')
 let chars = utils.chars
@@ -18,9 +19,13 @@ module.exports = function reg(app, api, type, routes) {
   if (!hasGetIndex) {
     // mount the vendored get /
     // IMPORTANT this needs to be a closure to ensure this function only gets called ONCE
+    let arcProxy = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
+    let local = join(__dirname, '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
+    // Check to see if sandbox is being called from a local (symlink) context
+    if (exists(local)) arcProxy = local
     let exec = invoker({
       verb: 'GET',
-      pathToFunction: join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
+      pathToFunction: arcProxy
     })
     app.get('/', exec)
   }
