@@ -50,7 +50,7 @@ module.exports = function _public(req, res, next) {
     else if (proxyAtRoot) {
       let exec = invoker({
         verb: 'GET',
-        pathToFunction: path.join(__dirname, '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
+        pathToFunction: path.join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
       })
       req.requestContext = {}
       exec(req, res)
