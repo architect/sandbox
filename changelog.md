@@ -7,6 +7,13 @@
 ### Changed
 
 - Internal change: moves vendored HTTP proxy bundle into node module
+- This change incorporates a number of fixes by way of `@architect/functions` (see below)
+
+
+### Fixes
+
+- Fixes issue where binary assets delivered via `sandbox` / root may not be properly encoded
+- Fixes issue where `http.proxy.public` + `http.proxy.read` may not have delivered correctly formatted responses in an Architect 5 environment
 
 ---
 

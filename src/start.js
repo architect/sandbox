@@ -111,7 +111,7 @@ module.exports = function start(params, callback) {
     },
 
     /**
-     *
+     * Always initialize any missing functions on startup
      */
     function _maybeInit(callback) {
       if (!process.env.DEPRECATED) {
