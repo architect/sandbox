@@ -80,29 +80,14 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
       } else {
         callback(null, {
           type: 'text/html',
-          body: `<h1>Async Error</h1>
-          <p>Lambda <code>${cwd}</code> ran without executing the completion callback or returning a value.</p>
+          body: `<h1>Async error</h1>
+<p><strong>Lambda <code>${cwd}</code> ran without executing the completion callback or returning a value.</strong></p>
 
-          HTTP Lambda functions that utilize <code>@architect/functions</code> must ensure <code>res</code> gets called.
+<p>Dependency-free functions, or functions that use <code>@architect/functions arc.http.async()</code> must return a correctly formatted response object.</p>
 
-          <pre>
-let arc = require('@architect/functions')
+<p>Functions that utilize <code>@architect/functions arc.http()</code> must ensure <code>res</code> gets called</p>
 
-function route(req, res) {
-  res({html:'ensure res gets called'})
-}
-
-exports.handler = arc.http(route)
-          </pre>
-
-          Dependency free functions must return an Object with the any of following keys to send an HTTP response:
-          <li><code>type</code></li>
-          <li><code>body</code></li>
-          <li><code>status</code> or <code>code</code></li>
-          <li><code>location</code></li>
-          <li><code>cookie</code></li>
-          <li><code>cors</code></li>
-
+<p>Learn more about <a href="https://arc.codes/primitives/http">dependency-free responses</a>, or about using <code><a href="https://arc.codes/reference/functions/http/node/classic">arc.http()</a></code> and <code><a href="https://arc.codes/reference/functions/http/node/async">arc.http.async()</a></code></p>.
           `
         })
       }
