@@ -42,7 +42,8 @@ module.exports = function maybeHydrate (callback) {
                 if (!notified) notify()
                 notified = true
                 let basepath = path
-                hydrate.install({basepath}, callback)
+                let copyShared = false
+                hydrate.install({basepath, copyShared}, callback)
               }
               else callback()
             }
@@ -58,7 +59,8 @@ module.exports = function maybeHydrate (callback) {
                 if (!notified) notify()
                 notified = true
                 let basepath = path
-                hydrate.install({basepath}, callback)
+                let copyShared = false
+                hydrate.install({basepath, copyShared}, callback)
               }
               else callback()
             }
@@ -74,7 +76,8 @@ module.exports = function maybeHydrate (callback) {
                 if (!notified) notify()
                 notified = true
                 let basepath = path
-                hydrate.install({basepath}, callback)
+                let copyShared = false
+                hydrate.install({basepath, copyShared}, callback)
               }
               else callback()
             }

@@ -2,6 +2,14 @@
 
 ---
 
+## [On branch] 2019-09-18
+
+### Changes
+
+- Improvements to auto-hydration src/shared and src/views upon startup
+
+---
+
 ## [1.3.14] 2019-09-16
 
 ### Changed
