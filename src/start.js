@@ -130,20 +130,17 @@ module.exports = function start(params, callback) {
     /**
      * ... then hydrate Architect project files into functions
      */
-    function _maybeHydrateShared(callback) {
-      if (process.env.DEPRECATED) {
-        hydrate({install: false}, function next(err) {
-          if (err) callback(err)
-          else {
-            if (!quiet) {
-              let msg = chalk.grey(chars.done, 'Project files hydrated into functions')
-              console.log(msg)
-            }
-            callback()
+    function _hydrateShared(callback) {
+      hydrate({install: false}, function next(err) {
+        if (err) callback(err)
+        else {
+          if (!quiet) {
+            let msg = chalk.grey(chars.done, 'Project files hydrated into functions')
+            console.log(msg)
           }
-        })
-      }
-      else callback()
+          callback()
+        }
+      })
     },
 
     /**
