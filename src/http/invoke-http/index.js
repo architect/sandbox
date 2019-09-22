@@ -1,5 +1,8 @@
-let url = require('url')
-let invoke = require('../invoke-lambda')
+let invoke = require('../../invoke-lambda')
+let requestFormatter = require('./_req-fmt')
+let requestFormatterDeprecated = require('./_req-fmt-deprecated')
+// let responseFormatter = require('./_res-fmt')
+// let responseFormatterDeprecated = require('./_res-fmt-deprecated')
 
 /**
  * builds response middleware for invoke
@@ -14,51 +17,15 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
     delete req.headers.cookie
     if (!req.headers.Cookie) delete req.headers.Cookie
 
-    let nullify = i => Object.getOwnPropertyNames(i).length ? i : null
-
-    let path = url.parse(req.url).pathname
-    let body = req.body
-    let headers = req.headers
-    let params = req.params
-    let query = url.parse(req.url, true).query
+    // Set up request shape
     let deprecated = process.env.DEPRECATED
-
-    // Maybe de-interpolate path into resource
-    let resource = path
-    if (route && route.includes(':')) {
-      resource = route.split('/')
-        .map(part => part.startsWith(':')
-          ? `{${part.replace(':','')}}`
-          : part)
-        .join('/')
+    let request
+    if (!deprecated) {
+      request = requestFormatter({verb, route, req})
     }
-    let request = {
-      httpMethod: verb,
-      path,
-      resource,
-      body: nullify(body),
-      headers,
-      pathParameters: nullify(params),
-      queryStringParameters: nullify(query),
+    else {
+      request = requestFormatterDeprecated({verb, req})
     }
-    // Base64 encoding status set by binary handler middleware
-    if (req.isBase64Encoded && !deprecated) request.isBase64Encoded = true
-
-    if (deprecated) {
-      request = {
-        method: verb,
-        httpMethod: verb,
-        path,
-        body,
-        headers,
-        params,
-        query,
-        queryStringParameters: query
-      }
-    }
-
-    // Mock /{proxy+} resource key
-    if (req.resource && !deprecated) request.resource = req.resource
 
     // run the lambda sig locally
     invoke(pathToFunction, request, function _res(err, result) {

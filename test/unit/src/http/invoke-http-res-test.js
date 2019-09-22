@@ -3,7 +3,7 @@ let sinon = require('sinon')
 let proxyquire = require('proxyquire')
 let lambdaStub = sinon.stub().yields()
 let invoke = proxyquire('../../../../src/http/invoke-http', {
-  '../invoke-lambda': lambdaStub
+  '../../invoke-lambda': lambdaStub
 })
 let responses = require('./http-res-fixtures')
 
