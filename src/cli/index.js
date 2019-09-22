@@ -44,6 +44,7 @@ module.exports = function cli(params = {}, callback) {
 
     let {arc} = utils.readArc()
     let arcFile = new RegExp(`${workingDirectory}${separator}(\\.arc|app\\.arc|arc\\.yaml|arc\\.json)`)
+    let lastEvent = Date.now()
 
     /**
      * Watch for pertinent filesystem changes
@@ -53,6 +54,7 @@ module.exports = function cli(params = {}, callback) {
       // Event criteria
       let update = event === 'update'
       let updateOrRemove = event === 'update' || event === 'remove'
+      let ready = (Date.now() - lastEvent) >= 500
 
       fileName = pathToUnix(fileName)
 
@@ -70,7 +72,7 @@ module.exports = function cli(params = {}, callback) {
       /**
        * Reload routes upon changes to Architect project manifest
        */
-      if (update && fileName.match(arcFile)) {
+      if (update && fileName.match(arcFile) && ready) {
         let status = chalk.grey('Architect project manifest changed, reloading HTTP routes...')
         console.log(`${chars.start} ${status}`)
 
@@ -88,7 +90,7 @@ module.exports = function cli(params = {}, callback) {
             console.log(status)
           }
           else {
-            let status = chalk.grey(`New functions ready to go!`)
+            let status = chalk.grey(`Functions are ready to go!`)
             console.log(`${chars.done} ${status}`)
           }
         })
@@ -97,21 +99,21 @@ module.exports = function cli(params = {}, callback) {
       /**
        * Rehydrate functions with shared files upon changes to src/shared and src/views
        */
-      if (updateOrRemove &&
-        fileName.includes(`${workingDirectory}/src/shared`) ||
-        fileName.includes(`${workingDirectory}/src/views`)) {
+      let isShared = (fileName.includes(`${workingDirectory}/src/shared`) || fileName.includes(`${workingDirectory}/src/views`))
+      if (updateOrRemove && ready && isShared) {
         let status = chalk.grey('Shared file changed, rehydrating functions...')
         console.log(`${chars.start} ${status}`)
         rehydrate()
       }
 
-
       /**
-       * Regenerate public/static.json upon changes to src/shared and src/views
+       * Regenerate public/static.json upon changes to public/
        */
-      if (updateOrRemove && arc.static &&
-          fileName.includes(`${workingDirectory}/public`) &&
-          !fileName.includes(`${workingDirectory}/public/static.json`)) {
+      let folderSetting = tuple => tuple[0] === 'folder'
+      let staticFolder = arc.static && arc.static.some(folderSetting) ? arc.static.find(folderSetting)[1] : 'public'
+      if (updateOrRemove && arc.static && ready &&
+          fileName.includes(`${workingDirectory}/${staticFolder}`) &&
+          !fileName.includes(`${workingDirectory}/${staticFolder}/static.json`)) {
         let start = Date.now()
         fingerprint({}, function next(err, result) {
           if (err) console.log(err)
@@ -124,6 +126,7 @@ module.exports = function cli(params = {}, callback) {
           }
         })
       }
+      lastEvent = Date.now()
 
     })
 

@@ -43,7 +43,7 @@ module.exports = function maybeHydrate (callback) {
           function _packageJson (callback) {
             let packageJson = exists(join(basepath, 'package.json'))
             if (packageJson) {
-              let result = depStatus(basepath, {time:true})
+              let result = depStatus(basepath)
               let {missing, outdated, warn} = result
               let installDeps = missing.length || outdated.length || warn.length
               if (installDeps) {
