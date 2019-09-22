@@ -1,4 +1,5 @@
 let chalk = require('chalk')
+let depStatus = require('depstatus')
 let exists = require('fs').existsSync
 let glob = require('glob')
 let join = require('path').join
@@ -27,57 +28,52 @@ module.exports = function maybeHydrate (callback) {
       return function (callback) {
         /**
          * Check each of our supported dependency manifests
+         * - Try to generally minimize file hits
          * - Try not to go any deeper into the filesystem than necessary (dep trees can take a long time to walk!)
          * - Assumes Architect deps will have their own deps, helping indicate hydration status
          */
-        let fullpath = join(process.cwd(), path)
+        let basepath = join(process.cwd(), path)
+        function install (callback) {
+          if (!notified) notify()
+          notified = true
+          hydrate.install({basepath, copyShared: false}, callback)
+        }
+
         series([
           function _packageJson (callback) {
-            let packageJson = exists(join(fullpath, 'package.json'))
+            let packageJson = exists(join(basepath, 'package.json'))
             if (packageJson) {
-              let pattern = join(fullpath, 'node_modules', '*')
-              let arcDir = join(fullpath, 'node_modules', '@architect')
-              let hydrated = glob.sync(pattern).some(file => !file.includes(arcDir))
-              if (!hydrated) {
-                if (!notified) notify()
-                notified = true
-                let basepath = path
-                let copyShared = false
-                hydrate.install({basepath, copyShared}, callback)
+              let result = depStatus(basepath, {time:true})
+              let {missing, outdated, warn} = result
+              let installDeps = missing.length || outdated.length || warn.length
+              if (installDeps) {
+                install(callback)
               }
               else callback()
             }
             else callback()
           },
           function _requirementsTxt (callback) {
-            let requirementsTxt = exists(join(fullpath, 'requirements.txt'))
+            let requirementsTxt = exists(join(basepath, 'requirements.txt'))
             if (requirementsTxt) {
-              let pattern = join(fullpath, 'vendor', '*')
-              let arcDir = join(fullpath, 'vendor', 'architect-functions')
+              let pattern = join(basepath, 'vendor', '*')
+              let arcDir = join(basepath, 'vendor', 'architect-functions')
               let hydrated = glob.sync(pattern).some(file => !file.includes(arcDir))
               if (!hydrated) {
-                if (!notified) notify()
-                notified = true
-                let basepath = path
-                let copyShared = false
-                hydrate.install({basepath, copyShared}, callback)
+                install(callback)
               }
               else callback()
             }
             else callback()
           },
           function _gemfile (callback) {
-            let gemfile = exists(join(fullpath, 'Gemfile'))
+            let gemfile = exists(join(basepath, 'Gemfile'))
             if (gemfile) {
-              let pattern = join(fullpath, 'vendor', 'bundle', '*')
-              let arcDir = join(fullpath, 'vendor', 'bundle', 'architect-functions')
+              let pattern = join(basepath, 'vendor', 'bundle', '*')
+              let arcDir = join(basepath, 'vendor', 'bundle', 'architect-functions')
               let hydrated = glob.sync(pattern).some(file => !file.includes(arcDir))
               if (!hydrated) {
-                if (!notified) notify()
-                notified = true
-                let basepath = path
-                let copyShared = false
-                hydrate.install({basepath, copyShared}, callback)
+                install(callback)
               }
               else callback()
             }
