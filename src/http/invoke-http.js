@@ -21,6 +21,7 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
     let headers = req.headers
     let params = req.params
     let query = url.parse(req.url, true).query
+    let deprecated = process.env.DEPRECATED
 
     // Maybe de-interpolate path into resource
     let resource = path
@@ -41,9 +42,9 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
       queryStringParameters: nullify(query),
     }
     // Base64 encoding status set by binary handler middleware
-    if (req.isBase64Encoded && !process.env.DEPRECATED) request.isBase64Encoded = true
+    if (req.isBase64Encoded && !deprecated) request.isBase64Encoded = true
 
-    if (process.env.DEPRECATED) {
+    if (deprecated) {
       request = {
         method: verb,
         httpMethod: verb,
@@ -55,6 +56,9 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
         queryStringParameters: query
       }
     }
+
+    // Mock /{proxy+} resource key
+    if (req.resource && !deprecated) request.resource = req.resource
 
     // run the lambda sig locally
     invoke(pathToFunction, request, function _res(err, result) {
@@ -116,7 +120,7 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
           if (body && body.type && body.type === 'Buffer' && body.data instanceof Array) return true
           return false
         }
-        if (isBuffer() && !process.env.DEPRECATED) {
+        if (isBuffer() && !deprecated) {
           res.statusCode = 502
           res.removeHeader('Content-Type')
           result.body =
@@ -134,7 +138,7 @@ Please base64 encode your response and include a 'isBase64Encoded: true' paramet
         let base64EncodedBody = result.isBase64Encoded &&
                                 result.body &&
                                 typeof result.body === 'string'
-        if (base64EncodedBody && process.env.DEPRECATED) {
+        if (base64EncodedBody && deprecated) {
           // Doc types defined in Arc v5 for conversion
           //   all other doc types
           let documents = [
@@ -164,7 +168,7 @@ Please base64 encode your response and include a 'isBase64Encoded: true' paramet
          * Arc v6 endpoint binary responses
          * - Any endpoint can emit binary responses via base64-encoded body + isBase64Encoded: true
          */
-        if (base64EncodedBody && !process.env.DEPRECATED)
+        if (base64EncodedBody && !deprecated)
           result.body = Buffer.from(result.body, 'base64')
 
         // isBase64Encoded flag passthrough

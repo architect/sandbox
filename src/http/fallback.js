@@ -14,6 +14,7 @@ module.exports = function _public(req, res, next) {
   if (req.path === '/') next()
   else {
     let arc = readArc().arc
+    let deprecated = process.env.DEPRECATED
     // reads all routes
     let routes = arc.http || []
     // add websocket route if necessary
@@ -57,7 +58,8 @@ module.exports = function _public(req, res, next) {
         verb: 'GET',
         pathToFunction: arcProxy
       })
-      req.requestContext = {}
+      if (!deprecated) req.resource = '/{proxy+}'
+      req.requestContext = {} // TODO mock a {proxy+} request payload
       exec(req, res)
     }
     else {
@@ -66,8 +68,8 @@ module.exports = function _public(req, res, next) {
         verb: req.method.toLowerCase(),
         pathToFunction: join(process.cwd(), 'src', 'http', `get-index`)
       })
-      // TODO mock a {proxy+} request payload
-      req.requestContext = {}
+      if (!deprecated) req.resource = '/{proxy+}'
+      req.requestContext = {} // TODO mock a {proxy+} request payload
       exec(req, res)
     }
   }
