@@ -2,11 +2,21 @@
 
 ---
 
-## [On branch] 2019-09-18
+## [On master] 2019-09-22
 
-### Changes
+### Added
 
-- Improvements to auto-hydration src/shared and src/views upon startup
+- Auto-hydration now detects changes to the state of your installed Node dependencies, and rehydrates if necessary; for example:
+  - You're working on a project, and a teammate updates a dependency in `get /foo` from version `1.0.0` to `1.1.0`
+  - Upon your next git pull, `sandbox` will detect the dependency update in `get /foo` and automatically install version `1.1.0` for you
+- Auto-hydration now has a rate limit of one change every 500ms to prevent recursive or aggressive file updates
+- Auto-hydration now has `@static folder` support
+
+
+### Changed
+
+- Improvements to auto-hydration of src/shared and src/views upon startup
+- Improved async error copy (displayed when execution does not complete)
 
 ---
 
