@@ -9,7 +9,7 @@ let reqs = require('./http-req-fixtures')
 
 lambdaStub.yields(null, {})
 let headers = {'Accept-Encoding': 'gzip'}
-let url = i => `http://localhost:3333${i ? i : ''}`
+let url = i => `http://localhost:6666${i ? i : ''}`
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${str(item)}`
 let response = {
@@ -17,6 +17,7 @@ let response = {
     if (header && header.toLowerCase() === 'cache-control') return undefined
     if (header && header.toLowerCase() === 'content-type') return 'application/json; charset=utf-8'
   }),
+  removeHeader: sinon.fake.returns(),
   setHeader: sinon.fake.returns(),
   end: sinon.fake.returns()
 }

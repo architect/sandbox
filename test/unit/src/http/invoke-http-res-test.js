@@ -11,7 +11,7 @@ let b64dec = i => Buffer.from(i, 'base64').toString('utf8')
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${item}`
 let input = {
-  url: 'http://localhost:3333',
+  url: 'http://localhost:6666',
   body: {},
   headers: {'Accept-Encoding': 'gzip'},
   params: {}
@@ -120,6 +120,7 @@ test('Architect v5 + Functions', t => {
   let antiCache = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
   // Output able to be out of run()'s scope here to be mutated by tests
   let output = {
+    getHeader: sinon.fake(getHeader.bind({}, null)),
     removeHeader: sinon.fake.returns(true),
     statusCode: sinon.fake.returns(),
     setHeader: sinon.fake.returns(),
@@ -199,6 +200,7 @@ test('Architect <6 + Functions response params', t => {
 
 test('invoke-http should replace cookie header with ssl and path modifications when lambda returns Architect v5 style response', t => {
   t.plan(1)
+  process.env.DEPRECATED = true
   let handler = invoke({})
   lambdaStub.yields(null, {
     cookie: 'nomnom; Secure'
@@ -206,6 +208,8 @@ test('invoke-http should replace cookie header with ssl and path modifications w
   let req = input
   let res = {
     getHeader: sinon.fake(getHeader.bind({}, null)),
+    removeHeader: sinon.fake.returns(true),
+    statusCode: sinon.fake.returns(),
     setHeader: sinon.fake.returns(),
     end: sinon.fake.returns()
   }
@@ -225,6 +229,8 @@ test('invoke-http should replace cookie header with ssl and path modifications w
   let req = input
   let res = {
     getHeader: sinon.fake(getHeader.bind({}, null)),
+    removeHeader: sinon.fake.returns(true),
+    statusCode: sinon.fake.returns(),
     setHeader: sinon.fake.returns(),
     end: sinon.fake.returns()
   }
