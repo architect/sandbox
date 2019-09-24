@@ -80,12 +80,19 @@ module.exports = function start(params, callback) {
      * Populate additional environment variables
      */
     function _env(callback) {
-      process.env.SESSION_TABLE_NAME = 'jwe' // Default
       if (!process.env.NODE_ENV)
         process.env.NODE_ENV = 'testing'
-      if (version && version.startsWith('Architect 5'))
+      // Set Arc 5 / 6+ env
+      if (version && version.startsWith('Architect 5')) {
         process.env.DEPRECATED = true
+        process.env.ARC_HTTP = 'aws'
+      }
+      else process.env.ARC_HTTP = 'aws_proxy'
+      // Read .arc-env
       utils.initEnv(callback)
+      // Populate session table (if not present)
+      if (!process.env.SESSION_TABLE_NAME)
+        process.env.SESSION_TABLE_NAME = 'jwe' // Default
     },
 
     /**
@@ -219,4 +226,3 @@ module.exports = function start(params, callback) {
 
   return promise
 }
-

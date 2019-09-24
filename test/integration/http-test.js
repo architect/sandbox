@@ -23,7 +23,7 @@ test('http.start', t=> {
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
   client = http.start(function() {
     t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
-    t.ok(true, '@http mounted')
+    t.ok(client, '@http mounted')
   })
 })
 
@@ -33,7 +33,7 @@ test('get /', t=> {
   function _got(err, data) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'got /')
+      t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs10.x!'), 'is hello world')
       console.log({data})
     }
@@ -48,7 +48,7 @@ test('get /binary', t=> {
     if (err) t.fail(err)
     else {
       const img = Buffer.from(data.body).toString('base64');
-      t.ok(true, 'got /binary')
+      t.ok(data, 'got /binary')
       t.ok(img.startsWith('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
       console.log({data})
     }
@@ -62,7 +62,7 @@ test('get /nodejs8.10', t=> {
   }, function _got(err, data) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'got /')
+      t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs8.10!'), 'is hello world')
       console.log({data})
     }
@@ -76,7 +76,7 @@ test('get /python3.7', t=> {
   }, function _got(err, data) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'got /')
+      t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running python3.7!'), 'is hello world')
       console.log({data})
     }
@@ -90,7 +90,7 @@ test('get /python3.6', t=> {
   }, function _got(err, data) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'got /')
+      t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running python3.6!'), 'is hello world')
       console.log({data})
     }
@@ -104,7 +104,7 @@ test('get /ruby2.5', t=> {
   }, function _got(err, data) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'got /')
+      t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running ruby2.5!'), 'is hello world')
       console.log({data})
     }
@@ -121,7 +121,7 @@ test('post /post', t=> {
   }, function _got(err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'posted /post')
+      t.ok(result, 'posted /post')
       t.equal(b64dec(result.body.body), 'hi=there', 'Got base64-encoded form URL-encoded body payload')
       t.ok(result.body.isBase64Encoded, 'Got isBase64Encoded flag')
       console.log(result.body)
@@ -138,7 +138,7 @@ test('put /put', t=> {
   }, function _got(err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'put /put')
+      t.ok(result, 'put /put')
       t.equal(b64dec(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.ok(result.body.isBase64Encoded, 'Got isBase64Encoded flag')
       console.log(result.body)
@@ -159,7 +159,7 @@ test('patch /patch', t=> {
   }, function _got(err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'patched /patch')
+      t.ok(result, 'patched /patch')
       t.equal(b64dec(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.ok(result.body.isBase64Encoded, 'Got isBase64Encoded flag')
       console.log(result.body)
@@ -177,7 +177,7 @@ test('delete /delete', t=> {
   }, function _got(err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'deleted /delete')
+      t.ok(result, 'deleted /delete')
       t.equal(b64dec(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.ok(result.body.isBase64Encoded, 'Got isBase64Encoded flag')
       console.log(result.body)
@@ -188,18 +188,24 @@ test('delete /delete', t=> {
 test('http.close', t=> {
   t.plan(1)
   client.close()
-  t.ok(true, 'http connection closed')
+  t.pass('http connection closed')
 })
 
 /**
- * Test failing to load index.html without get / defined
+ * Arc v6: test failing to load index.html without get / defined
  */
-test('http.start', t=> {
-  t.plan(2)
+let end
+test('sandbox.start', t=> {
+  t.plan(3)
   process.chdir(path.join(__dirname, '..', 'mock', 'no-index-fail'))
-  client = http.start(function() {
-    t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
-    t.ok(true, '@http mounted')
+  sandbox.start({}, function(err, close) {
+    if (err) t.fail(err)
+    else {
+      end = close
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.ok(end, 'sandbox started')
+    }
   })
 })
 
@@ -217,21 +223,26 @@ test('get / without defining get / should fail if index.html not present', t=> {
   })
 })
 
-test('http.close', t=> {
+test('shut down sandbox', t=> {
   t.plan(1)
-  client.close()
-  t.ok(true, 'http connection closed')
+  end()
+  t.pass('sandbox shut down')
 })
 
 /**
- * Test successfully loading index.html without get / defined
+ * Arc v6: test successfully loading index.html without get / defined
  */
-test('http.start', t=> {
-  t.plan(2)
+test('sandbox.start', t=> {
+  t.plan(3)
   process.chdir(path.join(__dirname, '..', 'mock', 'no-index-pass'))
-  client = http.start(function() {
-    t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
-    t.ok(true, '@http mounted')
+  sandbox.start({}, function(err, close) {
+    if (err) t.fail(err)
+    else {
+      end = close
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.ok(end, 'sandbox started')
+    }
   })
 })
 
@@ -247,16 +258,15 @@ test('get / without defining get / should succeed if index.html is present', t=>
   })
 })
 
-test('http.close', t=> {
+test('shut down sandbox', t=> {
   t.plan(1)
-  client.close()
-  t.ok(true, 'http connection closed')
+  end()
+  t.pass('sandbox shut down')
 })
 
 /**
  * Test to ensure sandbox loads without defining @http
  */
-let end
 test('sandbox.start', t=> {
   t.plan(1)
   process.chdir(path.join(__dirname, '..', 'mock', 'no-http'))
@@ -264,7 +274,7 @@ test('sandbox.start', t=> {
     if (err) t.fail(err)
     else {
       end = close
-      t.ok(true, 'sandbox started')
+      t.ok(end, 'sandbox started')
     }
   })
 })
@@ -280,10 +290,10 @@ test('get / without defining @http', t=> {
   })
 })
 
-test('sandbox.close', t=> {
+test('shut down sandbox', t=> {
   t.plan(1)
   end()
-  t.ok(true, 'http connection closed')
+  t.pass('sandbox shut down')
 })
 
 /**
@@ -297,7 +307,7 @@ test('sandbox.start', t=> {
     else {
       end = close
       t.ok(process.env.DEPRECATED, 'Arc v5 deprecated status set')
-      t.ok(true, 'sandbox started')
+      t.ok(end, 'sandbox started')
     }
   })
 })
@@ -308,7 +318,7 @@ test('get /', t=> {
   function _got(err, data) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'got /')
+      t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs10.x!'), 'is hello world')
       console.log({data})
     }
@@ -323,7 +333,7 @@ test('get /binary', t=> {
     if (err) t.fail(err)
     else {
       const img = Buffer.from(data.body).toString('base64');
-      t.ok(true, 'got /binary')
+      t.ok(data, 'got /binary')
       t.ok(img.startsWith('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
       console.log({data})
     }
@@ -340,7 +350,7 @@ test('post /post', t=> {
   }, function _got(err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'posted /post')
+      t.ok(result, 'posted /post')
       t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
       t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
       console.log(result.body)
@@ -358,7 +368,7 @@ test('put /put', t=> {
   }, function _got(err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'put /put')
+      t.ok(result, 'put /put')
       t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
       console.log(result.body)
@@ -380,7 +390,7 @@ test('patch /patch', t=> {
   }, function _got(err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'patched /patch')
+      t.ok(result, 'patched /patch')
       t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
       console.log(result.body)
@@ -399,7 +409,7 @@ test('delete /delete', t=> {
   }, function _got(err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'deleted /delete')
+      t.ok(result, 'deleted /delete')
       t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
       console.log(result.body)
@@ -408,8 +418,8 @@ test('delete /delete', t=> {
   })
 })
 
-test('sandbox.close', t=> {
+test('shut down sandbox', t=> {
   t.plan(1)
   end()
-  t.ok(true, 'http connection closed')
+  t.pass('sandbox shut down')
 })

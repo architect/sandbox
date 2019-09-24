@@ -3,7 +3,7 @@ let sinon = require('sinon')
 let proxyquire = require('proxyquire')
 let lambdaStub = sinon.stub().yields()
 let invoke = proxyquire('../../../../src/http/invoke-http', {
-  '../invoke-lambda': lambdaStub
+  '../../invoke-lambda': lambdaStub
 })
 let responses = require('./http-res-fixtures')
 
@@ -11,7 +11,7 @@ let b64dec = i => Buffer.from(i, 'base64').toString('utf8')
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${item}`
 let input = {
-  url: 'http://localhost:3333',
+  url: 'http://localhost:6666',
   body: {},
   headers: {'Accept-Encoding': 'gzip'},
   params: {}
@@ -41,7 +41,7 @@ let teardown = () => {
 }
 
 test('Architect v6 dependency-free responses', t => {
-  t.plan(9)
+  t.plan(11)
   let run = (response, callback) => {
     let output = {
       getHeader: sinon.fake(getHeader.bind({}, null)),
@@ -62,14 +62,18 @@ test('Architect v6 dependency-free responses', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
   run(responses.arc6.buffer, res => {
-    t.ok(res.body.startsWith('Cannot respond with a raw buffer.'), 'Raw buffer response causes error')
+    t.ok(res.body.includes('Cannot respond with a raw buffer'), 'Raw buffer response causes error')
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
   run(responses.arc6.encodedWithBinaryType, res => {
-    t.ok(typeof res.body === 'string', 'Body is (likely) base 64 encoded')
+    t.ok(typeof res.body === 'string', 'Body is (likely) base64 encoded')
     t.equal(b64dec(res.body), 'hi there\n', 'Body still base64 encoded')
     t.notOk(res.isBase64Encoded, 'isBase64Encoded param NOT set automatically')
     t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+  run(responses.arc5.cookie, res => {
+    t.ok(res.body.includes('Invalid response parameter'), 'Arc v5 style parameter causes error')
+    t.equal(res.statusCode, 502, 'Responded with 502')
   })
   teardown()
 })
@@ -120,6 +124,7 @@ test('Architect v5 + Functions', t => {
   let antiCache = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
   // Output able to be out of run()'s scope here to be mutated by tests
   let output = {
+    getHeader: sinon.fake(getHeader.bind({}, null)),
     removeHeader: sinon.fake.returns(true),
     statusCode: sinon.fake.returns(),
     setHeader: sinon.fake.returns(),
@@ -199,6 +204,7 @@ test('Architect <6 + Functions response params', t => {
 
 test('invoke-http should replace cookie header with ssl and path modifications when lambda returns Architect v5 style response', t => {
   t.plan(1)
+  process.env.DEPRECATED = true
   let handler = invoke({})
   lambdaStub.yields(null, {
     cookie: 'nomnom; Secure'
@@ -206,6 +212,8 @@ test('invoke-http should replace cookie header with ssl and path modifications w
   let req = input
   let res = {
     getHeader: sinon.fake(getHeader.bind({}, null)),
+    removeHeader: sinon.fake.returns(true),
+    statusCode: sinon.fake.returns(),
     setHeader: sinon.fake.returns(),
     end: sinon.fake.returns()
   }
@@ -225,6 +233,8 @@ test('invoke-http should replace cookie header with ssl and path modifications w
   let req = input
   let res = {
     getHeader: sinon.fake(getHeader.bind({}, null)),
+    removeHeader: sinon.fake.returns(true),
+    statusCode: sinon.fake.returns(),
     setHeader: sinon.fake.returns(),
     end: sinon.fake.returns()
   }
