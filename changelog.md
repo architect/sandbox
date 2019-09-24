@@ -11,6 +11,11 @@
   - Upon your next git pull, `sandbox` will detect the dependency update in `get /foo` and automatically install version `1.1.0` for you
 - Auto-hydration now has a rate limit of one change every 500ms to prevent recursive or aggressive file updates
 - Auto-hydration now has `@static folder` support
+- Beta: `sandbox` init script support!
+  - `sandbox` will now run the init script of your choosing upon startup after all subsystems have started up:
+    - `scripts/sandbox-startup.js` - a CommonJS module, receives your parsed Arc project as a parameter, supports async/await
+    - `scripts/sandbox-startup.py` - a Python script
+    - `scripts/sandbox-startup.rb` - a Ruby script
 
 
 ### Changed
@@ -18,6 +23,7 @@
 - Improvements to auto-hydration of src/shared and src/views upon startup
 - Improved async error copy (displayed when execution does not complete)
 - `sandbox` now respects and errors on invalid response params for proper Architect 6 compatibility, fixes #49
+- Updates Dynalite to `3.0.0`, thanks @mhart!
 
 
 ### Fixed
