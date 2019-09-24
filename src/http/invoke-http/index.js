@@ -3,6 +3,7 @@ let requestFormatter = require('./_req-fmt')
 let requestFormatterDeprecated = require('./_req-fmt-deprecated')
 let responseFormatter = require('./_res-fmt')
 let responseFormatterDeprecated = require('./_res-fmt-deprecated')
+let validator = require('./_validator')
 
 /**
  * builds response middleware for invoke
@@ -31,7 +32,11 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
     invoke(pathToFunction, request, function _res(err, result) {
       if (err) res(err)
       else {
-        if (!deprecated) {
+        let {valid, body} = validator({res, result})
+        if (!valid) {
+          res.end(body)
+        }
+        else if (!deprecated) {
           let body = responseFormatter({res, result})
           res.end(body || '')
         }

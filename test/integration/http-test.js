@@ -192,14 +192,20 @@ test('http.close', t=> {
 })
 
 /**
- * Test failing to load index.html without get / defined
+ * Arc v6: test failing to load index.html without get / defined
  */
-test('http.start', t=> {
-  t.plan(2)
+let end
+test('sandbox.start', t=> {
+  t.plan(3)
   process.chdir(path.join(__dirname, '..', 'mock', 'no-index-fail'))
-  client = http.start(function() {
-    t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
-    t.ok(true, '@http mounted')
+  sandbox.start({}, function(err, close) {
+    if (err) t.fail(err)
+    else {
+      end = close
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.ok(end, 'sandbox started')
+    }
   })
 })
 
@@ -217,21 +223,26 @@ test('get / without defining get / should fail if index.html not present', t=> {
   })
 })
 
-test('http.close', t=> {
+test('shut down sandbox', t=> {
   t.plan(1)
-  client.close()
-  t.ok(true, 'http connection closed')
+  end()
+  t.pass('sandbox shut down')
 })
 
 /**
- * Test successfully loading index.html without get / defined
+ * Arc v6: test successfully loading index.html without get / defined
  */
-test('http.start', t=> {
-  t.plan(2)
+test('sandbox.start', t=> {
+  t.plan(3)
   process.chdir(path.join(__dirname, '..', 'mock', 'no-index-pass'))
-  client = http.start(function() {
-    t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
-    t.ok(client, '@http mounted')
+  sandbox.start({}, function(err, close) {
+    if (err) t.fail(err)
+    else {
+      end = close
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.ok(end, 'sandbox started')
+    }
   })
 })
 
@@ -247,16 +258,15 @@ test('get / without defining get / should succeed if index.html is present', t=>
   })
 })
 
-test('http.close', t=> {
+test('shut down sandbox', t=> {
   t.plan(1)
-  client.close()
-  t.pass('http connection closed')
+  end()
+  t.pass('sandbox shut down')
 })
 
 /**
  * Test to ensure sandbox loads without defining @http
  */
-let end
 test('sandbox.start', t=> {
   t.plan(1)
   process.chdir(path.join(__dirname, '..', 'mock', 'no-http'))
@@ -280,10 +290,10 @@ test('get / without defining @http', t=> {
   })
 })
 
-test('sandbox.close', t=> {
+test('shut down sandbox', t=> {
   t.plan(1)
   end()
-  t.pass('http connection closed')
+  t.pass('sandbox shut down')
 })
 
 /**
@@ -297,7 +307,7 @@ test('sandbox.start', t=> {
     else {
       end = close
       t.ok(process.env.DEPRECATED, 'Arc v5 deprecated status set')
-      t.ok(true, 'sandbox started')
+      t.ok(end, 'sandbox started')
     }
   })
 })
@@ -340,7 +350,7 @@ test('post /post', t=> {
   }, function _got(err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'posted /post')
+      t.ok(result, 'posted /post')
       t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
       t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
       console.log(result.body)
@@ -358,7 +368,7 @@ test('put /put', t=> {
   }, function _got(err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'put /put')
+      t.ok(result, 'put /put')
       t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
       console.log(result.body)
@@ -380,7 +390,7 @@ test('patch /patch', t=> {
   }, function _got(err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'patched /patch')
+      t.ok(result, 'patched /patch')
       t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
       console.log(result.body)
@@ -399,7 +409,7 @@ test('delete /delete', t=> {
   }, function _got(err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(true, 'deleted /delete')
+      t.ok(result, 'deleted /delete')
       t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
       console.log(result.body)
@@ -408,8 +418,8 @@ test('delete /delete', t=> {
   })
 })
 
-test('sandbox.close', t=> {
+test('shut down sandbox', t=> {
   t.plan(1)
   end()
-  t.ok(true, 'http connection closed')
+  t.pass('sandbox shut down')
 })

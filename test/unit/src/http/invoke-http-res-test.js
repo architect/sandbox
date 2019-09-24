@@ -62,7 +62,7 @@ test('Architect v6 dependency-free responses', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
   run(responses.arc6.buffer, res => {
-    t.ok(res.body.startsWith('Cannot respond with a raw buffer.'), 'Raw buffer response causes error')
+    t.ok(res.body.includes('Cannot respond with a raw buffer'), 'Raw buffer response causes error')
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
   run(responses.arc6.encodedWithBinaryType, res => {

@@ -4,6 +4,10 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
 
   let cwd = options.cwd
   let timedout = false
+  let headers = {
+    'content-type': 'text/html; charset=utf8;',
+    'cache-control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
+  }
   // run the show
   let child = spawn(command, args, options)
   let stdout = ''
@@ -46,14 +50,14 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
     clearTimeout(to) // ensure the timeout doesn't block
     if (timedout) {
       callback(null, {
-        type: 'text/html',
+        headers,
         body: `<h1>Timeout Error</h1>
         <p>Lambda <code>${cwd}</code> timed out after <b>${timeout / 1000} seconds</b></p>`
       })
     } else if (error) {
       callback(null, {
         statusCode: 502,
-        type: 'text/html',
+        headers,
         body: `<h1>Requested function is missing or not defined, or unknown error</h1>
         <p>${error}</p>
         `
@@ -79,7 +83,7 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
         callback(null, parsed)
       } else {
         callback(null, {
-          type: 'text/html',
+          headers,
           body: `<h1>Async error</h1>
 <p><strong>Lambda <code>${cwd}</code> ran without executing the completion callback or returning a value.</strong></p>
 
@@ -92,8 +96,7 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
         })
       }
     } else {
-      callback(null, {type: 'text/html', body: `<pre>${code}...${stdout}</pre><pre>${stderr}</pre>`})
+      callback(null, {headers, body: `<pre>${code}...${stdout}</pre><pre>${stderr}</pre>`})
     }
   })
 }
-
