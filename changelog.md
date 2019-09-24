@@ -17,6 +17,13 @@
 
 - Improvements to auto-hydration of src/shared and src/views upon startup
 - Improved async error copy (displayed when execution does not complete)
+- `sandbox` now respects and errors on invalid response params for proper Architect 6 compatibility, fixes #49
+
+
+### Fixed
+
+- Minor fix where if you specified a `SESSION_TABLE_NAME` env var outside of `.arc-env`, `sandbox` won't clobber it
+- Fixed caching headers for various error states (async, timeout, etc.) to ensure your browser won't accidentally cache an error response
 
 ---
 
