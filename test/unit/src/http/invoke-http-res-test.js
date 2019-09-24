@@ -41,7 +41,7 @@ let teardown = () => {
 }
 
 test('Architect v6 dependency-free responses', t => {
-  t.plan(9)
+  t.plan(11)
   let run = (response, callback) => {
     let output = {
       getHeader: sinon.fake(getHeader.bind({}, null)),
@@ -66,10 +66,14 @@ test('Architect v6 dependency-free responses', t => {
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
   run(responses.arc6.encodedWithBinaryType, res => {
-    t.ok(typeof res.body === 'string', 'Body is (likely) base 64 encoded')
+    t.ok(typeof res.body === 'string', 'Body is (likely) base64 encoded')
     t.equal(b64dec(res.body), 'hi there\n', 'Body still base64 encoded')
     t.notOk(res.isBase64Encoded, 'isBase64Encoded param NOT set automatically')
     t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+  run(responses.arc5.cookie, res => {
+    t.ok(res.body.includes('Invalid response parameter'), 'Arc v5 style parameter causes error')
+    t.equal(res.statusCode, 502, 'Responded with 502')
   })
   teardown()
 })

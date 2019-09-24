@@ -10,7 +10,7 @@ function setError (res) {
 
 let errors = {
   invalidParam: `<h1>Invalid response parameter</h1>
-<p>Only the following parameters are valid responses: $VALIDPARAMS</p>`,
+<p>Only the following parameters are valid in a response: $VALIDPARAMS</p>`,
   isRawBuffer: `<h1>Cannot respond with a raw buffer</h1>
 <p>Please base64 encode your response and include a <code>isBase64Encoded: true</code> parameter, or run your response through <code>@architect/functions</code><p>`
 }
@@ -25,15 +25,15 @@ module.exports = function responseValidator ({res, result}) {
     'headers',
     'isBase64Encoded'
   ]
-  let isBuffer = () => {
-    let body = result.body
+
+  // Reject raw, unencoded buffers (as does APIG)
+  let isBuffer = body => {
     if (body && body instanceof Buffer) return true
     if (body && body.type && body.type === 'Buffer' && body.data instanceof Array) return true
     return false
   }
-
-  // Reject raw, unencoded buffers (as does APIG)
-  if (isBuffer()) {
+  let bodyIsBuffer = isBuffer(result.body)
+  if (bodyIsBuffer) {
     setError(res)
     let body = errors.isRawBuffer
     return {
@@ -53,37 +53,6 @@ module.exports = function responseValidator ({res, result}) {
     }
     else return {valid: true}
   }
-  else {
-    let deprecatedValid = [
-      // Status
-      'code',
-      'status',
-      // Sessions
-      'cookie',
-      'session',
-      // Headers
-      'location',
-      'cors',
-      'type',
-      'cacheControl',
-      // Content types
-      'css',
-      'html',
-      'js',
-      'json',
-      'text',
-      'xml'
-    ]
-    validParams = validParams.concat(deprecatedValid)
-    let invalid = params.some(p => !validParams.includes(p))
-    if (invalid) {
-      setError(res)
-      let body = invalidParam(validParams)
-      return {
-        valid: false,
-        body
-      }
-    }
-    else return {valid: true}
-  }
+  // Arc v5 accepts literally any response params
+  else return {valid: true}
 }
