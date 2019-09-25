@@ -6,11 +6,14 @@
 
 ### Added
 
-- Auto-hydration now detects changes to the state of your installed Node dependencies, and rehydrates if necessary; for example:
-  - You're working on a project, and a teammate updates a dependency in `get /foo` from version `1.0.0` to `1.1.0`
-  - Upon your next git pull, `sandbox` will detect the dependency update in `get /foo` and automatically install version `1.1.0` for you
-- Auto-hydration now has a rate limit of one change every 500ms to prevent recursive or aggressive file updates
-- Auto-hydration now has `@static folder` support
+- Auto-hydration received a bunch of nice upgrades:
+  - Auto-hydration now detects changes to the state of your installed Node dependencies, and rehydrates if necessary; for example:
+    - You're working on a project, and a teammate updates a dependency in `get /foo` from version `1.0.0` to `1.1.0`
+    - Upon your next git pull, `sandbox` will detect the dependency update in `get /foo` and automatically install version `1.1.0` for you
+  - Auto-hydration now has a rate limit of one change every 500ms to prevent recursive or aggressive file updates
+  - Auto-hydration now has `@static folder` support
+  - Auto-hydration now only hydrates the shared files necessary
+    - For example: if you change a file in `src/views`, it will only update your `@views` functions, and not attempt to rehydrate all your project's functions with `src/shared`
 - Beta: `sandbox` init script support!
   - `sandbox` will now run the init script of your choosing upon startup after all subsystems have started up:
     - `scripts/sandbox-startup.js` - a CommonJS module, receives your parsed Arc project as a parameter, supports async/await
