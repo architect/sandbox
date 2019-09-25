@@ -1,4 +1,3 @@
-let chalk = require('chalk')
 let fingerprint = require('@architect/utils').fingerprint
 let hydrate = require('@architect/hydrate')
 let maybeHydrate = require('../http/maybe-hydrate')
@@ -7,7 +6,7 @@ let pkgVer = require('../../package.json').version
 let ver = `Sandbox ${pkgVer}`
 let utils = require('@architect/utils')
 let watch = require('node-watch')
-let chars = utils.chars
+let updater = utils.updater
 
 // Just use Unix seperators on Windows - path.posix.normalize(process.cwd()) doesn't do what we want
 // So we normalise to slash file names (C:/foo/bar) for regex tests, etc.
@@ -45,6 +44,7 @@ module.exports = function cli(params = {}, callback) {
     let {arc} = utils.readArc()
     let arcFile = new RegExp(`${workingDirectory}${separator}(\\.arc|app\\.arc|arc\\.yaml|arc\\.json)`)
     let lastEvent = Date.now()
+    let update = updater('Sandbox')
 
     /**
      * Watch for pertinent filesystem changes
@@ -52,58 +52,66 @@ module.exports = function cli(params = {}, callback) {
     watcher.on('change', function (event, fileName) {
 
       // Event criteria
-      let update = event === 'update'
+      let fileUpdate = event === 'update'
       let updateOrRemove = event === 'update' || event === 'remove'
       let ready = (Date.now() - lastEvent) >= 500
 
       fileName = pathToUnix(fileName)
 
-      let rehydrate = () => {
+      let rehydrate = ({only, msg}) => {
         let start = Date.now()
-        let status = chalk.grey('Shared file changed, rehydrating functions...')
-        console.log(`${chars.start} ${status}`)
-        hydrate.shared({}, () => {
+        update.status(msg)
+        hydrate.shared({only}, () => {
           let end = Date.now()
-          let status = chalk.grey(`Project files rehydrated into functions in ${end - start}ms`)
-          console.log(`${chars.done} ${status}`)
+          update.done(`Files rehydrated into functions in ${end - start}ms`)
         })
       }
 
       /**
        * Reload routes upon changes to Architect project manifest
        */
-      if (update && fileName.match(arcFile) && ready) {
-        let status = chalk.grey('Architect project manifest changed, reloading HTTP routes...')
-        console.log(`${chars.start} ${status}`)
-
+      if (fileUpdate && fileName.match(arcFile) && ready) {
+        update.status('Architect project manifest changed, reloading HTTP routes...')
         let start = Date.now()
         process.env.QUIET = true
         http.close()
         http.start(function () {
           let end = Date.now()
-          let status = chalk.grey(`HTTP routes reloaded in ${end - start}ms`)
-          console.log(`${chars.done} ${status}`)
+          update.done(`HTTP routes reloaded in ${end - start}ms`)
         })
         maybeHydrate(function (err) {
           if (err) {
-            let status = chalk.grey(`Error hydrating new functions:`, err)
-            console.log(status)
+            update.error(`Error hydrating new functions:`, err)
           }
           else {
-            let status = chalk.grey(`Functions are ready to go!`)
-            console.log(`${chars.done} ${status}`)
+            update.done(`Functions are ready to go!`)
+            if (process.env.DEPRECATED) {
+              let only = 'arcFile'
+              let msg = 'Rehydrating functions with new project manifest'
+              rehydrate({only, msg})
+            }
           }
         })
       }
 
       /**
-       * Rehydrate functions with shared files upon changes to src/shared and src/views
+       * Rehydrate functions with shared files upon changes to src/shared
        */
-      let isShared = (fileName.includes(`${workingDirectory}/src/shared`) || fileName.includes(`${workingDirectory}/src/views`))
+      let isShared = fileName.includes(`${workingDirectory}/src/shared`)
       if (updateOrRemove && ready && isShared) {
-        let status = chalk.grey('Shared file changed, rehydrating functions...')
-        console.log(`${chars.start} ${status}`)
-        rehydrate()
+        let only = 'shared'
+        let msg = 'Shared file changed, rehydrating functions...'
+        rehydrate({only, msg})
+      }
+
+      /**
+       * Rehydrate functions with shared files upon changes to src/views
+       */
+      let isViews = fileName.includes(`${workingDirectory}/src/views`)
+      if (updateOrRemove && ready && isViews) {
+        let only = 'views'
+        let msg = 'Views file changed, rehydrating views...'
+        rehydrate({only, msg})
       }
 
       /**
@@ -116,12 +124,13 @@ module.exports = function cli(params = {}, callback) {
           !fileName.includes(`${workingDirectory}/${staticFolder}/static.json`)) {
         let start = Date.now()
         fingerprint({}, function next(err, result) {
-          if (err) console.log(err)
+          if (err) update.error(err)
           else {
             if (result) {
               let end = Date.now()
-              console.log(chars.done, chalk.grey(`Regenerated public/static.json in ${end - start}ms`))
-              rehydrate()
+              let only = 'staticJson'
+              let msg = `Regenerated public/static.json in ${end - start}ms`
+              rehydrate({only, msg})
             }
           }
         })
@@ -134,7 +143,7 @@ module.exports = function cli(params = {}, callback) {
      * Watch for sandbox errors
      */
     watcher.on('error', function(err) {
-      console.log(`Sandbox error:`, err)
+      update.error(`Error:`, err)
     })
   })
 }
