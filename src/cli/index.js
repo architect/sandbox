@@ -10,7 +10,7 @@ let updater = utils.updater
 
 // Just use Unix seperators on Windows - path.posix.normalize(process.cwd()) doesn't do what we want
 // So we normalise to slash file names (C:/foo/bar) for regex tests, etc.
-const pathToUnix = function (string) {
+let pathToUnix = function (string) {
   return string.replace(/\\/g, "/");
 }
 
@@ -45,6 +45,12 @@ module.exports = function cli(params = {}, callback) {
     let arcFile = new RegExp(`${workingDirectory}${separator}(\\.arc|app\\.arc|arc\\.yaml|arc\\.json)`)
     let lastEvent = Date.now()
     let update = updater('Sandbox')
+    let deprecated = process.env.DEPRECATED
+    let ts = () => {
+      let date = new Date(lastEvent).toLocaleDateString()
+      let time = new Date(lastEvent).toLocaleTimeString()
+      console.log(`\n[${date}, ${time}]`)
+    }
 
     /**
      * Watch for pertinent filesystem changes
@@ -60,6 +66,7 @@ module.exports = function cli(params = {}, callback) {
 
       let rehydrate = ({only, msg}) => {
         let start = Date.now()
+        ts()
         update.status(msg)
         hydrate.shared({only}, () => {
           let end = Date.now()
@@ -71,27 +78,45 @@ module.exports = function cli(params = {}, callback) {
        * Reload routes upon changes to Architect project manifest
        */
       if (fileUpdate && fileName.match(arcFile) && ready) {
-        update.status('Architect project manifest changed, reloading HTTP routes...')
-        let start = Date.now()
-        process.env.QUIET = true
+        // TODO add arc pragma diffing, reload tables, events, etc.
+        let {arc} = utils.readArc()
+
+        // Always attempt to close the http server, but only reload if necessary
         http.close()
-        http.start(function () {
-          let end = Date.now()
-          update.done(`HTTP routes reloaded in ${end - start}ms`)
-        })
-        maybeHydrate(function (err) {
-          if (err) {
-            update.error(`Error hydrating new functions:`, err)
-          }
-          else {
-            update.done(`Functions are ready to go!`)
-            if (process.env.DEPRECATED) {
-              let only = 'arcFile'
-              let msg = 'Rehydrating functions with new project manifest'
-              rehydrate({only, msg})
-            }
-          }
-        })
+
+        // Arc 5 only starts if it's got actual routes to load
+        let arc5 = deprecated && arc.http && arc.http.length
+        // Arc 6 may start with proxy at root, or empty `@http` pragma
+        let arc6 = !deprecated && arc.static || arc.http
+        if (arc5 || arc6) {
+          let quiet = process.env.QUIET
+          process.env.QUIET = true
+          let start = Date.now()
+          ts()
+          update.status('Architect project manifest changed, loading HTTP routes...')
+          http.start(function () {
+            let end = Date.now()
+            process.env.QUIET = quiet
+            update.done(`HTTP routes reloaded in ${end - start}ms`)
+            maybeHydrate(function (err) {
+              if (err) {
+                update.error(`Error hydrating new functions:`, err)
+              }
+              else {
+                update.done(`Functions are ready to go!`)
+                if (deprecated) {
+                  let only = 'arcFile'
+                  let msg = 'Rehydrating functions with new project manifest'
+                  rehydrate({only, msg})
+                }
+              }
+            })
+          })
+        }
+        else {
+          ts()
+          update.status('Architect project manifest changed')
+        }
       }
 
       /**

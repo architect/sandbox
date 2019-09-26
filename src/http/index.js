@@ -85,7 +85,8 @@ app.start = function start(callback) {
 }
 
 app.close = function close() {
-  server.close()
+  if (server)
+    server.close()
   if (websocket)
     websocket.close()
 }

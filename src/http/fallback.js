@@ -46,10 +46,17 @@ module.exports = function _public(req, res, next) {
 
     // if either exact or wildcard match bail
     let match = exactMatch || wildMatch
-    if (match) {
+
+    // Arc v5 doesn't support implicit proxy at root, move along
+    let invalid = proxyAtRoot && deprecated
+
+    // Determine whether this is an SPA req
+    let isProxy = pathname !== '/'
+
+    if (match || invalid) {
       next()
     }
-    else if (proxyAtRoot) {
+    else if (proxyAtRoot && !deprecated) {
       let arcProxy = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
       let local = join(__dirname, '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
       // Check to see if sandbox is being called from a local (symlink) context
@@ -58,7 +65,8 @@ module.exports = function _public(req, res, next) {
         verb: 'GET',
         pathToFunction: arcProxy
       })
-      if (!deprecated) req.resource = '/{proxy+}'
+      if (isProxy) req.resource = '/{proxy+}'
+      else req.resource = pathname
       req.requestContext = {} // TODO mock a {proxy+} request payload
       exec(req, res)
     }
@@ -68,7 +76,8 @@ module.exports = function _public(req, res, next) {
         verb: req.method.toLowerCase(),
         pathToFunction: join(process.cwd(), 'src', 'http', `get-index`)
       })
-      if (!deprecated) req.resource = '/{proxy+}'
+      if (isProxy) req.resource = '/{proxy+}'
+      else req.resource = pathname
       req.requestContext = {} // TODO mock a {proxy+} request payload
       exec(req, res)
     }
