@@ -5,17 +5,18 @@ let log = require('./pretty-print-route')
 let invoker = require('./invoke-http')
 let name = utils.getLambdaName
 let updater = utils.updater
-let quiet = process.env.QUIET
 
 module.exports = function reg(app, api, type, routes) {
+  let quiet = process.env.QUIET
   if (!quiet) {
     let update = updater('Sandbox')
-    update.done('Loaded routes:')
+    update.done('Loaded routes')
   }
 
   // adds default get / aka 'proxy at root'
   let hasGetIndex = routes.some(tuple=> tuple[0].toLowerCase() === 'get' && tuple[1] === '/')
-  if (!hasGetIndex) {
+  let deprecated = process.env.DEPRECATED
+  if (!hasGetIndex && !deprecated) {
     // mount the vendored get /
     // IMPORTANT this needs to be a closure to ensure this function only gets called ONCE
     let arcProxy = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')

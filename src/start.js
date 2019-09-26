@@ -19,6 +19,7 @@ module.exports = function start(params, callback) {
   let {port, options, version} = params
   let update = updater('Sandbox')
   let arc
+  let deprecated
   /**
    * Set up default sandbox port
    * CLI args > env var > passed arg
@@ -89,6 +90,7 @@ module.exports = function start(params, callback) {
       // Set Arc 5 / 6+ env
       if (version && version.startsWith('Architect 5')) {
         process.env.DEPRECATED = true
+        deprecated = process.env.DEPRECATED
         process.env.ARC_HTTP = 'aws'
       }
       else process.env.ARC_HTTP = 'aws_proxy'
@@ -124,7 +126,7 @@ module.exports = function start(params, callback) {
      * Always initialize any missing functions on startup
      */
     function _maybeInit(callback) {
-      if (!process.env.DEPRECATED) {
+      if (!deprecated) {
         utils.init(null, callback)
       }
       else callback()
@@ -193,8 +195,11 @@ module.exports = function start(params, callback) {
           console.log(`${ready} ${readyMsg}`)
         }
       }
-      // two ways in
-      if (arc.static || arc.http) {
+      // Arc 5 only starts if it's got actual routes to load
+      let arc5 = deprecated && arc.http && arc.http.length
+      // Arc 6 may start with proxy at root, or empty `@http` pragma
+      let arc6 = !deprecated && arc.static || arc.http
+      if (arc5 || arc6) {
         http.start(function() {
           ok()
           let link = chalk.green.bold.underline(`http://localhost:${port}\n`)
