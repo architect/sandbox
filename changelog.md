@@ -14,6 +14,7 @@
   - Auto-hydration now has `@static folder` support
   - Auto-hydration now only hydrates the shared files necessary
     - For example: if you change a file in `src/views`, it will only update your `@views` functions, and not attempt to rehydrate all your project's functions with `src/shared`
+  - Events now have a timestamp and improved formatting
 - Beta: `sandbox` init script support!
   - `sandbox` will now run the init script of your choosing upon startup after all subsystems have started up:
     - `scripts/sandbox-startup.js` - a CommonJS module, receives your parsed Arc project as a parameter, supports async/await
@@ -24,13 +25,16 @@
 ### Changed
 
 - Improvements to auto-hydration of src/shared and src/views upon startup
+- Improvements to the conditions under which the HTTP server starts, shuts down, and restarts
 - Improved async error copy (displayed when execution does not complete)
+- Proxied requests now sends a proper `req.resource`, which can resolve some SPA bugs, esp when used with newer Arc Functions
 - `sandbox` now respects and errors on invalid response params for proper Architect 6 compatibility, fixes #49
 - Updates Dynalite to `3.0.0`, thanks @mhart!
 
 
 ### Fixed
 
+- Fixed issue where in certain circumstances `get /` wouldn't reload after a change to the project manifest
 - Minor fix where if you specified a `SESSION_TABLE_NAME` env var outside of `.arc-env`, `sandbox` won't clobber it
 - Fixed caching headers for various error states (async, timeout, etc.) to ensure your browser won't accidentally cache an error response
 
