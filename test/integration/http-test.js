@@ -214,11 +214,10 @@ test('get / without defining get / should fail if index.html not present', t=> {
   tiny.get({url},
   function _got(err, data) {
     if (err) {
-      t.equals(err.statusCode, 502, 'Got 502 for missing function')
+      t.equals(err.statusCode, 404, 'Got 404 for missing file')
     }
     else {
-      t.ok(data, 'proxy mounted')
-      console.log(data)
+      t.fail(data)
     }
   })
 })
@@ -250,7 +249,7 @@ test('get / without defining get / should succeed if index.html is present', t=>
   t.plan(1)
   tiny.get({url},
   function _got(err, data) {
-    if (err) t.fail('Should not have received error')
+    if (err) t.fail(err)
     else {
       t.ok(data.body.startsWith('Hello world!'), 'Proxy mounted and delivered index.html')
       console.log(data)
@@ -354,7 +353,6 @@ test('post /post', t=> {
       t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
       t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
       console.log(result.body)
-      t.end()
     }
   })
 })
@@ -372,7 +370,6 @@ test('put /put', t=> {
       t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
       console.log(result.body)
-      t.end()
     }
   })
 })
@@ -394,7 +391,6 @@ test('patch /patch', t=> {
       t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
       console.log(result.body)
-      t.end()
     }
   })
 })
@@ -413,7 +409,6 @@ test('delete /delete', t=> {
       t.equal(JSON.stringify(result.body.body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.notOk(result.body.isBase64Encoded, 'No isBase64Encoded flag')
       console.log(result.body)
-      t.end()
     }
   })
 })

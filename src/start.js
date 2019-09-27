@@ -99,6 +99,8 @@ module.exports = function start(params, callback) {
       // Populate session table (if not present)
       if (!process.env.SESSION_TABLE_NAME)
         process.env.SESSION_TABLE_NAME = 'jwe' // Default
+      // Declare a bucket for implicit proxy
+      process.env.ARC_STATIC_BUCKET = 'sandbox'
     },
 
     /**
