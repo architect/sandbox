@@ -2,7 +2,7 @@
 
 ---
 
-## [On master] 2019-09-22
+## [1.4.0] 2019-09-26
 
 ### Added
 
@@ -30,6 +30,7 @@
 - Proxied requests now sends a proper `req.resource`, which can resolve some SPA bugs, esp when used with newer Arc Functions
 - `sandbox` now respects and errors on invalid response params for proper Architect 6 compatibility, fixes #49
 - Updates Dynalite to `3.0.0`, thanks @mhart!
+- Better 404 / file missing handling in `sandbox` when using `http.proxy` (or loading assets without `@http get /` specified)
 
 
 ### Fixed
