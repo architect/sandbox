@@ -1,9 +1,9 @@
 module.exports = function _getGSI(name, indexes) {
-  var tableName = name.split(/staging-|production-/)[1]
-  var actual = indexes.filter(index=> index.hasOwnProperty(tableName))
+  let tableName = name.split(/staging-|production-/)[1]
+  let actual = indexes.filter(index=> Object.prototype.hasOwnProperty.call(index, tableName))
   if (actual.length >= 1) {
     return actual.map(idx=> {
-      var keys = Object.keys(idx[tableName])
+      let keys = Object.keys(idx[tableName])
       if (keys.length > 2 || keys.length < 1) {
         throw Error(`@indexes ${tableName} has wrong number of keys`)
       }
@@ -13,7 +13,7 @@ module.exports = function _getGSI(name, indexes) {
               ? `${keys[0]}-index`
               : `${keys[0]}-${keys[1]}-index`
       // always add the HASH key (partition)
-      var KeySchema = [{
+      let KeySchema = [{
         AttributeName: keys[0],
         KeyType: 'HASH'
       }]
@@ -24,7 +24,7 @@ module.exports = function _getGSI(name, indexes) {
           KeyType: 'RANGE'
         })
       }
-      var params = {
+      let params = {
         IndexName,
         KeySchema,
         Projection: {

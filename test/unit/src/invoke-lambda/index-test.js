@@ -14,9 +14,9 @@ let invoke = proxyquire('../../../../src/invoke-lambda', {
 })
 
 test('Set up env', t => {
+  t.plan(1)
   process.chdir(path.join(__dirname, '..', '..', '..', 'mock', 'normal'))
   t.ok(invoke, 'Got invoke')
-  t.end()
 })
 
 let p = e => `src/http/${e}`

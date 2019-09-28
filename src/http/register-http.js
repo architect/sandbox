@@ -1,26 +1,31 @@
-let chalk = require('chalk')
+let exists = require('fs').existsSync
 let join = require('path').join
 let utils = require('@architect/utils')
-let chars = utils.chars
 let log = require('./pretty-print-route')
 let invoker = require('./invoke-http')
 let name = utils.getLambdaName
-let quiet = process.env.QUIET
+let updater = utils.updater
 
 module.exports = function reg(app, api, type, routes) {
+  let quiet = process.env.QUIET
   if (!quiet) {
-    let msg = chalk.grey(chars.done, 'Loaded routes:')
-    console.log(`${msg}`)
+    let update = updater('Sandbox')
+    update.done('Loaded routes')
   }
 
   // adds default get / aka 'proxy at root'
   let hasGetIndex = routes.some(tuple=> tuple[0].toLowerCase() === 'get' && tuple[1] === '/')
-  if (!hasGetIndex) {
+  let deprecated = process.env.DEPRECATED
+  if (!hasGetIndex && !deprecated) {
     // mount the vendored get /
     // IMPORTANT this needs to be a closure to ensure this function only gets called ONCE
+    let arcProxy = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
+    let local = join(__dirname, '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
+    // Check to see if sandbox is being called from a local (symlink) context
+    if (exists(local)) arcProxy = local
     let exec = invoker({
       verb: 'GET',
-      pathToFunction: join(__dirname, '..', '..', 'vendor', 'arc-proxy-3.3.7')
+      pathToFunction: arcProxy
     })
     app.get('/', exec)
   }

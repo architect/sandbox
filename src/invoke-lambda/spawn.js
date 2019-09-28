@@ -4,6 +4,10 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
 
   let cwd = options.cwd
   let timedout = false
+  let headers = {
+    'content-type': 'text/html; charset=utf8;',
+    'cache-control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
+  }
   // run the show
   let child = spawn(command, args, options)
   let stdout = ''
@@ -46,14 +50,14 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
     clearTimeout(to) // ensure the timeout doesn't block
     if (timedout) {
       callback(null, {
-        type: 'text/html',
+        headers,
         body: `<h1>Timeout Error</h1>
         <p>Lambda <code>${cwd}</code> timed out after <b>${timeout / 1000} seconds</b></p>`
       })
     } else if (error) {
       callback(null, {
         statusCode: 502,
-        type: 'text/html',
+        headers,
         body: `<h1>Requested function is missing or not defined, or unknown error</h1>
         <p>${error}</p>
         `
@@ -79,36 +83,20 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
         callback(null, parsed)
       } else {
         callback(null, {
-          type: 'text/html',
-          body: `<h1>Async Error</h1>
-          <p>Lambda <code>${cwd}</code> ran without executing the completion callback or returning a value.</p>
+          headers,
+          body: `<h1>Async error</h1>
+<p><strong>Lambda <code>${cwd}</code> ran without executing the completion callback or returning a value.</strong></p>
 
-          HTTP Lambda functions that utilize <code>@architect/functions</code> must ensure <code>res</code> gets called.
+<p>Dependency-free functions, or functions that use <code>@architect/functions arc.http.async()</code> must return a correctly formatted response object.</p>
 
-          <pre>
-let arc = require('@architect/functions')
+<p>Functions that utilize <code>@architect/functions arc.http()</code> must ensure <code>res</code> gets called</p>
 
-function route(req, res) {
-  res({html:'ensure res gets called'})
-}
-
-exports.handler = arc.http(route)
-          </pre>
-
-          Dependency free functions must return an Object with the any of following keys to send an HTTP response:
-          <li><code>type</code></li>
-          <li><code>body</code></li>
-          <li><code>status</code> or <code>code</code></li>
-          <li><code>location</code></li>
-          <li><code>cookie</code></li>
-          <li><code>cors</code></li>
-
+<p>Learn more about <a href="https://arc.codes/primitives/http">dependency-free responses</a>, or about using <code><a href="https://arc.codes/reference/functions/http/node/classic">arc.http()</a></code> and <code><a href="https://arc.codes/reference/functions/http/node/async">arc.http.async()</a></code></p>.
           `
         })
       }
     } else {
-      callback(null, {type: 'text/html', body: `<pre>${code}...${stdout}</pre><pre>${stderr}</pre>`})
+      callback(null, {headers, body: `<pre>${code}...${stdout}</pre><pre>${stderr}</pre>`})
     }
   })
 }
-
