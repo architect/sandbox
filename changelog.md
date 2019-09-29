@@ -2,6 +2,19 @@
 
 ---
 
+## [1.4.1] 2019-09-29
+
+### Added
+
+- Startup auto-hydration now hydrates `src/views` and `src/shared`
+
+
+### Fixed
+
+- When auto-hydrating functions upon startup, `sandbox` no longer hydrates `src/views` and `src/shared` with each function
+
+---
+
 ## [1.4.0] 2019-09-26
 
 ### Added
