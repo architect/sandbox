@@ -24,6 +24,9 @@ module.exports = function maybeHydrate (callback) {
   else {
     let notify = () => console.log(chalk.grey(chars.done, 'Found new functions to hydrate!'))
     let notified = false
+    let shared = join('src', 'shared')
+    let views = join('src', 'views')
+    arc.localPaths.push(shared, views)
     let ops = arc.localPaths.map(path => {
       return function (callback) {
         /**
@@ -36,9 +39,12 @@ module.exports = function maybeHydrate (callback) {
         function install (callback) {
           if (!notified) notify()
           notified = true
-          hydrate.install({basepath, copyShared: false}, callback)
+          // Disable per-function shared file copying; handled project-wide elsewhere
+          let copyShared = false
+          // Disable sidecar shared/views hydration; handled project-wide elsewhere
+          let hydrateShared = path === shared || path === views || false
+          hydrate.install({basepath, copyShared, hydrateShared}, callback)
         }
-
         series([
           function _packageJson (callback) {
             let packageJson = exists(join(basepath, 'package.json'))
