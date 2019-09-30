@@ -2,11 +2,16 @@
 
 ---
 
-## [1.4.1] 2019-09-29
+## [1.4.1 - 1.4.2] 2019-09-29
 
 ### Added
 
 - Startup auto-hydration now hydrates `src/views` and `src/shared`
+
+
+### Changed
+
+- Updated dependencies
 
 
 ### Fixed
@@ -37,11 +42,11 @@
 
 ### Changed
 
-- Improvements to auto-hydration of src/shared and src/views upon startup
-- Improvements to the conditions under which the HTTP server starts, shuts down, and restarts
+- Improvements to auto-hydration of `src/shared` and `src/views` upon startup
+- Improvements to the conditions under which the HTTP server starts, shuts down, and restarts; fixes #65
 - Improved async error copy (displayed when execution does not complete)
 - Proxied requests now sends a proper `req.resource`, which can resolve some SPA bugs, esp when used with newer Arc Functions
-- `sandbox` now respects and errors on invalid response params for proper Architect 6 compatibility, fixes #49
+- `sandbox` now respects and errors on invalid response params for proper Architect 6 compatibility; fixes #49
 - Updates Dynalite to `3.0.0`, thanks @mhart!
 - Better 404 / file missing handling in `sandbox` when using `http.proxy` (or loading assets without `@http get /` specified)
 
