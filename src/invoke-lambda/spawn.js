@@ -5,8 +5,8 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
   let cwd = options.cwd
   let timedout = false
   let headers = {
-    'content-type': 'text/html; charset=utf8;',
-    'cache-control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
+    'Content-Type': 'text/html; charset=utf8;',
+    'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
   }
   // run the show
   let child = spawn(command, args, options)
