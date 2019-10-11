@@ -2,6 +2,24 @@
 
 ---
 
+## [1.4.4] 2019-10-10
+
+### Added
+
+- Added support for `@static fingerprint true` in root spa / proxy requests
+  - Also includes support for build-free calls between your fingerprinted static assets
+    - Example: in `public/index.html`, use the following syntax to automatically replace the local / human-friendly filename reference to the deployed fingerprinted filename:
+    - `${arc.static('image.png')}` will be automatically replaced by `image-a1c3e5.png`
+    - Or `${STATIC('image.png')}` (which is the same thing, but shoutier)
+    - Note: although those look like JS template literal placeholders, they're intended to live inside non-executed, static files within `public/` (or `@static folder foo`)
+
+
+### Changed
+
+- Updated dependencies
+
+---
+
 ## [1.4.1 - 1.4.3] 2019-09-29
 
 ### Added
