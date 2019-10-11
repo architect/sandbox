@@ -83,6 +83,10 @@ module.exports = function registerWebSocket({app, server}) {
 
   // create a handler for receiving arc.ws.send messages
   app.post('/__arc', function handle(req, res) {
+    if (req.isBase64Encoded) {
+      let buffer = new Buffer(req.body, 'base64')
+      req.body = JSON.parse(buffer.toString())
+    }
     let client = connections.find(client=> req.body.id === client.id)
     if (client) {
       try {
