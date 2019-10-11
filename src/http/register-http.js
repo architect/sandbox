@@ -17,12 +17,15 @@ module.exports = function reg(app, api, type, routes) {
   let hasGetIndex = routes.some(tuple=> tuple[0].toLowerCase() === 'get' && tuple[1] === '/')
   let deprecated = process.env.DEPRECATED
   if (!hasGetIndex && !deprecated) {
-    // mount the vendored get /
-    // IMPORTANT this needs to be a closure to ensure this function only gets called ONCE
+    // Sandbox running as a dependency (most common use case)
     let arcProxy = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
+    // Sandbox running as a global install
+    let global = join(__dirname, '..', '..', '..', 'http-proxy', 'dist')
+    // Sandbox running from a local (symlink) context (usually testing/dev)
     let local = join(__dirname, '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
-    // Check to see if sandbox is being called from a local (symlink) context
-    if (exists(local)) arcProxy = local
+    if (exists(global)) arcProxy = global
+    else if (exists(local)) arcProxy = local
+
     let exec = invoker({
       verb: 'GET',
       pathToFunction: arcProxy
