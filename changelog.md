@@ -2,7 +2,7 @@
 
 ---
 
-## [1.4.4] 2019-10-10
+## [1.4.4 - 1.4.5] 2019-10-10
 
 ### Added
 
@@ -17,6 +17,11 @@
 ### Changed
 
 - Updated dependencies
+
+
+### Fixes
+
+- Fixes root spa / proxy requests when Architect and/or Sandbox are globally installed; resolves #92 /ht @grahamb
 
 ---
 
