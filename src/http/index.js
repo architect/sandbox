@@ -32,7 +32,7 @@ app.use(body.json({
 app.use(body.urlencoded({
   extended: false,
   limit,
-  type: req => req.headers['content-type'].includes(formURLenc) &&
+  type: req => (req.headers['content-type'] || []).includes(formURLenc) &&
                !req.isBase64Encoded
 }))
 
