@@ -3,8 +3,6 @@ let spawn = require('child_process').spawn
 let kill = require('tree-kill')
 
 module.exports = function spawnChild(command, args, options, timeout, callback) {
-  let update = updater('Sandbox')
-
   let cwd = options.cwd
   let timedout = false
   let headers = {
@@ -28,6 +26,7 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
         if (closed) {null} // Check one last time for graceful shutdown
         else {
           if (error) {
+            let update = updater('Sandbox')
             update.error('Caught hanging execution with an error, attempting to exit 1')
             kill(child.pid)
             closed = true
