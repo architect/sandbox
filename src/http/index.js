@@ -18,6 +18,7 @@ let fallback = require('./fallback')
 // config arcana
 let jsonTypes = /^application\/.*json/
 let formURLenc = /^application\/x-www-form-urlencoded/
+let isWSsend = req => req.url === '/__arc'
 let limit = '6mb';
 let app = Router({mergeParams: true})
 
@@ -26,14 +27,14 @@ app.use(binary)
 app.use(body.json({
   limit,
   type: req => jsonTypes.test(req.headers['content-type']) &&
-               !req.isBase64Encoded
+               (!req.isBase64Encoded || isWSsend(req))
 }))
 
 app.use(body.urlencoded({
   extended: false,
   limit,
   type: req => formURLenc.test(req.headers['content-type']) &&
-               !req.isBase64Encoded
+               (!req.isBase64Encoded || isWSsend(req))
 }))
 
 app.use(publicMiddleware)
