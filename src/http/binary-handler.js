@@ -11,8 +11,12 @@ module.exports = function binary(req, res, next) {
   }
 
   let contentLength = req.headers && req.headers['content-length']
+  let isWebSocket = req.url === '/__arc'
   if (!contentLength || Number(contentLength) === 0) {
     req.body = {}
+    next()
+  }
+  else if (isWebSocket) {
     next()
   }
   // Arc 6-only impl: always base64-encode all bodies

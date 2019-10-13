@@ -2,7 +2,7 @@
 let Router = require('router')
 let body = require('body-parser')
 let finalhandler = require('finalhandler')
-let readArc = require('@architect/utils/read-arc')
+let {readArc} = require('@architect/utils')
 
 // built ins
 let http = require('http')
@@ -47,15 +47,15 @@ let websocket
 app.start = function start(callback) {
 
   // read the arc file
-  let web = readArc().arc
+  let {arc} = readArc()
   let staticFolder = tuple=> tuple[0] === 'folder'
-  let folder = web.static && web.static.some(staticFolder)? web.static.find(staticFolder)[1] : 'public'
+  let folder = arc.static && arc.static.some(staticFolder)? arc.static.find(staticFolder)[1] : 'public'
 
   // allow override of 'public' folder
   process.env.ARC_SANDBOX_PATH_TO_STATIC = join(process.cwd(), folder)
 
   // always registering http routes (falling back to get / proxy)
-  registerHTTP(app, '@http', 'http', web.http || [])
+  registerHTTP(app, '@http', 'http', arc.http || [])
 
   // create an actual server; how quaint!
   server = http.createServer(function _request(req, res) {
@@ -74,8 +74,8 @@ app.start = function start(callback) {
   })
 
   // bind ws
-  if (web.ws) {
-    let routes = web.ws
+  if (arc.ws) {
+    let routes = arc.ws
     websocket = registerWS({app, server, routes})
   }
 

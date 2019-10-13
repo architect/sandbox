@@ -5,9 +5,9 @@ let fs = require('fs')
 let uuid = require('uuid/v4')
 
 let paths = {
-  original: ['ws-connect', 'ws-disconnect', 'ws-default'],
-  classic: ['ws-$connect', 'ws-$disconnect', 'ws-$default'],
-  clean: ['connect', 'disconnect', 'default']
+  clean: ['connect', 'disconnect', 'default'],
+  original: ['ws-connect', 'ws-disconnect', 'ws-default'],    // deprecated
+  classic: ['ws-$connect', 'ws-$disconnect', 'ws-$default'],  // deprecated
 }
 
 module.exports = function registerWebSocket({app, server}) {
@@ -33,7 +33,7 @@ module.exports = function registerWebSocket({app, server}) {
       if (err) console.log(err)
     }
 
-    // invoke src/ws/ws-$connect w mock payload
+    // invoke src/ws/connect w mock payload
     invoke($connect, {
       body: '{}',
       requestContext: {connectionId}
@@ -47,8 +47,8 @@ module.exports = function registerWebSocket({app, server}) {
 
       let notFound = action === null || (!fs.existsSync(cwd(localAction)) && !fs.existsSync(cwd(action)))
       if (notFound) {
-        // invoke src/ws/ws-$default
-        console.log('lambda not found, invoking $default route')
+        // invoke src/ws/default
+        console.log('lambda not found, invoking default route')
         invoke($default, {
           body: msg,
           requestContext: {connectionId}
@@ -63,7 +63,7 @@ module.exports = function registerWebSocket({app, server}) {
         }, noop)
       }
       else {
-        // invoke src/ws/ws-${action}
+        // invoke src/ws/${action}
         console.log(`lambda found, routing to ${localAction}`)
         invoke(cwd(localAction), {
           body: msg,
@@ -73,7 +73,7 @@ module.exports = function registerWebSocket({app, server}) {
     })
 
     ws.on('close', function close() {
-      // invoke src/ws/ws-$disconnect
+      // invoke src/ws/$disconnect
       invoke($disconnect, {
         body: '{}',
         requestContext: {connectionId}
