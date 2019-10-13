@@ -4,10 +4,19 @@
 
 ## [On master]
 
+### Changed
+
+- Legacy WebSockets paths on the filesystem are now formally deprecated
+  - Your default three WebSockets paths should be: `src/ws/default`, `src/ws/connect`, `src/ws/disconnect`
+  - If you're using the old WebSockets paths `src/ws/ws-default` and `src/ws/ws-$default`, simply remove `ws-[$]` and you should be all set!
+
+
 ### Fixed
 
-- Fixes HTTP request with `body` and no `Content-Type` header; resolves #102, thanks @andybee!
-- Fixes issue where legacy runtimes may not have been fully hydrated
+- Fixed issue when emitting to WebSockets with Arc Functions (`arc.ws.send`); resolves #48, thanks @andybee + @bvkimball!
+- Fixed issue where `sandbox` may not have correctly resolved some custom WebSocket actions
+- Fixed HTTP request with `body` and no `Content-Type` header; resolves #102, thanks @andybee!
+- Fixed issue where legacy runtimes may not have been fully hydrated
 
 ---
 
