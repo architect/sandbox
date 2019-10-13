@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@architect/http-proxy": "^3.4.2",
-    "@architect/hydrate": "^1.4.7",
+    "@architect/hydrate": "^1.4.9",
     "@architect/parser": "^1.2.1",
     "@architect/utils": "^1.3.8",
     "aws-sdk": "^2.548.0",

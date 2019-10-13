@@ -2,6 +2,15 @@
 
 ---
 
+## [On master]
+
+### Fixed
+
+- Fixes HTTP request with `body` and no `Content-Type` header; resolves #102, thanks @andybee!
+- Fixes issue where legacy runtimes may not have been fully hydrated
+
+---
+
 ## [1.4.6] 2019-10-11
 
 ### Changed
