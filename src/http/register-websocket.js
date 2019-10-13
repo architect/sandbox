@@ -57,7 +57,7 @@ module.exports = function registerWebSocket({app, server}) {
     })
 
     ws.on('close', function close() {
-      // invoke src/ws/$disconnect
+      // invoke src/ws/disconnect
       invoke($disconnect, {
         body: '{}',
         requestContext: {connectionId}
