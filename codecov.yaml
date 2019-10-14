@@ -2,4 +2,5 @@ coverage:
   precision: 2
   round: down
   range: "25...75"
+
 comment: off

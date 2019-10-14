@@ -3,6 +3,7 @@ name: Bug report
 about: Create a report to help us improve this project
 
 ---
+<!-- We always prioritize issues with clear repro steps and/or reduced test cases, thanks in advance! -->
 
 **Describe the issue**
 A clear and concise description of the bug
