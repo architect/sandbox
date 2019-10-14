@@ -8,7 +8,7 @@
 
 - Legacy WebSockets paths on the filesystem are now formally deprecated
   - Your default three WebSockets paths should be: `src/ws/default`, `src/ws/connect`, `src/ws/disconnect`
-  - If you're using the old WebSockets paths `src/ws/ws-default` and `src/ws/ws-$default`, simply remove `ws-[$]` and you should be all set!
+  - If you're using legacy WebSockets paths (either `src/ws/ws-default` or `src/ws/ws-$default`), simply remove `ws-[$]` and you should be all set!
 
 
 ### Fixed
