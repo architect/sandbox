@@ -1,5 +1,12 @@
 # Architect Sandbox changelog
 
+## [1.4.7] 2019-10-14
+
+### Changed
+
+- Bug fix for when sandbox \_\_arc websocket handler receives a Base64 encoded
+  body, decode it.
+
 ---
 
 ## [On master]
