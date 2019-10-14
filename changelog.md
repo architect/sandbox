@@ -2,7 +2,7 @@
 
 ---
 
-## [On master]
+## [1.4.7] 2019-10-14
 
 ### Changed
 
@@ -16,7 +16,8 @@
 - Fixed issue when emitting to WebSockets with Arc Functions (`arc.ws.send`); resolves #48, thanks @andybee + @bvkimball!
 - Fixed issue where `sandbox` may not have correctly resolved some custom WebSocket actions
 - Fixed HTTP request with `body` and no `Content-Type` header; resolves #102, thanks @andybee!
-- Fixed issue where legacy runtimes may not have been fully hydrated
+- Fixed issue where killed subprocesses would not trigger timeouts; resolves #30, /ht @mikemaccana
+- Fixed issue where functions with legacy runtimes may not have been fully hydrated
 
 ---
 
