@@ -1,40 +1,57 @@
+let {updater} = require('@architect/utils')
 let spawn = require('child_process').spawn
+let kill = require('tree-kill')
 
 module.exports = function spawnChild(command, args, options, timeout, callback) {
-
   let cwd = options.cwd
   let timedout = false
   let headers = {
     'Content-Type': 'text/html; charset=utf8;',
     'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
   }
+
   // run the show
   let child = spawn(command, args, options)
   let stdout = ''
   let stderr = ''
   let error
+  let closed = false
 
-  // bake a timeout
+  // Ensure we don't have dangling processes due to open connections, etc.
+  function maybeShutdown () {
+    if (closed) {null} // noop
+    else {
+      // Wait for 50ms for a proper close, otherwise assume the process is hung
+      setTimeout(() => {
+        if (closed) {null} // Check one last time for graceful shutdown
+        else {
+          if (error) {
+            let update = updater('Sandbox')
+            update.error('Caught hanging execution with an error, attempting to exit 1')
+            kill(child.pid)
+            closed = true
+            done(1)
+          }
+          else {
+            kill(child.pid)
+            closed = true
+            done(0)
+          }
+        }
+      }, 50)
+    }
+  }
+
+  // Set an execution timeout
   let to = setTimeout(function () {
     timedout = true
-    child.kill()
+    closed = true
+    kill(child.pid)
+    done(1)
   }, timeout)
 
-  child.stdout.on('data', data => {
-    // always capture data piped to stdout
-    // python buffers so you might get everything despite our best efforts
-    stdout += data
-  })
-
-  child.stderr.on('data', data => {
-    stderr += data
-  })
-
-  child.on('error', err => {
-    error = err
-  })
-
-  child.on('close', function done (code) {
+  // End execution
+  function done (code) {
     // Output any console logging from the child process
     let tidy = stdout.toString()
       .split('\n')
@@ -66,8 +83,10 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
       // extract the __ARC__ line
       let command = line => line.startsWith('__ARC__')
       let result = stdout.split('\n').find(command)
-      if (result && result !== '__ARC__ undefined') {
+      if (result && result !== '__ARC__ undefined __ARC_END__') {
         let raw = result.replace('__ARC__', '')
+                        .replace('__ARC_END__', '')
+                        .trim()
         let parsed = JSON.parse(raw)
         // if its an error pretty print it
         if (parsed.name && parsed.message && parsed.stack) {
@@ -97,6 +116,34 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
       }
     } else {
       callback(null, {headers, body: `<pre>${code}...${stdout}</pre><pre>${stderr}</pre>`})
+    }
+  }
+
+  child.stdout.on('data', data => {
+    // always capture data piped to stdout
+    // python buffers so you might get everything despite our best efforts
+    stdout += data
+    if (data.includes('__ARC_END__'))
+      maybeShutdown()
+  })
+
+  child.stderr.on('data', data => {
+    stderr += data
+    if (data.includes('__ARC_END__'))
+      maybeShutdown()
+  })
+
+  child.on('error', err => {
+    error = err
+    if (err.includes('__ARC_END__'))
+      maybeShutdown()
+  })
+
+  child.on('close', function close (code) {
+    if (closed) {null} // Hung process was caught and shut down
+    else {
+      closed = true
+      done(code)
     }
   })
 }
