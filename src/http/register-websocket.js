@@ -67,6 +67,12 @@ module.exports = function registerWebSocket({app, server}) {
 
   // create a handler for receiving arc.ws.send messages
   app.post('/__arc', function handle(req, res) {
+    // If body comes in as Base64 encoded, we have to decode and then JSON parse
+    // since the router plugins would have skipped the JSON parsing of the body
+    let body = req.isBase64Encoded
+      ? JSON.parse(new Buffer(req.body, "base64").toString("ascii"))
+      : req.body
+      
     let client = connections.find(client=> req.body.id === client.id)
     if (client) {
       try {
