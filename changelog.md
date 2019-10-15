@@ -1,6 +1,17 @@
 # Architect Sandbox changelog
 
 ---
+## [1.4.8] 2019-10-15
+
+### Changed
+
+- Updated dependencies
+
+### Fixed
+
+- Improves error states for missing static configs, 404s, etc. when using `@http` and/or `@static` with `arc.http.proxy` or without defining `get /`
+
+---
 
 ## [1.4.7] 2019-10-14
 
