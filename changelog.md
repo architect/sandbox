@@ -1,7 +1,12 @@
 # Architect Sandbox changelog
 
 ---
-## [1.4.8] 2019-10-15
+## [1.4.8 - 1.4.9] 2019-10-15
+
+### Added
+
+- Added update notifier to help ensure folks are running the (hopefully) least buggy, most stable, most secure version of Sandbox
+
 
 ### Changed
 
