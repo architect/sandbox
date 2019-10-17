@@ -8,9 +8,9 @@ let http = require('./http')
 let hydrate = require('@architect/hydrate')
 let maybeHydrate = require('./http/maybe-hydrate')
 let series = require('run-series')
-let utils = require('@architect/utils')
-let updater = utils.updater
-let chars = utils.chars
+let create = require('@architect/create')
+let {banner, chars, fingerprint, initEnv,
+     portInUse, readArc, updater} = require('@architect/utils')
 let quiet = process.env.QUIET
 
 module.exports = function start(params, callback) {
@@ -53,7 +53,7 @@ module.exports = function start(params, callback) {
      * Make sure we have access to the desired port
      */
     function _checkPort(callback) {
-      utils.portInUse(port, callback)
+      portInUse(port, callback)
     },
 
     /**
@@ -61,7 +61,7 @@ module.exports = function start(params, callback) {
      */
     function _checkArc(callback) {
       try {
-        arc = utils.readArc().arc
+        arc = readArc().arc
         callback()
       }
       catch(e) {
@@ -74,7 +74,7 @@ module.exports = function start(params, callback) {
      * Print the banner (which also loads some boostrap env vars)
      */
     function _printBanner(callback) {
-      utils.banner(params)
+      banner(params)
       if (!quiet) {
         update.done('Found Architect manifest, starting up')
       }
@@ -95,7 +95,7 @@ module.exports = function start(params, callback) {
       }
       else process.env.ARC_HTTP = 'aws_proxy'
       // Read .arc-env
-      utils.initEnv(callback)
+      initEnv(callback)
       // Populate session table (if not present)
       if (!process.env.SESSION_TABLE_NAME)
         process.env.SESSION_TABLE_NAME = 'jwe' // Default
@@ -112,7 +112,7 @@ module.exports = function start(params, callback) {
         callback()
       }
       else {
-        utils.fingerprint({}, function next(err, result) {
+        fingerprint({}, function next(err, result) {
           if (err) callback(err)
           else {
             if (result) {
@@ -129,7 +129,7 @@ module.exports = function start(params, callback) {
      */
     function _maybeInit(callback) {
       if (!deprecated) {
-        utils.init(null, callback)
+        create({}, callback)
       }
       else callback()
     },
