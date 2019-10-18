@@ -1,18 +1,17 @@
   module.exports = function getAttributeDefinitions(attr) {
-    var defs = [];
+    let defs = []
     Object.keys(attr).forEach(function(k, i) {
       defs[i] = {
         AttributeName: k,
         AttributeType: convert(attr[k].replace(/\*+/g, '')),
-      };
-    });
-
-    return defs;
+      }
+    })
+    return defs
   }
 
 function convert(v) {
   return ({
     'String':'S',
     'Number':'N'
-  })[v];
+  })[v]
 }

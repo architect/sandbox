@@ -45,7 +45,7 @@ module.exports = function responseValidator ({res, result}) {
     let invalid = params.some(p => !validParams.includes(p))
     if (invalid) {
       setError(res)
-      let body = invalidParam(validParams) + `Recieved:<pre> ${JSON.stringify(params, null ,2)}</pre>`
+      let body = invalidParam(validParams) + `Recieved:<pre> ${JSON.stringify(result, null ,2)}</pre>`
       return {
         valid: false,
         body
