@@ -2,6 +2,31 @@
 
 ---
 
+## [1.4.10 - 1.4.11] 2019-10-17
+
+### Changed
+
+- Internal change: swaps out `utils/init` for `@architect/create`
+
+---
+
+## [1.4.8 - 1.4.9] 2019-10-15
+
+### Added
+
+- Added update notifier to help ensure folks are running the (hopefully) least buggy, most stable, most secure version of Sandbox
+
+
+### Changed
+
+- Updated dependencies
+
+### Fixed
+
+- Improves error states for missing static configs, 404s, etc. when using `@http` and/or `@static` with `arc.http.proxy` or without defining `get /`
+
+---
+
 ## [1.4.7] 2019-10-14
 
 ### Changed
