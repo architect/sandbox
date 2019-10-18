@@ -2,11 +2,15 @@
 
 ---
 
-## [1.4.10 - 1.4.11] 2019-10-17
+## [1.4.10 - 1.4.12] 2019-10-17
 
 ### Changed
 
 - Internal change: swaps out `utils/init` for `@architect/create`
+
+### Fix
+
+- https://github.com/architect/sandbox/issues/47
 
 ---
 
