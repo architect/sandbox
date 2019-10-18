@@ -1,6 +1,6 @@
 {
   "name": "@architect/sandbox",
-  "version": "1.4.10",
+  "version": "1.4.11",
   "description": "Architect dev server: run full Architect projects locally & offline",
   "main": "src/index.js",
   "scripts": {
