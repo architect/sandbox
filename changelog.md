@@ -2,15 +2,28 @@
 
 ---
 
+## [1.4.13] 2019-10-19
+
+### Changed
+
+- Updated dependencies
+
+
+### Fixed
+
+- Removed unnecessary dependency
+
+---
+
 ## [1.4.10 - 1.4.12] 2019-10-17
 
 ### Changed
 
 - Internal change: swaps out `utils/init` for `@architect/create`
 
-### Fix
+### Fixed
 
-- https://github.com/architect/sandbox/issues/47
+- Fixes issue when `@tables` definition includes `stream true`; resolves #47, thanks @gr2m!
 
 ---
 
