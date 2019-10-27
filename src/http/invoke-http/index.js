@@ -22,7 +22,7 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
     // Set up request shape
     let request
     if (!deprecated) {
-      request = requestFormatter({verb, route, req})
+      request = requestFormatter({verb, req, route})
     }
     else {
       request = requestFormatterDeprecated({verb, req})
