@@ -97,6 +97,31 @@ test('Architect v6: get /nature/hiking', t => {
   teardown()
 })
 
+test('Architect v6: get /{proxy+}', t => {
+  t.plan(7)
+  let request = reqs.arc6.getProxyPlus
+  let verb = 'GET'
+  let route = '/'
+  let handler = invoke({verb, route})
+  let input = {
+    url: url('/nature/hiking'),
+    resource: '/{proxy+}',
+    body: {},
+    headers,
+    params: request.pathParameters
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  t.equal(str(request.body), str(req.body), match('req.body', req.body))
+  t.equal(str(request.path), str(req.path), match('req.path', req.path))
+  t.equal(str(request.resource), str(req.resource), match('req.resource', req.resource))
+  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
+  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
+  t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  teardown()
+})
+
 test('Architect v6: post /form (JSON)', t => {
   t.plan(7)
   let request = reqs.arc6.postJson
