@@ -70,7 +70,10 @@ module.exports = function _public(req, res, next) {
         verb: 'GET',
         pathToFunction: arcProxy
       })
-      if (isProxy) req.resource = '/{proxy+}'
+      if (isProxy) {
+        req.resource = '/{proxy+}'
+        req.params = {proxy: pathname}
+      }
       else req.resource = pathname
       req.requestContext = {} // TODO mock a {proxy+} request payload
       exec(req, res)
@@ -81,7 +84,10 @@ module.exports = function _public(req, res, next) {
         verb: req.method.toLowerCase(),
         pathToFunction: join(process.cwd(), 'src', 'http', `get-index`)
       })
-      if (isProxy) req.resource = '/{proxy+}'
+      if (isProxy) {
+        req.resource = '/{proxy+}'
+        req.params = {proxy: pathname}
+      }
       else req.resource = pathname
       req.requestContext = {} // TODO mock a {proxy+} request payload
       exec(req, res)
