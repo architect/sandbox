@@ -2,6 +2,19 @@
 
 ---
 
+## [1.4.14] 2019-10-29
+
+### Added
+
+- `request.parameters` and `request.pathParameters` are now properly passed through for root proxy requests
+
+
+### Changed
+
+- Updated dependencies
+
+---
+
 ## [1.4.13] 2019-10-19
 
 ### Changed
