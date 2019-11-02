@@ -20,7 +20,7 @@
     "sandbox": "./src/cli/cli.js"
   },
   "dependencies": {
-    "@architect/create": "^1.0.3",
+    "@architect/create": "^1.0.4",
     "@architect/http-proxy": "^3.4.7",
     "@architect/hydrate": "^1.4.9",
     "@architect/parser": "^1.2.1",
