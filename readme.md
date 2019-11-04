@@ -4,7 +4,8 @@
 
 > Architect dev server: run full Architect projects locally & offline in a sandbox
 
-[![Travis Build Status](https://travis-ci.com/architect/sandbox.svg?branch=master)](https://travis-ci.com/architect/sandbox) [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/1j42wah7k1ls7xfp/branch/master?svg=true)](https://ci.appveyor.com/project/ArchitectCI/sandbox/branch/master) [![codecov](https://codecov.io/gh/architect/sandbox/branch/master/graph/badge.svg)](https://codecov.io/gh/architect/sandbox)
+[![GitHub CI status](https://github.com/architect/sandbox/workflows/Node%20CI/badge.svg)](https://github.com/architect/sandbox/actions?query=workflow%3A%22Node+CI%22)
+<!-- [![codecov](https://codecov.io/gh/architect/sandbox/branch/master/graph/badge.svg)](https://codecov.io/gh/architect/sandbox) -->
 
 ## Install
 
