@@ -8,7 +8,8 @@
     "test:unit": "cross-env PORT=6666 tape test/unit/*-test.js test/unit/**/*-test.js test/unit/**/**/*-test.js | tap-spec",
     "test:integration": "cross-env PORT=6666 tape test/integration/*-test.js | tap-spec",
     "coverage": "nyc --reporter=lcov --reporter=text npm run test:unit",
-    "lint": "eslint src --fix"
+    "lint": "eslint src --fix",
+    "rc": "npm version prerelease --preid RC"
   },
   "repository": {
     "type": "git",
