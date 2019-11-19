@@ -6,8 +6,6 @@ _mock
 .git
 .github
 .nyc_output/
-.travis.yml
-appveyor.yml
 changelog.md
 codecov.yaml
 contributing.md
