@@ -1,7 +1,7 @@
 name: Node CI
 
-# Push tests pushes; PR tests merges; create tests tags (and releases)
-on: [push, pull_request, create]
+# Push tests pushes; PR tests merges
+on: [push, pull_request]
 
 jobs:
 
@@ -14,31 +14,55 @@ jobs:
         node-version: [8.x, 10.x, 12.x]
         os: [windows-latest, ubuntu-latest, macOS-latest]
 
+
     # Go
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-node@v1
+    - name: Check out repo
+      uses: actions/checkout@v1
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+
     # Hardcoded individual Python and Ruby versions (for now)
-    - uses: actions/setup-python@v1
+    - name: Set up Python
+      uses: actions/setup-python@v1
       with:
         python-version: '3.x'
-    - uses: actions/setup-ruby@v1
+
+    - name: Set up Ruby
+      uses: actions/setup-ruby@v1
       with:
         ruby-version: '2.5'
 
-    - name: Versions
+    - name: Env
       run: |
-        node --version
-        python --version
-        ruby --version
+        echo "Event name: ${{ github.event_name }}"
+        echo "Git ref:    ${{ github.ref }}"
+        echo "GH actor:   ${{ github.actor }}"
+        echo "SHA:        ${{ github.sha }}"
+        VER=`node --version`; echo "Node ver:   $VER"
+        VER=`npm --version`; echo "npm ver:    $VER"
+        VER=`python --version`; echo "Py ver:     $VER"
+        VER=`ruby --version`; echo "Ruby ver:   $VER"
 
     - name: Install
       run: npm install
 
     - name: Test
       run: npm test
+      env:
+        CI: true
+
+    - name: Notify
+      uses: homoluctus/slatify@master
+      # Only fire alert once
+      if: github.ref == 'refs/heads/master' && failure() && matrix.node-version == '10.x' && matrix.os == 'ubuntu-latest'
+      with:
+        type: ${{ job.status }}
+        job_name: '*Build*'
+        url: ${{ secrets.SLACK_WEBHOOK }}
 
   # ----- Only git tag testing + package publishing beyond this point ----- #
 
@@ -46,15 +70,18 @@ jobs:
   publish:
     # Setup
     needs: build
-    if: github.event_name == 'create' && startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
 
     # Go
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - name: Check out repo
+        uses: actions/checkout@v1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
         with:
-          node-version: 12
+          node-version: 10
           registry-url: https://registry.npmjs.org/
 
       - name: Install
@@ -74,9 +101,10 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # Set up Node again, this time using GitHub as the publish target
-      - uses: actions/setup-node@v1
+      - name: Set up Node.js
+       uses: actions/setup-node@v1
         with:
-          node-version: 12
+          node-version: 10
           registry-url: https://npm.pkg.github.com/
 
       # Publish to GitHub
@@ -91,3 +119,11 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify
+        uses: homoluctus/slatify@master
+        if: always()
+        with:
+          type: ${{ job.status }}
+          job_name: '*Publish*'
+          url: ${{ secrets.SLACK_WEBHOOK }}
