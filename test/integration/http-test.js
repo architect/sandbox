@@ -34,7 +34,7 @@ test('get /', t=> {
     if (err) t.fail(err)
     else {
       t.ok(data, 'got /')
-      t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs10.x!'), 'is hello world')
+      t.ok(data.body.startsWith('Hello from Architect Sandbox running the default runtime!'), 'is hello world')
       console.log({data})
     }
   })
@@ -55,6 +55,34 @@ test('get /binary', t=> {
   })
 })
 
+test('get /nodejs12.x', t=> {
+  t.plan(2)
+  tiny.get({
+    url: url + '/nodejs12.x'
+  }, function _got(err, data) {
+    if (err) t.fail(err)
+    else {
+      t.ok(data, 'got /')
+      t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs12.x!'), 'is hello world')
+      console.log({data})
+    }
+  })
+})
+
+test('get /nodejs10.x', t=> {
+  t.plan(2)
+  tiny.get({
+    url: url + '/nodejs10.x'
+  }, function _got(err, data) {
+    if (err) t.fail(err)
+    else {
+      t.ok(data, 'got /')
+      t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs10.x!'), 'is hello world')
+      console.log({data})
+    }
+  })
+})
+
 test('get /nodejs8.10', t=> {
   t.plan(2)
   tiny.get({
@@ -64,6 +92,20 @@ test('get /nodejs8.10', t=> {
     else {
       t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs8.10!'), 'is hello world')
+      console.log({data})
+    }
+  })
+})
+
+test('get /python3.8', t=> {
+  t.plan(2)
+  tiny.get({
+    url: url + '/python3.8'
+  }, function _got(err, data) {
+    if (err) t.fail(err)
+    else {
+      t.ok(data, 'got /')
+      t.ok(data.body.startsWith('Hello from Architect Sandbox running python3.8!'), 'is hello world')
       console.log({data})
     }
   })
@@ -318,7 +360,7 @@ test('get /', t=> {
     if (err) t.fail(err)
     else {
       t.ok(data, 'got /')
-      t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs10.x!'), 'is hello world')
+      t.ok(data.body.startsWith('Hello from Architect Sandbox running the default runtime!'), 'is hello world')
       console.log({data})
     }
   })
