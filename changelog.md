@@ -2,6 +2,19 @@
 
 ---
 
+## [On branch] 2019-11-19
+
+### Added
+
+- Added support for `nodejs12.x` and `python3.8` runtimes
+
+
+### Changed
+
+- Updated dependencies
+
+---
+
 ## [1.4.14] 2019-10-29
 
 ### Added

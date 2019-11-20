@@ -3,11 +3,9 @@ _mock
 .DS_Store
 .eslintignore
 .eslintrc.js
-.git
-.github
+.git/
+.github/
 .nyc_output/
-.travis.yml
-appveyor.yml
 changelog.md
 codecov.yaml
 contributing.md

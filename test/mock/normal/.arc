@@ -8,9 +8,12 @@ ping
 pong
 
 @http
-get / # runs default (nodejs10.x)
-get /binary # runs default (nodejs10.x)
+get /           # runs default
+get /binary     # runs default
+get /nodejs12.x
+get /nodejs10.x
 get /nodejs8.10
+get /python3.8
 get /python3.7
 get /python3.6
 get /ruby2.5
