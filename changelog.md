@@ -2,7 +2,7 @@
 
 ---
 
-## [On branch] 2019-11-19
+## [1.4.17] 2019-11-19
 
 ### Added
 
@@ -17,6 +17,26 @@
 ### Fixed
 
 - Fixed printing of unnecessary ANSI escape characters in CI environments (`CI` env, or not TTY output)
+
+---
+
+## [1.4.16] 2019-11-19
+
+### Fixed
+
+- Fixed issue where `public/` may be automatically generated if `@static folder` is defined
+
+---
+
+## [1.4.15] 2019-11-19
+
+### Added
+
+- Root requests now look for default `index.html` when `ARC_STATIC_SPA=false`
+
+### Changed
+
+- Adds anti-caching and body parsing `application/vnd.api+json`; resolves #141, thanks @jkarsrud!
 
 ---
 
