@@ -13,6 +13,11 @@
 
 - Updated dependencies
 
+
+### Fixed
+
+- Fixed printing of unnecessary ANSI escape characters in CI environments (`CI` env, or not TTY output)
+
 ---
 
 ## [1.4.14] 2019-10-29
