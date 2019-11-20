@@ -43,7 +43,7 @@ jobs:
         echo "SHA:        ${{ github.sha }}"
         VER=`node --version`; echo "Node ver:   $VER"
         VER=`npm --version`; echo "npm ver:    $VER"
-        VER=`python --version`; echo "Py ver:     $VER"
+        VER=`python --version`; echo "Python ver: $VER"
         VER=`ruby --version`; echo "Ruby ver:   $VER"
 
     - name: Install

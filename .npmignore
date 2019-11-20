@@ -3,8 +3,8 @@ _mock
 .DS_Store
 .eslintignore
 .eslintrc.js
-.git
-.github
+.git/
+.github/
 .nyc_output/
 changelog.md
 codecov.yaml
