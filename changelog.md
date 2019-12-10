@@ -2,6 +2,16 @@
 
 ---
 
+## [1.4.18] 2019-12-10
+
+### Added
+
+- Added proper emulation of API Gateway v2's WebSocket connection authorization
+  - Returning an object containing `statusCode` 2xx allows a WebSocket client to connect
+  - Returning any other status code will hang up on the request
+
+---
+
 ## [1.4.17] 2019-11-19
 
 ### Added
