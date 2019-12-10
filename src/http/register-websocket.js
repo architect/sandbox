@@ -1,3 +1,4 @@
+let http = require('http')
 let WebSocket = require('ws')
 let join = require('path').join
 let invoke = require('../invoke-lambda')
@@ -7,36 +8,61 @@ let uuid = require('uuid/v4')
 module.exports = function registerWebSocket({app, server}) {
 
   let cwd = name=> join(process.cwd(), 'src', 'ws', name)
-  let wss = new WebSocket.Server({server})
+  let wss = new WebSocket.Server({noServer: true})
   let connections = []
 
+  // Build paths to default ws lambdas
+  // We're guaranteed that these routes will exist
+  let $connect = cwd('connect')
+  let $disconnect = cwd('disconnect')
+  let $default = cwd('default')
+
+  // Create a connectionId uuid
+  let connectionId = uuid()
+  connections.push({id: connectionId})
+
+  /**
+   * Handle handleshake and possibly return error; note:
+   * - In APIGWv2, !2xx responses hang up and return the status code
+   * - However, 2xx responses initiate a socket connection (automatically responding with 101)
+   */
+  server.on('upgrade', async (request, socket, head) => {
+    // Invoke src/ws/connect with mock payload and connectionId
+    invoke($connect, {
+      body: '{}',
+      requestContext: {connectionId}
+    }, function connect(err, res) {
+      let statusCode = res && res.statusCode
+      if (err || !statusCode || typeof statusCode !== 'number') {
+        socket.write(`HTTP/1.1 502 ${http.STATUS_CODES[502]}\r\n\r\n`)
+        socket.destroy()
+        return
+      }
+      else if (statusCode >= 200 && statusCode <= 208 || statusCode === 226) {
+        wss.handleUpgrade(request, socket, head, (ws) => {
+          wss.emit('connection', ws, request)
+        })
+      }
+      else {
+        socket.write(`HTTP/1.1 ${statusCode} ${http.STATUS_CODES[statusCode]}\r\n\r\n`)
+        socket.destroy()
+        return
+      }
+    })
+  })
+
+  // Ok, the connection was accepted and the upgrade was completed
   wss.on('connection', function connection(ws) {
-
-    // build paths to default ws lambdas
-    // we're guaranteed that these routes will exist
-    let $connect = cwd('connect')
-    let $disconnect = cwd('disconnect')
-    let $default = cwd('default')
-
-    // create a connectionId uuid
-    let connectionId = uuid()
-    connections.push({id:connectionId, ws})
+    // Be sure to append ws to client's connection
+    let id = connections.findIndex(client => client.id === connectionId)
+    connections[id].ws = ws
 
     function noop(err) {
       if (err) console.log(err)
     }
-
-    // invoke src/ws/connect w mock payload
-    invoke($connect, {
-      body: '{}',
-      requestContext: {connectionId}
-    }, noop)
-
     ws.on('message', function message(msg) {
-
       let payload = JSON.parse(msg)
       let action = payload.action || null
-
       let notFound = action === null || !fs.existsSync(cwd(action))
       if (notFound) {
         // invoke src/ws/default
