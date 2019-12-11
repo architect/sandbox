@@ -2,10 +2,10 @@ let test = require('tape')
 let sinon = require('sinon')
 let proxyquire = require('proxyquire')
 let lambdaStub = sinon.stub().yields()
-let invoke = proxyquire('../../../../src/http/invoke-http', {
+let invoke = proxyquire('../../../../../src/http/invoke-http', {
   '../../invoke-lambda': lambdaStub
 })
-let reqs = require('./http-req-fixtures')
+let reqs = require('../http-req-fixtures')
 
 lambdaStub.yields(null, {})
 let headers = {'Accept-Encoding': 'gzip'}
