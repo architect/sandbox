@@ -2,10 +2,10 @@ let test = require('tape')
 let sinon = require('sinon')
 let proxyquire = require('proxyquire')
 let lambdaStub = sinon.stub().yields()
-let invoke = proxyquire('../../../../src/http/invoke-http', {
+let invoke = proxyquire('../../../../../src/http/invoke-http', {
   '../../invoke-lambda': lambdaStub
 })
-let responses = require('./http-res-fixtures')
+let responses = require('../http-res-fixtures')
 
 let b64dec = i => Buffer.from(i, 'base64').toString('utf8')
 let str = i => JSON.stringify(i)

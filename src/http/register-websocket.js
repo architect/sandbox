@@ -1,36 +1,40 @@
 let http = require('http')
 let WebSocket = require('ws')
 let join = require('path').join
-let invoke = require('../invoke-lambda')
+let invoke = require('./invoke-ws')
 let fs = require('fs')
 let uuid = require('uuid/v4')
 
 module.exports = function registerWebSocket({app, server}) {
 
-  let cwd = name=> join(process.cwd(), 'src', 'ws', name)
+  let wsName = name => process.env.DEPRECATED ? `ws-${name}` : name
+  let cwd = name=> join(process.cwd(), 'src', 'ws', wsName(name))
   let wss = new WebSocket.Server({noServer: true})
   let connections = []
+  let connectionId // (Re)assigned upon each upgrade request
 
-  // Build paths to default ws lambdas
+  // Build paths to default WS Lambdas
   // We're guaranteed that these routes will exist
   let $connect = cwd('connect')
   let $disconnect = cwd('disconnect')
   let $default = cwd('default')
 
-  // Create a connectionId uuid
-  let connectionId = uuid()
-  connections.push({id: connectionId})
 
   /**
    * Handle handleshake and possibly return error; note:
    * - In APIGWv2, !2xx responses hang up and return the status code
    * - However, 2xx responses initiate a socket connection (automatically responding with 101)
    */
-  server.on('upgrade', async (request, socket, head) => {
-    // Invoke src/ws/connect with mock payload and connectionId
-    invoke($connect, {
-      body: '{}',
-      requestContext: {connectionId}
+  server.on('upgrade', async function verify(req, socket, head) {
+    // Create a connectionId uuid
+    connectionId = uuid()
+    connections.push({id: connectionId})
+
+    console.log('\nClient attempting connection, invoking ws/connect')
+    invoke({
+      action: $connect,
+      connectionId,
+      req
     }, function connect(err, res) {
       let statusCode = res && res.statusCode
       if (err || !statusCode || typeof statusCode !== 'number') {
@@ -39,8 +43,8 @@ module.exports = function registerWebSocket({app, server}) {
         return
       }
       else if (statusCode >= 200 && statusCode <= 208 || statusCode === 226) {
-        wss.handleUpgrade(request, socket, head, (ws) => {
-          wss.emit('connection', ws, request)
+        wss.handleUpgrade(req, socket, head, (ws) => {
+          wss.emit('connection', ws, req)
         })
       }
       else {
@@ -66,27 +70,31 @@ module.exports = function registerWebSocket({app, server}) {
       let notFound = action === null || !fs.existsSync(cwd(action))
       if (notFound) {
         // invoke src/ws/default
-        console.log('WebSocket Lambda not found, invoking ws/default')
-        invoke($default, {
+        console.log('\nWebSocket Lambda not found, invoking ws/default')
+        invoke({
+          action: $default,
           body: msg,
-          requestContext: {connectionId}
+          connectionId
         }, noop)
       }
       else {
         // invoke src/ws/${action}
-        console.log(`WebSocket lambda found, invoking ws/${action}`)
-        invoke(cwd(action), {
+        console.log(`\nWebSocket Lambda found, invoking ws/${action}`)
+        invoke({
+          action: cwd(action),
           body: msg,
-          requestContext: {connectionId}
+          connectionId
         }, noop)
       }
     })
 
     ws.on('close', function close() {
       // invoke src/ws/disconnect
-      invoke($disconnect, {
-        body: '{}',
-        requestContext: {connectionId}
+      console.log(`\nWebSocket disconnecting, invoking ws/disconnect`)
+      invoke({
+        action: $disconnect,
+        connectionId,
+        req: {headers: {host: `localhost:${process.env.PORT}`}}
       }, noop)
     })
   })

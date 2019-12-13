@@ -6,7 +6,7 @@ let responseFormatterDeprecated = require('./_res-fmt-deprecated')
 let validator = require('./_validator')
 
 /**
- * builds response middleware for invoke
+ * Formats and validates HTTP request and response event objects
  */
 module.exports = function invokeHTTP({verb, pathToFunction, route}) {
   if (verb) verb = verb.toUpperCase()

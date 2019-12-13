@@ -2,6 +2,21 @@
 
 ---
 
+## [11.4.19] 2019-12-12
+
+### Added
+
+- Sandbox now passes full request params from WebSocket clients on `connect` and `disconnect`
+  - Now in addition to `request.requestContext.connectionId`, you'll have `request.headers`, and `request.queryStringParameters` (if present)
+  - Sandbox now only passes `request.body` to WebSocket functions that receive `message`s (instead of adding an empty `body` object to all requests)
+
+
+### Changed
+
+- Adds better backwards compatibility support for legacy `src/ws/ws-*` WebSocket function paths
+
+---
+
 ## [1.4.18] 2019-12-10
 
 ### Added
