@@ -40,7 +40,7 @@
     "run-waterfall": "^1.1.6",
     "send": "^0.17.1",
     "tree-kill": "^1.2.1",
-    "update-notifier": "3.0.1",
+    "update-notifier": "4.0.0",
     "uuid": "^3.3.3",
     "ws": "^7.2.0"
   },
