@@ -7,19 +7,18 @@ let uuid = require('uuid/v4')
 
 module.exports = function registerWebSocket({app, server}) {
 
-  let cwd = name=> join(process.cwd(), 'src', 'ws', name)
+  let wsName = name => process.env.DEPRECATED ? `ws-${name}` : name
+  let cwd = name=> join(process.cwd(), 'src', 'ws', wsName(name))
   let wss = new WebSocket.Server({noServer: true})
   let connections = []
+  let connectionId // (Re)assigned upon each upgrade request
 
-  // Build paths to default ws lambdas
+  // Build paths to default WS Lambdas
   // We're guaranteed that these routes will exist
   let $connect = cwd('connect')
   let $disconnect = cwd('disconnect')
   let $default = cwd('default')
 
-  // Create a connectionId uuid
-  let connectionId = uuid()
-  connections.push({id: connectionId})
 
   /**
    * Handle handleshake and possibly return error; note:
@@ -27,6 +26,10 @@ module.exports = function registerWebSocket({app, server}) {
    * - However, 2xx responses initiate a socket connection (automatically responding with 101)
    */
   server.on('upgrade', async function verify(req, socket, head) {
+    // Create a connectionId uuid
+    connectionId = uuid()
+    connections.push({id: connectionId})
+
     console.log('\nClient attempting connection, invoking ws/connect')
     invoke({
       action: $connect,
