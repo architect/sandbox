@@ -24,7 +24,7 @@
     "@architect/create": "^1.0.6",
     "@architect/http-proxy": "^3.4.7",
     "@architect/hydrate": "^1.4.11",
-    "@architect/parser": "^1.2.2",
+    "@architect/parser": "^2.0.0",
     "@architect/utils": "^1.3.10",
     "aws-sdk": "^2.589.0",
     "body-parser": "^1.19.0",
