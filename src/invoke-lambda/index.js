@@ -2,10 +2,12 @@ let path = require('path')
 
 let getConfig = require('./get-config')
 let runInNode = require('./run-in-node')
+let runInDeno = require('./run-in-deno')
 let runInPython = require('./run-in-python')
 let runInRuby = require('./run-in-ruby')
 
 let runtimes = {
+  'deno':       runInDeno,
   'nodejs12.x': runInNode,
   'nodejs10.x': runInNode,
   'nodejs8.10': runInNode,
@@ -13,7 +15,6 @@ let runtimes = {
   'python3.6':  runInPython,
   'python3.7':  runInPython,
   'ruby2.5':    runInRuby,
-  // TODO
   // 'go1.x': runInGo,
   // 'dotnetcore2.1': runInDotNet,
   // 'java8': runInJava,

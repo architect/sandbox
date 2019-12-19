@@ -2,6 +2,12 @@
 
 ---
 
+## [11.5.0] 2019-12-19
+
+### Added
+
+- Sandbox now supports Deno runtime projects!
+
 ## [11.4.19] 2019-12-12
 
 ### Added
