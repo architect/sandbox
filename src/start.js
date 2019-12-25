@@ -13,9 +13,8 @@ let {banner, chars, fingerprint, initEnv,
      portInUse, readArc, updater} = require('@architect/utils')
 let quiet = process.env.QUIET
 
-module.exports = function start(params, callback) {
+module.exports = function start(params={}, callback) {
   let start = Date.now()
-  params = params || {}
   let {port, options, version} = params
   let update = updater('Sandbox')
   let arc
@@ -266,6 +265,9 @@ module.exports = function start(params, callback) {
   function _done(err) {
     if (err) callback(err)
     else {
+      if (!quiet && process.env.ARC_AWS_CREDS === 'dummy') {
+        update.warn('Missing or invalid AWS credentials or credentials file, using dummy credentials (this is probably ok)')
+      }
       function end() {
         client.close()
         bus.close()
