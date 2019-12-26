@@ -21,11 +21,11 @@
     "sandbox": "./src/cli/cli.js"
   },
   "dependencies": {
-    "@architect/create": "^1.0.10",
+    "@architect/create": "^1.0.11-RC.1",
     "@architect/http-proxy": "^3.4.7",
-    "@architect/hydrate": "^1.4.12",
+    "@architect/hydrate": "^1.4.12-RC.0",
     "@architect/parser": "^1.2.2",
-    "@architect/utils": "^1.3.11-RC.4",
+    "@architect/utils": "^1.4.1",
     "body-parser": "^1.19.0",
     "chalk": "^3.0.0",
     "depstatus": "^1.0.0",
