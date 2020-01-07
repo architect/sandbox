@@ -2,13 +2,23 @@
 
 ---
 
-## [11.5.0] 2019-12-19
+## [1.5.1] 2020-01-06
+
+### Fixed
+
+- Fixed errors related to missing `aws-sdk` dependency
+
+---
+
+## [1.5.0] 2019-12-19
 
 ### Added
 
 - Sandbox now supports Deno runtime projects!
 
-## [11.4.19] 2019-12-12
+---
+
+## [1.4.19] 2019-12-12
 
 ### Added
 
