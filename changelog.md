@@ -2,7 +2,12 @@
 
 ---
 
-## [1.5.2] 2020-01-07
+## [1.5.2 - 1.5.3] 2020-01-07
+
+### Added
+
+- Added `verbose` CLI flag (`-v, --verbose, verbose`) and verbose-only dummy credentials warning
+
 
 ### Changed
 
