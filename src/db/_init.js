@@ -1,4 +1,4 @@
-let readArc = require('@architect/utils/read-arc')
+let {readArc} = require('@architect/utils')
 let waterfall = require('run-waterfall')
 let getAttributeDefinitions = require('./create-table/_get-attribute-definitions')
 let getKeySchema = require('./create-table/_get-key-schema')

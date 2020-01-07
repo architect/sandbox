@@ -1,4 +1,4 @@
-let readArc = require('@architect/utils/read-arc')
+let {readArc} = require('@architect/utils')
 let exists = require('fs').existsSync
 let join = require('path').join
 let {parse} = require('url')
