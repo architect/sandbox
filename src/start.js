@@ -19,21 +19,28 @@ module.exports = function start(params={}, callback) {
   let update = updater('Sandbox')
   let arc
   let deprecated
+  let verbose
   /**
    * Set up default sandbox port
    * CLI args > env var > passed arg
    */
-  let findPort = option => option === '-p' || option === '--port' || option === 'port'
+  let findPort = option => ['-p', '--port', 'port'].includes(option)
   if (options && options.some(findPort)) {
-    if (options.indexOf('-p') >= 0)
-      process.env.PORT = options[options.indexOf('-p') + 1]
-    if (options.indexOf('--port') >= 0)
-      process.env.PORT = options[options.indexOf('--port') + 1]
-    if (options.indexOf('port') >= 0)
-      process.env.PORT = options[options.indexOf('port') + 1]
+    let thePort = i => options[options.indexOf(i) + 1] || 3333
+    if (options.includes('-p'))
+      process.env.PORT = thePort('-p')
+    else if (options.includes('--port'))
+      process.env.PORT = thePort('--port')
+    else if (options.includes('port'))
+      process.env.PORT = thePort('port')
   }
   process.env.PORT = process.env.PORT || port || 3333
   port = process.env.PORT
+
+  let findVerbose = option => ['-v', '--verbose', 'verbose'].includes(option)
+  if (options && options.some(findVerbose)) {
+    verbose = true
+  }
 
   // Set up promise if there is no callback
   let promise
@@ -265,7 +272,7 @@ module.exports = function start(params={}, callback) {
   function _done(err) {
     if (err) callback(err)
     else {
-      if (!quiet && process.env.ARC_AWS_CREDS === 'dummy') {
+      if (verbose && process.env.ARC_AWS_CREDS === 'dummy') {
         update.warn('Missing or invalid AWS credentials or credentials file, using dummy credentials (this is probably ok)')
       }
       function end() {
