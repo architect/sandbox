@@ -2,6 +2,14 @@
 
 ---
 
+## [1.5.4] 2020-01-08
+
+### Fixed
+
+- Fixed regression related to missing `aws-sdk` dependency errors
+
+---
+
 ## [1.5.2 - 1.5.3] 2020-01-07
 
 ### Added
