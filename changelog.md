@@ -2,7 +2,12 @@
 
 ---
 
-## [1.5.5] 2020-01-22
+## [1.5.5 - 1.5.6] 2020-01-22
+
+### Added
+
+- Added `ARC_WSS_URL` env var on startup (matches the environment variable behavior of Architect 6.0.25)
+
 
 ### Changed
 
