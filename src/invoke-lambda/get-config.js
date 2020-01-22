@@ -6,14 +6,14 @@ module.exports = function readConfigFor(cwd, callback) {
   let arcConfig = path.join(cwd, '.arc-config')
   fs.readFile(arcConfig, function done(err, data) {
     if (err) {
-      let runtime = 'nodejs10.x'
+      let runtime = 'nodejs12.x'
       let timeout = getTimeout()
       callback(null, {runtime, timeout})
     }
     else {
       let arc = parse(data.toString())
       let awsRuntime = arc.aws.find(tuple => tuple.includes('runtime'))
-      let runtime = awsRuntime? awsRuntime[1] : 'nodejs10.x'
+      let runtime = awsRuntime? awsRuntime[1] : 'nodejs12.x'
       let timeout = getTimeout(arc)
       callback(null, {runtime, timeout})
     }
