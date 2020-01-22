@@ -10,6 +10,7 @@ let runtimes = {
   'deno':       runInDeno,
   'nodejs12.x': runInNode,
   'nodejs10.x': runInNode,
+  // DEPRECATED by AWS Jan/Feb 2020; will retain Node 8 legacy support until mid 2020
   'nodejs8.10': runInNode,
   'python3.8':  runInPython,
   'python3.6':  runInPython,
