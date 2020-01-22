@@ -6,7 +6,7 @@
 
 ### Added
 
-- Added `ARC_WSS_URL` env var on startup (matches the environment variable behavior of Architect 6.0.25)
+- Added `ARC_WSS_URL` env var on startup (matches the environment variable behavior of Architect 6.0.25); fixed #225
 
 
 ### Changed
