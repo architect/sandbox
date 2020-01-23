@@ -108,7 +108,7 @@ module.exports = function start(params={}, callback) {
       // Declare a bucket for implicit proxy
       process.env.ARC_STATIC_BUCKET = 'sandbox'
       // Set default WebSocket URL
-      process.env.ARC_WSS_URL = 'ws://localhost'
+      process.env.ARC_WSS_URL = `ws://localhost:${port}`
     },
 
     /**

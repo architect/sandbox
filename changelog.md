@@ -2,6 +2,14 @@
 
 ---
 
+## [1.5.7] 2020-01-23
+
+### Fixed
+
+- Fixed local WebSocket port in `ARC_WSS_URL`
+
+---
+
 ## [1.5.5 - 1.5.6] 2020-01-22
 
 ### Added
