@@ -2,6 +2,19 @@
 
 ---
 
+## [1.5.8] 2020-01-29
+
+### Fixed
+
+- Fixed secondary index (`@indexes`) naming schema issue introduced with Architect 6; fixed #45, thanks @eshikerya & @konsumer
+
+
+### Changed
+
+- Updated dependencies
+
+---
+
 ## [1.5.7] 2020-01-23
 
 ### Fixed
