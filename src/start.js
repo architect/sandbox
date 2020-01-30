@@ -91,24 +91,30 @@ module.exports = function start(params={}, callback) {
      * Populate additional environment variables
      */
     function _env(callback) {
-      if (!process.env.NODE_ENV)
+      // Always set default to testing
+      if (!process.env.NODE_ENV) {
         process.env.NODE_ENV = 'testing'
-      // Set Arc 5 / 6+ env
+      }
+      // Set Arc 5 / 6+ Lambda config env
       if (version && version.startsWith('Architect 5')) {
         process.env.DEPRECATED = true
         deprecated = process.env.DEPRECATED
         process.env.ARC_HTTP = 'aws'
       }
-      else process.env.ARC_HTTP = 'aws_proxy'
-      // Read .arc-env
-      initEnv(callback)
+      else {
+        process.env.ARC_HTTP = 'aws_proxy'
+      }
       // Populate session table (if not present)
-      if (!process.env.SESSION_TABLE_NAME)
-        process.env.SESSION_TABLE_NAME = 'jwe' // Default
+      if (!process.env.SESSION_TABLE_NAME) {
+        process.env.SESSION_TABLE_NAME = 'jwe'
+      }
       // Declare a bucket for implicit proxy
       process.env.ARC_STATIC_BUCKET = 'sandbox'
       // Set default WebSocket URL
       process.env.ARC_WSS_URL = `ws://localhost:${port}`
+
+      // Read .arc-env
+      initEnv(callback)
     },
 
     /**
@@ -195,7 +201,7 @@ module.exports = function start(params={}, callback) {
       let ok = () => {
         let end = Date.now()
         console.log()
-        update.done(`Sandbox started in ${end - start}ms`)
+        update.done(`Started in ${end - start}ms`)
         if (!quiet) {
           let isWin = process.platform.startsWith('win')
           let ready = isWin
@@ -269,6 +275,21 @@ module.exports = function start(params={}, callback) {
         )
       }
       else callback()
+    },
+
+    /**
+     * Check aws-sdk installation status if installed globally
+     */
+    function _checkAWS_SDK(callback) {
+      let cwd = process.cwd()
+      let dir = __dirname
+      if (!dir.startsWith(cwd)) {
+        let awsDir = join(__dirname.split('@architect')[0], 'aws-sdk', 'package.json')
+        if (!exists(awsDir)) {
+          update.warn(`Possibly found a global install of Architect without a global install of AWS-SDK, please run: npm i -g aws-sdk`)
+        }
+      }
+      callback()
     }
   ],
   function _done(err) {
