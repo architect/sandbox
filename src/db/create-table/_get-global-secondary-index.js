@@ -7,16 +7,25 @@ module.exports = function _getGSI(name, indexes) {
       if (keys.length > 2 || keys.length < 1) {
         throw Error(`@indexes ${tableName} has wrong number of keys`)
       }
-      let hasOne = keys.length === 1
-      let hasTwo = keys.length === 2
-      let IndexName = hasOne? `${name}-${keys[0]}-index` : `${name}-${keys[0]}-${keys[1]}-index`
+      let hasOneKey = keys.length === 1
+      let hasTwoKeys = keys.length === 2
+
+      let deprecated = process.env.DEPRECATED
+      let singleKey = deprecated
+        ? `${name}-${keys[0]}-index` // Old school index naming
+        : `${keys[0]}-index` // New school index naming
+      let multiKey = deprecated
+        ? `${name}-${keys[0]}-${keys[1]}-index`
+        : `${keys[0]}-${keys[1]}-index`
+
+      let IndexName = hasOneKey ? singleKey : multiKey
       // always add the HASH key (partition)
       let KeySchema = [{
         AttributeName: keys[0],
         KeyType: 'HASH'
       }]
       // maybe add the RANGE key (sort)
-      if (hasTwo) {
+      if (hasTwoKeys) {
         KeySchema.push({
           AttributeName: keys[1],
           KeyType: 'RANGE'
