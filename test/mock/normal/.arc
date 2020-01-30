@@ -26,6 +26,16 @@ delete /delete
 accounts
   accountID *String
 
+pets
+  accountID *String
+
 @indexes
 accounts
   email *String
+
+pets
+  petID *String
+
+pets
+  accountID *String
+  petID **String
