@@ -3,23 +3,33 @@ let create = require('./_create-table')
 
 /**
  * @param params Object
- * @param params.table Object
  * @param params.app String
+ * @param params.dynamo Object
  * @param params.indexes Array
+ * @param params.table Object
  */
 module.exports = function createTable(params, callback) {
+  let {app, dynamo, indexes, table} = params
 
-  var name = Object.keys(params.table)[0]
-  var attr = params.table[name]
-  var staging = `${params.app}-staging-${name}`
-  var production = `${params.app}-production-${name}`
+  let name = Object.keys(table)[0]
+  let attr = table[name]
 
   parallel([
     function _createStaging(callback) {
-      create(staging, attr, params.indexes, callback)
+      create({
+        name: `${app}-staging-${name}`,
+        attr,
+        indexes,
+        dynamo
+      }, callback)
     },
     function _createProduction(callback) {
-      create(production, attr, params.indexes, callback)
+      create({
+        name: `${app}-production-${name}`,
+        attr,
+        indexes,
+        dynamo
+      }, callback)
     }
   ],
   function _done(err) {

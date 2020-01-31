@@ -1,22 +1,28 @@
 let path = require('path')
 let test = require('tape')
 let {db} = require('../../src')
-let client = require('../../src/db/_get-db-client')
+let getDBClient = require('../../src/db/_get-db-client')
 let server
+let dynamo
 
 test('db.start', t=> {
-  t.plan(2)
+  t.plan(3)
   t.ok(db, 'got db')
   // move the current process into the mock dir
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
   server = db.start(function() {
     t.ok(true, '@tables created in local database')
   })
+  getDBClient(function _gotDBClient(err, client) {
+    if (err) console.log(err) // Yes, but actually no
+    dynamo = client
+    t.ok(dynamo, 'Got Dynamo client')
+  })
 })
 
 test('can list tables', t=> {
   t.plan(1)
-  client.listTables({}, function done(err, result) {
+  dynamo.listTables({}, function done(err, result) {
     if (err) t.fail(err)
     else {
       t.ok(Array.isArray(result.TableNames), 'got tables')
@@ -30,7 +36,7 @@ let TableName2 = 'mockapp-production-pets'
 
 test('can insert a row', t=> {
   t.plan(1)
-  client.putItem({
+  dynamo.putItem({
     TableName,
     Item: {
       accountID: {S: 'mock-account-id'},
@@ -48,7 +54,7 @@ test('can insert a row', t=> {
 
 test('can read index in arc 6', t=> {
   t.plan(1)
-  client.describeTable({
+  dynamo.describeTable({
     TableName
   },
   function _desc(err, result) {
@@ -61,7 +67,7 @@ test('can read index in arc 6', t=> {
 
 test('can read index in arc 6', t=> {
   t.plan(3)
-  client.describeTable({
+  dynamo.describeTable({
     TableName: TableName2
   },
   function _desc(err, result) {
@@ -76,7 +82,7 @@ test('can read index in arc 6', t=> {
 
 test('can read the row', t=> {
   t.plan(1)
-  client.getItem({
+  dynamo.getItem({
     TableName,
     Key: {
       accountID: {S:'fake-account-id'}
@@ -93,7 +99,7 @@ test('can read the row', t=> {
 
 test('can query the index', t=> {
   t.plan(1)
-  client.query({
+  dynamo.query({
     TableName,
     IndexName: 'email-index',
     KeyConditions: {
@@ -133,7 +139,7 @@ test('db.start', t=> {
 
 test('can list tables', t=> {
   t.plan(1)
-  client.listTables({}, function done(err, result) {
+  dynamo.listTables({}, function done(err, result) {
     if (err) t.fail(err)
     else {
       t.ok(Array.isArray(result.TableNames), 'got tables')
@@ -144,7 +150,7 @@ test('can list tables', t=> {
 
 test('can insert a row', t=> {
   t.plan(1)
-  client.putItem({
+  dynamo.putItem({
     TableName,
     Item: {
       accountID: {S: 'mock-account-id'},
@@ -162,7 +168,7 @@ test('can insert a row', t=> {
 
 test('can read index in arc 5', t=> {
   t.plan(1)
-  client.describeTable({
+  dynamo.describeTable({
     TableName
   },
   function _desc(err, result) {
@@ -176,7 +182,7 @@ test('can read index in arc 5', t=> {
 
 test('can read index in arc 5', t=> {
   t.plan(3)
-  client.describeTable({
+  dynamo.describeTable({
     TableName: TableName2
   },
   function _desc(err, result) {
@@ -191,7 +197,7 @@ test('can read index in arc 5', t=> {
 
 test('can read the row', t=> {
   t.plan(1)
-  client.getItem({
+  dynamo.getItem({
     TableName,
     Key: {
       accountID: {S:'fake-account-id'}
@@ -208,7 +214,7 @@ test('can read the row', t=> {
 
 test('can query the index', t=> {
   t.plan(1)
-  client.query({
+  dynamo.query({
     TableName,
     IndexName: 'mockapp-production-accounts-email-index',
     KeyConditions: {
