@@ -11,6 +11,7 @@ module.exports = {start}
  */
 function start(callback) {
   let {arc} = readArc()
+  let quiet = process.env.ARC_QUIET
   function close (callback) {
     if (callback) callback()
   }
@@ -30,15 +31,21 @@ function start(callback) {
         } else {
           res.statusCode = 404
           res.end('not found')
-          console.log(chalk.red.dim('event bus 404 for URL ' + req.url))
+          if (!quiet) {
+            console.log(chalk.red.dim('event bus 404 for URL ' + req.url))
+          }
           return
         }
-        console.log(chalk.grey.dim('@' + message.arcType), chalk.green.dim(JSON.stringify(JSON.parse(body), null, 2)))
+        if (!quiet) {
+          console.log(chalk.grey.dim('@' + message.arcType), chalk.green.dim(JSON.stringify(JSON.parse(body), null, 2)))
+        }
         // spawn a fork of the node process
         let subprocess = fork(path.join(__dirname, '_subprocess.js'))
         subprocess.send(message)
         subprocess.on('message', function _message(msg) {
-          console.log(chalk.grey.dim(msg.text))
+          if (!quiet) {
+            console.log(chalk.grey.dim(msg.text))
+          }
         })
         res.statusCode = 200
         res.end('ok')

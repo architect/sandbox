@@ -12,6 +12,7 @@ module.exports = function registerWebSocket({app, server}) {
   let wss = new WebSocket.Server({noServer: true})
   let connections = []
   let connectionId // (Re)assigned upon each upgrade request
+  let quiet = process.env.ARC_QUIET
 
   // Build paths to default WS Lambdas
   // We're guaranteed that these routes will exist
@@ -30,7 +31,9 @@ module.exports = function registerWebSocket({app, server}) {
     connectionId = uuid()
     connections.push({id: connectionId})
 
-    console.log('\nClient attempting connection, invoking ws/connect')
+    if (!quiet) {
+      console.log('\nInvoking ws/connect WebSocket Lambda')
+    }
     invoke({
       action: $connect,
       connectionId,
@@ -70,7 +73,9 @@ module.exports = function registerWebSocket({app, server}) {
       let notFound = action === null || !fs.existsSync(cwd(action))
       if (notFound) {
         // invoke src/ws/default
-        console.log('\nWebSocket Lambda not found, invoking ws/default')
+        if (!quiet) {
+          console.log('\nInvoking ws/default WebSocket Lambda')
+        }
         invoke({
           action: $default,
           body: msg,
@@ -79,7 +84,9 @@ module.exports = function registerWebSocket({app, server}) {
       }
       else {
         // invoke src/ws/${action}
-        console.log(`\nWebSocket Lambda found, invoking ws/${action}`)
+        if (!quiet) {
+          console.log(`\nInvoking ws/${action} WebSocket Lambda`)
+        }
         invoke({
           action: cwd(action),
           body: msg,
@@ -90,7 +97,9 @@ module.exports = function registerWebSocket({app, server}) {
 
     ws.on('close', function close() {
       // invoke src/ws/disconnect
-      console.log(`\nWebSocket disconnecting, invoking ws/disconnect`)
+      if (!quiet) {
+        console.log(`\nInvoking ws/disconnect WebSocket Lambda`)
+      }
       invoke({
         action: $disconnect,
         connectionId,
@@ -107,7 +116,7 @@ module.exports = function registerWebSocket({app, server}) {
         client.ws.send(JSON.stringify(req.body.payload))
       }
       catch(e) {
-        console.log('failed to ws.send', e)
+        console.log('Failed to ws.send', e)
       }
       res.statusCode = 200
       res.end('\n')
