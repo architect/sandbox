@@ -2,6 +2,25 @@
 
 ---
 
+## [1.5.9] 2020-01-31
+
+### Added
+
+- tk
+
+
+### Changed
+
+- When called as module, `sandbox.end` now calls an optional callback or returns a promise
+- Sandbox now only starts the `@events` + `@queues` bus and `@tables` DB when called for by the Architect project manifest
+
+
+### Fixed
+
+- tk
+
+---
+
 ## [1.5.8] 2020-01-29
 
 ### Fixed
