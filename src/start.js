@@ -121,8 +121,7 @@ module.exports = function start(params={}, callback) {
      * Check to see if @static fingerprint is enabled, and maybe generate public/static.json
      */
     function _maybeWriteStaticManifest(callback) {
-      let {static} = arc
-      if (!static) {
+      if (!arc.static) {
         callback()
       }
       else {
@@ -174,24 +173,26 @@ module.exports = function start(params={}, callback) {
      * Start dynalite with tables enumerated in .arc (if any)
      */
     function _db(callback) {
-      client = db.start(function() {
-        if (arc.tables) {
+      if (arc.tables) {
+        client = db.start(function() {
           update.done('@tables created in local database')
-        }
-        callback()
-      })
+          callback()
+        })
+      }
+      else callback()
     },
 
     /**
      * Start event bus to listen for arc.event.publish events on 3334
      */
     function _events(callback) {
-      bus = events.start(function() {
-        if (arc.events || arc.queues) {
+      if (arc.events || arc.queues) {
+        bus = events.start(function() {
           update.done('@events and @queues ready on local event bus')
-        }
-        callback()
-      })
+          callback()
+        })
+      }
+      else callback()
     },
 
     /**
@@ -298,11 +299,34 @@ module.exports = function start(params={}, callback) {
       if (verbose && process.env.ARC_AWS_CREDS === 'dummy') {
         update.warn('Missing or invalid AWS credentials or credentials file, using dummy credentials (this is probably ok)')
       }
-      function end() {
-        client.close()
-        bus.close()
-        if (arc.http || arc.ws)
-          http.close()
+      function end(callback) {
+        // Set up promise if there is no callback
+        let promise
+        if (!callback) {
+          promise = new Promise(function(res, rej) {
+            callback = function(err, result) {
+              err ? rej(err) : res(result)
+            }
+          })
+        }
+        series([
+          function _client(callback) {
+            if (arc.tables) client.close(callback)
+            else callback()
+          },
+          function _bus(callback) {
+            if (arc.events || arc.queues) bus.close(callback)
+            else callback()
+          },
+          function _http(callback) {
+            if (arc.http || arc.ws) http.close(callback)
+            else callback()
+          }
+        ], function closed (err) {
+          if (err) callback(err)
+          else callback(null, 'Sandbox successfully shut down')
+        })
+        return promise
       }
       /**
        * Finally, pass a function to shut everything down if this is being used as a module

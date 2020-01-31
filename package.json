@@ -1,6 +1,6 @@
 {
   "name": "@architect/sandbox",
-  "version": "1.5.8",
+  "version": "1.5.9-RC.0",
   "description": "Architect dev server: run full Architect projects locally & offline",
   "main": "src/index.js",
   "scripts": {
@@ -21,7 +21,7 @@
     "sandbox": "./src/cli/cli.js"
   },
   "dependencies": {
-    "@architect/create": "^1.0.13",
+    "@architect/create": "^1.0.14",
     "@architect/http-proxy": "^3.4.7",
     "@architect/hydrate": "^1.4.15",
     "@architect/parser": "^1.2.2",
@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@architect/functions": "^3.5.0",
-    "codecov": "^3.6.2",
+    "codecov": "^3.6.3",
     "cross-env": "^7.0.0",
     "eslint": "^6.8.0",
     "nyc": "^15.0.0",

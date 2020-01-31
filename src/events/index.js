@@ -7,16 +7,15 @@ let chalk = require('chalk')
 module.exports = {start}
 
 /**
- * creates a little web server that listens for events on 3334
+ * Creates a little web server that listens for events on 3334
  */
 function start(callback) {
-
   let {arc} = readArc()
-  let close = x=> !x
+  function close (callback) {
+    if (callback) callback()
+  }
 
-  // if .arc has events and we're not clobbering with ARC_LOCAL flag
   if (arc.events || arc.queues) {
-    // start a little web server
     let server = http.createServer(function listener(req, res) {
       let body = ''
       req.on('data', chunk => {
@@ -45,21 +44,17 @@ function start(callback) {
         res.end('ok')
       })
     })
-    // ends our little web server
-    close = function _closer() {
-      try {
-        console.log('calling event server close')
-        server.close()
-      }
-      catch(e) {
-        console.log('swallowing server.close error in sandbox events', e)
+    // start listening on 3334
+    server.listen(3334, callback ? callback : x => !x)
+
+    return {
+      close: function (callback) {
+        server.close(callback)
       }
     }
-    // start listening on 3334
-    server.listen(3334, callback ? callback: x=>!x)
   }
   else {
     callback()
+    return {close}
   }
-  return {close}
 }

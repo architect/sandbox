@@ -36,7 +36,7 @@ Prints the specified `ver` on init, or falls back to the version string defined 
 
 Starts a singleton [local in-memory DynamoDB server](https://www.npmjs.com/package/dynalite), automatically creating any tables or indexes defined in the project manifest's [`@tables`][tables] pragma. Also creates a local session table.
 
-Returns an object with a `close()` method that gracefully shuts the server down.
+Returns an object with a `close([callback])` method that gracefully shuts the server down.
 
 Invokes `callback` once the DB is up and listening.
 
@@ -45,7 +45,7 @@ Invokes `callback` once the DB is up and listening.
 
 If Architect project manifest defines [`@queues`][queues] or [`@events`][events], sets up interprocess communication between your events and queues via a tiny web server.
 
-Returns an object with a `close()` method that gracefully shuts the server down.
+Returns an object with a `close([callback])` method that gracefully shuts the server down.
 
 Invokes `callback` once the server is up and listening.
 
@@ -57,7 +57,7 @@ If Architect project manifest defines defines [`@http`][http] or [`@websocket`][
 Invokes `callback` once the server is up and listening.
 
 
-### `sandbox.http.close()`
+### `sandbox.http.close([callback])`
 
 Closes any servers started via [`sandbox.http.start()`][start].
 
@@ -66,10 +66,11 @@ Closes any servers started via [`sandbox.http.start()`][start].
 
 Initializes the sandbox; first checks that ports are available to consume, prints a banner, loading basic environment variables and necessary AWS credentials, and sets up any local DBs via [`sandbox.db.start()`][db], events or queues via [`sandbox.events.start()`][events-start], HTTP handlers via [`sandbox.http.start()`][http-start].
 
-Invokes `callback` once everything is ready, passing `null` as the first parameter and `end` as the second parameter to `callback`, where `end` is a
-function that closes all servers down.
+Invokes `callback` once everything is ready, passing `null` as the first parameter and a function (which we'll just call `end`) as the second parameter.
 
-Returns a promise if `callback` is falsy.
+`end` accepts a callback; when invoked, it closes down all running servers.
+
+Both `sandbox.start` and `end` return a `promise` if `callback` is falsy.
 
 
 ## Example Usage

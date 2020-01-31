@@ -3,6 +3,7 @@ let Router = require('router')
 let body = require('body-parser')
 let finalhandler = require('finalhandler')
 let {readArc} = require('@architect/utils')
+let series = require('run-series')
 
 // built ins
 let http = require('http')
@@ -85,11 +86,20 @@ app.start = function start(callback) {
   return app
 }
 
-app.close = function close() {
-  if (server)
-    server.close()
-  if (websocket)
-    websocket.close()
+app.close = function close(callback) {
+  series([
+    function _server(callback) {
+      if (server) server.close(callback)
+      else callback()
+    },
+    function _websocket(callback) {
+      if (websocket) websocket.close(callback)
+      else callback()
+    },
+  ], function _closed(err) {
+    if (err) console.log(err)
+    if (callback) callback()
+  })
 }
 
 // export the app

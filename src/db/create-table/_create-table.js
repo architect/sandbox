@@ -1,17 +1,13 @@
-let list = errback=> dynamo.listTables({}, errback)
 let getAttributeDefinitions = require('./_get-attribute-definitions')
 let getKeySchema = require('./_get-key-schema')
 let clean = require('./_remove-ttl-and-lambda')
 let getGSI = require('./_get-global-secondary-index')
 let getAttributeDefinitionsWithGsi = require('./_get-attribute-definitions-with-gsi')
-let dynamo
 
-module.exports = function _createTable(name, attr, indexes, callback) {
-  // Don't load dynamo client with global requires, it may not yet have env vars loaded
-  // eslint-disable-next-line
-  dynamo = require('../_get-db-client')
-
+module.exports = function _createTable(params, callback) {
+  let {name, attr, indexes, dynamo} = params
   let keys = Object.keys(clean(attr))
+  let list = errback=> dynamo.listTables({}, errback)
 
   list(function _tables(err, result) {
     if (err) {
