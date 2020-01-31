@@ -11,15 +11,15 @@ let series = require('run-series')
 let create = require('@architect/create')
 let {banner, chars, fingerprint, initEnv,
      portInUse, readArc, updater} = require('@architect/utils')
-let quiet = process.env.QUIET
 
 module.exports = function start(params={}, callback) {
   let start = Date.now()
-  let {port, options, version} = params
+  let {port, options, version, quiet=false} = params
   let update = updater('Sandbox')
   let arc
   let deprecated
   let verbose
+
   /**
    * Set up default sandbox port
    * CLI args > env var > passed arg
@@ -37,6 +37,11 @@ module.exports = function start(params={}, callback) {
   process.env.PORT = process.env.PORT || port || 3333
   port = process.env.PORT
 
+  // Set up quietude
+  quiet = process.env.ARC_QUIET || process.env.QUIET || quiet
+  process.env.ARC_QUIET = quiet // For when sandbox is being run outside of @arc/arc
+
+  // Set up verbositude
   let findVerbose = option => ['-v', '--verbose', 'verbose'].includes(option)
   if (options && options.some(findVerbose)) {
     verbose = true
@@ -128,7 +133,7 @@ module.exports = function start(params={}, callback) {
         fingerprint({}, function next(err, result) {
           if (err) callback(err)
           else {
-            if (result) {
+            if (result && !quiet) {
               update.done('Static asset fingerpringing enabled, public/static.json generated')
             }
             callback()
@@ -175,7 +180,9 @@ module.exports = function start(params={}, callback) {
     function _db(callback) {
       if (arc.tables) {
         client = db.start(function() {
-          update.done('@tables created in local database')
+          if (!quiet) {
+            update.done('@tables created in local database')
+          }
           callback()
         })
       }
@@ -188,7 +195,9 @@ module.exports = function start(params={}, callback) {
     function _events(callback) {
       if (arc.events || arc.queues) {
         bus = events.start(function() {
-          update.done('@events and @queues ready on local event bus')
+          if (!quiet) {
+            update.done('@events and @queues ready on local event bus')
+          }
           callback()
         })
       }
@@ -201,9 +210,9 @@ module.exports = function start(params={}, callback) {
     function _http(callback) {
       let ok = () => {
         let end = Date.now()
-        console.log()
-        update.done(`Started in ${end - start}ms`)
         if (!quiet) {
+          console.log()
+          update.done(`Started in ${end - start}ms`)
           let isWin = process.platform.startsWith('win')
           let ready = isWin
             ? chars.done
@@ -219,8 +228,10 @@ module.exports = function start(params={}, callback) {
       if (arc5 || arc6) {
         http.start(function() {
           ok()
-          let link = chalk.green.bold.underline(`http://localhost:${port}\n`)
-          console.log(`\n    ${link}`)
+          if (!quiet) {
+            let link = chalk.green.bold.underline(`http://localhost:${port}\n`)
+            console.log(`\n    ${link}`)
+          }
           callback()
         })
       }
@@ -245,8 +256,10 @@ module.exports = function start(params={}, callback) {
       else if (exists(initRb))
         script = initRb
       if (script) {
+        if (!quiet) {
+          update.status('Running sandbox init script')
+        }
         let now = Date.now()
-        update.status('Running sandbox init script')
         let run
         let runtime
         if (script === initJS) {
@@ -266,11 +279,15 @@ module.exports = function start(params={}, callback) {
         Promise.resolve(run).then(
           function done(result) {
             if (result) {
-              update.done(`Init (${runtime}):`)
+              if (!quiet) {
+                update.done(`Init (${runtime}):`)
+              }
               let print = result.toString().trim().split('\n').map(l => `    ${l.trim()}`).join('\n')
               console.log(print)
             }
-            update.done(`Sandbox init script ran in ${Date.now() - now}ms`)
+            if (!quiet) {
+              update.done(`Sandbox init script ran in ${Date.now() - now}ms`)
+            }
             callback()
           }
         )
@@ -286,7 +303,7 @@ module.exports = function start(params={}, callback) {
       let dir = __dirname
       if (!dir.startsWith(cwd)) {
         let awsDir = join(__dirname.split('@architect')[0], 'aws-sdk', 'package.json')
-        if (!exists(awsDir)) {
+        if (!exists(awsDir) && !quiet) {
           update.warn(`Possibly found a global install of Architect without a global install of AWS-SDK, please run: npm i -g aws-sdk`)
         }
       }
@@ -296,7 +313,7 @@ module.exports = function start(params={}, callback) {
   function _done(err) {
     if (err) callback(err)
     else {
-      if (verbose && process.env.ARC_AWS_CREDS === 'dummy') {
+      if (verbose && process.env.ARC_AWS_CREDS === 'dummy' && !quiet) {
         update.warn('Missing or invalid AWS credentials or credentials file, using dummy credentials (this is probably ok)')
       }
       function end(callback) {

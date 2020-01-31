@@ -62,7 +62,7 @@ Invokes `callback` once the server is up and listening.
 Closes any servers started via [`sandbox.http.start()`][start].
 
 
-### `sandbox.start({port, options}, callback)`
+### `sandbox.start({port, options, quiet}, callback)`
 
 Initializes the sandbox; first checks that ports are available to consume, prints a banner, loading basic environment variables and necessary AWS credentials, and sets up any local DBs via [`sandbox.db.start()`][db], events or queues via [`sandbox.events.start()`][events-start], HTTP handlers via [`sandbox.http.start()`][http-start].
 

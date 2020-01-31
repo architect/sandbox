@@ -47,9 +47,11 @@ module.exports = function cli(params = {}, callback) {
     let update = updater('Sandbox')
     let deprecated = process.env.DEPRECATED
     let ts = () => {
-      let date = new Date(lastEvent).toLocaleDateString()
-      let time = new Date(lastEvent).toLocaleTimeString()
-      console.log(`\n[${date}, ${time}]`)
+      if (process.env.ARC_QUIET) {
+        let date = new Date(lastEvent).toLocaleDateString()
+        let time = new Date(lastEvent).toLocaleTimeString()
+        console.log(`\n[${date}, ${time}]`)
+      }
     }
 
     /**

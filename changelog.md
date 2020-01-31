@@ -4,10 +4,23 @@
 
 ## [1.5.9] 2020-01-31
 
+### Added
+
+- Better support for quiet mode:
+  - Via params: `sandbox.start({quiet: true})`
+  - Via env vars: `ARC_QUIET` (or legacy `QUIET`)
+  - Fixes #621; thanks @konsumer!
+
+
 ### Changed
 
 - When called as module, `sandbox.end` now calls an optional callback or returns a promise; fixes #622, thanks @konsumer!
 - Sandbox now only starts the `@events` + `@queues` bus and `@tables` DB when called for by the Architect project manifest
+
+
+### Fixed
+
+- Improved logging for WebSocket invocations to be less confusing about potential non-error states when message action not found; fixes @sandbox#228
 
 ---
 
