@@ -325,7 +325,7 @@ module.exports = function start(params={}, callback) {
           }
         ], function closed (err) {
           if (err) callback(err)
-          else callback(null, 'Sandbox successfully closed')
+          else callback(null, 'Sandbox successfully shut down')
         })
         return promise
       }
