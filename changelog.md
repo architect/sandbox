@@ -2,7 +2,7 @@
 
 ---
 
-## [1.5.9] 2020-01-31
+## [1.6.0] 2020-01-31
 
 ### Added
 
@@ -10,6 +10,7 @@
   - Via params: `sandbox.start({quiet: true})`
   - Via env vars: `ARC_QUIET` (or legacy `QUIET`)
   - Fixes #621; thanks @konsumer!
+- Adds discrete `sandbox.end([callback])` method for shutting down the Sandbox in test environments
 
 
 ### Changed

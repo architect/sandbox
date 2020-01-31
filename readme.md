@@ -66,12 +66,16 @@ Closes any servers started via [`sandbox.http.start()`][start].
 
 Initializes the sandbox; first checks that ports are available to consume, prints a banner, loading basic environment variables and necessary AWS credentials, and sets up any local DBs via [`sandbox.db.start()`][db], events or queues via [`sandbox.events.start()`][events-start], HTTP handlers via [`sandbox.http.start()`][http-start].
 
-Invokes `callback` once everything is ready, passing `null` as the first parameter and a function (which we'll just call `end`) as the second parameter.
+Invokes `callback` once everything is ready, passing `null` as the first parameter and `sandbox.end` as the second parameter.
 
-`end` accepts a callback; when invoked, it closes down all running servers.
+Return a `promise` if `callback` is falsy.
 
-Both `sandbox.start` and `end` return a `promise` if `callback` is falsy.
 
+### `sandbox.end([callback])`
+
+Shuts down the sandbox, closing down all running servers and services. Returns a `promise` if `callback` is falsy.
+
+---
 
 ## Example Usage
 
