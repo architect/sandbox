@@ -2,12 +2,13 @@ let cli = require('./cli')
 let db = require('./db')
 let events = require('./events')
 let http = require('./http')
-let start = require('./start')
+let sandbox = require('./sandbox')
 
 module.exports = {
   cli,
   db,
   events,
   http,
-  start
+  start: sandbox.start,
+  end: sandbox.end
 }
