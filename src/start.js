@@ -121,8 +121,7 @@ module.exports = function start(params={}, callback) {
      * Check to see if @static fingerprint is enabled, and maybe generate public/static.json
      */
     function _maybeWriteStaticManifest(callback) {
-      let {static} = arc
-      if (!static) {
+      if (!arc.static) {
         callback()
       }
       else {
