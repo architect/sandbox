@@ -12,7 +12,7 @@ module.exports = {start}
 function start(callback) {
   let {arc} = readArc()
   function close (callback) {
-    callback()
+    if (callback) callback()
   }
 
   if (arc.events || arc.queues) {

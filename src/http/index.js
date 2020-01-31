@@ -96,7 +96,10 @@ app.close = function close(callback) {
       if (websocket) websocket.close(callback)
       else callback()
     },
-  ], callback)
+  ], function _closed(err) {
+    if (err) console.log(err)
+    if (callback) callback()
+  })
 }
 
 // export the app
