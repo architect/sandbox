@@ -211,10 +211,10 @@ function start(params, callback) {
      */
     function _http(callback) {
       let ok = () => {
-        let end = Date.now()
+        let finish = Date.now()
         if (!quiet) {
           console.log()
-          update.done(`Started in ${end - start}ms`)
+          update.done(`Started in ${finish - start}ms`)
           let isWin = process.platform.startsWith('win')
           let ready = isWin
             ? chars.done
