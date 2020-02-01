@@ -43,7 +43,7 @@ function start(params, callback) {
 
   // Set up quietude
   quiet = process.env.ARC_QUIET || process.env.QUIET || quiet
-  process.env.ARC_QUIET = quiet // For when sandbox is being run outside of @arc/arc
+  process.env.ARC_QUIET = quiet || '' // For when sandbox is being run outside of @arc/arc
 
   // Set up verbositude
   let findVerbose = option => ['-v', '--verbose', 'verbose'].includes(option)
