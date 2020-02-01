@@ -15,7 +15,8 @@ let {banner, chars, fingerprint, initEnv,
 let client
 let bus
 
-function start(params={}, callback) {
+function start(params, callback) {
+  params = params || {}
   let start = Date.now()
   let {port, options, version, quiet=false} = params
   let update = updater('Sandbox')
@@ -356,6 +357,7 @@ function end(callback) {
     if (err) callback(err)
     else callback(null, 'Sandbox successfully shut down')
   })
+
   return promise
 }
 
