@@ -12,7 +12,11 @@ let create = require('@architect/create')
 let {banner, chars, fingerprint, initEnv,
      portInUse, readArc, updater} = require('@architect/utils')
 
-module.exports = function start(params={}, callback) {
+let client
+let bus
+
+function start(params, callback) {
+  params = params || {}
   let start = Date.now()
   let {port, options, version, quiet=false} = params
   let update = updater('Sandbox')
@@ -39,7 +43,7 @@ module.exports = function start(params={}, callback) {
 
   // Set up quietude
   quiet = process.env.ARC_QUIET || process.env.QUIET || quiet
-  process.env.ARC_QUIET = quiet // For when sandbox is being run outside of @arc/arc
+  process.env.ARC_QUIET = quiet || '' // For when sandbox is being run outside of @arc/arc
 
   // Set up verbositude
   let findVerbose = option => ['-v', '--verbose', 'verbose'].includes(option)
@@ -57,8 +61,6 @@ module.exports = function start(params={}, callback) {
     })
   }
 
-  let client
-  let bus
   series([
     /**
      * Make sure we have access to the desired port
@@ -209,10 +211,10 @@ module.exports = function start(params={}, callback) {
      */
     function _http(callback) {
       let ok = () => {
-        let end = Date.now()
+        let finish = Date.now()
         if (!quiet) {
           console.log()
-          update.done(`Started in ${end - start}ms`)
+          update.done(`Started in ${finish - start}ms`)
           let isWin = process.platform.startsWith('win')
           let ready = isWin
             ? chars.done
@@ -316,35 +318,6 @@ module.exports = function start(params={}, callback) {
       if (verbose && process.env.ARC_AWS_CREDS === 'dummy' && !quiet) {
         update.warn('Missing or invalid AWS credentials or credentials file, using dummy credentials (this is probably ok)')
       }
-      function end(callback) {
-        // Set up promise if there is no callback
-        let promise
-        if (!callback) {
-          promise = new Promise(function(res, rej) {
-            callback = function(err, result) {
-              err ? rej(err) : res(result)
-            }
-          })
-        }
-        series([
-          function _client(callback) {
-            if (arc.tables) client.close(callback)
-            else callback()
-          },
-          function _bus(callback) {
-            if (arc.events || arc.queues) bus.close(callback)
-            else callback()
-          },
-          function _http(callback) {
-            if (arc.http || arc.ws) http.close(callback)
-            else callback()
-          }
-        ], function closed (err) {
-          if (err) callback(err)
-          else callback(null, 'Sandbox successfully shut down')
-        })
-        return promise
-      }
       /**
        * Finally, pass a function to shut everything down if this is being used as a module
        */
@@ -354,3 +327,38 @@ module.exports = function start(params={}, callback) {
 
   return promise
 }
+
+function end(callback) {
+  // Set up promise if there is no callback
+  let promise
+  if (!callback) {
+    promise = new Promise(function(res, rej) {
+      callback = function(err, result) {
+        err ? rej(err) : res(result)
+      }
+    })
+  }
+  // Read .arc again in case the state changed during the course of usage
+  let arc = readArc().arc
+  series([
+    function _client(callback) {
+      if (arc.tables) client.close(callback)
+      else callback()
+    },
+    function _bus(callback) {
+      if (arc.events || arc.queues) bus.close(callback)
+      else callback()
+    },
+    function _http(callback) {
+      if (arc.http || arc.ws) http.close(callback)
+      else callback()
+    }
+  ], function closed (err) {
+    if (err) callback(err)
+    else callback(null, 'Sandbox successfully shut down')
+  })
+
+  return promise
+}
+
+module.exports = {start, end}
