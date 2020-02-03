@@ -2,7 +2,7 @@
 
 ---
 
-## [1.6.0] 2020-01-31
+## [1.6.0] 2020-02-02
 
 ### Added
 
@@ -11,6 +11,9 @@
   - Via env vars: `ARC_QUIET` (or legacy `QUIET`)
   - Fixes #621; thanks @konsumer!
 - Adds discrete `sandbox.end([callback])` method for shutting down the Sandbox in test environments
+  - This method takes an optional callback or returns a promise
+- Sandbox now sets the `ARC_CLOUDFORMATION` env var used by Architect Functions and other libs
+  - This only occurs when running Sandbox against live infra (specifically: `NODE_ENV` = `staging` || `production`),
 
 
 ### Changed
@@ -22,6 +25,7 @@
 ### Fixed
 
 - Improved logging for WebSocket invocations to be less confusing about potential non-error states when message action not found; fixes @sandbox#228
+- Fixed potential destructuring bug in `sandbox.start`
 
 ---
 

@@ -10,7 +10,7 @@ let maybeHydrate = require('./http/maybe-hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
 let {banner, chars, fingerprint, initEnv,
-     portInUse, readArc, updater} = require('@architect/utils')
+     portInUse, readArc, toLogicalID, updater} = require('@architect/utils')
 
 let client
 let bus
@@ -18,7 +18,7 @@ let bus
 function start(params, callback) {
   params = params || {}
   let start = Date.now()
-  let {port, options, version, quiet=false} = params
+  let {port=3333, options, version, quiet=false} = params
   let update = updater('Sandbox')
   let arc
   let deprecated
@@ -30,7 +30,7 @@ function start(params, callback) {
    */
   let findPort = option => ['-p', '--port', 'port'].includes(option)
   if (options && options.some(findPort)) {
-    let thePort = i => options[options.indexOf(i) + 1] || 3333
+    let thePort = i => options[options.indexOf(i) + 1] || port
     if (options.includes('-p'))
       process.env.PORT = thePort('-p')
     else if (options.includes('--port'))
@@ -38,7 +38,7 @@ function start(params, callback) {
     else if (options.includes('port'))
       process.env.PORT = thePort('port')
   }
-  process.env.PORT = process.env.PORT || port || 3333
+  process.env.PORT = process.env.PORT || port
   port = process.env.PORT
 
   // Set up quietude
@@ -99,17 +99,22 @@ function start(params, callback) {
      */
     function _env(callback) {
       // Always set default to testing
-      if (!process.env.NODE_ENV) {
+      let NODE_ENV = process.env.NODE_ENV
+      if (!NODE_ENV) {
         process.env.NODE_ENV = 'testing'
       }
       // Set Arc 5 / 6+ Lambda config env
       if (version && version.startsWith('Architect 5')) {
-        process.env.DEPRECATED = true
-        deprecated = process.env.DEPRECATED
+        deprecated = process.env.DEPRECATED = true
         process.env.ARC_HTTP = 'aws'
       }
       else {
         process.env.ARC_HTTP = 'aws_proxy'
+        if (NODE_ENV === 'staging' ||
+            NODE_ENV === 'production') {
+          let capEnv = NODE_ENV.charAt(0).toUpperCase() + NODE_ENV.substr(1)
+          process.env.ARC_CLOUDFORMATION = `${toLogicalID(arc.app[0])}${capEnv}`
+        }
       }
       // Populate session table (if not present)
       if (!process.env.SESSION_TABLE_NAME) {
