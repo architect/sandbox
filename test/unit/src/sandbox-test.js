@@ -8,13 +8,22 @@ test('Set up env', t => {
   t.ok(sandbox, 'Found sandbox')
   t.ok(sandbox.start, 'Found sandbox.start')
   t.ok(sandbox.end, 'Found sandbox.end')
-})
-
-test('sandbox returns a Promise or uses continuation passing', async t => {
-  t.plan(8)
   process.env.ARC_QUIET = true
   process.chdir(join(__dirname, '..', '..', 'mock', 'no-functions'))
+})
 
+// Port tests
+// ---
+// start: default (3333 + 3334 + 5000)
+// - confirm all open
+// end: confirm all closed
+// ---
+// start: 6666 + 6667 + 6668
+// - confirm all open
+// end: confirm all closed
+
+test('sandbox returns a Promise', async t => {
+  t.plan(8)
   try {
     let end = await sandbox.start()
     t.pass('sandbox.start returned Promise (without params)')

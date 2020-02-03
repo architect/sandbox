@@ -5,6 +5,7 @@ let getDBClient = require('../../src/db/_get-db-client')
 let server
 let dynamo
 
+/* Regular test suite */
 test('db.start', t=> {
   t.plan(3)
   t.ok(db, 'got db')
@@ -124,7 +125,7 @@ test('db.close', t=> {
   t.ok(true, 'db closed')
 })
 
-/* test deprecated */
+/* DEPRECATED mode */
 test('db.start', t=> {
   t.plan(2)
   t.ok(db, 'got db')

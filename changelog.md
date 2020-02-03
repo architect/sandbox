@@ -2,6 +2,18 @@
 
 ---
 
+## [On branch]
+
+### Added
+
+- Added support for running multiple Sandboxes at the same time
+  - No more conflicting events and ports when running multiple simultaneous local Architect projects
+  - Note: while unlikely, if you already manually specify your Sandbox's port, this may be a breaking change in two circumstances:
+    - 1) You use Architect Functions; to fix, upgrade to Functions **`___TBD___`** or later
+    - 2) You hardcode an `@events` client to port `3334` or DynamoDB client to port `5000`; you should now change them to be dynamic, assigned to `PORT` + 1 and `PORT` + 2, respectively (e.g. `arc sandbox --port 4444` will now use ports `4444`, `4445`, and `4446`)
+
+---
+
 ## [1.6.0] 2020-02-02
 
 ### Added

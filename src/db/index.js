@@ -16,7 +16,8 @@ function start(callback) {
   }
 
   if (arc.tables) {
-    check(function _check(err, inUse) {
+    let port = process.env.ARC_TABLES_PORT || 5000
+    check(port, function _check(err, inUse) {
       if (err) throw err
       if (inUse) {
         server = {close}
@@ -25,7 +26,7 @@ function start(callback) {
       else {
         server = dynalite({
           createTableMs: 0
-        }).listen(5000, function _server(err) {
+        }).listen(port, function _server(err) {
           if (err) {
             // if we err then the db has been started elsewhere..
             // just try to continue

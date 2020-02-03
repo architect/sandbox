@@ -1,7 +1,6 @@
-var net = require('net')
-module.exports = function checkPort(fn) {
-  var port = 5000
-  var tester = net.createServer()
+let net = require('net')
+module.exports = function checkPort(port, fn) {
+  let tester = net.createServer()
   .once('error', function (err) {
     if (err.code != 'EADDRINUSE') return fn(err)
     fn(null, true)

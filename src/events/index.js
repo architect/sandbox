@@ -7,7 +7,7 @@ let chalk = require('chalk')
 module.exports = {start}
 
 /**
- * Creates a little web server that listens for events on 3334
+ * Creates a little web server that listens for events
  */
 function start(callback) {
   let {arc} = readArc()
@@ -52,7 +52,8 @@ function start(callback) {
       })
     })
     // start listening on 3334
-    server.listen(3334, callback ? callback : x => !x)
+    let port = process.env.ARC_EVENTS_PORT || 3334
+    server.listen(port, callback ? callback : x => !x)
 
     return {
       close: function (callback) {

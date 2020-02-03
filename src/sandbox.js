@@ -25,7 +25,7 @@ function start(params, callback) {
   let verbose
 
   /**
-   * Set up default sandbox port
+   * Set up Sandbox ports
    * CLI args > env var > passed arg
    */
   let findPort = option => ['-p', '--port', 'port'].includes(option)
@@ -38,8 +38,23 @@ function start(params, callback) {
     else if (options.includes('port'))
       process.env.PORT = thePort('port')
   }
-  process.env.PORT = process.env.PORT || port
-  port = process.env.PORT
+  port = process.env.PORT = Number(process.env.PORT) || port
+
+  // Validate
+  let notNum = e => e && isNaN(e)
+  if (notNum(process.env.ARC_EVENTS_PORT) ||
+      notNum(process.env.ARC_TABLES_PORT) ||
+      notNum(port)) {
+        throw ReferenceError('Ports must be numbers')
+  }
+
+  // Set non-conflicting ports for running multiple simultaneous Architect projects
+  if (port !== 3333 && !process.env.ARC_EVENTS_PORT) {
+    process.env.ARC_EVENTS_PORT = port + 1
+  }
+  if (port !== 3333 && !process.env.ARC_TABLES_PORT) {
+    process.env.ARC_TABLES_PORT = port + 2
+  }
 
   // Set up quietude
   quiet = process.env.ARC_QUIET || process.env.QUIET || quiet
@@ -63,7 +78,7 @@ function start(params, callback) {
 
   series([
     /**
-     * Make sure we have access to the desired port
+     * Make sure we have access to the desired HTTP port
      */
     function _checkPort(callback) {
       portInUse(port, callback)
@@ -103,6 +118,7 @@ function start(params, callback) {
       if (!NODE_ENV) {
         process.env.NODE_ENV = 'testing'
       }
+
       // Set Arc 5 / 6+ Lambda config env
       if (version && version.startsWith('Architect 5')) {
         deprecated = process.env.DEPRECATED = true
@@ -116,12 +132,15 @@ function start(params, callback) {
           process.env.ARC_CLOUDFORMATION = `${toLogicalID(arc.app[0])}${capEnv}`
         }
       }
+
       // Populate session table (if not present)
       if (!process.env.SESSION_TABLE_NAME) {
         process.env.SESSION_TABLE_NAME = 'jwe'
       }
+
       // Declare a bucket for implicit proxy
       process.env.ARC_STATIC_BUCKET = 'sandbox'
+
       // Set default WebSocket URL
       process.env.ARC_WSS_URL = `ws://localhost:${port}`
 
@@ -197,7 +216,7 @@ function start(params, callback) {
     },
 
     /**
-     * Start event bus to listen for arc.event.publish events on 3334
+     * Start event bus to listen for arc.event.publish events
      */
     function _events(callback) {
       if (arc.events || arc.queues) {
