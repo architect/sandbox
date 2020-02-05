@@ -6,7 +6,7 @@
 
 ### Added
 
-- Added support for running multiple Sandboxes at the same time
+- Added support for running multiple Sandboxes at the same time; fixes #635
   - No more conflicting events and ports when running multiple simultaneous local Architect projects
   - Also, you can now manually configure your `@events` port with `ARC_EVENTS_PORT`, and `@tables` port with `ARC_TABLES_PORT`
   - Note: while unlikely, if you already manually specify your Sandbox's port, this may be a breaking change to your local workflow in two circumstances:
