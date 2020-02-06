@@ -17,23 +17,9 @@ test('Set up env', t => {
   t.ok(sandbox.end, 'Found sandbox.end')
 })
 
-test('sandbox returns a Promise or uses continuation passing', async t => {
+test('sandbox returns a Promise', async t => {
   t.plan(10)
   process.chdir(join(__dirname, '..', '..', 'mock', 'no-functions'))
-})
-
-// Port tests
-// ---
-// start: default (3333 + 3334 + 5000)
-// - confirm all open
-// end: confirm all closed
-// ---
-// start: 6666 + 6667 + 6668
-// - confirm all open
-// end: confirm all closed
-
-test('sandbox returns a Promise', async t => {
-  t.plan(8)
   try {
     let end = await sandbox.start()
     t.pass('sandbox.start returned Promise (without params)')
@@ -123,7 +109,7 @@ let envVars = [
   'PORT',
   'SESSION_TABLE_NAME'
 ]
-// TODO: test for: ARC_SANDBOX_PATH_TO_STATIC
+// TODO: tests for: ARC_SANDBOX_PATH_TO_STATIC, ARC_EVENTS_PORT, ARC_TABLES_PORT
 
 function cleanEnv(t) {
   envVars.forEach(v => delete process.env[v])
