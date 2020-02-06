@@ -21,12 +21,12 @@
     "sandbox": "./src/cli/cli.js"
   },
   "dependencies": {
-    "@architect/create": "^1.0.14",
+    "@architect/create": "^1.0.15",
     "@architect/http-proxy": "^3.4.7",
-    "@architect/hydrate": "^1.4.15",
-    "@architect/parser": "^1.2.2",
+    "@architect/hydrate": "^1.4.17",
+    "@architect/parser": "1.2.2",
     "@architect/utils": "^1.4.7",
-    "aws-sdk": "^2.610.0",
+    "aws-sdk": "^2.612.0",
     "body-parser": "^1.19.0",
     "chalk": "^3.0.0",
     "depstatus": "^1.0.0",
@@ -45,8 +45,8 @@
     "ws": "^7.2.1"
   },
   "devDependencies": {
-    "@architect/functions": "^3.5.0",
-    "codecov": "^3.6.3",
+    "@architect/functions": "^3.5.1",
+    "codecov": "^3.6.4",
     "cross-env": "^7.0.0",
     "eslint": "^6.8.0",
     "nyc": "^15.0.0",
