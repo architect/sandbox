@@ -2,6 +2,14 @@
 
 ---
 
+## [1.6.1] 2020-02-05
+
+### Fixed
+
+- Fixed AWS credential instantiation to ensure that missing `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` env vars are backfilled with dummy values in scenarios where valid credentials are not required
+
+---
+
 ## [1.6.0] 2020-02-02
 
 ### Added
