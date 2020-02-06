@@ -64,22 +64,19 @@ test('Sandbox uses continuation passing', t => {
   t.plan(7)
 
   // FYI: setTimeouts mostly jic to advance ticks and maybe give the sandbox time to start up / shut down between invocations
-  let end
   setTimeout(() => {
     sandbox.start({}, (err, fn) => {
       if (err) t.fail(err)
       t.pass('sandbox.start executed callback (null params)')
-      end = fn
+      let end = fn
       let isFunction = end instanceof Function
       t.ok(isFunction, 'sandbox.start returned sandbox.end')
-    })
-  }, 50)
-  setTimeout(() => {
-    end(() => {
-      t.pass('Function returned by sandbox.start executed callback')
-      tiny.get({url}, err => {
-        if (err) shutdown(t, err)
-        else t.fail('Sandbox did not shut down')
+      end(() => {
+        t.pass('Function returned by sandbox.start executed callback')
+        tiny.get({url}, err => {
+          if (err) shutdown(t, err)
+          else t.fail('Sandbox did not shut down')
+        })
       })
     })
   }, 50)
