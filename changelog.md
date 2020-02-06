@@ -2,7 +2,7 @@
 
 ---
 
-## [On branch]
+## [1.7.0]
 
 ### Added
 
@@ -13,6 +13,14 @@
     - 1) You use Architect Functions; to fix, upgrade to Functions `3.6` or later
     - 2) You hardcode an `@events` client to port `3334` or DynamoDB client to port `5000`; you should now read the ports from `ARC_EVENTS_PORT` and `ARC_TABLES_PORT`
     - This change is **NOT breaking to any live AWS / production infra**
+
+---
+
+## [1.6.1] 2020-02-05
+
+### Fixed
+
+- Fixed AWS credential instantiation to ensure that missing `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` env vars are backfilled with dummy values in scenarios where valid credentials are not required
 
 ---
 
