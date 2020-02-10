@@ -64,11 +64,6 @@ module.exports = function cli(params={}, callback) {
      */
     watcher.on('change', function (event, fileName) {
 
-      // Ignore version control changes
-      let git = path.join(process.cwd(), '.git')
-      let hg = path.join(process.cwd(), '.hg')
-      if (fileName.startsWith(git) || fileName.startsWith(hg)) return
-
       // Event criteria
       let fileUpdate = event === 'update'
       let updateOrRemove = event === 'update' || event === 'remove'
