@@ -2,7 +2,15 @@
 
 ---
 
-## [1.7.0]
+## [On branch]
+
+### Fixed
+
+- Fixed issue where pulling changes down with git (or Mercurial) would not trigger filesystem changes; fixes #673
+
+---
+
+## [1.7.0] 2020-02-05
 
 ### Added
 
