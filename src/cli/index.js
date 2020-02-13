@@ -14,7 +14,7 @@ let pathToUnix = function (string) {
   return string.replace(/\\/g, "/");
 }
 
-module.exports = function cli(params = {}, callback) {
+module.exports = function cli(params={}, callback) {
   // Calling the CLI as a module from a parent package causes some strange require race behavior against relative paths, so we have to call them at execution time
   // eslint-disable-next-line
   let http = require('../http')
@@ -23,31 +23,36 @@ module.exports = function cli(params = {}, callback) {
 
   if (!params.version) params.version = ver
   sandbox.start(params, function watching(err, close) {
-    if (err && err.message === 'hydration_error') {
-      // Hydration errors already reported, no need to log
-      if (close) close()
-      if (callback) callback(err)
-      else process.exit(1)
-    }
     if (err) {
-      console.log(err)
+      // Hydration errors already reported, no need to log
+      if (err.message !== 'hydration_error') console.log(err)
       if (close) close()
       if (callback) callback(err)
       else process.exit(1)
     }
-    if (callback) callback(null, close)
-    let watcher = watch(process.cwd(), { recursive: true })
+    else if (callback) callback(null, close)
 
+    // Setup
+    let update = updater('Sandbox')
+    let deprecated = process.env.DEPRECATED
+    let watcher = watch(process.cwd(), {recursive: true})
     let workingDirectory = pathToUnix(process.cwd())
     let separator = path.posix.sep
 
+    // Arc stuff
     let {arc} = utils.readArc()
     let arcFile = new RegExp(`${workingDirectory}${separator}(\\.arc|app\\.arc|arc\\.yaml|arc\\.json)`)
-    let lastEvent = Date.now()
-    let update = updater('Sandbox')
-    let deprecated = process.env.DEPRECATED
+    let folderSetting = tuple => tuple[0] === 'folder'
+    let staticFolder = arc.static && arc.static.some(folderSetting) ? arc.static.find(folderSetting)[1] : 'public'
+
+    // Timers
+    let lastEvent
+    let arcEventTimer
+    let rehydrateSharedTimer
+    let rehydrateViewsTimer
+    let fingerprintTimer
     let ts = () => {
-      if (process.env.ARC_QUIET) {
+      if (!process.env.ARC_QUIET) {
         let date = new Date(lastEvent).toLocaleDateString()
         let time = new Date(lastEvent).toLocaleTimeString()
         console.log(`\n[${date}, ${time}]`)
@@ -62,13 +67,10 @@ module.exports = function cli(params = {}, callback) {
       // Event criteria
       let fileUpdate = event === 'update'
       let updateOrRemove = event === 'update' || event === 'remove'
-      let ready = (Date.now() - lastEvent) >= 500
-
       fileName = pathToUnix(fileName)
 
       let rehydrate = ({only, msg}) => {
         let start = Date.now()
-        ts()
         update.status(msg)
         hydrate.shared({only}, () => {
           let end = Date.now()
@@ -79,91 +81,104 @@ module.exports = function cli(params = {}, callback) {
       /**
        * Reload routes upon changes to Architect project manifest
        */
-      if (fileUpdate && fileName.match(arcFile) && ready) {
-        // TODO add arc pragma diffing, reload tables, events, etc.
-        let {arc} = utils.readArc()
+      if (fileUpdate && fileName.match(arcFile)) {
+        clearTimeout(arcEventTimer)
+        arcEventTimer = setTimeout(() => {
+          // TODO add arc pragma diffing, reload tables, events, etc.
+          let {arc} = utils.readArc()
 
-        // Always attempt to close the http server, but only reload if necessary
-        http.close()
+          // Always attempt to close the http server, but only reload if necessary
+          http.close()
 
-        // Arc 5 only starts if it's got actual routes to load
-        let arc5 = deprecated && arc.http && arc.http.length
-        // Arc 6 may start with proxy at root, or empty `@http` pragma
-        let arc6 = !deprecated && arc.static || arc.http
-        if (arc5 || arc6) {
-          let quiet = process.env.QUIET
-          process.env.QUIET = true
-          let start = Date.now()
-          ts()
-          update.status('Architect project manifest changed, loading HTTP routes...')
-          http.start(function () {
-            let end = Date.now()
-            process.env.QUIET = quiet
-            update.done(`HTTP routes reloaded in ${end - start}ms`)
-            maybeHydrate(function (err) {
-              if (err) {
-                update.error(`Error hydrating new functions:`, err)
-              }
-              else {
-                update.done(`Functions are ready to go!`)
-                if (deprecated) {
-                  let only = 'arcFile'
-                  let msg = 'Rehydrating functions with new project manifest'
-                  rehydrate({only, msg})
+          // Arc 5 only starts if it's got actual routes to load
+          let arc5 = deprecated && arc.http && arc.http.length
+          // Arc 6 may start with proxy at root, or empty `@http` pragma
+          let arc6 = !deprecated && arc.static || arc.http
+          if (arc5 || arc6) {
+            ts()
+            let quiet = process.env.ARC_QUIET
+            process.env.ARC_QUIET = true
+            let start = Date.now()
+            update.status('Architect project manifest changed, loading HTTP routes...')
+            http.start(function () {
+              let end = Date.now()
+              if (!quiet) delete process.env.ARC_QUIET
+              update.done(`HTTP routes reloaded in ${end - start}ms`)
+              maybeHydrate(function (err) {
+                if (err) {
+                  update.error(`Error hydrating new functions:`, err)
                 }
-              }
+                else {
+                  update.done(`Functions are ready to go!`)
+                  if (deprecated) {
+                    let only = 'arcFile'
+                    let msg = 'Rehydrating functions with new project manifest'
+                    rehydrate({only, msg})
+                  }
+                }
+              })
             })
-          })
-        }
-        else {
-          ts()
-          update.status('Architect project manifest changed')
-        }
+          }
+          else {
+            ts()
+            update.status('Architect project manifest changed')
+          }
+        }, 50)
       }
 
       /**
        * Rehydrate functions with shared files upon changes to src/shared
        */
       let isShared = fileName.includes(`${workingDirectory}/src/shared`)
-      if (updateOrRemove && ready && isShared) {
-        let only = 'shared'
-        let msg = 'Shared file changed, rehydrating functions...'
-        rehydrate({only, msg})
+      if (updateOrRemove && isShared) {
+        clearTimeout(rehydrateSharedTimer)
+        rehydrateSharedTimer = setTimeout(() => {
+          ts()
+          let only = 'shared'
+          let msg = 'Shared file changed, rehydrating functions...'
+          rehydrate({only, msg})
+        }, 50)
       }
 
       /**
        * Rehydrate functions with shared files upon changes to src/views
        */
       let isViews = fileName.includes(`${workingDirectory}/src/views`)
-      if (updateOrRemove && ready && isViews) {
-        let only = 'views'
-        let msg = 'Views file changed, rehydrating views...'
-        rehydrate({only, msg})
+      if (updateOrRemove && isViews) {
+        clearTimeout(rehydrateViewsTimer)
+        rehydrateViewsTimer = setTimeout(() => {
+          ts()
+          let only = 'views'
+          let msg = 'Views file changed, rehydrating views...'
+          rehydrate({only, msg})
+        }, 50)
       }
 
       /**
        * Regenerate public/static.json upon changes to public/
        */
-      let folderSetting = tuple => tuple[0] === 'folder'
-      let staticFolder = arc.static && arc.static.some(folderSetting) ? arc.static.find(folderSetting)[1] : 'public'
-      if (updateOrRemove && arc.static && ready &&
+      if (updateOrRemove && arc.static &&
           fileName.includes(`${workingDirectory}/${staticFolder}`) &&
           !fileName.includes(`${workingDirectory}/${staticFolder}/static.json`)) {
-        let start = Date.now()
-        fingerprint({}, function next(err, result) {
-          if (err) update.error(err)
-          else {
-            if (result) {
-              let end = Date.now()
-              let only = 'staticJson'
-              let msg = `Regenerated public/static.json in ${end - start}ms`
-              rehydrate({only, msg})
+        clearTimeout(fingerprintTimer)
+        fingerprintTimer = setTimeout(() => {
+          ts()
+          let start = Date.now()
+          fingerprint({}, function next(err, result) {
+            if (err) update.error(err)
+            else {
+              if (result) {
+                let end = Date.now()
+                let only = 'staticJson'
+                let msg = `Regenerated public/static.json in ${end - start}ms`
+                rehydrate({only, msg})
+              }
             }
-          }
-        })
+          })
+        }, 50)
       }
-      lastEvent = Date.now()
 
+      lastEvent = Date.now()
     })
 
     /**

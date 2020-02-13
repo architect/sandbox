@@ -5,6 +5,9 @@ let update = require('update-notifier')
 let ver = pkg.version
 let options = process.argv
 
+/**
+ * Entry for actual CLI
+ */
 update({pkg, shouldNotifyInNpmScript: true})
   .notify({boxenOpts: {
     padding: 1,
