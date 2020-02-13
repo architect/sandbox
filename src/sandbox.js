@@ -113,9 +113,14 @@ function start(params, callback) {
      * Populate additional environment variables
      */
     function _env(callback) {
-      // Always set default to testing
-      let NODE_ENV = process.env.NODE_ENV
-      if (!NODE_ENV) {
+      /**
+       * Ensure env is one of: 'testing', 'staging', or 'production'
+       * - By default, set (or override) to 'testing'
+       * - Some test harnesses (ahem) will automatically populate NODE_ENV with their own values, unbidden
+       */
+      let env = process.env.NODE_ENV
+      let isNotStagingOrProd = env !== 'staging' && env !== 'production'
+      if (!env || isNotStagingOrProd) {
         process.env.NODE_ENV = 'testing'
       }
 
@@ -126,9 +131,9 @@ function start(params, callback) {
       }
       else {
         process.env.ARC_HTTP = 'aws_proxy'
-        if (NODE_ENV === 'staging' ||
-            NODE_ENV === 'production') {
-          let capEnv = NODE_ENV.charAt(0).toUpperCase() + NODE_ENV.substr(1)
+        if (env === 'staging' ||
+            env === 'production') {
+          let capEnv = env.charAt(0).toUpperCase() + env.substr(1)
           process.env.ARC_CLOUDFORMATION = `${toLogicalID(arc.app[0])}${capEnv}`
         }
       }
