@@ -2,11 +2,16 @@
 
 ---
 
-## [On branch]
+## [1.7.1] 2020-02-13
+
+### Changed
+- Sandbox now ensures `NODE_ENV` is one of `testing`, `staging`, or `production` (defaulting to `testing`)
+
 
 ### Fixed
 
 - Fixed issue where pulling changes down with git (or Mercurial) would not trigger filesystem changes; fixes #673
+- Improves reliability of using Sandbox with certain test harnesses that may automatically set `NODE_ENV`
 
 ---
 
