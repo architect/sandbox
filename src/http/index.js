@@ -72,6 +72,11 @@ app.start = function start(callback) {
         return
       }
     }
+
+    if (module.exports.middleware) {
+      app.use(module.exports.middleware)
+    }
+
     app(req, res, finalhandler(req, res))
   })
 
