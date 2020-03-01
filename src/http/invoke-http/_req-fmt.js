@@ -1,13 +1,16 @@
 let URL = require('url')
+let headerFormatter = require('./_header-fmt')
 
 /**
  * Arc 6+ request formatter
  * - Mocks request object shape from API Gateway / Lambda proxy integration
  */
 module.exports = function requestFormatter ({verb, route, req}) {
-  let {body, headers, params, url} = req
+  let {body, params, url} = req
   let path = URL.parse(url).pathname
   let query = URL.parse(url, true).query
+
+  let {headers, multiValueHeaders} = headerFormatter(req.headers)
 
   // API Gateway sends a null literal instead of an empty object because reasons
   let nullify = i => Object.getOwnPropertyNames(i).length ? i : null
@@ -28,6 +31,7 @@ module.exports = function requestFormatter ({verb, route, req}) {
     resource,
     body: nullify(body),
     headers,
+    multiValueHeaders,
     pathParameters: nullify(params),
     queryStringParameters: nullify(query),
   }
