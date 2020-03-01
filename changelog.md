@@ -2,6 +2,20 @@
 
 ---
 
+## [1.7.2] 2020-02-29
+
+### Added
+
+- Added mocking of AWS's `multiValueHeaders` into `req`
+- Also added mocking of the headers AWS drops from requests
+
+
+### Fixed
+
+- Fixes differences between AWS's inconsistent header casing and our existing lowcase-normalized header casing; fixes #698
+
+---
+
 ## [1.7.1] 2020-02-13
 
 ### Changed
