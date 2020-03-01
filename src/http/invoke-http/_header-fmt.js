@@ -1,14 +1,14 @@
 /**
- * AWS drops and sometimes mangles HTTP headers
+ * AWS sometimes drops or mangles HTTP headers
  * - See: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-known-issues.html
- *   - TODO: write a script against this page I guess
+ *   - TODO: write a script to scrape this page every once in a while I guess
  */
 module.exports = function headerFormatter(reqHeaders={}) {
   let headers = {}
   let multiValueHeaders = {}
 
   /**
-   * Manglings: for whatever reason Authorization, Host, User-Agent, & Date are force-Pascal-cased
+   * Manglings: for whatever reason Authorization, Host, User-Agent, & Date are force-Pascal-kebab-cased
    * No, this isn't documented.
    */
   Object.keys(reqHeaders).forEach(header => {
@@ -29,7 +29,7 @@ module.exports = function headerFormatter(reqHeaders={}) {
   })
 
   /**
-   * Drops: sometimes AWS drops headers
+   * Drops: sometimes AWS drops headers because reasons
    */
   Object.keys(reqHeaders).forEach(header => {
     let h = header.toLowerCase()
