@@ -7,7 +7,7 @@
 ### Added
 
 - Added mocking of AWS's `multiValueHeaders` into `req`
-- Also added ocking of the headers AWS drops from requests
+- Also added mocking of the headers AWS drops from requests
 
 
 ### Fixed
