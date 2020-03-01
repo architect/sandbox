@@ -12,7 +12,7 @@
 
 ### Fixed
 
-- Fixes differences between AWS's inconsistent header casing and our existing lowcase-normalized header casing
+- Fixes differences between AWS's inconsistent header casing and our existing lowcase-normalized header casing; fixes #698
 
 ---
 
