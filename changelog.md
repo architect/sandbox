@@ -2,6 +2,14 @@
 
 ---
 
+## [1.7.3] 2020-03-17
+
+### Fixed
+
+- Query string arrays like `ids=1&ids=2&ids=3&ids=4` are stored in the request `multiValueQueryStringParameters` property. Previously, the Array-like value was being stored in `request.query` which was inconsistent with API Gateway. This fix makes sandbox behave more like a "real" Lambda with regards to request properties.
+
+---
+
 ## [1.7.2] 2020-02-29
 
 ### Added
