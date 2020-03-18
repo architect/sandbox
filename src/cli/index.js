@@ -1,12 +1,11 @@
-let fingerprint = require('@architect/utils').fingerprint
 let hydrate = require('@architect/hydrate')
 let maybeHydrate = require('../http/maybe-hydrate')
 let path = require('path')
 let pkgVer = require('../../package.json').version
 let ver = `Sandbox ${pkgVer}`
-let utils = require('@architect/utils')
 let watch = require('node-watch')
-let updater = utils.updater
+let { fingerprint, updater } = require('@architect/utils')
+let readArc = require('../sandbox/read-arc')
 
 // Just use Unix seperators on Windows - path.posix.normalize(process.cwd()) doesn't do what we want
 // So we normalise to slash file names (C:/foo/bar) for regex tests, etc.
@@ -40,7 +39,7 @@ module.exports = function cli(params={}, callback) {
     let separator = path.posix.sep
 
     // Arc stuff
-    let {arc} = utils.readArc()
+    let {arc} = readArc()
     let arcFile = new RegExp(`${workingDirectory}${separator}(\\.arc|app\\.arc|arc\\.yaml|arc\\.json)`)
     let folderSetting = tuple => tuple[0] === 'folder'
     let staticFolder = arc.static && arc.static.some(folderSetting) ? arc.static.find(folderSetting)[1] : 'public'
@@ -85,7 +84,7 @@ module.exports = function cli(params={}, callback) {
         clearTimeout(arcEventTimer)
         arcEventTimer = setTimeout(() => {
           // TODO add arc pragma diffing, reload tables, events, etc.
-          let {arc} = utils.readArc()
+          let {arc} = readArc()
 
           // Always attempt to close the http server, but only reload if necessary
           http.close()

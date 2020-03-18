@@ -2,7 +2,7 @@
 let Router = require('router')
 let body = require('body-parser')
 let finalhandler = require('finalhandler')
-let {readArc} = require('@architect/utils')
+let readArc = require('../sandbox/read-arc')
 let series = require('run-series')
 
 // built ins

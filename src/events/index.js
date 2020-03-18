@@ -1,4 +1,4 @@
-let {readArc} = require('@architect/utils')
+let readArc = require('../sandbox/read-arc')
 let fork = require('child_process').fork
 let path = require('path')
 let http = require('http')

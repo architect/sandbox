@@ -1,4 +1,4 @@
-let {readArc} = require('@architect/utils')
+let readArc = require('../sandbox/read-arc')
 let exists = require('fs').existsSync
 let join = require('path').join
 let {parse} = require('url')
@@ -13,7 +13,7 @@ module.exports = function _public(req, res, next) {
   // immediately exit to normal flow if /
   if (req.path === '/') next()
   else {
-    let arc = readArc().arc
+    let { arc } = readArc()
     let deprecated = process.env.DEPRECATED
     // reads all routes
     let routes = arc.http || []
@@ -22,7 +22,7 @@ module.exports = function _public(req, res, next) {
     // tokenize them [['get', '/']]
     let tokens = routes.map(r=> [r[0]].concat(r[1].split('/').filter(Boolean)))
     // tokenize the current req
-    let {pathname} = parse(req.url)
+    let { pathname } = parse(req.url)
     let current = [req.method.toLowerCase()].concat(pathname.split('/').filter(Boolean))
     // get all exact match routes
     let exact = tokens.filter(t=> !t.some(v=> v.startsWith(':')))
