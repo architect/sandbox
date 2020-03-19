@@ -8,7 +8,19 @@ let headerFormatter = require('./_header-fmt')
 module.exports = function requestFormatter ({verb, route, req}) {
   let {body, params, url} = req
   let path = URL.parse(url).pathname
-  let query = URL.parse(url, true).query
+  let query = {}
+  let multiValueQueryStringParameters = {}
+  let queryData = URL.parse(url, true).query
+  // API Gateway places Array-type query strings into its own property 
+  // located at req.multiValueQueryStringParameters. 
+  // This mimicks that behavior.
+  Object.keys(queryData).map(k => {
+    if (Array.isArray(queryData[k])) {
+      multiValueQueryStringParameters[k] = queryData[k]
+      query[k] = queryData[queryData[k].length - 1]
+    }
+    query[k] = queryData[k]
+  })
 
   let {headers, multiValueHeaders} = headerFormatter(req.headers)
 
@@ -34,6 +46,7 @@ module.exports = function requestFormatter ({verb, route, req}) {
     multiValueHeaders,
     pathParameters: nullify(params),
     queryStringParameters: nullify(query),
+    multiValueQueryStringParameters: nullify(multiValueQueryStringParameters),
   }
 
   // Base64 encoding status set by binary handler middleware
