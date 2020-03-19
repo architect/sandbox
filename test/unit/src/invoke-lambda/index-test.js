@@ -2,6 +2,7 @@ let path = require('path')
 let proxyquire = require('proxyquire')
 let sinon = require('sinon')
 let test = require('tape')
+let cwd = process.cwd()
 
 // let spy = sinon.spy()
 let nodeFake = sinon.fake((opts, to, callback) => callback(opts, to))
@@ -82,4 +83,10 @@ test('Verify call counts', t => {
   t.equals(nodeFake.callCount, 4, 'Node called correct number of times')
   t.equals(pythonFake.callCount, 3, 'Python called correct number of times')
   t.equals(rubyFake.callCount, 1, 'Ruby called correct number of times')
+})
+
+test('Teardown', t => {
+  t.plan(1)
+  process.chdir(cwd)
+  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
 })

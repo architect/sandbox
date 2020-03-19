@@ -1,4 +1,4 @@
-let {readArc} = require('@architect/utils')
+let readArc = require('../sandbox/read-arc')
 let check = require('./_check-port')
 let dynalite = require('dynalite')
 let init = require('./_init')

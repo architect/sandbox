@@ -4,6 +4,9 @@ let {db} = require('../../src')
 let getDBClient = require('../../src/db/_get-db-client')
 let server
 let dynamo
+let TableName = 'mockapp-production-accounts'
+let TableName2 = 'mockapp-production-pets'
+let cwd = process.cwd()
 
 /* Regular test suite */
 test('db.start', t=> {
@@ -32,8 +35,22 @@ test('can list tables', t=> {
   })
 })
 
-let TableName = 'mockapp-production-accounts'
-let TableName2 = 'mockapp-production-pets'
+test('default tables present', t => {
+  t.plan(3)
+  let defaultTables = [
+    'arc-sessions',
+    'mockapp-production-arc-sessions',
+    'mockapp-staging-arc-sessions',
+  ]
+  dynamo.listTables({}, function done(err, result) {
+    if (err) t.fail(err)
+    else {
+      for (let table of defaultTables) {
+        t.ok(result.TableNames.includes(table), `found ${table}`)
+      }
+    }
+  })
+})
 
 test('can insert a row', t=> {
   t.plan(1)
@@ -127,7 +144,7 @@ test('db.close', t=> {
 
 /* DEPRECATED mode */
 test('db.start', t=> {
-  t.plan(2)
+  t.plan(3)
   t.ok(db, 'got db')
   // move the current process into the mock dir
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
@@ -135,6 +152,11 @@ test('db.start', t=> {
   server = db.start(function() {
     t.ok(true, '@tables created in local database')
     console.log(process.env.DEPRECATED)
+  })
+  getDBClient(function _gotDBClient(err, client) {
+    if (err) console.log(err) // Yes, but actually no
+    dynamo = client
+    t.ok(dynamo, 'Got Dynamo client')
   })
 })
 
@@ -145,6 +167,23 @@ test('can list tables', t=> {
     else {
       t.ok(Array.isArray(result.TableNames), 'got tables')
       console.log(result)
+    }
+  })
+})
+
+test('default tables present', t => {
+  t.plan(3)
+  let defaultTables = [
+    'arc-sessions',
+    'mockapp-production-arc-sessions',
+    'mockapp-staging-arc-sessions',
+  ]
+  dynamo.listTables({}, function done(err, result) {
+    if (err) t.fail(err)
+    else {
+      for (let table of defaultTables) {
+        t.ok(result.TableNames.includes(table), `found ${table}`)
+      }
     }
   })
 })
@@ -235,8 +274,10 @@ test('can query the index', t=> {
 })
 
 test('db.close', t=> {
-  t.plan(1)
+  t.plan(2)
   delete process.env.DEPRECATED
   server.close()
   t.ok(true, 'db closed')
+  process.chdir(cwd)
+  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
 })

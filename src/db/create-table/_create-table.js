@@ -5,7 +5,7 @@ let getGSI = require('./_get-global-secondary-index')
 let getAttributeDefinitionsWithGsi = require('./_get-attribute-definitions-with-gsi')
 
 module.exports = function _createTable(params, callback) {
-  let {name, attr, indexes, dynamo} = params
+  let { name, attr, indexes, dynamo } = params
   let keys = Object.keys(clean(attr))
   let list = errback=> dynamo.listTables({}, errback)
 

@@ -2,6 +2,7 @@ let arc = require('@architect/functions')
 let test = require('tape')
 let path = require('path')
 let {events} = require('../../src')
+let cwd = process.cwd()
 
 let client
 test('events.start', t=> {
@@ -50,9 +51,13 @@ test('arc.queues.publish', t=> {
 })
 
 test('events.close', t=> {
-  t.plan(1)
-  setTimeout(function wait() {
-    client.close()
-    t.ok(true, '@events closed')
+  t.plan(2)
+  setTimeout(() => {
+    client.close(function closed(err) {
+      if (err) t.fail(err)
+      else t.ok(true, '@events closed')
+    })
   }, 1000)
+  process.chdir(cwd)
+  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
 })

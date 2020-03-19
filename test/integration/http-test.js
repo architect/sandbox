@@ -4,8 +4,14 @@ let test = require('tape')
 let sandbox = require('../../src')
 let {http} = require('../../src')
 
+let cwd = process.cwd()
 let b64dec = i => Buffer.from(i, 'base64').toString()
 let url = 'http://localhost:6666'
+
+// Verify sandbox shut down
+let shutdown = (t, err) => {
+  t.equal(err.code, 'ECONNREFUSED', 'Sandbox succssfully shut down')
+}
 
 let client
 test('env', t=> {
@@ -229,8 +235,12 @@ test('delete /delete', t=> {
 
 test('http.close', t=> {
   t.plan(1)
-  client.close()
-  t.pass('http connection closed')
+  client.close(() => {
+    tiny.get({url}, err => {
+      if (err) shutdown(t, err)
+      else t.fail('Sandbox did not shut down')
+    })
+  })
 })
 
 /**
@@ -266,8 +276,12 @@ test('get / without defining get / should fail if index.html not present', t=> {
 
 test('shut down sandbox', t=> {
   t.plan(1)
-  end()
-  t.pass('sandbox shut down')
+  end(() => {
+    tiny.get({url}, err => {
+      if (err) shutdown(t, err)
+      else t.fail('Sandbox did not shut down')
+    })
+  })
 })
 
 /**
@@ -301,8 +315,12 @@ test('get / without defining get / should succeed if index.html is present', t=>
 
 test('shut down sandbox', t=> {
   t.plan(1)
-  end()
-  t.pass('sandbox shut down')
+  end(() => {
+    tiny.get({url}, err => {
+      if (err) shutdown(t, err)
+      else t.fail('Sandbox did not shut down')
+    })
+  })
 })
 
 /**
@@ -456,7 +474,15 @@ test('delete /delete', t=> {
 })
 
 test('shut down sandbox', t=> {
-  t.plan(1)
-  end()
-  t.pass('sandbox shut down')
+  t.plan(3)
+  end(() => {
+    tiny.get({url}, err => {
+      if (err) shutdown(t, err)
+      else t.fail('Sandbox did not shut down')
+    })
+  })
+  delete process.env.DEPRECATED
+  t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+  process.chdir(cwd)
+  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
 })

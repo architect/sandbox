@@ -2,15 +2,16 @@ let chalk = require('chalk')
 let exec = require('child_process').execSync
 let exists = require('fs').existsSync
 let join = require('path').join
-let db = require('./db')
-let events = require('./events')
-let http = require('./http')
+let db = require('../db')
+let events = require('../events')
+let http = require('../http')
 let hydrate = require('@architect/hydrate')
-let maybeHydrate = require('./http/maybe-hydrate')
+let maybeHydrate = require('../http/maybe-hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
 let {banner, chars, fingerprint, initEnv,
-     portInUse, readArc, toLogicalID, updater} = require('@architect/utils')
+     portInUse, toLogicalID, updater} = require('@architect/utils')
+let readArc = require('./read-arc')
 
 let client
 let bus
@@ -21,6 +22,7 @@ function start(params, callback) {
   let {port=3333, options, version, quiet=false} = params
   let update = updater('Sandbox')
   let arc
+  let isDefaultProject
   let deprecated
   let verbose
 
@@ -85,27 +87,26 @@ function start(params, callback) {
     },
 
     /**
-     * Ensure there's an Architect project manifest present
-     */
-    function _checkArc(callback) {
-      try {
-        arc = readArc().arc
-        callback()
-      }
-      catch(e) {
-        let msg = chalk.white(chalk.red.bold('Sandbox error!'), e.message)
-        callback(msg)
-      }
-    },
-
-    /**
      * Print the banner (which also loads some boostrap env vars)
      */
     function _printBanner(callback) {
       banner(params)
-      if (!quiet) {
-        update.done('Found Architect manifest, starting up')
+      callback()
+    },
+
+    /**
+     * Read the current Architect project (or use a default project)
+     */
+    function _checkArc(callback) {
+      let check = readArc()
+      arc = check.arc
+      if (!quiet && !check.filepath) {
+        update.warn('No Architect project manifest found, using default project')
       }
+      else {
+        update.done('Found Architect project manifest, starting up')
+      }
+      isDefaultProject = check.isDefaultProject ? true : false
       callback()
     },
 
@@ -157,7 +158,7 @@ function start(params, callback) {
      * Check to see if @static fingerprint is enabled, and maybe generate public/static.json
      */
     function _maybeWriteStaticManifest(callback) {
-      if (!arc.static) {
+      if (!arc.static || isDefaultProject) {
         callback()
       }
       else {
@@ -368,7 +369,7 @@ function end(callback) {
     })
   }
   // Read .arc again in case the state changed during the course of usage
-  let arc = readArc().arc
+  let {arc} = readArc()
   series([
     function _client(callback) {
       if (arc.tables) client.close(callback)
