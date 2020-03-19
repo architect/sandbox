@@ -6,6 +6,7 @@ let server
 let dynamo
 let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
+let cwd = process.cwd()
 
 /* Regular test suite */
 test('db.start', t=> {
@@ -273,8 +274,10 @@ test('can query the index', t=> {
 })
 
 test('db.close', t=> {
-  t.plan(1)
+  t.plan(2)
   delete process.env.DEPRECATED
   server.close()
   t.ok(true, 'db closed')
+  process.chdir(cwd)
+  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
 })

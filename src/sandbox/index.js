@@ -369,7 +369,7 @@ function end(callback) {
     })
   }
   // Read .arc again in case the state changed during the course of usage
-  let arc = readArc().arc
+  let {arc} = readArc()
   series([
     function _client(callback) {
       if (arc.tables) client.close(callback)
