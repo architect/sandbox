@@ -11,16 +11,19 @@ module.exports = function requestFormatter ({verb, route, req}) {
   let query = {}
   let multiValueQueryStringParameters = {}
   let queryData = URL.parse(url, true).query
-  // API Gateway places Array-type query strings into its own property 
-  // located at req.multiValueQueryStringParameters. 
+  // API Gateway places Array-type query strings into its own property
+  // located at req.multiValueQueryStringParameters.
   // This mimicks that behavior.
-  Object.keys(queryData).map(k => {
-    if (Array.isArray(queryData[k])) {
-      multiValueQueryStringParameters[k] = queryData[k]
-      query[k] = queryData[queryData[k].length - 1]
+  for (let param of Object.keys(queryData)) {
+    if (Array.isArray(queryData[param])) {
+      query[param] = queryData[param][queryData[param].length - 1]
+      multiValueQueryStringParameters[param] = queryData[param]
     }
-    query[k] = queryData[k]
-  })
+    else {
+      query[param] = queryData[param]
+      multiValueQueryStringParameters[param] = [queryData[param]]
+    }
+  }
 
   let {headers, multiValueHeaders} = headerFormatter(req.headers)
 
