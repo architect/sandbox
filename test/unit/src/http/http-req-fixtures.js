@@ -28,6 +28,17 @@ let arc6 = {
     queryStringParameters: {whats:'up'}
   },
 
+  // get /?whats=up&whats=there
+  getWithQueryStringDuplicateKey: {
+    body: null,
+    path: '/',
+    headers,
+    httpMethod: 'GET',
+    pathParameters: null,
+    queryStringParameters: { whats: 'there' },
+    multiValueQueryStringParameters: { whats: [ 'up', 'there' ] }
+  },
+
   // get /nature/hiking
   getWithParam: {
     body: null,
@@ -47,7 +58,7 @@ let arc6 = {
     headers,
     httpMethod: 'GET',
     pathParameters: {proxy: '/nature/hiking'},
-    queryStringParameters: {}
+    queryStringParameters: null
   },
 
   // post /form (JSON)

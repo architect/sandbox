@@ -21,13 +21,45 @@ let response = {
   setHeader: sinon.fake.returns(),
   end: sinon.fake.returns()
 }
+
 let teardown = () => {
   lambdaStub.reset() // mostly jic
   delete process.env.DEPRECATED
 }
 
+/**
+ * Checks AWS's funky multiValueHeaders + multiValueQueryStringParameters
+ */
+function checkMultiValueHeaders (mock, req, t) {
+  // Fixtures always have headers
+  for (let header of Object.keys(mock.headers)) {
+    if (mock.headers[header] !== req.multiValueHeaders[header][0])
+      t.fail(`Could not find ${header} in multiValueHeaders`)
+  }
+  t.pass('multiValueHeaders checked out')
+}
+function checkMultiValueQueryStringParameters (mock, req, t) {
+  if (mock.queryStringParameters === req.multiValueQueryStringParameters) {
+    t.pass('multiValueQueryStringParameters checked out')
+  }
+  if (mock.queryStringParameters === null &&
+      req.multiValueQueryStringParameters !== null) {
+    t.fail(`multiValueQueryStringParameters is not null`)
+  }
+  else if (mock.queryStringParameters !== null) {
+    if (str(mock.queryStringParameters) !== str(req.queryStringParameters))
+      t.fail(`queryStringParameters is not the same`)
+    for (let param of Object.keys(mock.queryStringParameters)) {
+      if (mock.queryStringParameters[param] !==
+          req.multiValueQueryStringParameters[param][req.multiValueQueryStringParameters[param].length - 1])
+        t.fail(`Could not find '${param}' key in multiValueQueryStringParameters`)
+    }
+    t.pass('multiValueQueryStringParameters checked out')
+  }
+}
+
 test('Architect v6: get /', t => {
-  t.plan(6)
+  t.plan(8)
   let request = reqs.arc6.getIndex
   let verb = 'GET'
   let route = '/'
@@ -46,12 +78,14 @@ test('Architect v6: get /', t => {
   t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  checkMultiValueHeaders(request, req, t)
+  checkMultiValueQueryStringParameters(request, req, t)
   teardown()
 })
 
 test('Architect v6: get /?whats=up', t => {
-  t.plan(6)
+  t.plan(8)
   let request = reqs.arc6.getWithQueryString
   let verb = 'GET'
   let route = '/'
@@ -69,12 +103,39 @@ test('Architect v6: get /?whats=up', t => {
   t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  checkMultiValueHeaders(request, req, t)
+  checkMultiValueQueryStringParameters(request, req, t)
+  teardown()
+})
+
+test('Architect v6: get /?whats=up&whats=there', t => {
+  t.plan(8)
+  let request = reqs.arc6.getWithQueryStringDuplicateKey
+  let verb = 'GET'
+  let route = '/'
+  let handler = invoke({verb, route})
+  let input = {
+    url: url('?whats=up&whats=there'),
+    body: {},
+    headers,
+    params: {}
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  t.equal(str(request.body), str(req.body), match('req.body', req.body))
+  t.equal(str(request.path), str(req.path), match('req.path', req.path))
+  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
+  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
+  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  checkMultiValueHeaders(request, req, t)
+  checkMultiValueQueryStringParameters(request, req, t)
   teardown()
 })
 
 test('Architect v6: get /nature/hiking', t => {
-  t.plan(7)
+  t.plan(9)
   let request = reqs.arc6.getWithParam
   let verb = 'GET'
   let route = '/nature/:activities'
@@ -93,12 +154,14 @@ test('Architect v6: get /nature/hiking', t => {
   t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  checkMultiValueHeaders(request, req, t)
+  checkMultiValueQueryStringParameters(request, req, t)
   teardown()
 })
 
 test('Architect v6: get /{proxy+}', t => {
-  t.plan(7)
+  t.plan(9)
   let request = reqs.arc6.getProxyPlus
   let verb = 'GET'
   let route = '/'
@@ -118,12 +181,14 @@ test('Architect v6: get /{proxy+}', t => {
   t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  checkMultiValueHeaders(request, req, t)
+  checkMultiValueQueryStringParameters(request, req, t)
   teardown()
 })
 
 test('Architect v6: post /form (JSON)', t => {
-  t.plan(7)
+  t.plan(9)
   let request = reqs.arc6.postJson
   let verb = 'POST'
   let route = '/form'
@@ -142,14 +207,16 @@ test('Architect v6: post /form (JSON)', t => {
   t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
   lambdaStub.reset()
+  checkMultiValueHeaders(request, req, t)
+  checkMultiValueQueryStringParameters(request, req, t)
   t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
   teardown()
 })
 
 test('Architect v6: post /form (form URL encoded)', t => {
-  t.plan(7)
+  t.plan(9)
   let request = reqs.arc6.postFormURL
   let verb = 'POST'
   let route = '/form'
@@ -168,13 +235,15 @@ test('Architect v6: post /form (form URL encoded)', t => {
   t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  checkMultiValueHeaders(request, req, t)
+  checkMultiValueQueryStringParameters(request, req, t)
   t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
   teardown()
 })
 
 test('Architect v6: post /form (multipart form data)', t => {
-  t.plan(7)
+  t.plan(9)
   let request = reqs.arc6.postMultiPartFormData
   let verb = 'POST'
   let route = '/form'
@@ -193,13 +262,15 @@ test('Architect v6: post /form (multipart form data)', t => {
   t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  checkMultiValueHeaders(request, req, t)
+  checkMultiValueQueryStringParameters(request, req, t)
   t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
   teardown()
 })
 
 test('Architect v6: post /form (octet stream)', t => {
-  t.plan(7)
+  t.plan(9)
   let request = reqs.arc6.postOctetStream
   let verb = 'POST'
   let route = '/form'
@@ -218,13 +289,15 @@ test('Architect v6: post /form (octet stream)', t => {
   t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  checkMultiValueHeaders(request, req, t)
+  checkMultiValueQueryStringParameters(request, req, t)
   t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
   teardown()
 })
 
 test('Architect v6: put /form (JSON)', t => {
-  t.plan(7)
+  t.plan(9)
   let request = reqs.arc6.putJson
   let verb = 'PUT'
   let route = '/form'
@@ -243,13 +316,15 @@ test('Architect v6: put /form (JSON)', t => {
   t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  checkMultiValueHeaders(request, req, t)
+  checkMultiValueQueryStringParameters(request, req, t)
   t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
   teardown()
 })
 
 test('Architect v6: patch /form (JSON)', t => {
-  t.plan(7)
+  t.plan(9)
   let request = reqs.arc6.patchJson
   let verb = 'PATCH'
   let route = '/form'
@@ -268,13 +343,15 @@ test('Architect v6: patch /form (JSON)', t => {
   t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  checkMultiValueHeaders(request, req, t)
+  checkMultiValueQueryStringParameters(request, req, t)
   t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
   teardown()
 })
 
 test('Architect v6: delete /form (JSON)', t => {
-  t.plan(7)
+  t.plan(9)
   let request = reqs.arc6.deleteJson
   let verb = 'DELETE'
   let route = '/form'
@@ -293,7 +370,9 @@ test('Architect v6: delete /form (JSON)', t => {
   t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(req.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
+  checkMultiValueHeaders(request, req, t)
+  checkMultiValueQueryStringParameters(request, req, t)
   t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
   teardown()
 })
