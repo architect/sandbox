@@ -314,7 +314,13 @@ function start(params, callback) {
               if (!quiet) {
                 update.done(`Init (${runtime}):`)
               }
-              let print = result.toString().trim().split('\n').map(l => `    ${l.trim()}`).join('\n')
+              let print =
+                result
+                  .toString()
+                  .trim()
+                  .split('\n')
+                  .map(l => `    ${l.trim()}`)
+                  .join('\n')
               console.log(print)
             }
             if (!quiet) {
