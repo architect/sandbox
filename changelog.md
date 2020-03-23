@@ -2,6 +2,21 @@
 
 ---
 
+## [1.8.1] 2020-03-22
+
+### Changed
+
+- Minor improvements to auto-generated boilerplate function files
+- Updated dependencies
+
+
+### Fixed
+
+- `.arc-env` env vars now support a wider variety of special characters (such as `+`, `@`, `#`, etc.) if quoted, e.g. `FOO "sp#ci@lch+rs"`; fixes #638
+- Fixed Architect project manifest syntax errors and error reporting
+
+---
+
 ## [1.8.0] 2020-03-18
 
 ### Added
