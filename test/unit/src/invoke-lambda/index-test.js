@@ -92,14 +92,22 @@ test('Verify call counts from runtime invocations', t => {
 
 // This test will still hit the node call counter at least once
 test('Test body size limits', t => {
-  t.plan(2)
+  t.plan(4)
   let blobby = size => Array(size).fill('a').join('')
+  let snsify = str => ({Records:[{Sns:{Message:JSON.stringify(str)}}]})
   invoke(p('post-post'), { body: blobby(6000001) }, (err) => {
-    t.ok(err instanceof Error, '> 6MB request bodies return an error')
+    t.ok(err instanceof Error, 'POST: > 6MB request bodies return an error')
     console.log(err.message)
   })
   invoke(p('post-post'), { body: blobby(10) }, (err) => {
-    t.notOk(err instanceof Error, 'Sub 6MB request bodies are fine')
+    t.notOk(err instanceof Error, 'POST: sub 6MB request bodies are fine')
+  })
+  invoke(p('events-ping'), snsify(blobby(6000001)), (err) => {
+    t.ok(err instanceof Error, 'Event: > 6MB request bodies return an error')
+    console.log(err.message)
+  })
+  invoke(p('events-ping'), snsify(blobby(10)), (err) => {
+    t.notOk(err instanceof Error, 'Event: sub 6MB request bodies are fine')
   })
 })
 

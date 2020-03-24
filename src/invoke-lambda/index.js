@@ -24,13 +24,16 @@ let runtimes = {
  * mocks a lambda.. not much to it eh!
  *
  * @param {string} pathToLambda - path to lambda function code
- * @param {object} request - payload to invoke lambda function with
+ * @param {object} event - HTTP / event payload to invoke lambda function with
  * @param {function} callback - node style errback
  */
-module.exports = function invokeLambda(pathToLambda, request, callback) {
+module.exports = function invokeLambda(pathToLambda, event, callback) {
   let maxSize = 1000 * 6000
-  if (request.body && request.body.length > maxSize) {
-    let err = Error('Maximum request body exceeded: Lambda allows up to 6MB payloads (base64-encoded)')
+  let { body, Records } = event
+  let bodySize = body && JSON.stringify(body).length || 0
+  let payloadSize = Records && JSON.stringify(Records).length || 0
+  if (bodySize > maxSize || payloadSize > maxSize) {
+    let err = Error('Maximum event body exceeded: Lambda allows up to 6MB payloads (base64-encoded)')
     callback(err)
   }
   else {
@@ -46,7 +49,7 @@ module.exports = function invokeLambda(pathToLambda, request, callback) {
       env: {...process.env, ...defaults}
     }
 
-    request = JSON.stringify(request)
+    let request = JSON.stringify(event)
 
     getConfig(pathToLambda, function done(err, {runtime, timeout}) {
       if (err) callback(err)

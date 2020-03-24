@@ -2,6 +2,19 @@
 
 ---
 
+## [1.8.2] 2020-03-24
+
+### Added
+
+- Lambda's payload size limits are now respected and mocked; payloads exceeding 6MB will fail to execute, as they would in AWS
+
+
+### Fixed
+
+- Fixes issue where HTTP requests with large body payloads error with E2BIG; fixes #639, /ht @dawnerd
+
+---
+
 ## [1.8.1] 2020-03-22
 
 ### Changed
