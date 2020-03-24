@@ -1,7 +1,7 @@
 require 'json'
 require './index'
 
-request = {event: JSON.parse(ENV['__ARC_REQ__'])}
+request = JSON.parse(STDIN.gets)
 context = {event: JSON.parse(ENV['__ARC_CONTEXT__'])}
 response = '__ARC__ '
 responseEnd = ' __ARC_END__'

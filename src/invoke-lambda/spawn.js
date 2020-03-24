@@ -2,12 +2,19 @@ let {updater} = require('@architect/utils')
 let spawn = require('child_process').spawn
 let kill = require('tree-kill')
 
-module.exports = function spawnChild(command, args, options, timeout, callback) {
+module.exports = function spawnChild(command, args, options, request, timeout, callback) {
   let cwd = options.cwd
   let timedout = false
   let headers = {
     'Content-Type': 'text/html; charset=utf8;',
     'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
+  }
+
+  // deno's stdin interfaces were wonky and unstable at the time of impl
+  // we're routing around it until they stabilize / become friendly
+  let isDeno = command === 'deno'
+  if (isDeno) {
+    options.env.__ARC_REQ__ = request
   }
 
   // run the show
@@ -16,6 +23,12 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
   let stderr = ''
   let error
   let closed = false
+
+  if (!isDeno) {
+    child.stdin.setEncoding('utf-8');
+    child.stdin.write(request + '\n')
+    child.stdin.end()
+  }
 
   // Ensure we don't have dangling processes due to open connections, etc.
   function maybeShutdown () {

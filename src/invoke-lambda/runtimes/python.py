@@ -1,10 +1,11 @@
 import os
 import json
 import index
+import sys
 
-req = os.environ.get('__ARC_REQ__')
+req = sys.stdin.readlines()
 con = os.environ.get('__ARC_CONTEXT__')
-event = json.loads(req)
+event = json.loads(req[0])
 context = json.loads(con)
 result = '__ARC__ ' + json.dumps(index.handler(event, context)) + ' __ARC_END__'
 

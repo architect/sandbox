@@ -5,13 +5,15 @@ let test = require('tape')
 let cwd = process.cwd()
 
 // let spy = sinon.spy()
-let nodeFake = sinon.fake((opts, to, callback) => callback(opts, to))
-let pythonFake = sinon.fake((opts, to, callback) => callback(opts, to))
-let rubyFake = sinon.fake((opts, to, callback) => callback(opts, to))
+let nodeFake = sinon.fake((opts, request, to, callback) => callback(opts, request, to))
+let pythonFake = sinon.fake((opts, request, to, callback) => callback(opts, request, to))
+let rubyFake = sinon.fake((opts, request, to, callback) => callback(opts, request, to))
+let denoFake = sinon.fake((opts, request, to, callback) => callback(opts, request, to))
 let invoke = proxyquire('../../../../src/invoke-lambda', {
   './run-in-node': nodeFake,
   './run-in-python': pythonFake,
-  './run-in-ruby': rubyFake
+  './run-in-ruby': rubyFake,
+  './run-in-deno': denoFake
 })
 
 test('Set up env', t => {
@@ -24,65 +26,89 @@ let p = e => `src/http/${e}`
 let event = {something:'happened'}
 
 test('Test runtime invocations', t => {
-  t.plan(24)
-  invoke(p('get-index'), event, (options, timeout) => {
-    t.equals(options.cwd, p('get-index'), 'Passed correct path')
-    t.equals(timeout, 5000, 'Ran with correct timeout')
-    t.equals(options.env['__ARC_REQ__'], JSON.stringify(event), 'Runtime received event')
-    // t.equals(nodeFake.callCount, 1, 'Node called')
+  t.plan(27)
+  invoke(p('get-index'), event, (options, request, timeout) => {
+    t.equals(options.cwd, p('get-index'), 'Default runtime passed correct path')
+    t.equals(timeout, 5000, 'Default runtime ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'Default runtime received event')
   })
 
-  invoke(p('get-nodejs12_x'), event, (options, timeout) => {
-    t.equals(options.cwd, p('get-nodejs12_x'), 'Passed correct path')
-    t.equals(timeout, 12000, 'Ran with correct timeout')
-    t.equals(options.env['__ARC_REQ__'], JSON.stringify(event), 'Runtime received event')
-    // t.equals(nodeFake.callCount, 2, 'Node called')
+  invoke(p('get-nodejs12_x'), event, (options, request, timeout) => {
+    t.equals(options.cwd, p('get-nodejs12_x'), 'nodejs12.x passed correct path')
+    t.equals(timeout, 12000, 'nodejs12.x ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'nodejs12.x received event')
   })
 
-  invoke(p('get-nodejs10_x'), event, (options, timeout) => {
-    t.equals(options.cwd, p('get-nodejs10_x'), 'Passed correct path')
-    t.equals(timeout, 10000, 'Ran with correct timeout')
-    t.equals(options.env['__ARC_REQ__'], JSON.stringify(event), 'Runtime received event')
-    // t.equals(nodeFake.callCount, 2, 'Node called')
+  invoke(p('get-nodejs10_x'), event, (options, request, timeout) => {
+    t.equals(options.cwd, p('get-nodejs10_x'), 'nodejs10.x passed correct path')
+    t.equals(timeout, 10000, 'nodejs10.x ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'nodejs10.x received event')
   })
 
-  invoke(p('get-nodejs8_10'), event, (options, timeout) => {
-    t.equals(options.cwd, p('get-nodejs8_10'), 'Passed correct path')
-    t.equals(timeout, 810000, 'Ran with correct timeout')
-    t.equals(options.env['__ARC_REQ__'], JSON.stringify(event), 'Runtime received event')
-    // t.equals(nodeFake.callCount, 2, 'Node called')
+  invoke(p('get-nodejs8_10'), event, (options, request, timeout) => {
+    t.equals(options.cwd, p('get-nodejs8_10'), 'nodejs8.10 passed correct path')
+    t.equals(timeout, 810000, 'nodejs8.10 ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'nodejs8.10 received event')
   })
 
-  invoke(p('get-python3_8'), event, (options, timeout) => {
-    t.equals(options.cwd, p('get-python3_8'), 'Passed correct path')
-    t.equals(timeout, 38000, 'Ran with correct timeout')
-    t.equals(options.env['__ARC_REQ__'], JSON.stringify(event), 'Runtime received event')
+  invoke(p('get-python3_8'), event, (options, request, timeout) => {
+    t.equals(options.cwd, p('get-python3_8'), 'python3.8 passed correct path')
+    t.equals(timeout, 38000, 'python3.8 ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'python3.8 received event')
   })
 
-  invoke(p('get-python3_7'), event, (options, timeout) => {
-    t.equals(options.cwd, p('get-python3_7'), 'Passed correct path')
-    t.equals(timeout, 37000, 'Ran with correct timeout')
-    t.equals(options.env['__ARC_REQ__'], JSON.stringify(event), 'Runtime received event')
+  invoke(p('get-python3_7'), event, (options, request, timeout) => {
+    t.equals(options.cwd, p('get-python3_7'), 'python3.7 passed correct path')
+    t.equals(timeout, 37000, 'python3.7 ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'python3.7 received event')
   })
 
-  invoke(p('get-python3_6'), event, (options, timeout) => {
-    t.equals(options.cwd, p('get-python3_6'), 'Passed correct path')
-    t.equals(timeout, 36000, 'Ran with correct timeout')
-    t.equals(options.env['__ARC_REQ__'], JSON.stringify(event), 'Runtime received event')
+  invoke(p('get-python3_6'), event, (options, request, timeout) => {
+    t.equals(options.cwd, p('get-python3_6'), 'python3.6 passed correct path')
+    t.equals(timeout, 36000, 'python3.6 ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'python3.6 received event')
   })
 
-  invoke(p('get-ruby2_5'), event, (options, timeout) => {
-    t.equals(options.cwd, p('get-ruby2_5'), 'Passed correct path')
-    t.equals(timeout, 25000, 'Ran with correct timeout')
-    t.equals(options.env['__ARC_REQ__'], JSON.stringify(event), 'Runtime received event')
+  invoke(p('get-ruby2_5'), event, (options, request, timeout) => {
+    t.equals(options.cwd, p('get-ruby2_5'), 'ruby2.5 passed correct path')
+    t.equals(timeout, 25000, 'ruby2.5 ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'ruby2.5 received event')
+  })
+
+  invoke(p('get-deno'), event, (options, request, timeout) => {
+    t.equals(options.cwd, p('get-deno'), 'deno passed correct path')
+    t.equals(timeout, 10000, 'deno ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'deno received event')
   })
 })
 
-test('Verify call counts', t => {
-  t.plan(3)
+test('Verify call counts from runtime invocations', t => {
+  t.plan(4)
   t.equals(nodeFake.callCount, 4, 'Node called correct number of times')
   t.equals(pythonFake.callCount, 3, 'Python called correct number of times')
   t.equals(rubyFake.callCount, 1, 'Ruby called correct number of times')
+  t.equals(denoFake.callCount, 1, 'Deno called correct number of times')
+})
+
+// This test will still hit the node call counter at least once
+test('Test body size limits', t => {
+  t.plan(4)
+  let blobby = size => Array(size).fill('a').join('')
+  let snsify = str => ({Records:[{Sns:{Message:JSON.stringify(str)}}]})
+  invoke(p('post-post'), { body: blobby(6000001) }, (err) => {
+    t.ok(err instanceof Error, 'POST: > 6MB request bodies return an error')
+    console.log(err.message)
+  })
+  invoke(p('post-post'), { body: blobby(10) }, (err) => {
+    t.notOk(err instanceof Error, 'POST: sub 6MB request bodies are fine')
+  })
+  invoke(p('events-ping'), snsify(blobby(6000001)), (err) => {
+    t.ok(err instanceof Error, 'Event: > 6MB request bodies return an error')
+    console.log(err.message)
+  })
+  invoke(p('events-ping'), snsify(blobby(10)), (err) => {
+    t.notOk(err instanceof Error, 'Event: sub 6MB request bodies are fine')
+  })
 })
 
 test('Teardown', t => {
