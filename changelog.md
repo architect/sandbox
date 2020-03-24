@@ -2,11 +2,16 @@
 
 ---
 
-## [1.8.2] 2020-03-24
+## [1.8.2 - 1.8.3] 2020-03-24
 
 ### Added
 
 - Lambda's payload size limits are now respected and mocked; payloads exceeding 6MB will fail to execute, as they would in AWS
+
+
+### Changed
+
+- Updated dependencies
 
 
 ### Fixed
