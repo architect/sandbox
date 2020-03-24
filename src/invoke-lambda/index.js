@@ -31,7 +31,6 @@ let runtimes = {
 module.exports = function invokeLambda(pathToLambda, event, callback) {
 
   let defaults = {
-    __ARC_REQ__: JSON.stringify(event),
     __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
     PYTHONUNBUFFERED: true,
     PYTHONPATH: path.join(pathToLambda, 'vendor')
@@ -43,10 +42,12 @@ module.exports = function invokeLambda(pathToLambda, event, callback) {
     env: {...process.env, ...defaults}
   }
 
+  let request = JSON.stringify(event)
+
   getConfig(pathToLambda, function done(err, {runtime, timeout}) {
     if (err) callback(err)
     else {
-      runtimes[runtime](options, timeout, callback)
+      runtimes[runtime](options, request, timeout, callback)
     }
   })
 }

@@ -2,7 +2,7 @@ let {updater} = require('@architect/utils')
 let spawn = require('child_process').spawn
 let kill = require('tree-kill')
 
-module.exports = function spawnChild(command, args, options, timeout, callback) {
+module.exports = function spawnChild(command, args, options, request, timeout, callback) {
   let cwd = options.cwd
   let timedout = false
   let headers = {
@@ -16,6 +16,10 @@ module.exports = function spawnChild(command, args, options, timeout, callback) 
   let stderr = ''
   let error
   let closed = false
+
+  child.stdin.setEncoding('utf-8');
+  child.stdin.write(request + '\n')
+  child.stdin.end()
 
   // Ensure we don't have dangling processes due to open connections, etc.
   function maybeShutdown () {
