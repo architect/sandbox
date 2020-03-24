@@ -30,7 +30,7 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
 
     // run the lambda sig locally
     invoke(pathToFunction, request, function _res(err, result) {
-      if (err) res(err)
+      if (err) res.end(err.message)
       else {
         let {valid, body} = validator({res, result})
         if (!valid) {

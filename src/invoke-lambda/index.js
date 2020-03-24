@@ -24,29 +24,35 @@ let runtimes = {
  * mocks a lambda.. not much to it eh!
  *
  * @param {string} pathToLambda - path to lambda function code
- * @param {object} event - payload to invoke lambda function with
+ * @param {object} request - payload to invoke lambda function with
  * @param {function} callback - node style errback
  */
-module.exports = function invokeLambda(pathToLambda, event, callback) {
-
-  let defaults = {
-    __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
-    PYTHONUNBUFFERED: true,
-    PYTHONPATH: path.join(pathToLambda, 'vendor')
+module.exports = function invokeLambda(pathToLambda, request, callback) {
+  let maxSize = 1000 * 6000
+  if (request.body && request.body.length > maxSize) {
+    let err = Error('Maximum request body exceeded: Lambda allows up to 6MB payloads (base64-encoded)')
+    callback(err)
   }
-
-  let options = {
-    shell: true,
-    cwd: pathToLambda,
-    env: {...process.env, ...defaults}
-  }
-
-  let request = JSON.stringify(event)
-
-  getConfig(pathToLambda, function done(err, {runtime, timeout}) {
-    if (err) callback(err)
-    else {
-      runtimes[runtime](options, request, timeout, callback)
+  else {
+    let defaults = {
+      __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
+      PYTHONUNBUFFERED: true,
+      PYTHONPATH: path.join(pathToLambda, 'vendor')
     }
-  })
+
+    let options = {
+      shell: true,
+      cwd: pathToLambda,
+      env: {...process.env, ...defaults}
+    }
+
+    request = JSON.stringify(request)
+
+    getConfig(pathToLambda, function done(err, {runtime, timeout}) {
+      if (err) callback(err)
+      else {
+        runtimes[runtime](options, request, timeout, callback)
+      }
+    })
+  }
 }

@@ -74,6 +74,7 @@ test('Test runtime invocations', t => {
     t.equals(timeout, 25000, 'ruby2.5 ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'ruby2.5 received event')
   })
+
   invoke(p('get-deno'), event, (options, request, timeout) => {
     t.equals(options.cwd, p('get-deno'), 'deno passed correct path')
     t.equals(timeout, 10000, 'deno ran with correct timeout')
@@ -81,12 +82,25 @@ test('Test runtime invocations', t => {
   })
 })
 
-test('Verify call counts', t => {
+test('Verify call counts from runtime invocations', t => {
   t.plan(4)
   t.equals(nodeFake.callCount, 4, 'Node called correct number of times')
   t.equals(pythonFake.callCount, 3, 'Python called correct number of times')
   t.equals(rubyFake.callCount, 1, 'Ruby called correct number of times')
   t.equals(denoFake.callCount, 1, 'Deno called correct number of times')
+})
+
+// This test will still hit the node call counter at least once
+test('Test body size limits', t => {
+  t.plan(2)
+  let blobby = size => Array(size).fill('a').join('')
+  invoke(p('post-post'), { body: blobby(6000001) }, (err) => {
+    t.ok(err instanceof Error, '> 6MB request bodies return an error')
+    console.log(err.message)
+  })
+  invoke(p('post-post'), { body: blobby(10) }, (err) => {
+    t.notOk(err instanceof Error, 'Sub 6MB request bodies are fine')
+  })
 })
 
 test('Teardown', t => {
