@@ -7,11 +7,10 @@ let runInPython = require('./run-in-python')
 let runInRuby = require('./run-in-ruby')
 
 let runtimes = {
-  'deno':       runInDeno,
   'nodejs12.x': runInNode,
   'nodejs10.x': runInNode,
-  // DEPRECATED by AWS Jan/Feb 2020; will retain Node 8 legacy support until mid 2020
-  'nodejs8.10': runInNode,
+  'nodejs8.10': runInNode, // DEPRECATED by AWS Jan/Feb 2020; will retain Node 8 until ~mid 2020
+  'deno':       runInDeno,
   'python3.8':  runInPython,
   'python3.6':  runInPython,
   'python3.7':  runInPython,
