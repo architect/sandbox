@@ -26,7 +26,7 @@
     "@architect/hydrate": "~1.4.20",
     "@architect/parser": "~2.1.1",
     "@architect/utils": "~1.5.1",
-    "aws-sdk": "~2.644.0",
+    "aws-sdk": "~2.648.0",
     "body-parser": "~1.19.0",
     "chalk": "~3.0.0",
     "depstatus": "~1.0.0",
