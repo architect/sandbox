@@ -5,10 +5,10 @@ let test = require('tape')
 let cwd = process.cwd()
 
 // let spy = sinon.spy()
-let nodeFake = sinon.fake((opts, request, to, callback) => callback(opts, request, to))
-let pythonFake = sinon.fake((opts, request, to, callback) => callback(opts, request, to))
-let rubyFake = sinon.fake((opts, request, to, callback) => callback(opts, request, to))
-let denoFake = sinon.fake((opts, request, to, callback) => callback(opts, request, to))
+let nodeFake = sinon.fake((options, request, timeout, callback) => callback(null, {options, request, timeout}))
+let pythonFake = sinon.fake((options, request, timeout, callback) => callback(null, {options, request, timeout}))
+let rubyFake = sinon.fake((options, request, timeout, callback) => callback(null, {options, request, timeout}))
+let denoFake = sinon.fake((options, request, timeout, callback) => callback(null, {options, request, timeout}))
 let invoke = proxyquire('../../../../src/invoke-lambda', {
   './run-in-node': nodeFake,
   './run-in-python': pythonFake,
@@ -27,55 +27,64 @@ let event = {something:'happened'}
 
 test('Test runtime invocations', t => {
   t.plan(27)
-  invoke(p('get-index'), event, (options, request, timeout) => {
+  invoke(p('get-index'), event, (err, {options, request, timeout}) => {
+    if (err) t.fail(err)
     t.equals(options.cwd, p('get-index'), 'Default runtime passed correct path')
     t.equals(timeout, 5000, 'Default runtime ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'Default runtime received event')
   })
 
-  invoke(p('get-nodejs12_x'), event, (options, request, timeout) => {
+  invoke(p('get-nodejs12_x'), event, (err, {options, request, timeout}) => {
+    if (err) t.fail(err)
     t.equals(options.cwd, p('get-nodejs12_x'), 'nodejs12.x passed correct path')
     t.equals(timeout, 12000, 'nodejs12.x ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'nodejs12.x received event')
   })
 
-  invoke(p('get-nodejs10_x'), event, (options, request, timeout) => {
+  invoke(p('get-nodejs10_x'), event, (err, {options, request, timeout}) => {
+    if (err) t.fail(err)
     t.equals(options.cwd, p('get-nodejs10_x'), 'nodejs10.x passed correct path')
     t.equals(timeout, 10000, 'nodejs10.x ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'nodejs10.x received event')
   })
 
-  invoke(p('get-nodejs8_10'), event, (options, request, timeout) => {
+  invoke(p('get-nodejs8_10'), event, (err, {options, request, timeout}) => {
+    if (err) t.fail(err)
     t.equals(options.cwd, p('get-nodejs8_10'), 'nodejs8.10 passed correct path')
     t.equals(timeout, 810000, 'nodejs8.10 ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'nodejs8.10 received event')
   })
 
-  invoke(p('get-python3_8'), event, (options, request, timeout) => {
+  invoke(p('get-python3_8'), event, (err, {options, request, timeout}) => {
+    if (err) t.fail(err)
     t.equals(options.cwd, p('get-python3_8'), 'python3.8 passed correct path')
     t.equals(timeout, 38000, 'python3.8 ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'python3.8 received event')
   })
 
-  invoke(p('get-python3_7'), event, (options, request, timeout) => {
+  invoke(p('get-python3_7'), event, (err, {options, request, timeout}) => {
+    if (err) t.fail(err)
     t.equals(options.cwd, p('get-python3_7'), 'python3.7 passed correct path')
     t.equals(timeout, 37000, 'python3.7 ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'python3.7 received event')
   })
 
-  invoke(p('get-python3_6'), event, (options, request, timeout) => {
+  invoke(p('get-python3_6'), event, (err, {options, request, timeout}) => {
+    if (err) t.fail(err)
     t.equals(options.cwd, p('get-python3_6'), 'python3.6 passed correct path')
     t.equals(timeout, 36000, 'python3.6 ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'python3.6 received event')
   })
 
-  invoke(p('get-ruby2_5'), event, (options, request, timeout) => {
+  invoke(p('get-ruby2_5'), event, (err, {options, request, timeout}) => {
+    if (err) t.fail(err)
     t.equals(options.cwd, p('get-ruby2_5'), 'ruby2.5 passed correct path')
     t.equals(timeout, 25000, 'ruby2.5 ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'ruby2.5 received event')
   })
 
-  invoke(p('get-deno'), event, (options, request, timeout) => {
+  invoke(p('get-deno'), event, (err, {options, request, timeout}) => {
+    if (err) t.fail(err)
     t.equals(options.cwd, p('get-deno'), 'deno passed correct path')
     t.equals(timeout, 10000, 'deno ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'deno received event')
