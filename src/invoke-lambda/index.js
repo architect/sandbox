@@ -6,6 +6,8 @@ let runInDeno = require('./run-in-deno')
 let runInPython = require('./run-in-python')
 let runInRuby = require('./run-in-ruby')
 
+let warn = require('./warn')
+
 let runtimes = {
   'nodejs12.x': runInNode,
   'nodejs10.x': runInNode,
@@ -54,7 +56,18 @@ module.exports = function invokeLambda(pathToLambda, event, callback) {
     getConfig(pathToLambda, function done(err, {runtime, timeout}) {
       if (err) callback(err)
       else {
-        runtimes[runtime](options, request, timeout, callback)
+        runtimes[runtime](options, request, timeout, function done(err, result) {
+          if (err) callback(err)
+          else {
+            let missing
+            if (result && result.__DEP_ISSUES__) {
+              missing = result.__DEP_ISSUES__
+              delete result.__DEP_ISSUES__
+            }
+            warn(missing, pathToLambda)
+            callback(null, result)
+          }
+        })
       }
     })
   }

@@ -126,7 +126,7 @@ function start(params, callback) {
       }
 
       // Set Arc 5 / 6+ Lambda config env
-      if (version && version.startsWith('Architect 5')) {
+      if (version && version.startsWith('Architect 5') || process.env.DEPRECATED) {
         deprecated = process.env.DEPRECATED = true
         process.env.ARC_HTTP = 'aws'
       }
