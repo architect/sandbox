@@ -2,6 +2,14 @@
 
 ---
 
+## [1.9.1] 2020-03-31
+
+### Fixed
+
+- Updated the call to start Sandbox in Architect 6 such that it will now actually initiate the filesystem watcher
+
+---
+
 
 ## [1.9.0] 2020-03-29
 
