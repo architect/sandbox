@@ -7,6 +7,7 @@ let options = process.argv
 
 /**
  * Entry for actual CLI
+ *   Same as the @architect/architect caller, but calls updater + sets own version
  */
 update({pkg, shouldNotifyInNpmScript: true})
   .notify({boxenOpts: {
@@ -23,4 +24,10 @@ cli({
   needsValidCreds: false,
   options,
   version: `Sandbox ${ver}`
+},
+function _done(err) {
+  if (err) {
+    console.log(err)
+    process.exit(1)
+  }
 })
