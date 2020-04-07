@@ -8,6 +8,16 @@
 
 - Adds console logging for uncaught exceptions in async functions in Node.js and Deno; /ht @coco98
 
+
+### Changed
+
+- Updated dependencies
+
+
+### Fixed
+
+- Sandbox should now restore the terminal cursor more reliably when shut down
+
 ---
 
 ## [1.9.1] 2020-03-31
