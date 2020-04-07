@@ -2,6 +2,14 @@
 
 ---
 
+## [1.9.2] 2020-04-06
+
+### Added
+
+- Adds console logging for uncaught exceptions in async functions in Node.js and Deno; /ht @coco98
+
+---
+
 ## [1.9.1] 2020-03-31
 
 ### Fixed
