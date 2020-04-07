@@ -6,7 +6,10 @@ const context = JSON.parse(env.__ARC_CONTEXT__);
 
 
 function callback(err, result) {
-  let payload = err? {name:err.name, message:err.message, stack:err.stack} : result;
+  if (err) console.log(err);
+  let payload = err
+    ? { name: err.name, message: err.message, stack: err.stack }
+    : result;
   console.log('__ARC__', JSON.stringify(payload), '__ARC_END__');
 }
 

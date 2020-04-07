@@ -25,8 +25,9 @@ process.stdin.on('close', () => {
   if (missing.length) missing = [... new Set([...missing])];
 
   function callback(err, result) {
+    if (err) console.log(err);
     let payload = err
-      ? { name: err.name, message: err.message, stack: err.stack}
+      ? { name: err.name, message: err.message, stack: err.stack }
       : result;
     payload.__DEP_ISSUES__ = missing;
     console.log('__ARC__', JSON.stringify(payload), '__ARC_END__');
