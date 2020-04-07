@@ -1,6 +1,6 @@
 {
   "name": "@architect/sandbox",
-  "version": "1.9.1",
+  "version": "1.9.2-RC.0",
   "description": "Architect dev server: run full Architect projects locally & offline",
   "main": "src/index.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "@architect/http-proxy": "~3.8.0",
     "@architect/hydrate": "~1.4.20",
     "@architect/parser": "~2.1.1",
-    "@architect/utils": "~1.5.1",
+    "@architect/utils": "~1.5.3-RC.0",
     "aws-sdk": "~2.644.0",
     "body-parser": "~1.19.0",
     "chalk": "~4.0.0",
