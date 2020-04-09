@@ -69,7 +69,7 @@ module.exports = function spawnChild(command, args, options, request, timeout, c
     let tidy = stdout.toString()
       .split('\n')
       .filter(line => !line.startsWith('__ARC__'))
-      .join('\n').trim()
+      .join('\n')
     if (tidy.length > 0) {
       console.log(tidy)
     }

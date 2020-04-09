@@ -2,6 +2,14 @@
 
 ---
 
+## [1.9.3] 2020-04-08
+
+### Fixed
+
+- Preserve leading/trailing whitespace from console logging
+
+---
+
 ## [1.9.2] 2020-04-06
 
 ### Added
