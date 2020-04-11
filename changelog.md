@@ -2,19 +2,12 @@
 
 ---
 
-## [1.9.4] 2020-04-10
-
-### Fixed
-
-- Fixed issue where `.arc-config` files with an `@aws timeout` value of exactly `900` (15 minutes) would not be respected
-
----
-
 ## [1.9.3] 2020-04-08
 
 ### Fixed
 
 - Preserve leading/trailing whitespace from console logging
+- Fixed issue where `.arc-config` files with an `@aws timeout` value of exactly `900` (15 minutes) would not be respected
 
 ---
 
