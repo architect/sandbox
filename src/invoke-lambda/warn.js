@@ -17,7 +17,7 @@ module.exports = function warn (missing=[], pathToLambda) {
       pathToLambda = pathToLambda.replace(process.cwd(), '').substr(1)
 
       update.warn(`Your function may have ${plural ? 'dependencies' : 'a dependency'} that could be inaccessible in production`)
-      missing = missing.map(dep => `Please run: cd ${pathToLambda} && npm i ${dep}`)
+      missing = missing.map(dep => `Please run: cd ${pathToLambda} && [ -f package.json ] || npm init -y && npm i ${dep}`)
       update.status(null, ...missing)
     }
   }
