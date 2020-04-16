@@ -23,6 +23,7 @@ test('Set up env', t => {
 })
 
 let p = e => `src/http/${e}`
+let e = e => `src/events/${e}`
 let event = {something:'happened'}
 
 test('Test runtime invocations', t => {
@@ -111,11 +112,11 @@ test('Test body size limits', t => {
   invoke(p('post-post'), { body: blobby(10) }, (err) => {
     t.notOk(err instanceof Error, 'POST: sub 6MB request bodies are fine')
   })
-  invoke(p('events-ping'), snsify(blobby(6000001)), (err) => {
+  invoke(e('ping'), snsify(blobby(6000001)), (err) => {
     t.ok(err instanceof Error, 'Event: > 6MB request bodies return an error')
     console.log(err.message)
   })
-  invoke(p('events-ping'), snsify(blobby(10)), (err) => {
+  invoke(e('ping'), snsify(blobby(10)), (err) => {
     t.notOk(err instanceof Error, 'Event: sub 6MB request bodies are fine')
   })
 })
