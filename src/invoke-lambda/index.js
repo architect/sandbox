@@ -1,4 +1,5 @@
 let path = require('path')
+let fs = require('fs')
 
 let getConfig = require('./get-config')
 let runInNode = require('./run-in-node')
@@ -30,45 +31,50 @@ let runtimes = {
  * @param {function} callback - node style errback
  */
 module.exports = function invokeLambda(pathToLambda, event, callback) {
-  let maxSize = 1000 * 6000
-  let { body, Records } = event
-  let bodySize = body && JSON.stringify(body).length || 0
-  let payloadSize = Records && JSON.stringify(Records).length || 0
-  if (bodySize > maxSize || payloadSize > maxSize) {
-    let err = Error('Maximum event body exceeded: Lambda allows up to 6MB payloads (base64-encoded)')
-    callback(err)
+  if (!fs.existsSync(pathToLambda)) {
+    callback(Error(`Lambda not found: ${pathToLambda}`))
   }
   else {
-    let defaults = {
-      __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
-      PYTHONUNBUFFERED: true,
-      PYTHONPATH: path.join(pathToLambda, 'vendor')
+    let maxSize = 1000 * 6000
+    let { body, Records } = event
+    let bodySize = body && JSON.stringify(body).length || 0
+    let payloadSize = Records && JSON.stringify(Records).length || 0
+    if (bodySize > maxSize || payloadSize > maxSize) {
+      let err = Error('Maximum event body exceeded: Lambda allows up to 6MB payloads (base64-encoded)')
+      callback(err)
     }
-
-    let options = {
-      shell: true,
-      cwd: pathToLambda,
-      env: {...process.env, ...defaults}
-    }
-
-    let request = JSON.stringify(event)
-
-    getConfig(pathToLambda, function done(err, {runtime, timeout}) {
-      if (err) callback(err)
-      else {
-        runtimes[runtime](options, request, timeout, function done(err, result) {
-          if (err) callback(err)
-          else {
-            let missing
-            if (result && result.__DEP_ISSUES__) {
-              missing = result.__DEP_ISSUES__
-              delete result.__DEP_ISSUES__
-            }
-            warn(missing, pathToLambda)
-            callback(null, result)
-          }
-        })
+    else {
+      let defaults = {
+        __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
+        PYTHONUNBUFFERED: true,
+        PYTHONPATH: path.join(pathToLambda, 'vendor')
       }
-    })
+
+      let options = {
+        shell: true,
+        cwd: pathToLambda,
+        env: {...process.env, ...defaults}
+      }
+
+      let request = JSON.stringify(event)
+
+      getConfig(pathToLambda, function done(err, {runtime, timeout}) {
+        if (err) callback(err)
+        else {
+          runtimes[runtime](options, request, timeout, function done(err, result) {
+            if (err) callback(err)
+            else {
+              let missing
+              if (result && result.__DEP_ISSUES__) {
+                missing = result.__DEP_ISSUES__
+                delete result.__DEP_ISSUES__
+              }
+              warn(missing, pathToLambda)
+              callback(null, result)
+            }
+          })
+        }
+      })
+    }
   }
 }
