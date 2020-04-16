@@ -29,7 +29,7 @@ process.stdin.on('close', () => {
     let payload = err
       ? { name: err.name, message: err.message, stack: err.stack }
       : result;
-    payload.__DEP_ISSUES__ = missing;
+    if (payload) payload.__DEP_ISSUES__ = missing;
     console.log('__ARC__', JSON.stringify(payload), '__ARC_END__');
   }
 
