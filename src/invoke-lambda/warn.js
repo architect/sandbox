@@ -1,3 +1,5 @@
+let fs = require('fs')
+let { join } = require('path')
 let { updater } = require('@architect/utils')
 
 /**
@@ -14,10 +16,15 @@ module.exports = function warn (missing=[], pathToLambda) {
     if (missing.length) {
       let update = updater('Sandbox')
       let plural = missing.length > 1
-      pathToLambda = pathToLambda.replace(process.cwd(), '').substr(1)
+      let localPath = pathToLambda.replace(process.cwd(), '').substr(1)
+
+      let hasPackage = fs.existsSync(join(pathToLambda, 'package.json'))
+      let msg = hasPackage
+        ? `Please run: cd ${localPath} && npm i`
+        : `Please run: cd ${localPath} && echo {} > package.json && npm i`
 
       update.warn(`Your function may have ${plural ? 'dependencies' : 'a dependency'} that could be inaccessible in production`)
-      missing = missing.map(dep => `Please run: cd ${pathToLambda} && npm i ${dep}`)
+      missing = missing.map(dep => `${msg} ${dep}`)
       update.status(null, ...missing)
     }
   }

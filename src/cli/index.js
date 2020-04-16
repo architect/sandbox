@@ -1,11 +1,13 @@
 let hydrate = require('@architect/hydrate')
 let maybeHydrate = require('../http/maybe-hydrate')
 let path = require('path')
+let fs = require('fs')
 let pkgVer = require('../../package.json').version
 let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
 let { fingerprint, updater } = require('@architect/utils')
 let readArc = require('../sandbox/read-arc')
+let osPath = require('ospath')
 
 // Just use Unix seperators on Windows - path.posix.normalize(process.cwd()) doesn't do what we want
 // So we normalise to slash file names (C:/foo/bar) for regex tests, etc.
@@ -34,7 +36,7 @@ module.exports = function cli(params={}, callback) {
     // Setup
     let update = updater('Sandbox')
     let deprecated = process.env.DEPRECATED
-    let watcher = watch(process.cwd(), {recursive: true})
+    let watcher = watch(process.cwd(), { recursive: true })
     let workingDirectory = pathToUnix(process.cwd())
     let separator = path.posix.sep
 
@@ -58,17 +60,33 @@ module.exports = function cli(params={}, callback) {
       }
     }
 
+    // Cleanup after any past runs
+    let pauseFile = path.join(osPath.tmp(), '_pause-architect-sandbox-watcher')
+    if (fs.existsSync(pauseFile)) {
+      fs.unlinkSync(pauseFile)
+    }
+    let paused = false
+
     /**
      * Watch for pertinent filesystem changes
      */
     watcher.on('change', function (event, fileName) {
+
+      if (!paused && fs.existsSync(pauseFile)) {
+        paused = true
+        update.status('Watcher temporarily paused')
+      }
+      if (paused && !fs.existsSync(pauseFile)) {
+        update.status('Watcher no longer paused')
+        paused = false
+      }
 
       // Event criteria
       let fileUpdate = event === 'update'
       let updateOrRemove = event === 'update' || event === 'remove'
       fileName = pathToUnix(fileName)
 
-      let rehydrate = ({only, msg}) => {
+      let rehydrate = ({ only, msg }) => {
         let start = Date.now()
         update.status(msg)
         hydrate.shared({only}, () => {
@@ -80,7 +98,7 @@ module.exports = function cli(params={}, callback) {
       /**
        * Reload routes upon changes to Architect project manifest
        */
-      if (fileUpdate && fileName.match(arcFile)) {
+      if (fileUpdate && fileName.match(arcFile) && !paused) {
         clearTimeout(arcEventTimer)
         arcEventTimer = setTimeout(() => {
           // TODO add arc pragma diffing, reload tables, events, etc.
@@ -129,7 +147,7 @@ module.exports = function cli(params={}, callback) {
        * Rehydrate functions with shared files upon changes to src/shared
        */
       let isShared = fileName.includes(`${workingDirectory}/src/shared`)
-      if (updateOrRemove && isShared) {
+      if (updateOrRemove && isShared && !paused) {
         clearTimeout(rehydrateSharedTimer)
         rehydrateSharedTimer = setTimeout(() => {
           ts()
@@ -143,7 +161,7 @@ module.exports = function cli(params={}, callback) {
        * Rehydrate functions with shared files upon changes to src/views
        */
       let isViews = fileName.includes(`${workingDirectory}/src/views`)
-      if (updateOrRemove && isViews) {
+      if (updateOrRemove && isViews && !paused) {
         clearTimeout(rehydrateViewsTimer)
         rehydrateViewsTimer = setTimeout(() => {
           ts()
@@ -156,7 +174,7 @@ module.exports = function cli(params={}, callback) {
       /**
        * Regenerate public/static.json upon changes to public/
        */
-      if (updateOrRemove && arc.static &&
+      if (updateOrRemove && arc.static && !paused &&
           fileName.includes(`${workingDirectory}/${staticFolder}`) &&
           !fileName.includes(`${workingDirectory}/${staticFolder}/static.json`)) {
         clearTimeout(fingerprintTimer)
