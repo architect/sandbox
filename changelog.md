@@ -14,7 +14,7 @@
 
 ### Changed
 
-- Improved missing dependency warning to provide better instructions on how to install a missing dependency if the function in question does not already have a `package.json` file
+- Improved missing dependency warning to provide better instructions on how to install a missing dependency if the function in question does not already have a `package.json` file; /ht @exalted
 
 
 ### Fixed
