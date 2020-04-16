@@ -7,7 +7,7 @@
 ### Added
 
 - Added Sandbox watcher pausing
-  - The presence of `._pause-sandbox-watcher` in the root of your project will temporarily pause the Sandbox watcher
+  - The presence of `_pause-architect-sandbox-watcher` in your operating system's `$TMP` directory (usually `/tmp` or `c:\windows\temp`) will temporarily pause the Sandbox watcher
   - This is useful when combined with tools like `lint-staged` to ensure automated file stashing within `src/shared` and `src/views` doesn't result in hydration failures
   - Sandbox cleans up this file on startup, jic
 

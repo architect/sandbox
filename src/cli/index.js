@@ -7,6 +7,7 @@ let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
 let { fingerprint, updater } = require('@architect/utils')
 let readArc = require('../sandbox/read-arc')
+let osPath = require('ospath')
 
 // Just use Unix seperators on Windows - path.posix.normalize(process.cwd()) doesn't do what we want
 // So we normalise to slash file names (C:/foo/bar) for regex tests, etc.
@@ -60,7 +61,7 @@ module.exports = function cli(params={}, callback) {
     }
 
     // Cleanup after any past runs
-    let pauseFile = path.join(process.cwd(), '._pause-sandbox-watcher')
+    let pauseFile = path.join(osPath.tmp(), '_pause-architect-sandbox-watcher')
     if (fs.existsSync(pauseFile)) {
       fs.unlinkSync(pauseFile)
     }
@@ -72,9 +73,13 @@ module.exports = function cli(params={}, callback) {
      */
     watcher.on('change', function (event, fileName) {
 
+      if (fs.existsSync(pauseFile)) {
+        paused = true
+      }
+      else paused = false
+
       // Event criteria
       let fileUpdate = event === 'update'
-      let fileDelete = event === 'remove'
       let updateOrRemove = event === 'update' || event === 'remove'
       fileName = pathToUnix(fileName)
 
@@ -85,13 +90,6 @@ module.exports = function cli(params={}, callback) {
           let end = Date.now()
           update.done(`Files rehydrated into functions in ${end - start}ms`)
         })
-      }
-
-      if (fileUpdate && fileName.match(pauseFile)) {
-        paused = true
-      }
-      if (fileDelete && fileName.match(pauseFile)) {
-        paused = false
       }
 
       /**
