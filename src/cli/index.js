@@ -36,7 +36,7 @@ module.exports = function cli(params={}, callback) {
     // Setup
     let update = updater('Sandbox')
     let deprecated = process.env.DEPRECATED
-    let watcher = watch(process.cwd(), {recursive: true})
+    let watcher = watch(process.cwd(), { recursive: true })
     let workingDirectory = pathToUnix(process.cwd())
     let separator = path.posix.sep
 
@@ -65,7 +65,6 @@ module.exports = function cli(params={}, callback) {
     if (fs.existsSync(pauseFile)) {
       fs.unlinkSync(pauseFile)
     }
-
     let paused = false
 
     /**
@@ -73,17 +72,21 @@ module.exports = function cli(params={}, callback) {
      */
     watcher.on('change', function (event, fileName) {
 
-      if (fs.existsSync(pauseFile)) {
+      if (!paused && fs.existsSync(pauseFile)) {
         paused = true
+        update.status('Watcher temporarily paused')
       }
-      else paused = false
+      if (paused && !fs.existsSync(pauseFile)) {
+        update.status('Watcher no longer paused')
+        paused = false
+      }
 
       // Event criteria
       let fileUpdate = event === 'update'
       let updateOrRemove = event === 'update' || event === 'remove'
       fileName = pathToUnix(fileName)
 
-      let rehydrate = ({only, msg}) => {
+      let rehydrate = ({ only, msg }) => {
         let start = Date.now()
         update.status(msg)
         hydrate.shared({only}, () => {
