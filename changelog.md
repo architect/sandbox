@@ -11,6 +11,12 @@
   - This is useful when combined with tools like `lint-staged` to ensure automated file stashing within `src/shared` and `src/views` doesn't result in hydration failures
   - Sandbox cleans up this file on startup, jic
 
+
+### Changed
+
+- Improved missing dependency warning to provide better instructions on how to install a missing dependency if the function in question does not already have a `package.json` file
+
+
 ### Fixed
 
 - Fixed issue where explicit (or empty) returns would provide a red herring error
