@@ -1,6 +1,7 @@
 let hydrate = require('@architect/hydrate')
 let maybeHydrate = require('../http/maybe-hydrate')
 let path = require('path')
+let fs = require('fs')
 let pkgVer = require('../../package.json').version
 let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
@@ -58,6 +59,14 @@ module.exports = function cli(params={}, callback) {
       }
     }
 
+    // Cleanup after any past runs
+    let pauseFile = path.join(process.cwd(), '._pause-sandbox-watcher')
+    if (fs.existsSync(pauseFile)) {
+      fs.unlinkSync(pauseFile)
+    }
+
+    let paused = false
+
     /**
      * Watch for pertinent filesystem changes
      */
@@ -65,6 +74,7 @@ module.exports = function cli(params={}, callback) {
 
       // Event criteria
       let fileUpdate = event === 'update'
+      let fileDelete = event === 'remove'
       let updateOrRemove = event === 'update' || event === 'remove'
       fileName = pathToUnix(fileName)
 
@@ -77,10 +87,17 @@ module.exports = function cli(params={}, callback) {
         })
       }
 
+      if (fileUpdate && fileName.match(pauseFile)) {
+        paused = true
+      }
+      if (fileDelete && fileName.match(pauseFile)) {
+        paused = false
+      }
+
       /**
        * Reload routes upon changes to Architect project manifest
        */
-      if (fileUpdate && fileName.match(arcFile)) {
+      if (fileUpdate && fileName.match(arcFile) && !paused) {
         clearTimeout(arcEventTimer)
         arcEventTimer = setTimeout(() => {
           // TODO add arc pragma diffing, reload tables, events, etc.
@@ -129,7 +146,7 @@ module.exports = function cli(params={}, callback) {
        * Rehydrate functions with shared files upon changes to src/shared
        */
       let isShared = fileName.includes(`${workingDirectory}/src/shared`)
-      if (updateOrRemove && isShared) {
+      if (updateOrRemove && isShared && !paused) {
         clearTimeout(rehydrateSharedTimer)
         rehydrateSharedTimer = setTimeout(() => {
           ts()
@@ -143,7 +160,7 @@ module.exports = function cli(params={}, callback) {
        * Rehydrate functions with shared files upon changes to src/views
        */
       let isViews = fileName.includes(`${workingDirectory}/src/views`)
-      if (updateOrRemove && isViews) {
+      if (updateOrRemove && isViews && !paused) {
         clearTimeout(rehydrateViewsTimer)
         rehydrateViewsTimer = setTimeout(() => {
           ts()
@@ -156,7 +173,7 @@ module.exports = function cli(params={}, callback) {
       /**
        * Regenerate public/static.json upon changes to public/
        */
-      if (updateOrRemove && arc.static &&
+      if (updateOrRemove && arc.static && !paused &&
           fileName.includes(`${workingDirectory}/${staticFolder}`) &&
           !fileName.includes(`${workingDirectory}/${staticFolder}/static.json`)) {
         clearTimeout(fingerprintTimer)
