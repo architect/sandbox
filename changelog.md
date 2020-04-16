@@ -2,10 +2,27 @@
 
 ---
 
+## [1.9.4] 2020-04-16
+
+### Added
+
+- Added Sandbox watcher pausing
+  - The presence of `._pause-sandbox-watcher` in the root of your project will temporarily pause the Sandbox watcher
+  - This is useful when combined with tools like `lint-staged` to ensure automated file stashing within `src/shared` and `src/views` doesn't result in hydration failures
+  - Sandbox cleans up this file on startup, jic
+
+### Fixed
+
+- Fixed issue where explicit (or empty) returns would provide a red herring error
+- When a non-existent `@events` Lambda is invoked, Sandbox will now gracefully fail
+
+---
+
 ## [1.9.3] 2020-04-08
 
 ### Fixed
 
+- Sandbox should now restore the terminal cursor more reliably when quit
 - Preserve leading/trailing whitespace from console logging
 - Fixed issue where `.arc-config` files with an `@aws timeout` value of exactly `900` (15 minutes) would not be respected
 
