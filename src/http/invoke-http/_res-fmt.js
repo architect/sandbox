@@ -9,20 +9,31 @@ module.exports = function responseFormatter ({res, result}) {
   // Content type
   // Note: result.headers is a case-sensitive js object,
   //       res.get/setHeader is not (e.g. 'set-cookie' == 'Set-Cookie')
-  let contentType = result && result.headers && result.headers['Content-Type'] ||
+  let contentType = result && result.multiValueHeaders && result.multiValueHeaders['Content-Type'] ||
+                    result && result.multiValueHeaders && result.multiValueHeaders['content-type'] ||
+                    result && result.headers && result.headers['Content-Type'] ||
                     result && result.headers && result.headers['content-type']
   res.setHeader('Content-Type', contentType || 'application/json; charset=utf-8')
-  if (result.headers && result.headers['content-type']) delete result.headers['content-type']
+  if (result.multiValueHeaders && result.multiValueHeaders['content-type'])
+    delete result.multiValueHeaders['content-type']
+  else if (result.headers && result.headers['content-type']) {
+    delete result.headers['content-type']
+  }
 
   // Headers
-  if (result.headers) {
-    Object.keys(result.headers).forEach(k=> {
-      if (k.toLowerCase() === 'set-cookie' && result.headers[k]) {
-        res.setHeader(k, result.headers[k].replace('; Secure', '; Path=/'))
-      } else if (k === 'cache-control' && result.headers[k]) {
-        res.setHeader('Cache-Control', result.headers[k])
+  const headers = result.multiValueHeaders || result.headers
+  if (headers) {
+    Object.keys(headers).forEach(k=> {
+      if (k.toLowerCase() === 'set-cookie' && headers[k]) {
+        if (!Array.isArray(headers[k]))
+          res.setHeader(k, headers[k].replace('; Secure', '; Path=/'))
+        else {
+          res.setHeader(k, headers[k].map(value => value.replace('; Secure', '; Path=/')))
+        }
+      } else if (k === 'cache-control' && headers[k]) {
+        res.setHeader('Cache-Control', headers[k])
       } else {
-        res.setHeader(k, result.headers[k])
+        res.setHeader(k, headers[k])
       }
     })
   }

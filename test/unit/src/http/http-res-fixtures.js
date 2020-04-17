@@ -34,6 +34,11 @@ let arc6 = {
   encodedWithBinaryType: {
     body: b64enc('hi there\n'),
     headers: {'Content-Type': 'application/pdf'}
+  },
+
+  // Set multiValueHeaders
+  multiValueHeaders: {
+    multiValueHeaders: {'Set-Cookie': ['Foo', 'Bar']}
   }
 }
 
