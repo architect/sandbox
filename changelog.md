@@ -2,6 +2,14 @@
 
 ---
 
+## [1.9.5] 2020-04-18
+
+### Fixed
+
+- Updated dependency status checker, fixes false positive rehyhdration of packages installed by archive or git repo
+
+---
+
 ## [1.9.4] 2020-04-16
 
 ### Added
