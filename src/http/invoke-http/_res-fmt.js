@@ -13,11 +13,11 @@ module.exports = function responseFormatter ({res, result}) {
                     result && result.multiValueHeaders && result.multiValueHeaders['content-type'] ||
                     result && result.headers && result.headers['Content-Type'] ||
                     result && result.headers && result.headers['content-type']
-  res.setHeader('Content-Type', contentType || 'application/json; charset=utf-8')
-  if (result.multiValueHeaders && result.multiValueHeaders['content-type'])
-    delete result.multiValueHeaders['content-type']
-  if (result.headers && result.headers['content-type'])
-    delete result.headers['content-type']
+  res.setHeader('Content-Type', contentType || 'application/json; charset=utf-8');
+  [result.multiValueHeaders || {}, result.headers || {}].forEach(headers => Object.keys(headers).forEach(key => {
+    if (key.toLowerCase() !== 'content-type') return
+    delete headers[key];
+  }));
 
   // Headers
   let headers = result.multiValueHeaders || result.headers
