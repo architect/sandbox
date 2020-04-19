@@ -38,6 +38,7 @@ let arc6 = {
 
   // Set multiValueHeaders
   multiValueHeaders: {
+    headers: {'Set-Cookie': 'Baz'},
     multiValueHeaders: {'Set-Cookie': ['Foo', 'Bar']}
   }
 }

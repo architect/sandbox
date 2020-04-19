@@ -16,13 +16,18 @@ module.exports = function responseFormatter ({res, result}) {
   res.setHeader('Content-Type', contentType || 'application/json; charset=utf-8')
   if (result.multiValueHeaders && result.multiValueHeaders['content-type'])
     delete result.multiValueHeaders['content-type']
-  else if (result.headers && result.headers['content-type']) {
+  if (result.headers && result.headers['content-type'])
     delete result.headers['content-type']
-  }
 
   // Headers
-  const headers = result.multiValueHeaders || result.headers
+  let headers = result.multiValueHeaders || result.headers
   if (headers) {
+    // APIG merges `headers` and `multiValueHeaders` if both are set, favoring multiValue first
+    if (result.multiValueHeaders && result.headers) {
+      headers = Object.entries(result.headers).reduce((accumulator, [key, value]) => {
+        return { ...accumulator, [key]: [...(result.multiValueHeaders[key] || []), value] }
+      }, headers)
+    }
     Object.keys(headers).forEach(k=> {
       if (k.toLowerCase() === 'set-cookie' && headers[k]) {
         if (!Array.isArray(headers[k]))
