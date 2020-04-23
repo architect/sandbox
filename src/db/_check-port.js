@@ -2,7 +2,7 @@ let net = require('net')
 module.exports = function checkPort(port, fn) {
   let tester = net.createServer()
   .once('error', function (err) {
-    if (err.code != 'EADDRINUSE') return fn(err)
+    if (err.code == 'EADDRINUSE') return fn(err)
     fn(null, true)
   })
   .once('listening', function() {
