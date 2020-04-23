@@ -2,6 +2,19 @@
 
 ---
 
+## [1.9.6] 2020-04-22
+
+### Added
+
+- Adds support for `multiValueHeaders` in response object; fixes #764, thanks @andybee!
+
+
+### Fixed
+
+- Fixed an issue where `multiValueHeaders` may conflict with `headers` values for `Content-Type`; thanks @andybee!
+
+---
+
 ## [1.9.5] 2020-04-18
 
 ### Fixed
