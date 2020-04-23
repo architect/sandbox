@@ -23,6 +23,7 @@ module.exports = function responseValidator ({res, result}) {
     'statusCode',
     'body',
     'headers',
+    'multiValueHeaders',
     'isBase64Encoded'
   ]
 

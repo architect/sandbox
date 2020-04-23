@@ -41,7 +41,7 @@ let teardown = () => {
 }
 
 test('Architect v6 dependency-free responses', t => {
-  t.plan(11)
+  t.plan(13)
   let run = (response, callback) => {
     let output = {
       getHeader: sinon.fake(getHeader.bind({}, null)),
@@ -70,6 +70,10 @@ test('Architect v6 dependency-free responses', t => {
     t.equal(b64dec(res.body), 'hi there\n', 'Body still base64 encoded')
     t.notOk(res.isBase64Encoded, 'isBase64Encoded param NOT set automatically')
     t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+  run(responses.arc6.multiValueHeaders, res => {
+    t.deepEqual(res.headers['Set-Cookie'], ['Foo', 'Bar', 'Baz'], 'Header values set')
+    t.deepEqual(res.headers['Content-Type'], ['text/plain'], 'Content-Type favors multiValueHeaders')
   })
   run(responses.arc5.cookie, res => {
     t.ok(res.body.includes('Invalid response parameter'), 'Arc v5 style parameter causes error')
