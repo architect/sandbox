@@ -13,6 +13,7 @@
 
 - Fixed an issue where `multiValueHeaders` may conflict with `headers` values for `Content-Type`; thanks @andybee!
 - Fixed an issue where errors weren't being handled if the database port conflicted on startup; thanks @exalted!
+- Fixed `Deno.env()` became `Deno.env.toObject()` for the impending 1.x release
 
 ---
 
