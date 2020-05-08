@@ -1,6 +1,6 @@
 import { handler } from './index.ts';
 
-const env = Deno.env();
+const env = Deno.env.toObject();
 const event = JSON.parse(env.__ARC_REQ__);
 const context = JSON.parse(env.__ARC_CONTEXT__);
 
