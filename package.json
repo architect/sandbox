@@ -43,7 +43,7 @@
     "tree-kill": "~1.2.2",
     "update-notifier": "~4.1.0",
     "uuid": "~7.0.3",
-    "ws": "~7.2.3"
+    "ws": "~7.3.0"
   },
   "devDependencies": {
     "@architect/functions": "^3.8.1",
