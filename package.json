@@ -42,7 +42,7 @@
     "send": "~0.17.1",
     "tree-kill": "~1.2.2",
     "update-notifier": "~4.1.0",
-    "uuid": "~7.0.3",
+    "uuid": "~8.0.0",
     "ws": "~7.3.0"
   },
   "devDependencies": {
