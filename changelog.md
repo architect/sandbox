@@ -2,6 +2,24 @@
 
 ---
 
+## [1.10.0] 2020-05-17
+
+### Added
+
+- Adds Yarn support for hydration
+- Improved default caching behavior for static assets; fixes #273
+  - Any assets that don't have `cache-control` explicitly set will now default to using `ETag` in order to improve the reliability of cache invalidation
+  - HTML & JSON responses still default to anti-caching headers
+- Added path peeking (aka pretty URLs)
+  - Example: to load `/foo/index.html`, you used to have to request `/foo/`
+- Added ETag support to Sandbox static asset serving
+
+### Fixed
+
+- Fixed `ERR_FEATURE_UNAVAILABLE_ON_PLATFORM` error in Node.js 14; fixes #780, ht @stegosource
+
+---
+
 ## [1.9.6] 2020-04-22
 
 ### Added
