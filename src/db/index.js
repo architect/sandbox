@@ -17,25 +17,31 @@ function start(callback) {
 
   if (arc.tables) {
     let port = process.env.ARC_TABLES_PORT || 5000
-    check(port, function _check(err, inUse) {
-      if (err) throw err
-      if (inUse) {
-        server = {close}
-        init(callback)
-      }
-      else {
-        server = dynalite({
-          createTableMs: 0
-        }).listen(port, function _server(err) {
-          if (err) {
-            // if we err then the db has been started elsewhere..
-            // just try to continue
-            console.log(err)
-          }
+    let hasExternalDb = process.env.ARC_DB_EXTERNAL || false
+    if (!hasExternalDb) {
+      check(port, function _check(err, inUse) {
+        if (err) throw err
+        if (inUse) {
+          server = {close}
           init(callback)
-        })
-      }
-    })
+        }
+        else {
+          server = dynalite({
+            createTableMs: 0
+          }).listen(port, function _server(err) {
+            if (err) {
+              // if we err then the db has been started elsewhere..
+              // just try to continue
+              console.log(err)
+            }
+            init(callback)
+          })
+        }
+      })
+    } else {
+      // Using external DB
+      init(callback)
+    }
     return {
       close: function (callback) {
         server.close(callback)
@@ -51,3 +57,4 @@ function start(callback) {
 module.exports = {
   start
 }
+
