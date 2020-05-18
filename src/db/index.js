@@ -57,4 +57,3 @@ function start(callback) {
 module.exports = {
   start
 }
-
