@@ -2,9 +2,15 @@ let pool = require('./pool')
 
 module.exports = function handle(req, res) {
   try {
-    let record = pool.getConnection(req.body.id)
-    console.log('called send and got record', record)
-    //record.ws.send(JSON.stringify(req.body.payload))
+    let ws = pool.getConnection(req.body.id)
+    if (ws) {
+      ws.send(JSON.stringify(req.body.payload))
+    }
+    else {
+      let e = Error('GoneException: 410')
+      e.code = 'GoneException'
+      throw e
+    }
   }
   catch(e) {
     console.log('Failed to ws.send', e)

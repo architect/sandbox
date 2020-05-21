@@ -4,16 +4,14 @@ let pool = require('./pool')
 let getPath = require('./get-path')
 let noop = err => err? console.log(err): ''
 
-module.exports = function connection(ws, wss) {
+module.exports = function connection(connectionId, ws) {
 
-  //console.log('connection event called', ws, req)
+  // save this for send to use
+  pool.register(connectionId, ws)
 
   let $default = getPath('default')
   let $disconnect = getPath('disconnect')
   let quiet = process.env.ARC_QUIET
-  let connectionId = 'wot mate'
-
-  pool.connect(ws, wss)
 
   ws.on('message', function message(msg) {
 
@@ -21,9 +19,8 @@ module.exports = function connection(ws, wss) {
     let action = payload.action || null
     let notFound = action === null || fs.existsSync(getPath(action)) === false
     if (notFound) {
-      // invoke src/ws/default
       if (!quiet) {
-        console.log('\nInvoking ws/default WebSocket Lambda')
+        console.log('\nws/default:' + connectionId)
       }
       invoke({
         action: $default,
@@ -32,9 +29,8 @@ module.exports = function connection(ws, wss) {
       }, noop)
     }
     else {
-      // invoke src/ws/${action}
       if (!quiet) {
-        console.log(`\nInvoking ws/${action} WebSocket Lambda`)
+        console.log(`\nws/${ action }: ${ connectionId }`)
       }
       invoke({
         action: getPath(action),
@@ -45,9 +41,8 @@ module.exports = function connection(ws, wss) {
   })
 
   ws.on('close', function close() {
-    // invoke src/ws/disconnect
     if (!quiet) {
-      console.log(`\nInvoking ws/disconnect WebSocket Lambda`)
+      console.log(`\nws/disconnect: ${ connectionId }`)
     }
     invoke({
       action: $disconnect,

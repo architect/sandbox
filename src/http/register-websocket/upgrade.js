@@ -2,8 +2,6 @@ let getPath = require('./get-path')
 let http = require('http')
 let invoke = require('../invoke-ws')
 let Hashid = require('@begin/hashid')
-let pool = require('./pool')
-
 /**
  * Handle handleshake and possibly return error; note:
  * - In APIGWv2, !2xx responses hang up and return the status code
@@ -18,11 +16,10 @@ module.exports = function upgrade(wss) {
     // Create a connectionId uuid
     let h = new Hashid
     let connectionId = h.encode(Date.now())
-    pool.add({ connectionId })
 
     let quiet = process.env.ARC_QUIET
     if (!quiet) {
-      console.log('\nInvoking ws/connect WebSocket Lambda')
+      console.log('\nws/connect: ' + connectionId)
     }
 
     invoke({
@@ -39,8 +36,7 @@ module.exports = function upgrade(wss) {
       }
       else if (statusCode >= 200 && statusCode <= 208 || statusCode === 226) {
         wss.handleUpgrade(req, socket, head, (ws) => {
-          req.connectionId = connectionId
-          wss.emit('connection', ws, req)
+          wss.emit('connection', connectionId, ws)
         })
       }
       else {
