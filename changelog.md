@@ -2,6 +2,14 @@
 
 ---
 
+## [1.11.0] 2020-05-22
+
+### Fixed
+
+- Web socket `connectionId` was getting overwritten by concurrent client connections
+- Sending a message to a `connectionId` before it has connected should emit a `GoneException` 
+- h/t @andybee for helping track this down 🔍
+
 ## [1.10.0] 2020-05-17
 
 ### Added
