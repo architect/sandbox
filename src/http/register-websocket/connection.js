@@ -3,6 +3,7 @@ let invoke = require('../invoke-ws')
 let pool = require('./pool')
 let getPath = require('./get-path')
 let noop = err => err? console.log(err): ''
+let { updater } = require('@architect/utils')
 
 module.exports = function connection(connectionId, ws) {
 
@@ -11,7 +12,7 @@ module.exports = function connection(connectionId, ws) {
 
   let $default = getPath('default')
   let $disconnect = getPath('disconnect')
-  let quiet = process.env.ARC_QUIET
+  let update = updater('Sandbox')
 
   ws.on('message', function message(msg) {
 
@@ -19,9 +20,7 @@ module.exports = function connection(connectionId, ws) {
     let action = payload.action || null
     let notFound = action === null || fs.existsSync(getPath(action)) === false
     if (notFound) {
-      if (!quiet) {
-        console.log('\nws/default:' + connectionId)
-      }
+      update.status('ws/default: ' + connectionId)
       invoke({
         action: $default,
         body: msg,
@@ -29,9 +28,7 @@ module.exports = function connection(connectionId, ws) {
       }, noop)
     }
     else {
-      if (!quiet) {
-        console.log(`\nws/${ action }: ${ connectionId }`)
-      }
+      update.status(`ws/${ action }: ${ connectionId }`)
       invoke({
         action: getPath(action),
         body: msg,
@@ -41,9 +38,7 @@ module.exports = function connection(connectionId, ws) {
   })
 
   ws.on('close', function close() {
-    if (!quiet) {
-      console.log(`\nws/disconnect: ${ connectionId }`)
-    }
+    update.status(`ws/disconnect: ${ connectionId }`)
     invoke({
       action: $disconnect,
       connectionId,

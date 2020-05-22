@@ -2,6 +2,7 @@ let getPath = require('./get-path')
 let http = require('http')
 let invoke = require('../invoke-ws')
 let Hashid = require('@begin/hashid')
+let { updater } = require('@architect/utils')
 /**
  * Handle handleshake and possibly return error; note:
  * - In APIGWv2, !2xx responses hang up and return the status code
@@ -16,11 +17,8 @@ module.exports = function upgrade(wss) {
     // Create a connectionId uuid
     let h = new Hashid
     let connectionId = h.encode(Date.now())
-
-    let quiet = process.env.ARC_QUIET
-    if (!quiet) {
-      console.log('\nws/connect: ' + connectionId)
-    }
+    let update = updater('Sandbox')
+    update.status('ws/connect: ' + connectionId)
 
     invoke({
       action: $connect,
