@@ -47,7 +47,8 @@ module.exports = function invokeLambda(pathToLambda, event, callback) {
       let defaults = {
         __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
         PYTHONUNBUFFERED: true,
-        PYTHONPATH: path.join(pathToLambda, 'vendor')
+        PYTHONPATH: path.join(pathToLambda, 'vendor'),
+        LAMBDA_TASK_ROOT: pathToLambda,
       }
 
       let options = {
