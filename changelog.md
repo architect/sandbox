@@ -2,10 +2,11 @@
 
 ---
 
-## [1.12.0] 2020-05-22
+## [1.12.0-1.12.1] 2020-05-22 - 2020-06-01
 
 ### Fixed
 
+- Deno sandbox updated for 1.0.3; now forces reload every invocation
 - Web socket `connectionId` was getting overwritten by concurrent client connections
 - Sending a message to a `connectionId` before it has connected should emit a `GoneException` 
 - h/t @andybee for helping track this down 🔍
