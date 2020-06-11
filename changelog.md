@@ -2,15 +2,31 @@
 
 ---
 
-## [1.12.0-1.12.2] 2020-05-22 - 2020-06-04
+## [1.12.2] - 2020-06-04
+
+### Changed
+
+- Sandbox support for Deno updated for `1.0.5` and entry now looks for `index.{js,ts,tsx}` and `mod.{js,ts,tsx}`
+
+---
+
+## [1.12.1] 2020-06-01
+
+### Changed
+
+- Sandbox support for Deno updated for `1.0.3`; now forces reload every invocation
+
+---
+
+## [1.11.0 - 1.12.0] 2020-05-22
 
 ### Fixed
 
-- Deno sandbox updated for 1.0.5 and entry now looks for `index.{js,ts,tsx}` and `mod.{js,ts,tsx}`
-- Deno sandbox updated for 1.0.3; now forces reload every invocation
 - Web socket `connectionId` was getting overwritten by concurrent client connections
-- Sending a message to a `connectionId` before it has connected should emit a `GoneException` 
+- Sending a message to a `connectionId` before it has connected should emit a `GoneException`
 - h/t @andybee for helping track this down 🔍
+
+----
 
 ## [1.10.0] 2020-05-17
 
