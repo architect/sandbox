@@ -2,6 +2,25 @@
 
 ---
 
+## [1.12.3] 2020-06-16
+
+### Added
+
+- Added support for `@static spa true|false`
+
+
+### Changed
+
+- Updated dependencies
+
+
+### Fixed
+
+- Fixed proxy lookup to custom 404 page
+- Fixed incorrect filename in proxy 404 error message
+
+---
+
 ## [1.12.2] - 2020-06-04
 
 ### Changed
