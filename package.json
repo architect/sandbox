@@ -11,6 +11,9 @@
     "lint": "eslint src --fix",
     "rc": "npm version prerelease --preid RC"
   },
+  "engines": {
+    "node" : ">=10"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/architect/sandbox.git"
