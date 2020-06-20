@@ -137,6 +137,11 @@ function start(params, callback) {
           let capEnv = env.charAt(0).toUpperCase() + env.substr(1)
           process.env.ARC_CLOUDFORMATION = `${toLogicalID(arc.app[0])}${capEnv}`
         }
+        let spaSetting = tuple => tuple[0] === 'spa'
+        // findIndex instead of find so we don't mix up bools
+        let spa = arc.static && arc.static.some(spaSetting) && arc.static.findIndex(spaSetting)
+        let spaIsValid = arc.static && arc.static[spa] && typeof arc.static[spa][1] === 'boolean'
+        if (spaIsValid) process.env.ARC_STATIC_SPA = arc.static[spa][1]
       }
 
       // Populate session table (if not present)
