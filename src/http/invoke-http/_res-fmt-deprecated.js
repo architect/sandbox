@@ -2,7 +2,7 @@
  * Arc <6 response formatter
  * - Mocks response object shape for API Gateway VTL
  */
-module.exports = function responseFormatterDeprecated ({res, result}) {
+module.exports = function responseFormatterDeprecated ({ res, result }) {
   // HTTP status
   res.statusCode = result.status || result.code || result.statusCode || 200
 
@@ -34,12 +34,14 @@ module.exports = function responseFormatterDeprecated ({res, result}) {
 
   // Headers
   if (result.headers) {
-    Object.keys(result.headers).forEach(k=> {
+    Object.keys(result.headers).forEach(k => {
       if (k.toLowerCase() === 'set-cookie' && result.headers[k]) {
         res.setHeader(k, result.headers[k].replace('; Secure', '; Path=/'))
-      } else if (k === 'cache-control' && result.headers[k]) {
+      }
+      else if (k === 'cache-control' && result.headers[k]) {
         res.setHeader('Cache-Control', result.headers[k])
-      } else {
+      }
+      else {
         res.setHeader(k, result.headers[k])
       }
     })
@@ -73,7 +75,7 @@ module.exports = function responseFormatterDeprecated ({res, result}) {
 
 Please base64 encode your response and include a 'isBase64Encoded: true' parameter, or run your response through @architect/functions`
     return result.body
-}
+  }
 
   /**
    * Arc v5 proxy binary responses

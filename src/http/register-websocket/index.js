@@ -3,7 +3,7 @@ let upgrade = require('./upgrade')
 let connection = require('./connection')
 let sends = require('./send')
 
-module.exports = function registerWebSocket({app, server}) {
+module.exports = function registerWebSocket ({ app, server }) {
 
   let wss = new WebSocket.Server({ noServer: true })
 

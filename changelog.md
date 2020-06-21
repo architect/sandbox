@@ -2,6 +2,14 @@
 
 ---
 
+## [1.12.4] 2020-06-21
+
+### Changed
+
+- Internal change: implemented new code standard with `@architect/eslint-config`
+
+---
+
 ## [1.12.3] 2020-06-16
 
 ### Added

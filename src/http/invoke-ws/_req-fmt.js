@@ -4,7 +4,7 @@ let URL = require('url')
  * Arc 6+ APIGWv2 request formatter
  * - Mocks essentials of request object shape from WS Lambda proxy integration
  */
-module.exports = function requestFormatter ({req, body, connectionId}) {
+module.exports = function requestFormatter ({ req, body, connectionId }) {
   let request = {
     requestContext: {
       connectionId

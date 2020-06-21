@@ -6,7 +6,7 @@ let invoker = require('./invoke-http')
 let name = utils.getLambdaName
 let updater = utils.updater
 
-module.exports = function reg(app, api, type, routes) {
+module.exports = function reg (app, api, type, routes) {
   let quiet = process.env.QUIET
   if (!quiet) {
     let update = updater('Sandbox')
@@ -14,7 +14,7 @@ module.exports = function reg(app, api, type, routes) {
   }
 
   // adds default get / aka 'proxy at root'
-  let hasGetIndex = routes.some(tuple=> tuple[0].toLowerCase() === 'get' && tuple[1] === '/')
+  let hasGetIndex = routes.some(tuple => tuple[0].toLowerCase() === 'get' && tuple[1] === '/')
   let deprecated = process.env.DEPRECATED
   if (!hasGetIndex && !deprecated) {
     // Sandbox running as a dependency (most common use case)
@@ -33,17 +33,17 @@ module.exports = function reg(app, api, type, routes) {
     app.get('/', exec)
   }
 
-  routes.forEach(r=> {
+  routes.forEach(r => {
     let verb = r[0].toLowerCase()
     let route = r[1]
     let path = name(route)
     let pathToFunction = join(process.cwd(), 'src', type, `${verb}${path}`)
 
     // pretty print the route reg
-    log({verb, route, path})
+    log({ verb, route, path })
 
     // reg the route with the Router instance
-    let exec = invoker({verb, pathToFunction, route})
+    let exec = invoker({ verb, pathToFunction, route })
     app[verb](route, exec)
   })
 }

@@ -5,8 +5,8 @@ let headerFormatter = require('./_header-fmt')
  * Arc 6+ request formatter
  * - Mocks request object shape from API Gateway / Lambda proxy integration
  */
-module.exports = function requestFormatter ({verb, route, req}) {
-  let {body, params, url} = req
+module.exports = function requestFormatter ({ verb, route, req }) {
+  let { body, params, url } = req
   let path = URL.parse(url).pathname
   let query = {}
   let multiValueQueryStringParameters = {}
@@ -21,11 +21,11 @@ module.exports = function requestFormatter ({verb, route, req}) {
     }
     else {
       query[param] = queryData[param]
-      multiValueQueryStringParameters[param] = [queryData[param]]
+      multiValueQueryStringParameters[param] = [ queryData[param] ]
     }
   }
 
-  let {headers, multiValueHeaders} = headerFormatter(req.headers)
+  let { headers, multiValueHeaders } = headerFormatter(req.headers)
 
   // API Gateway sends a null literal instead of an empty object because reasons
   let nullify = i => Object.getOwnPropertyNames(i).length ? i : null
@@ -35,7 +35,7 @@ module.exports = function requestFormatter ({verb, route, req}) {
   if (route && route.includes(':')) {
     resource = route.split('/')
       .map(part => part.startsWith(':')
-        ? `{${part.replace(':','')}}`
+        ? `{${part.replace(':', '')}}`
         : part)
       .join('/')
   }

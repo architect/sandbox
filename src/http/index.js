@@ -20,8 +20,8 @@ let fallback = require('./fallback')
 let jsonTypes = /^application\/.*json/
 let formURLenc = /^application\/x-www-form-urlencoded/
 let isWSsend = req => req.url === '/__arc'
-let limit = '6mb';
-let app = Router({mergeParams: true})
+let limit = '6mb'
+let app = Router({ mergeParams: true })
 
 app.use(binary)
 
@@ -46,12 +46,12 @@ let server
 let websocket
 
 // starts the http server
-app.start = function start(callback) {
+app.start = function start (callback) {
 
   // read the arc file
-  let {arc} = readArc()
-  let staticFolder = tuple=> tuple[0] === 'folder'
-  let folder = arc.static && arc.static.some(staticFolder)? arc.static.find(staticFolder)[1] : 'public'
+  let { arc } = readArc()
+  let staticFolder = tuple => tuple[0] === 'folder'
+  let folder = arc.static && arc.static.some(staticFolder) ? arc.static.find(staticFolder)[1] : 'public'
 
   // allow override of 'public' folder
   process.env.ARC_SANDBOX_PATH_TO_STATIC = join(process.cwd(), folder)
@@ -60,7 +60,7 @@ app.start = function start(callback) {
   registerHTTP(app, '@http', 'http', arc.http || [])
 
   // create an actual server; how quaint!
-  server = http.createServer(function _request(req, res) {
+  server = http.createServer(function _request (req, res) {
     if (process.env.ARC_SANDBOX_ENABLE_CORS) {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Access-Control-Request-Method', '*')
@@ -78,7 +78,7 @@ app.start = function start(callback) {
   // bind ws
   if (arc.ws) {
     let routes = arc.ws
-    websocket = registerWS({app, server, routes})
+    websocket = registerWS({ app, server, routes })
   }
 
   // start listening
@@ -86,17 +86,17 @@ app.start = function start(callback) {
   return app
 }
 
-app.close = function close(callback) {
+app.close = function close (callback) {
   series([
-    function _server(callback) {
+    function _server (callback) {
       if (server) server.close(callback)
       else callback()
     },
-    function _websocket(callback) {
+    function _websocket (callback) {
       if (websocket) websocket.close(callback)
       else callback()
     },
-  ], function _closed(err) {
+  ], function _closed (err) {
     if (err) console.log(err)
     if (callback) callback()
   })

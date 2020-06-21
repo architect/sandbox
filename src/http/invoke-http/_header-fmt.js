@@ -3,7 +3,7 @@
  * - See: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-known-issues.html
  *   - TODO: write a script to scrape this page every once in a while I guess
  */
-module.exports = function headerFormatter(reqHeaders={}) {
+module.exports = function headerFormatter (reqHeaders = {}) {
   let headers = {}
   let multiValueHeaders = {}
 
@@ -54,8 +54,8 @@ module.exports = function headerFormatter(reqHeaders={}) {
    * multiValueHeaders impl: it's the same, but different
    */
   Object.keys(headers).forEach(header => {
-    multiValueHeaders[header] = [headers[header]]
+    multiValueHeaders[header] = [ headers[header] ]
   })
 
-  return {headers, multiValueHeaders}
+  return { headers, multiValueHeaders }
 }

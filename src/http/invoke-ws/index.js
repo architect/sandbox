@@ -4,8 +4,8 @@ let requestFormatter = require('./_req-fmt')
 /**
  * Formats WebSocket request event objects
  */
-function invokeWebSocketEvent(params, callback) {
-  let {action, body, connectionId, req} = params
+function invokeWebSocketEvent (params, callback) {
+  let { action, body, connectionId, req } = params
 
   // Only $connect + $disconnect WS invocations have headers
   if (req && req.headers) {
@@ -16,7 +16,7 @@ function invokeWebSocketEvent(params, callback) {
   }
 
   // Set up request shape
-  let request = requestFormatter({req, body, connectionId})
+  let request = requestFormatter({ req, body, connectionId })
 
   // Run the lambda sig locally
   invoke(action, request, callback)
