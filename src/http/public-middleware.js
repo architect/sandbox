@@ -7,7 +7,7 @@ let exists = fs.existsSync
 /**
  * serves static assets found in ./public at /_static
  */
-module.exports = function publicMiddleware(req, res, next) {
+module.exports = function publicMiddleware (req, res, next) {
   let isStatic = req.url.startsWith('/_static')
   if (isStatic) {
     sends(req, res, next)
@@ -17,7 +17,7 @@ module.exports = function publicMiddleware(req, res, next) {
   }
 }
 
-function sends(req, res, next) {
+function sends (req, res, next) {
 
   let basePath = req.url.replace('/_static', '')
   if (!basePath || basePath === '/')
@@ -32,18 +32,18 @@ function sends(req, res, next) {
     next()
   }
   else {
-    function error(err) {
+    function error (err) {
       res.statusCode = err.status || 500
       res.end(err.message)
     }
 
-    function redirect() {
+    function redirect () {
       res.statusCode = 301
       res.setHeader('Location', req.url + '/')
       res.end('\n')
     }
 
-    send(req, pathToFile, {root})
+    send(req, pathToFile, { root })
       .on('error', error)
       .on('directory', redirect)
       .pipe(res)

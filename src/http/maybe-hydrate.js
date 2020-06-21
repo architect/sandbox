@@ -5,7 +5,7 @@ let glob = require('glob')
 let join = require('path').join
 let hydrate = require('@architect/hydrate')
 let series = require('run-series')
-let {chars, inventory} = require('@architect/utils')
+let { chars, inventory } = require('@architect/utils')
 
 /**
  * Checks for the existence of supported dependency manifests, and auto-hydrates each function's dependencies as necessary
@@ -45,14 +45,14 @@ module.exports = function maybeHydrate (callback) {
           let copyShared = false
           // Disable sidecar shared/views hydration; handled project-wide elsewhere
           let hydrateShared = path === shared || path === views || false
-          hydrate.install({basepath, copyShared, hydrateShared}, callback)
+          hydrate.install({ basepath, copyShared, hydrateShared }, callback)
         }
         series([
           function _packageJson (callback) {
             let packageJson = exists(join(basepath, 'package.json'))
             if (packageJson) {
               let result = depStatus(basepath)
-              let {missing, outdated, warn} = result
+              let { missing, outdated, warn } = result
               let installDeps = missing.length || outdated.length || warn.length
               if (installDeps) {
                 install(callback)

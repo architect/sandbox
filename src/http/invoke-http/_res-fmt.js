@@ -2,7 +2,7 @@
  * Arc 6+ response formatter
  * - Mocks response object shape for API Gateway / Lambda proxy integration
  */
-module.exports = function responseFormatter ({res, result}) {
+module.exports = function responseFormatter ({ res, result }) {
   // HTTP status
   res.statusCode = result.statusCode || 200
 
@@ -14,30 +14,32 @@ module.exports = function responseFormatter ({res, result}) {
                     result && result.headers && result.headers['Content-Type'] ||
                     result && result.headers && result.headers['content-type']
   res.setHeader('Content-Type', contentType || 'application/json; charset=utf-8');
-  [result.multiValueHeaders || {}, result.headers || {}].forEach(headers => Object.keys(headers).forEach(key => {
+  [ result.multiValueHeaders || {}, result.headers || {} ].forEach(headers => Object.keys(headers).forEach(key => {
     if (key.toLowerCase() !== 'content-type') return
-    delete headers[key];
-  }));
+    delete headers[key]
+  }))
 
   // Headers
   let headers = result.multiValueHeaders || result.headers
   if (headers) {
     // APIG merges `headers` and `multiValueHeaders` if both are set, favoring multiValue first
     if (result.multiValueHeaders && result.headers) {
-      headers = Object.entries(result.headers).reduce((accumulator, [key, value]) => {
-        return { ...accumulator, [key]: [...(result.multiValueHeaders[key] || []), value] }
+      headers = Object.entries(result.headers).reduce((accumulator, [ key, value ]) => {
+        return { ...accumulator, [key]: [ ...(result.multiValueHeaders[key] || []), value ] }
       }, headers)
     }
-    Object.keys(headers).forEach(k=> {
+    Object.keys(headers).forEach(k => {
       if (k.toLowerCase() === 'set-cookie' && headers[k]) {
         if (!Array.isArray(headers[k]))
           res.setHeader(k, headers[k].replace('; Secure', '; Path=/'))
         else {
           res.setHeader(k, headers[k].map(value => value.replace('; Secure', '; Path=/')))
         }
-      } else if (k === 'cache-control' && headers[k]) {
+      }
+      else if (k === 'cache-control' && headers[k]) {
         res.setHeader('Cache-Control', headers[k])
-      } else {
+      }
+      else {
         res.setHeader(k, headers[k])
       }
     })

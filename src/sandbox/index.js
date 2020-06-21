@@ -9,17 +9,17 @@ let hydrate = require('@architect/hydrate')
 let maybeHydrate = require('../http/maybe-hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
-let {banner, chars, fingerprint, initEnv,
-     portInUse, toLogicalID, updater} = require('@architect/utils')
+let { banner, chars, fingerprint, initEnv,
+  portInUse, toLogicalID, updater } = require('@architect/utils')
 let readArc = require('./read-arc')
 
 let client
 let bus
 
-function start(params, callback) {
+function start (params, callback) {
   params = params || {}
   let start = Date.now()
-  let {port=3333, options, version, quiet=false} = params
+  let { port = 3333, options, version, quiet = false } = params
   let update = updater('Sandbox')
   let arc
   let isDefaultProject
@@ -30,7 +30,7 @@ function start(params, callback) {
    * Set up Sandbox ports
    * CLI args > env var > passed arg
    */
-  let findPort = option => ['-p', '--port', 'port'].includes(option)
+  let findPort = option => [ '-p', '--port', 'port' ].includes(option)
   if (options && options.some(findPort)) {
     let thePort = i => options[options.indexOf(i) + 1] || port
     if (options.includes('-p'))
@@ -47,7 +47,7 @@ function start(params, callback) {
   if (notNum(process.env.ARC_EVENTS_PORT) ||
       notNum(process.env.ARC_TABLES_PORT) ||
       notNum(port)) {
-        throw ReferenceError('Ports must be numbers')
+    throw ReferenceError('Ports must be numbers')
   }
 
   // Set non-conflicting ports for running multiple simultaneous Architect projects
@@ -63,7 +63,7 @@ function start(params, callback) {
   process.env.ARC_QUIET = quiet || '' // For when sandbox is being run outside of @arc/arc
 
   // Set up verbositude
-  let findVerbose = option => ['-v', '--verbose', 'verbose'].includes(option)
+  let findVerbose = option => [ '-v', '--verbose', 'verbose' ].includes(option)
   if (options && options.some(findVerbose)) {
     verbose = true
   }
@@ -71,8 +71,8 @@ function start(params, callback) {
   // Set up promise if there is no callback
   let promise
   if (!callback) {
-    promise = new Promise(function(res, rej) {
-      callback = function(err, result) {
+    promise = new Promise(function (res, rej) {
+      callback = function (err, result) {
         err ? rej(err) : res(result)
       }
     })
@@ -82,14 +82,14 @@ function start(params, callback) {
     /**
      * Make sure we have access to the desired HTTP port
      */
-    function _checkPort(callback) {
+    function _checkPort (callback) {
       portInUse(port, callback)
     },
 
     /**
      * Print the banner (which also loads some boostrap env vars)
      */
-    function _printBanner(callback) {
+    function _printBanner (callback) {
       banner(params)
       callback()
     },
@@ -97,7 +97,7 @@ function start(params, callback) {
     /**
      * Read the current Architect project (or use a default project)
      */
-    function _checkArc(callback) {
+    function _checkArc (callback) {
       let check = readArc()
       arc = check.arc
       if (!quiet && !check.filepath) {
@@ -113,7 +113,7 @@ function start(params, callback) {
     /**
      * Populate additional environment variables
      */
-    function _env(callback) {
+    function _env (callback) {
       /**
        * Ensure env is one of: 'testing', 'staging', or 'production'
        * - By default, set (or override) to 'testing'
@@ -162,12 +162,12 @@ function start(params, callback) {
     /**
      * Check to see if @static fingerprint is enabled, and maybe generate public/static.json
      */
-    function _maybeWriteStaticManifest(callback) {
+    function _maybeWriteStaticManifest (callback) {
       if (!arc.static || isDefaultProject) {
         callback()
       }
       else {
-        fingerprint({}, function next(err, result) {
+        fingerprint({}, function next (err, result) {
           if (err) callback(err)
           else {
             if (result && !quiet) {
@@ -182,7 +182,7 @@ function start(params, callback) {
     /**
      * Always initialize any missing functions on startup
      */
-    function _maybeInit(callback) {
+    function _maybeInit (callback) {
       if (!deprecated) {
         create({}, callback)
       }
@@ -192,15 +192,15 @@ function start(params, callback) {
     /**
      * Loop through functions and see if any need dependency hydration
      */
-    function _maybeHydrate(callback) {
+    function _maybeHydrate (callback) {
       maybeHydrate(callback)
     },
 
     /**
      * ... then hydrate Architect project files into functions
      */
-    function _hydrateShared(callback) {
-      hydrate({install: false}, function next(err) {
+    function _hydrateShared (callback) {
+      hydrate({ install: false }, function next (err) {
         if (err) callback(err)
         else {
           if (!quiet) {
@@ -214,9 +214,9 @@ function start(params, callback) {
     /**
      * Start dynalite with tables enumerated in .arc (if any)
      */
-    function _db(callback) {
+    function _db (callback) {
       if (arc.tables) {
-        client = db.start(function() {
+        client = db.start(function () {
           if (!quiet) {
             update.done('@tables created in local database')
           }
@@ -229,9 +229,9 @@ function start(params, callback) {
     /**
      * Start event bus to listen for arc.event.publish events
      */
-    function _events(callback) {
+    function _events (callback) {
       if (arc.events || arc.queues) {
-        bus = events.start(function() {
+        bus = events.start(function () {
           if (!quiet) {
             update.done('@events and @queues ready on local event bus')
           }
@@ -244,7 +244,7 @@ function start(params, callback) {
     /**
      * Start http server with routes enumerated in .arc (if any)
      */
-    function _http(callback) {
+    function _http (callback) {
       let ok = () => {
         let finish = Date.now()
         if (!quiet) {
@@ -263,7 +263,7 @@ function start(params, callback) {
       // Arc 6 may start with proxy at root, or empty `@http` pragma
       let arc6 = !deprecated && arc.static || arc.http
       if (arc5 || arc6) {
-        http.start(function() {
+        http.start(function () {
           ok()
           if (!quiet) {
             let link = chalk.green.bold.underline(`http://localhost:${port}\n`)
@@ -281,7 +281,7 @@ function start(params, callback) {
     /**
      * Run init script (if present)
      */
-    function _runInit(callback) {
+    function _runInit (callback) {
       let initJS = join(process.cwd(), 'scripts', 'sandbox-startup.js')
       let initPy = join(process.cwd(), 'scripts', 'sandbox-startup.py')
       let initRb = join(process.cwd(), 'scripts', 'sandbox-startup.rb')
@@ -314,7 +314,7 @@ function start(params, callback) {
           runtime = 'Ruby'
         }
         Promise.resolve(run).then(
-          function done(result) {
+          function done (result) {
             if (result) {
               if (!quiet) {
                 update.done(`Init (${runtime}):`)
@@ -341,7 +341,7 @@ function start(params, callback) {
     /**
      * Check aws-sdk installation status if installed globally
      */
-    function _checkAWS_SDK(callback) {
+    function _checkAWS_SDK (callback) {
       let cwd = process.cwd()
       let dir = __dirname
       if (!dir.startsWith(cwd)) {
@@ -353,7 +353,7 @@ function start(params, callback) {
       callback()
     }
   ],
-  function _done(err) {
+  function _done (err) {
     if (err) callback(err)
     else {
       if (verbose && process.env.ARC_AWS_CREDS === 'dummy' && !quiet) {
@@ -369,28 +369,28 @@ function start(params, callback) {
   return promise
 }
 
-function end(callback) {
+function end (callback) {
   // Set up promise if there is no callback
   let promise
   if (!callback) {
-    promise = new Promise(function(res, rej) {
-      callback = function(err, result) {
+    promise = new Promise(function (res, rej) {
+      callback = function (err, result) {
         err ? rej(err) : res(result)
       }
     })
   }
   // Read .arc again in case the state changed during the course of usage
-  let {arc} = readArc()
+  let { arc } = readArc()
   series([
-    function _client(callback) {
+    function _client (callback) {
       if (arc.tables) client.close(callback)
       else callback()
     },
-    function _bus(callback) {
+    function _bus (callback) {
       if (arc.events || arc.queues) bus.close(callback)
       else callback()
     },
-    function _http(callback) {
+    function _http (callback) {
       if (arc.http || arc.ws) http.close(callback)
       else callback()
     }
@@ -402,4 +402,4 @@ function end(callback) {
   return promise
 }
 
-module.exports = {start, end}
+module.exports = { start, end }

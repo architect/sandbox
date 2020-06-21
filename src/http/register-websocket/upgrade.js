@@ -8,8 +8,8 @@ let { updater } = require('@architect/utils')
  * - In APIGWv2, !2xx responses hang up and return the status code
  * - However, 2xx responses initiate a socket connection (automatically responding with 101)
  */
-module.exports = function upgrade(wss) {
-  return async function upgrade(req, socket, head) {
+module.exports = function upgrade (wss) {
+  return function upgrade (req, socket, head) {
 
     // get the path to the lambda function
     let $connect = getPath('connect')
@@ -25,7 +25,7 @@ module.exports = function upgrade(wss) {
       connectionId,
       req
     },
-    function connect(err, res) {
+    function connect (err, res) {
       let statusCode = res && res.statusCode
       if (err || !statusCode || typeof statusCode !== 'number') {
         socket.write(`HTTP/1.1 502 ${http.STATUS_CODES[502]}\r\n\r\n`)

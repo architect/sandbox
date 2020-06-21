@@ -1,8 +1,8 @@
 /**
  * Emulates our API Gateway binary → base64 handling
  */
-module.exports = function binary(req, res, next) {
-  function isBinary(headers) {
+module.exports = function binary (req, res, next) {
+  function isBinary (headers) {
     let binaryTypes = /^application\/octet-stream/
     let multipartFormData = /^multipart\/form-data/
     if (binaryTypes.test(headers['content-type'])) return true

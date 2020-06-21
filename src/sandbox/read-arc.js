@@ -22,7 +22,7 @@ data
  * unfortunately some modules depend on arc read throwing so for compat reasons it does that
  * this wrapper forces it into continuation passing style
  */
-module.exports = function arcfile() {
+module.exports = function arcfile () {
   let update = updater('Sandbox')
   let { arc, filepath, errors } = read()
 

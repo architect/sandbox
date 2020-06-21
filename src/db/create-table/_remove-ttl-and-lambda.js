@@ -1,6 +1,6 @@
-module.exports = function _removeTTL(attr) {
+module.exports = function _removeTTL (attr) {
   var clean = {}
-  Object.keys(attr).forEach(k=> {
+  Object.keys(attr).forEach(k => {
     if (attr[k] != 'TTL' && attr[k] != 'Lambda' && k != 'stream') {
       clean[k] = attr[k]
     }
