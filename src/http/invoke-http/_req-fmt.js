@@ -1,5 +1,5 @@
 let URL = require('url')
-let headerFormatter = require('./_header-fmt')
+let headerFormatter = require('./_req-header-fmt')
 
 /**
  * Arc 6+ request formatter

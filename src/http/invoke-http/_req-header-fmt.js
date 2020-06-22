@@ -3,12 +3,12 @@
  * - See: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-known-issues.html
  *   - TODO: write a script to scrape this page every once in a while I guess
  */
-module.exports = function headerFormatter (reqHeaders = {}) {
+module.exports = function requestHeaderFormatter (reqHeaders = {}) {
   let headers = {}
   let multiValueHeaders = {}
 
   /**
-   * Manglings: for whatever reason Authorization, Host, User-Agent, & Date are force-Pascal-kebab-cased
+   * Manglings: for whatever reason Authorization, Date, Host, and User-Agent are force-Pascal-kebab-cased
    * No, this isn't documented.
    */
   Object.keys(reqHeaders).forEach(header => {
@@ -34,14 +34,15 @@ module.exports = function headerFormatter (reqHeaders = {}) {
   Object.keys(reqHeaders).forEach(header => {
     let h = header.toLowerCase()
     let drops = [
+      'connection',
       'content-md5',
       'expect',
       'max-forwards',
       'proxy-authenticate',
       'server',
       'te',
-      'transfer-encoding',
       'trailer',
+      'transfer-encoding',
       'upgrade',
       'www-authenticate',
     ]

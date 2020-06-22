@@ -1,5 +1,5 @@
 let test = require('tape')
-let headerFormatter = require('../../../../../src/http/invoke-http/_header-fmt')
+let headerFormatter = require('../../../../../src/http/invoke-http/_req-header-fmt')
 
 test('Set up env', t => {
   t.plan(1)
@@ -21,7 +21,7 @@ test('Header mangling', t => {
     'user-agent': 'whatev',
     date: 'whatev',
   }
-  let {headers, multiValueHeaders} = headerFormatter(reqHeaders)
+  let { headers, multiValueHeaders } = headerFormatter(reqHeaders)
   // Upcasing
   t.ok(headers.Authorization, 'Got back upcased Authorization')
   t.ok(headers.Host, 'Got back upcased Host')
@@ -46,6 +46,7 @@ test('Header drops', t => {
   t.plan(2)
   let reqHeaders = {
     'ok': 'fine', // Should come through, everything else not so much
+    'connection': 'whatev',
     'content-md5': 'whatev',
     'expect': 'whatev',
     'max-forwards': 'whatev',
@@ -57,7 +58,7 @@ test('Header drops', t => {
     'upgrade': 'whatev',
     'www-authenticate': 'whatev',
   }
-  let {headers, multiValueHeaders} = headerFormatter(reqHeaders)
+  let { headers, multiValueHeaders } = headerFormatter(reqHeaders)
   t.equal(Object.keys(headers).length, 1, 'Dropped appropriate headers')
   t.equal(Object.keys(multiValueHeaders).length, 1, 'Dropped appropriate multiValueHeaders')
 })
