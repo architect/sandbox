@@ -73,7 +73,7 @@ test('Architect v6 dependency-free responses', t => {
   })
   run(responses.arc6.multiValueHeaders, res => {
     t.deepEqual(res.headers['set-cookie'], [ 'Foo', 'Bar', 'Baz' ], 'Header values set')
-    t.deepEqual(res.headers['Content-Type'], [ 'text/plain' ], 'Content-Type favors multiValueHeaders')
+    t.deepEqual(res.headers['content-type'], [ 'text/plain' ], 'Content-Type favors multiValueHeaders')
   })
   run(responses.arc5.cookie, res => {
     t.ok(res.body.includes('Invalid response parameter'), 'Arc v5 style parameter causes error')

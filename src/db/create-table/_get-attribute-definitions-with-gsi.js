@@ -13,7 +13,7 @@ function fixer (obj) {
   return result
 }
 
-module.exports = function getAttributeDefinitions (attr, name, indexes) {
+module.exports = function getAttributeDefinitionsWithGSI (attr, name, indexes) {
 
   let tableName = name.split(/staging-|production-/)[1]
 
@@ -22,6 +22,13 @@ module.exports = function getAttributeDefinitions (attr, name, indexes) {
 
   // interpolates attrs from table definitions and indexes
   let fixed = actual.map(fixer).concat(fixer(clean(attr))).reduce((a, b) => a.concat(b))
+
+  // remove dupes (like table fields defined in both base @table definition as well as @indexes definition)
+  fixed = fixed.filter((a, index, array) =>
+    index === array.findIndex((t) => (
+      t.AttributeName === a.AttributeName
+    ))
+  )
 
   // an array of [{AttributeName, AttributeType}]
   return fixed
