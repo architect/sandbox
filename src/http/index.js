@@ -62,10 +62,10 @@ app.start = function start (callback) {
   // create an actual server; how quaint!
   server = http.createServer(function _request (req, res) {
     if (process.env.ARC_SANDBOX_ENABLE_CORS) {
-      res.setHeader('Access-Control-Allow-Origin', '*')
-      res.setHeader('Access-Control-Request-Method', '*')
-      res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET')
-      res.setHeader('Access-Control-Allow-Headers', '*')
+      res.setHeader('access-control-allow-origin', '*')
+      res.setHeader('access-control-request-method', '*')
+      res.setHeader('access-control-allow-methods', 'OPTIONS, GET')
+      res.setHeader('access-control-allow-headers', '*')
       if (req.method === 'OPTIONS') {
         res.writeHead(200)
         res.end()

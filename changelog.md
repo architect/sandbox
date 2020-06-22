@@ -2,15 +2,7 @@
 
 ---
 
-## [1.12.4] 2020-06-21
-
-### Changed
-
-- Internal change: implemented new code standard with `@architect/eslint-config`
-
----
-
-## [1.12.3] 2020-06-16
+## [1.12.3] 2020-06-21
 
 ### Added
 
@@ -20,12 +12,18 @@
 ### Changed
 
 - Updated dependencies
+- Response header casing now matches API Gateway (read: everything is lower-cased)
+- Internal change: implemented new code standard with `@architect/eslint-config`
 
 
 ### Fixed
 
 - Fixed proxy lookup to custom 404 page
 - Fixed incorrect filename in proxy 404 error message
+- Response headers are now remapped (and in some cases dropped) per observed behavior in API Gateway
+  - Worth noting, this follows *actually observed* API Gateway behavior; what's published in their docs (link below) has been known to differ from reality
+  - https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-known-issues.html
+  - Fixes #879; /ht @andybee
 
 ---
 
