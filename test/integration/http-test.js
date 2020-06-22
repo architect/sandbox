@@ -2,7 +2,7 @@ let path = require('path')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sandbox = require('../../src')
-let {http} = require('../../src')
+let { http } = require('../../src')
 
 let cwd = process.cwd()
 let b64dec = i => Buffer.from(i, 'base64').toString()
@@ -14,7 +14,7 @@ let shutdown = (t, err) => {
 }
 
 let client
-test('env', t=> {
+test('env', t => {
   t.plan(2)
   t.ok(sandbox, 'got sandbox')
   t.ok(http, 'got http')
@@ -23,150 +23,150 @@ test('env', t=> {
 /**
  * Test sandbox http in isolation
  */
-test('http.start', t=> {
+test('http.start', t => {
   t.plan(2)
   // move to test/mock
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
-  client = http.start(function() {
+  client = http.start(function () {
     t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
     t.ok(client, '@http mounted')
   })
 })
 
-test('get /', t=> {
+test('get /', t => {
   t.plan(2)
-  tiny.get({url},
-  function _got(err, data) {
-    if (err) t.fail(err)
-    else {
-      t.ok(data, 'got /')
-      t.ok(data.body.startsWith('Hello from Architect Sandbox running the default runtime!'), 'is hello world')
-      console.log({data})
-    }
-  })
+  tiny.get({ url },
+    function _got (err, data) {
+      if (err) t.fail(err)
+      else {
+        t.ok(data, 'got /')
+        t.ok(data.body.startsWith('Hello from Architect Sandbox running the default runtime!'), 'is hello world')
+        console.log({ data })
+      }
+    })
 })
 
-test('get /binary', t=> {
+test('get /binary', t => {
   t.plan(2)
   tiny.get({
     url: url + '/binary'
-  }, function _got(err, data) {
+  }, function _got (err, data) {
     if (err) t.fail(err)
     else {
-      const img = Buffer.from(data.body).toString('base64');
+      const img = Buffer.from(data.body).toString('base64')
       t.ok(data, 'got /binary')
       t.ok(img.startsWith('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
-      console.log({data})
+      console.log({ data })
     }
   })
 })
 
-test('get /nodejs12.x', t=> {
+test('get /nodejs12.x', t => {
   t.plan(2)
   tiny.get({
     url: url + '/nodejs12.x'
-  }, function _got(err, data) {
+  }, function _got (err, data) {
     if (err) t.fail(err)
     else {
       t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs12.x!'), 'is hello world')
-      console.log({data})
+      console.log({ data })
     }
   })
 })
 
-test('get /nodejs10.x', t=> {
+test('get /nodejs10.x', t => {
   t.plan(2)
   tiny.get({
     url: url + '/nodejs10.x'
-  }, function _got(err, data) {
+  }, function _got (err, data) {
     if (err) t.fail(err)
     else {
       t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs10.x!'), 'is hello world')
-      console.log({data})
+      console.log({ data })
     }
   })
 })
 
-test('get /nodejs8.10', t=> {
+test('get /nodejs8.10', t => {
   t.plan(2)
   tiny.get({
     url: url + '/nodejs8.10'
-  }, function _got(err, data) {
+  }, function _got (err, data) {
     if (err) t.fail(err)
     else {
       t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running nodejs8.10!'), 'is hello world')
-      console.log({data})
+      console.log({ data })
     }
   })
 })
 
-test('get /python3.8', t=> {
+test('get /python3.8', t => {
   t.plan(2)
   tiny.get({
     url: url + '/python3.8'
-  }, function _got(err, data) {
+  }, function _got (err, data) {
     if (err) t.fail(err)
     else {
       t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running python3.8!'), 'is hello world')
-      console.log({data})
+      console.log({ data })
     }
   })
 })
 
-test('get /python3.7', t=> {
+test('get /python3.7', t => {
   t.plan(2)
   tiny.get({
     url: url + '/python3.7'
-  }, function _got(err, data) {
+  }, function _got (err, data) {
     if (err) t.fail(err)
     else {
       t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running python3.7!'), 'is hello world')
-      console.log({data})
+      console.log({ data })
     }
   })
 })
 
-test('get /python3.6', t=> {
+test('get /python3.6', t => {
   t.plan(2)
   tiny.get({
     url: url + '/python3.6'
-  }, function _got(err, data) {
+  }, function _got (err, data) {
     if (err) t.fail(err)
     else {
       t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running python3.6!'), 'is hello world')
-      console.log({data})
+      console.log({ data })
     }
   })
 })
 
-test('get /ruby2.5', t=> {
+test('get /ruby2.5', t => {
   t.plan(2)
   tiny.get({
     url: url + '/ruby2.5'
-  }, function _got(err, data) {
+  }, function _got (err, data) {
     if (err) t.fail(err)
     else {
       t.ok(data, 'got /')
       t.ok(data.body.startsWith('Hello from Architect Sandbox running ruby2.5!'), 'is hello world')
-      console.log({data})
+      console.log({ data })
     }
   })
 })
 
-test('post /post', t=> {
+test('post /post', t => {
   t.plan(3)
-  let data = {hi: 'there'}
+  let data = { hi: 'there' }
   tiny.post({
     url: url + '/post',
     data,
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-  }, function _got(err, result) {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'posted /post')
@@ -177,13 +177,13 @@ test('post /post', t=> {
   })
 })
 
-test('put /put', t=> {
+test('put /put', t => {
   t.plan(3)
-  let data = {hi: 'there'}
+  let data = { hi: 'there' }
   tiny.put({
     url: url + '/put',
     data,
-  }, function _got(err, result) {
+  }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'put /put')
@@ -216,13 +216,13 @@ test('patch /patch', t=> {
 })
 */
 
-test('delete /delete', t=> {
+test('delete /delete', t => {
   t.plan(3)
-  let data = {hi: 'there'}
+  let data = { hi: 'there' }
   tiny.del({
     url: url + '/delete',
     data,
-  }, function _got(err, result) {
+  }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'deleted /delete')
@@ -233,10 +233,10 @@ test('delete /delete', t=> {
   })
 })
 
-test('http.close', t=> {
+test('http.close', t => {
   t.plan(1)
   client.close(() => {
-    tiny.get({url}, err => {
+    tiny.get({ url }, err => {
       if (err) shutdown(t, err)
       else t.fail('Sandbox did not shut down')
     })
@@ -247,10 +247,10 @@ test('http.close', t=> {
  * Arc v6: test failing to load index.html without get / defined
  */
 let end
-test('sandbox.start', t=> {
+test('sandbox.start', t => {
   t.plan(3)
   process.chdir(path.join(__dirname, '..', 'mock', 'no-index-fail'))
-  sandbox.start({}, function(err, close) {
+  sandbox.start({}, function (err, close) {
     if (err) t.fail(err)
     else {
       end = close
@@ -261,23 +261,23 @@ test('sandbox.start', t=> {
   })
 })
 
-test('get / without defining get / should fail if index.html not present', t=> {
+test('get / without defining get / should fail if index.html not present', t => {
   t.plan(1)
-  tiny.get({url},
-  function _got(err, data) {
-    if (err) {
-      t.equals(err.statusCode, 404, 'Got 404 for missing file')
-    }
-    else {
-      t.fail(data)
-    }
-  })
+  tiny.get({ url },
+    function _got (err, data) {
+      if (err) {
+        t.equals(err.statusCode, 404, 'Got 404 for missing file')
+      }
+      else {
+        t.fail(data)
+      }
+    })
 })
 
-test('shut down sandbox', t=> {
+test('shut down sandbox', t => {
   t.plan(1)
   end(() => {
-    tiny.get({url}, err => {
+    tiny.get({ url }, err => {
       if (err) shutdown(t, err)
       else t.fail('Sandbox did not shut down')
     })
@@ -287,10 +287,10 @@ test('shut down sandbox', t=> {
 /**
  * Arc v6: test successfully loading index.html without get / defined
  */
-test('sandbox.start', t=> {
+test('sandbox.start', t => {
   t.plan(3)
   process.chdir(path.join(__dirname, '..', 'mock', 'no-index-pass'))
-  sandbox.start({}, function(err, close) {
+  sandbox.start({}, function (err, close) {
     if (err) t.fail(err)
     else {
       end = close
@@ -301,22 +301,22 @@ test('sandbox.start', t=> {
   })
 })
 
-test('get / without defining get / should succeed if index.html is present', t=> {
+test('get / without defining get / should succeed if index.html is present', t => {
   t.plan(1)
-  tiny.get({url},
-  function _got(err, data) {
-    if (err) t.fail(err)
-    else {
-      t.ok(data.body.startsWith('Hello world!'), 'Proxy mounted and delivered index.html')
-      console.log(data)
-    }
-  })
+  tiny.get({ url },
+    function _got (err, data) {
+      if (err) t.fail(err)
+      else {
+        t.ok(data.body.startsWith('Hello world!'), 'Proxy mounted and delivered index.html')
+        console.log(data)
+      }
+    })
 })
 
-test('shut down sandbox', t=> {
+test('shut down sandbox', t => {
   t.plan(1)
   end(() => {
-    tiny.get({url}, err => {
+    tiny.get({ url }, err => {
       if (err) shutdown(t, err)
       else t.fail('Sandbox did not shut down')
     })
@@ -326,10 +326,10 @@ test('shut down sandbox', t=> {
 /**
  * Test to ensure sandbox loads without defining @http
  */
-test('sandbox.start', t=> {
+test('sandbox.start', t => {
   t.plan(1)
   process.chdir(path.join(__dirname, '..', 'mock', 'no-http'))
-  sandbox.start({}, function(err, close) {
+  sandbox.start({}, function (err, close) {
     if (err) t.fail(err)
     else {
       end = close
@@ -338,18 +338,18 @@ test('sandbox.start', t=> {
   })
 })
 
-test('get / without defining @http', t=> {
+test('get / without defining @http', t => {
   t.plan(1)
-  tiny.get({url},
-  function _got(err, data) {
-    if (err) {
-      t.equals(err.code, 'ECONNREFUSED', 'Connection refused')
-    }
-    else t.fail(data)
-  })
+  tiny.get({ url },
+    function _got (err, data) {
+      if (err) {
+        t.equals(err.code, 'ECONNREFUSED', 'Connection refused')
+      }
+      else t.fail(data)
+    })
 })
 
-test('shut down sandbox', t=> {
+test('shut down sandbox', t => {
   t.plan(1)
   end()
   t.pass('sandbox shut down')
@@ -358,10 +358,10 @@ test('shut down sandbox', t=> {
 /**
  * Arc 5 compatibility tests
  */
-test('sandbox.start', t=> {
+test('sandbox.start', t => {
   t.plan(2)
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
-  sandbox.start({version: 'Architect 5.x'}, function(err, close) {
+  sandbox.start({ version: 'Architect 5.x' }, function (err, close) {
     if (err) t.fail(err)
     else {
       end = close
@@ -371,42 +371,42 @@ test('sandbox.start', t=> {
   })
 })
 
-test('get /', t=> {
+test('get /', t => {
   t.plan(2)
-  tiny.get({url},
-  function _got(err, data) {
-    if (err) t.fail(err)
-    else {
-      t.ok(data, 'got /')
-      t.ok(data.body.startsWith('Hello from Architect Sandbox running the default runtime!'), 'is hello world')
-      console.log({data})
-    }
-  })
+  tiny.get({ url },
+    function _got (err, data) {
+      if (err) t.fail(err)
+      else {
+        t.ok(data, 'got /')
+        t.ok(data.body.startsWith('Hello from Architect Sandbox running the default runtime!'), 'is hello world')
+        console.log({ data })
+      }
+    })
 })
 
-test('get /binary', t=> {
+test('get /binary', t => {
   t.plan(2)
   tiny.get({
     url: url + '/binary'
-  }, function _got(err, data) {
+  }, function _got (err, data) {
     if (err) t.fail(err)
     else {
-      const img = Buffer.from(data.body).toString('base64');
+      const img = Buffer.from(data.body).toString('base64')
       t.ok(data, 'got /binary')
       t.ok(img.startsWith('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
-      console.log({data})
+      console.log({ data })
     }
   })
 })
 
-test('post /post', t=> {
+test('post /post', t => {
   t.plan(3)
-  let data = {hi: 'there'}
+  let data = { hi: 'there' }
   tiny.post({
     url: url + '/post',
     data,
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-  }, function _got(err, result) {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'posted /post')
@@ -417,13 +417,13 @@ test('post /post', t=> {
   })
 })
 
-test('put /put', t=> {
+test('put /put', t => {
   t.plan(3)
-  let data = {hi: 'there'}
+  let data = { hi: 'there' }
   tiny.put({
     url: url + '/put',
     data,
-  }, function _got(err, result) {
+  }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'put /put')
@@ -456,13 +456,13 @@ test('patch /patch', t=> {
 })
 */
 
-test('delete /delete', t=> {
+test('delete /delete', t => {
   t.plan(3)
-  let data = {hi: 'there'}
+  let data = { hi: 'there' }
   tiny.del({
     url: url + '/delete',
     data,
-  }, function _got(err, result) {
+  }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'deleted /delete')
@@ -473,10 +473,10 @@ test('delete /delete', t=> {
   })
 })
 
-test('shut down sandbox', t=> {
+test('shut down sandbox', t => {
   t.plan(3)
   end(() => {
-    tiny.get({url}, err => {
+    tiny.get({ url }, err => {
       if (err) shutdown(t, err)
       else t.fail('Sandbox did not shut down')
     })

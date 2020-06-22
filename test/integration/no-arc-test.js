@@ -13,7 +13,7 @@ let shutdown = (t, err) => {
 }
 
 let end
-test('Env', t=> {
+test('Env', t => {
   t.plan(1)
   t.ok(sandbox, 'got sandbox')
 })
@@ -21,7 +21,7 @@ test('Env', t=> {
 /**
  * Test sandbox http in isolation
  */
-test('Start Sandbox without an Architect project manifest', t=> {
+test('Start Sandbox without an Architect project manifest', t => {
   t.plan(1)
   // move to test/mock
   process.chdir(path.join(__dirname, '..', 'mock', 'no-arc'))
@@ -34,32 +34,32 @@ test('Start Sandbox without an Architect project manifest', t=> {
   })
 })
 
-test('get /', t=> {
+test('get /', t => {
   t.plan(2)
-  tiny.get({url},
-  function _got(err, data) {
-    if (err) t.fail(err)
-    else {
-      t.ok(data, 'got /')
-      t.ok(data.body.startsWith('Hello from Architect Sandbox running without an Architect file!'), 'is hello world')
-      console.log({data})
-    }
-  })
+  tiny.get({ url },
+    function _got (err, data) {
+      if (err) t.fail(err)
+      else {
+        t.ok(data, 'got /')
+        t.ok(data.body.startsWith('Hello from Architect Sandbox running without an Architect file!'), 'is hello world')
+        console.log({ data })
+      }
+    })
 })
 
 let dynamo
-test('Get Dynamo client', t=> {
+test('Get Dynamo client', t => {
   t.plan(1)
-  getDBClient(function _gotDBClient(err, client) {
+  getDBClient(function _gotDBClient (err, client) {
     if (err) console.log(err) // Yes, but actually no
     dynamo = client
     t.ok(dynamo, 'Got Dynamo client')
   })
 })
 
-test('Can list tables', t=> {
+test('Can list tables', t => {
   t.plan(1)
-  dynamo.listTables({}, function done(err, result) {
+  dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(Array.isArray(result.TableNames), 'got tables')
@@ -77,7 +77,7 @@ test('default tables present', t => {
     'app-default-staging-data',
     'arc-sessions'
   ]
-  dynamo.listTables({}, function done(err, result) {
+  dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)
     else {
       for (let table of defaultTables) {
@@ -87,10 +87,10 @@ test('default tables present', t => {
   })
 })
 
-test('shut down sandbox', t=> {
+test('shut down sandbox', t => {
   t.plan(2)
   end(() => {
-    tiny.get({url}, err => {
+    tiny.get({ url }, err => {
       if (err) shutdown(t, err)
       else t.fail('Sandbox did not shut down')
     })

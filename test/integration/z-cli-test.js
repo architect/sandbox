@@ -6,7 +6,7 @@ let test = require('tape')
  * May take a few seconds to close all related threads
  * Test may fail if re-run quickly, or fail others by not releasing ports, etc. if not run last
  */
-test('CLI env', t=> {
+test('CLI env', t => {
   t.plan(1)
   // Assumes previous tests may have already set working dir to `mock`
   process.chdir(join(__dirname, '..', 'mock', 'normal'))

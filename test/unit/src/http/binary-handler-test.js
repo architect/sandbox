@@ -1,6 +1,6 @@
 let binaryHandler = require('../../../../src/http/binary-handler')
 let events = require('events').EventEmitter
-let {Readable} = require('stream')
+let { Readable } = require('stream')
 let test = require('tape')
 let dec = i => new Buffer.from(i, 'base64').toString()
 
@@ -12,7 +12,7 @@ test('Set up env', t => {
 test('Passthrough', t => {
   t.plan(1)
   process.env.DEPRECATED = true
-  let req = {headers: {'content-type': 'whatever'}}
+  let req = { headers: { 'content-type': 'whatever' } }
   let res = {}
   binaryHandler(req, res, () => {
     t.notOk(Object.getOwnPropertyNames(res).length, 'Passed through, no mutation of response')
@@ -69,7 +69,7 @@ test('Arc v6: base64 encode body & flag', t => {
   let body = 'hi there'
   let e = new events()
   let stream = new Readable()
-  stream.headers = {'content-length': '8'}
+  stream.headers = { 'content-length': '8' }
   stream.body = ''
   stream.push(body)
   stream.push(null)
