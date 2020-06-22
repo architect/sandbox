@@ -30,7 +30,7 @@ let runtimes = {
  * @param {object} event - HTTP / event payload to invoke lambda function with
  * @param {function} callback - node style errback
  */
-module.exports = function invokeLambda(pathToLambda, event, callback) {
+module.exports = function invokeLambda (pathToLambda, event, callback) {
   if (!fs.existsSync(pathToLambda)) {
     callback(Error(`Lambda not found: ${pathToLambda}`))
   }
@@ -47,21 +47,22 @@ module.exports = function invokeLambda(pathToLambda, event, callback) {
       let defaults = {
         __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
         PYTHONUNBUFFERED: true,
-        PYTHONPATH: path.join(pathToLambda, 'vendor')
+        PYTHONPATH: path.join(pathToLambda, 'vendor'),
+        LAMBDA_TASK_ROOT: pathToLambda,
       }
 
       let options = {
         shell: true,
         cwd: pathToLambda,
-        env: {...process.env, ...defaults}
+        env: { ...process.env, ...defaults }
       }
 
       let request = JSON.stringify(event)
 
-      getConfig(pathToLambda, function done(err, {runtime, timeout}) {
+      getConfig(pathToLambda, function done (err, { runtime, timeout }) {
         if (err) callback(err)
         else {
-          runtimes[runtime](options, request, timeout, function done(err, result) {
+          runtimes[runtime](options, request, timeout, function done (err, result) {
             if (err) callback(err)
             else {
               let missing

@@ -16,7 +16,7 @@ let errors = {
 }
 let invalidParam = validParams => errors.invalidParam.replace('$VALIDPARAMS', `${validParams.map(p => `<code>${p}</code>`).join(', ')}`)
 
-module.exports = function responseValidator ({res, result}) {
+module.exports = function responseValidator ({ res, result }) {
   let params = Object.getOwnPropertyNames(result)
   let deprecated = process.env.DEPRECATED
   let validParams = [
@@ -46,14 +46,14 @@ module.exports = function responseValidator ({res, result}) {
     let invalid = params.some(p => !validParams.includes(p))
     if (invalid) {
       setError(res)
-      let body = invalidParam(validParams) + `Recieved:<pre> ${JSON.stringify(result, null ,2)}</pre>`
+      let body = invalidParam(validParams) + `Recieved:<pre> ${JSON.stringify(result, null, 2)}</pre>`
       return {
         valid: false,
         body
       }
     }
-    else return {valid: true}
+    else return { valid: true }
   }
   // Arc v5 accepts literally any response params
-  else return {valid: true}
+  else return { valid: true }
 }

@@ -1,10 +1,10 @@
 let ledger = {}
 
 module.exports = {
-  getConnection(connectionId) {
+  getConnection (connectionId) {
     return ledger[connectionId]
   },
-  register(connectionId, ws) {
+  register (connectionId, ws) {
     ledger[connectionId] = ws
   },
 }

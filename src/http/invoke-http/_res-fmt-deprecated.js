@@ -1,54 +1,67 @@
+let headerFormatter = require('./_res-header-fmt')
+
 /**
  * Arc <6 response formatter
  * - Mocks response object shape for API Gateway VTL
  */
-module.exports = function responseFormatterDeprecated ({res, result}) {
+module.exports = function responseFormatterDeprecated ({ res, result }) {
   // HTTP status
   res.statusCode = result.status || result.code || result.statusCode || 200
+
+  // VTL-based parameters
+  let { cacheControl, cookie, cors, headers, location, type } = result
 
   // Content type
   // Note: result.headers is a case-sensitive js object,
   //       res.get/setHeader is not (e.g. 'set-cookie' == 'Set-Cookie')
-  let contentType = result.type ||
-                    result && result.headers && result.headers['Content-Type'] ||
-                    result && result.headers && result.headers['content-type']
+  let contentType = type ||
+                    (headers && headers['Content-Type']) ||
+                    (headers && headers['content-type'])
   res.setHeader('Content-Type', contentType || 'application/json; charset=utf-8')
-  if (result.headers && result.headers['content-type']) delete result.headers['content-type']
+  if (headers && headers['content-type']) delete headers['content-type']
 
   // Cookie
   //   remove Secure because localhost won't be SSL (and the cookie won't get set)
-  if (result.cookie)
-    res.setHeader('Set-Cookie', result.cookie.replace('; Secure', '; Path=/'))
+  if (cookie) {
+    res.setHeader('Set-Cookie', cookie.replace('; Secure', '; Path=/'))
+  }
 
   // Location
-  if (result.location)
-    res.setHeader('Location', result.location)
+  if (location) {
+    res.setHeader('Location', location)
+  }
 
   // Cross-origin ritual sacrifice
-  if (result.cors)
+  if (cors) {
     res.setHeader('Access-Control-Allow-Origin', '*')
+  }
 
   // Cache-Control
-  if (result.cacheControl)
-    res.setHeader('Cache-Control', result.cacheControl)
+  if (cacheControl) {
+    res.setHeader('Cache-Control', cacheControl)
+  }
 
   // Headers
-  if (result.headers) {
-    Object.keys(result.headers).forEach(k=> {
-      if (k.toLowerCase() === 'set-cookie' && result.headers[k]) {
-        res.setHeader(k, result.headers[k].replace('; Secure', '; Path=/'))
-      } else if (k === 'cache-control' && result.headers[k]) {
-        res.setHeader('Cache-Control', result.headers[k])
-      } else {
-        res.setHeader(k, result.headers[k])
+  if (headers) {
+    // Apply all that funky stuff AWS loves doing to our headers
+    headers = headerFormatter(headers)
+
+    Object.keys(headers).forEach(k => {
+      if (k === 'set-cookie') {
+        res.setHeader(k, headers[k].replace('; Secure', '; Path=/'))
+      }
+      else if (k === 'cache-control') {
+        res.setHeader('Cache-Control', headers[k])
+      }
+      else {
+        res.setHeader(k, headers[k])
       }
     })
   }
 
   // Set default anti-caching headers
-  let antiCache = res.getHeader('Content-Type') &&
-                  res.getHeader('Content-Type').includes('text/html') ||
-                  res.getHeader('Content-Type').includes('application/json')
+  let antiCache = contentType &&
+                  (contentType.includes('text/html') || contentType.includes('application/json'))
   if (!result.cacheControl && antiCache) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0')
   }
@@ -73,7 +86,7 @@ module.exports = function responseFormatterDeprecated ({res, result}) {
 
 Please base64 encode your response and include a 'isBase64Encoded: true' parameter, or run your response through @architect/functions`
     return result.body
-}
+  }
 
   /**
    * Arc v5 proxy binary responses
@@ -112,8 +125,9 @@ Please base64 encode your response and include a 'isBase64Encoded: true' paramet
   }
 
   // isBase64Encoded flag passthrough
-  if (result.isBase64Encoded)
+  if (result.isBase64Encoded) {
     res.isBase64Encoded = true
+  }
 
   // Re-encode nested JSON responses
   if (typeof result.json !== 'undefined') {

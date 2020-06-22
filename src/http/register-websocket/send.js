@@ -1,6 +1,6 @@
 let pool = require('./pool')
 
-module.exports = function handle(req, res) {
+module.exports = function handle (req, res) {
   try {
     let ws = pool.getConnection(req.body.id)
     if (ws) {
@@ -12,7 +12,7 @@ module.exports = function handle(req, res) {
       throw e
     }
   }
-  catch(e) {
+  catch (e) {
     console.log('Failed to ws.send', e)
   }
   res.statusCode = 200

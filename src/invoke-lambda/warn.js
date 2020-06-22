@@ -5,7 +5,7 @@ let { updater } = require('@architect/utils')
 /**
  * Warn the user if node has resolved a dependency outside their function's folder
  */
-module.exports = function warn (missing=[], pathToLambda) {
+module.exports = function warn (missing = [], pathToLambda) {
   if (missing.length) {
     // Remove AWS-SDK, that's bundled in Lambda
     let awsSdk = missing.findIndex(dep => dep === 'aws-sdk')

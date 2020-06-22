@@ -1,8 +1,8 @@
-let {updater} = require('@architect/utils')
+let { updater } = require('@architect/utils')
 let spawn = require('child_process').spawn
 let kill = require('tree-kill')
 
-module.exports = function spawnChild(command, args, options, request, timeout, callback) {
+module.exports = function spawnChild (command, args, options, request, timeout, callback) {
   let cwd = options.cwd
   let timedout = false
   let headers = {
@@ -25,7 +25,7 @@ module.exports = function spawnChild(command, args, options, request, timeout, c
   let closed = false
 
   if (!isDeno) {
-    child.stdin.setEncoding('utf-8');
+    child.stdin.setEncoding('utf-8')
     child.stdin.write(request + '\n')
     child.stdin.end()
   }
@@ -84,7 +84,8 @@ module.exports = function spawnChild(command, args, options, request, timeout, c
         body: `<h1>Timeout Error</h1>
         <p>Lambda <code>${cwd}</code> timed out after <b>${timeout / 1000} seconds</b></p>`
       })
-    } else if (error) {
+    }
+    else if (error) {
       callback(null, {
         statusCode: 502,
         headers,
@@ -92,14 +93,16 @@ module.exports = function spawnChild(command, args, options, request, timeout, c
         <p>${error}</p>
         `
       })
-    } else if (code === 0) {
+    }
+    else if (code === 0) {
       // extract the __ARC__ line
       let command = line => line.startsWith('__ARC__')
       let result = stdout.split('\n').find(command)
       if (result && result !== '__ARC__ undefined __ARC_END__') {
-        let raw = result.replace('__ARC__', '')
-                        .replace('__ARC_END__', '')
-                        .trim()
+        let raw = result
+          .replace('__ARC__', '')
+          .replace('__ARC_END__', '')
+          .trim()
         let parsed = JSON.parse(raw)
         // if its an error pretty print it
         if (parsed.name && parsed.message && parsed.stack) {
@@ -113,7 +116,8 @@ module.exports = function spawnChild(command, args, options, request, timeout, c
         }
         // otherwise just return the command line
         callback(null, parsed)
-      } else {
+      }
+      else {
         callback(null, {
           headers,
           body: `<h1>Async error</h1>
@@ -127,8 +131,9 @@ module.exports = function spawnChild(command, args, options, request, timeout, c
           `
         })
       }
-    } else {
-      callback(null, {headers, body: `<pre>${code}...${stdout}</pre><pre>${stderr}</pre>`})
+    }
+    else {
+      callback(null, { headers, body: `<pre>${code}...${stdout}</pre><pre>${stderr}</pre>` })
     }
   }
 
