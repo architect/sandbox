@@ -1,5 +1,5 @@
 let b64enc = i => new Buffer.from(i).toString('base64')
-let headers = {'Accept-Encoding': 'gzip'}
+let headers = { 'Accept-Encoding': 'gzip' }
 
 /**
  * Standard mock request set used in:
@@ -25,7 +25,7 @@ let arc6 = {
     headers,
     httpMethod: 'GET',
     pathParameters: null,
-    queryStringParameters: {whats:'up'}
+    queryStringParameters: { whats: 'up' }
   },
 
   // get /?whats=up&whats=there
@@ -46,7 +46,7 @@ let arc6 = {
     resource: '/nature/{activities}',
     headers,
     httpMethod: 'GET',
-    pathParameters: {activities:'hiking'},
+    pathParameters: { activities: 'hiking' },
     queryStringParameters: null
   },
 
@@ -57,15 +57,15 @@ let arc6 = {
     resource: '/{proxy+}',
     headers,
     httpMethod: 'GET',
-    pathParameters: {proxy: '/nature/hiking'},
+    pathParameters: { proxy: '/nature/hiking' },
     queryStringParameters: null
   },
 
   // post /form (JSON)
   postJson: {
-    body: b64enc(JSON.stringify({hi: 'there'})),
+    body: b64enc(JSON.stringify({ hi: 'there' })),
     path: '/form',
-    headers: {'Content-Type': 'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     httpMethod: 'POST',
     pathParameters: null,
     queryStringParameters: null,
@@ -76,7 +76,7 @@ let arc6 = {
   postFormURL: {
     body: b64enc('hi=there'),
     path: '/form',
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     httpMethod: 'POST',
     pathParameters: null,
     queryStringParameters: null,
@@ -87,7 +87,7 @@ let arc6 = {
   postMultiPartFormData: {
     body: b64enc('hi there'), // not a valid multipart form data payload but that's for userland validation
     path: '/form',
-    headers: {'Content-Type': 'multipart/form-data'},
+    headers: { 'Content-Type': 'multipart/form-data' },
     httpMethod: 'POST',
     pathParameters: null,
     queryStringParameters: null,
@@ -98,7 +98,7 @@ let arc6 = {
   postOctetStream: {
     body: b64enc('hi there\n'),
     path: '/form',
-    headers: {'Content-Type': 'application/octet-stream'},
+    headers: { 'Content-Type': 'application/octet-stream' },
     httpMethod: 'POST',
     pathParameters: null,
     queryStringParameters: null,
@@ -107,9 +107,9 @@ let arc6 = {
 
   // put /form (JSON)
   putJson: {
-    body: b64enc(JSON.stringify({hi: 'there'})),
+    body: b64enc(JSON.stringify({ hi: 'there' })),
     path: '/form',
-    headers: {'Content-Type': 'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     httpMethod: 'PUT',
     pathParameters: null,
     queryStringParameters: null,
@@ -118,9 +118,9 @@ let arc6 = {
 
   // patch /form (JSON)
   patchJson: {
-    body: b64enc(JSON.stringify({hi: 'there'})),
+    body: b64enc(JSON.stringify({ hi: 'there' })),
     path: '/form',
-    headers: {'Content-Type': 'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     httpMethod: 'PATCH',
     pathParameters: null,
     queryStringParameters: null,
@@ -129,9 +129,9 @@ let arc6 = {
 
   // delete /form (JSON)
   deleteJson: {
-    body: b64enc(JSON.stringify({hi: 'there'})),
+    body: b64enc(JSON.stringify({ hi: 'there' })),
     path: '/form',
-    headers: {'Content-Type': 'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     httpMethod: 'DELETE',
     pathParameters: null,
     queryStringParameters: null,
@@ -160,8 +160,8 @@ let arc5 = {
     method: 'GET',
     httpMethod: 'GET',
     params: {},
-    query: {whats:'up'},
-    queryStringParameters: {whats:'up'}
+    query: { whats: 'up' },
+    queryStringParameters: { whats: 'up' }
   },
 
   // get /nature/hiking
@@ -171,7 +171,7 @@ let arc5 = {
     headers,
     method: 'GET',
     httpMethod: 'GET',
-    params: {activities:'hiking'},
+    params: { activities: 'hiking' },
     query: {},
     queryStringParameters: {}
   },
@@ -179,7 +179,7 @@ let arc5 = {
   // post /form
   //   accounts for both JSON and form URL-encoded bodies
   post: {
-    body: {hi: 'there'},
+    body: { hi: 'there' },
     path: '/form',
     headers,
     method: 'POST',
@@ -192,7 +192,7 @@ let arc5 = {
   // post /form
   //   accounts for multipart form data-encoded bodies
   postBinary: {
-    body: {base64: 'aGVsbG89dGhlcmU='},
+    body: { base64: 'aGVsbG89dGhlcmU=' },
     path: '/form',
     headers,
     method: 'POST',
@@ -204,7 +204,7 @@ let arc5 = {
 
   // put /form
   put: {
-    body: {hi: 'there'},
+    body: { hi: 'there' },
     path: '/form',
     headers,
     method: 'PUT',
@@ -216,7 +216,7 @@ let arc5 = {
 
   // patch /form
   patch: {
-    body: {hi: 'there'},
+    body: { hi: 'there' },
     path: '/form',
     headers,
     method: 'PATCH',
@@ -228,7 +228,7 @@ let arc5 = {
 
   // delete /form
   delete: {
-    body: {hi: 'there'},
+    body: { hi: 'there' },
     path: '/form',
     headers,
     method: 'DELETE',

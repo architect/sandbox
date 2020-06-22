@@ -10,28 +10,28 @@ let shutdown = (t, err) => {
   t.equal(err.code, 'ECONNREFUSED', 'Sandbox succssfully shut down')
 }
 
-test('sandbox.start', t=> {
+test('sandbox.start', t => {
   t.plan(2)
   t.ok(sandbox, 'Has sandbox')
   t.ok(sandbox.start, 'Has sandbox.start')
 })
 
 let asyncClose
-test('Async sandbox.start test/mock', async t=> {
+test('Async sandbox.start test/mock', async t => {
   t.plan(1)
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
   asyncClose = await sandbox.start()
   t.ok(asyncClose, 'Sandbox started (async)')
 })
 
-test('Async sandbox.close', async t=> {
+test('Async sandbox.close', async t => {
   t.plan(1)
   let closed = await asyncClose()
   t.equal(closed, 'Sandbox successfully shut down', 'Sandbox closed')
 })
 
 let syncClose
-test('Sync sandbox.start test/mock', t=> {
+test('Sync sandbox.start test/mock', t => {
   t.plan(1)
   sandbox.start({}, function (err, end) {
     if (err) t.fail('Sandbox failed (sync)')
@@ -42,10 +42,10 @@ test('Sync sandbox.start test/mock', t=> {
   })
 })
 
-test('Sync sandbox.close', t=> {
+test('Sync sandbox.close', t => {
   t.plan(2)
   syncClose(() => {
-    tiny.get({url}, err => {
+    tiny.get({ url }, err => {
       if (err) shutdown(t, err)
       else t.fail('Sandbox did not shut down')
     })

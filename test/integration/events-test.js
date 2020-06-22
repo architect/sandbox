@@ -1,23 +1,23 @@
 let arc = require('@architect/functions')
 let test = require('tape')
 let path = require('path')
-let {events} = require('../../src')
+let { events } = require('../../src')
 let cwd = process.cwd()
 
 let client
-test('events.start', t=> {
+test('events.start', t => {
   t.plan(2)
   t.ok(events, 'events')
   // ensure we are testing
   process.env.NODE_ENV = 'testing'
   // move to test/mock
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
-  client = events.start(function() {
+  client = events.start(function () {
     t.ok(true, '@events mounted')
   })
 })
 
-test('arc.events.publish', t=> {
+test('arc.events.publish', t => {
   t.plan(1)
   arc.events.publish({
     name: 'ping',
@@ -26,7 +26,7 @@ test('arc.events.publish', t=> {
       yas: 'queen'
     }
   },
-  function done(err) {
+  function done (err) {
     if (err) t.fail(err)
     else {
       t.ok(true, 'published')
@@ -34,7 +34,7 @@ test('arc.events.publish', t=> {
   })
 })
 
-test('arc.queues.publish', t=> {
+test('arc.queues.publish', t => {
   t.plan(1)
   arc.queues.publish({
     name: 'pong',
@@ -42,7 +42,7 @@ test('arc.queues.publish', t=> {
       most: 'bes'
     }
   },
-  function done(err) {
+  function done (err) {
     if (err) t.fail(err)
     else {
       t.ok(true, 'published')
@@ -50,10 +50,10 @@ test('arc.queues.publish', t=> {
   })
 })
 
-test('events.close', t=> {
+test('events.close', t => {
   t.plan(2)
   setTimeout(() => {
-    client.close(function closed(err) {
+    client.close(function closed (err) {
       if (err) t.fail(err)
       else t.ok(true, '@events closed')
     })

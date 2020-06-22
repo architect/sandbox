@@ -1,3 +1,3 @@
-exports.handler = async function subscribe() {
+exports.handler = async function subscribe () {
   return
 }

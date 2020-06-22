@@ -1,2 +1,3 @@
 src/invoke-lambda/runtimes/deno.js
 src/invoke-lambda/runtimes/node.js
+test/mock
