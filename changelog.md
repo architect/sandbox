@@ -24,6 +24,7 @@
   - Worth noting, this follows *actually observed* API Gateway behavior; what's published in their docs (link below) has been known to differ from reality
   - https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-known-issues.html
   - Fixes #879; /ht @andybee
+- Fixed duplicate generation of table attribute definitions, fixes #828; thanks @filmaj, ht @exalted
 
 ---
 
