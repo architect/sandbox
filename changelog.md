@@ -2,6 +2,14 @@
 
 ---
 
+## [1.12.4] 2020-06-23
+
+### Fixed
+
+- Fixed unsetting `@tables encrypt` setting locally; fixes #785, thanks @filmaj! /ht @m-butler
+
+---
+
 ## [1.12.3] 2020-06-21
 
 ### Added
