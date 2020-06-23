@@ -178,7 +178,7 @@ test('default tables present', t => {
     'mockapp-production-arc-sessions',
     'mockapp-staging-arc-sessions',
   ]
-  dynamo.listTables({}, function done(err, result) {
+  dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)
     else {
       for (let table of defaultTables) {
