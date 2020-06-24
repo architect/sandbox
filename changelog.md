@@ -2,6 +2,14 @@
 
 ---
 
+## [1.12.6] 2020-06-24
+
+### Added
+
+- Added experimental external support for manually opting into [AWS's Java-based local DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html); thanks @m-butler!
+
+---
+
 ## [1.12.4 - 1.12.5] 2020-06-23
 
 ### Changed
