@@ -6,7 +6,7 @@
 
 ### Added
 
-- Added experimental external support for manually opting into [AWS's Java-based local DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html); thanks @m-butler!
+- Added experimental support for manually opting into [AWS's Java-based local DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html); thanks @m-butler!
 
 ---
 
