@@ -13,7 +13,7 @@ let match = (copy, item) => `${copy} matches: ${item}`
 let input = {
   url: 'http://localhost:6666',
   body: {},
-  headers: {'Accept-Encoding': 'gzip'},
+  headers: { 'Accept-Encoding': 'gzip' },
   params: {}
 }
 let getHeader = (type, header) => {
@@ -51,7 +51,7 @@ test('Architect v6 dependency-free responses', t => {
       end: sinon.fake.returns()
     }
     lambdaStub.yields(null, response)
-    let handler = invoke({verb:'GET', route:'/'})
+    let handler = invoke({ verb: 'GET', route: '/' })
     handler(input, output)
     let res = parseOutput(output)
     callback(res)
@@ -72,8 +72,8 @@ test('Architect v6 dependency-free responses', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
   run(responses.arc6.multiValueHeaders, res => {
-    t.deepEqual(res.headers['Set-Cookie'], ['Foo', 'Bar', 'Baz'], 'Header values set')
-    t.deepEqual(res.headers['Content-Type'], ['text/plain'], 'Content-Type favors multiValueHeaders')
+    t.deepEqual(res.headers['set-cookie'], [ 'Foo', 'Bar', 'Baz' ], 'Header values set')
+    t.deepEqual(res.headers['content-type'], [ 'text/plain' ], 'Content-Type favors multiValueHeaders')
   })
   run(responses.arc5.cookie, res => {
     t.ok(res.body.includes('Invalid response parameter'), 'Arc v5 style parameter causes error')
@@ -94,7 +94,7 @@ test('Architect v5 dependency-free responses', t => {
       end: sinon.fake.returns()
     }
     lambdaStub.yields(null, response)
-    let handler = invoke({verb:'GET', route:'/'})
+    let handler = invoke({ verb: 'GET', route: '/' })
     handler(input, output)
     let res = parseOutput(output)
     callback(res)
@@ -106,7 +106,7 @@ test('Architect v5 dependency-free responses', t => {
   // Testing that cookie is set, not that a valid cookie was passed
   responses.arc5.cookie.cookie = '_idx=foo'
   run(responses.arc5.cookie, res => {
-    t.ok(res.headers['Set-Cookie'].includes('_idx='), `Cookie set: ${res.headers['Set-Cookie'].substr(0,75)}...`)
+    t.ok(res.headers['Set-Cookie'].includes('_idx='), `Cookie set: ${res.headers['Set-Cookie'].substr(0, 75)}...`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
   run(responses.arc5.cors, res => {
@@ -136,7 +136,7 @@ test('Architect v5 + Functions', t => {
   }
   let run = (response, callback) => {
     lambdaStub.yields(null, response)
-    let handler = invoke({verb:'GET', route:'/'})
+    let handler = invoke({ verb: 'GET', route: '/' })
     handler(input, output)
     let res = parseOutput(output)
     callback(res)
@@ -150,7 +150,7 @@ test('Architect v5 + Functions', t => {
   run(responses.arc5.cacheControl, res => {
     t.equal(responses.arc5.cacheControl.headers['cache-control'], res.headers['Cache-Control'], match(`res.headers['Cache-Control']`, res.headers['Cache-Control']))
     if (responses.arc5.cacheControl.headers['cache-control'] && !res.headers['cache-control'])
-    t.pass(`Headers normalized and de-duped: ${str(res.headers)}`)
+      t.pass(`Headers normalized and de-duped: ${str(res.headers)}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
   output.getHeader = sinon.fake(getHeader.bind({}, responses.arc5.noCacheControlHTML.headers['Content-Type']))
@@ -186,7 +186,7 @@ test('Architect <6 + Functions response params', t => {
       end: sinon.fake.returns()
     }
     lambdaStub.yields(null, response)
-    let handler = invoke({verb:'GET', route:'/'})
+    let handler = invoke({ verb: 'GET', route: '/' })
     handler(input, output)
     let res = parseOutput(output)
     callback(res)
@@ -221,7 +221,7 @@ test('invoke-http should replace cookie header with ssl and path modifications w
     setHeader: sinon.fake.returns(),
     end: sinon.fake.returns()
   }
-  handler(req, res);
+  handler(req, res)
   t.ok(res.setHeader.calledWith('Set-Cookie', 'nomnom; Path=/'), 'setHeader called with modified cookie')
   teardown()
 })
@@ -242,7 +242,7 @@ test('invoke-http should replace cookie header with ssl and path modifications w
     setHeader: sinon.fake.returns(),
     end: sinon.fake.returns()
   }
-  handler(req, res);
-  t.ok(res.setHeader.calledWith('Set-Cookie', 'nomnom; Path=/'), 'setHeader called with modified cookie')
+  handler(req, res)
+  t.ok(res.setHeader.calledWith('set-cookie', 'nomnom; Path=/'), 'setHeader called with modified cookie')
   teardown()
 })

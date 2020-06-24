@@ -1,4 +1,4 @@
-module.exports = function getKeyType(k) {
+module.exports = function getKeyType (k) {
   var hashkeys = [
     '*String',
     '*Number',

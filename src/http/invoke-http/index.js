@@ -8,11 +8,11 @@ let validator = require('./_validator')
 /**
  * Formats and validates HTTP request and response event objects
  */
-module.exports = function invokeHTTP({verb, pathToFunction, route}) {
+module.exports = function invokeHTTP ({ verb, pathToFunction, route }) {
   if (verb) verb = verb.toUpperCase()
   let deprecated = process.env.DEPRECATED
 
-  return function respond(req, res) {
+  return function respond (req, res) {
 
     // Coerce API Gateway 'Cookie' from express 'cookie'
     req.headers.Cookie = req.headers.cookie
@@ -20,28 +20,22 @@ module.exports = function invokeHTTP({verb, pathToFunction, route}) {
     if (!req.headers.Cookie) delete req.headers.Cookie
 
     // Set up request shape
-    let request
-    if (!deprecated) {
-      request = requestFormatter({verb, req, route})
-    }
-    else {
-      request = requestFormatterDeprecated({verb, req})
-    }
+    let request = deprecated
+      ? requestFormatterDeprecated({ verb, req })
+      : requestFormatter({ verb, req, route })
 
     // run the lambda sig locally
-    invoke(pathToFunction, request, function _res(err, result) {
+    invoke(pathToFunction, request, function _res (err, result) {
       if (err) res.end(err.message)
       else {
-        let {valid, body} = validator({res, result})
+        let { valid, body } = validator({ res, result })
         if (!valid) {
           res.end(body)
         }
-        else if (!deprecated) {
-          let body = responseFormatter({res, result})
-          res.end(body || '')
-        }
         else {
-          let body = responseFormatterDeprecated({res, result})
+          let body = deprecated
+            ? responseFormatterDeprecated({ res, result })
+            : responseFormatter({ res, result })
           res.end(body || '')
         }
       }

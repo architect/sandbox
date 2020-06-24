@@ -1,6 +1,6 @@
 let aws = require('aws-sdk')
 
-module.exports = function initDynamoClient(callback) {
+module.exports = function initDynamoClient (callback) {
   /**
    * Final DynamoDB credentials backstop
    * - Creds are usually loaded for the process via banner's AWS initialization routines
@@ -24,6 +24,6 @@ module.exports = function initDynamoClient(callback) {
   let port = process.env.ARC_TABLES_PORT || 5000
   let endpoint = new aws.Endpoint(`http://localhost:${port}`)
   let region = 'us-west-2'
-  let dynamo = new aws.DynamoDB({endpoint, region})
+  let dynamo = new aws.DynamoDB({ endpoint, region })
   callback(null, dynamo)
 }

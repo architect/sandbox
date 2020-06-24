@@ -2,6 +2,71 @@
 
 ---
 
+## [1.12.4 - 1.12.5] 2020-06-23
+
+### Changed
+
+- Updated dependencies
+
+
+### Fixed
+
+- Fixed unsetting `@tables encrypt` setting locally; fixes #785, thanks @filmaj! /ht @m-butler
+
+---
+
+## [1.12.3] 2020-06-21
+
+### Added
+
+- Added support for `@static spa true|false`
+
+
+### Changed
+
+- Updated dependencies
+- Response header casing now matches API Gateway (read: everything is lower-cased)
+- Internal change: implemented new code standard with `@architect/eslint-config`
+
+
+### Fixed
+
+- Fixed proxy lookup to custom 404 page
+- Fixed incorrect filename in proxy 404 error message
+- Response headers are now remapped (and in some cases dropped) per observed behavior in API Gateway
+  - Worth noting, this follows *actually observed* API Gateway behavior; what's published in their docs (link below) has been known to differ from reality
+  - https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-known-issues.html
+  - Fixes #879; /ht @andybee
+- Fixed duplicate generation of table attribute definitions, fixes #828; thanks @filmaj, ht @exalted
+
+---
+
+## [1.12.2] - 2020-06-04
+
+### Changed
+
+- Sandbox support for Deno updated for `1.0.5` and entry now looks for `index.{js,ts,tsx}` and `mod.{js,ts,tsx}`
+
+---
+
+## [1.12.1] 2020-06-01
+
+### Changed
+
+- Sandbox support for Deno updated for `1.0.3`; now forces reload every invocation
+
+---
+
+## [1.11.0 - 1.12.0] 2020-05-22
+
+### Fixed
+
+- Web socket `connectionId` was getting overwritten by concurrent client connections
+- Sending a message to a `connectionId` before it has connected should emit a `GoneException`
+- h/t @andybee for helping track this down 🔍
+
+----
+
 ## [1.10.0] 2020-05-17
 
 ### Added

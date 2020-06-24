@@ -5,17 +5,11 @@ let fs = require('fs')
 let pkgVer = require('../../package.json').version
 let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
-let { fingerprint, updater } = require('@architect/utils')
+let { fingerprint, pathToUnix, updater } = require('@architect/utils')
 let readArc = require('../sandbox/read-arc')
 let osPath = require('ospath')
 
-// Just use Unix seperators on Windows - path.posix.normalize(process.cwd()) doesn't do what we want
-// So we normalise to slash file names (C:/foo/bar) for regex tests, etc.
-let pathToUnix = function (string) {
-  return string.replace(/\\/g, "/");
-}
-
-module.exports = function cli(params={}, callback) {
+module.exports = function cli (params = {}, callback) {
   // Calling the CLI as a module from a parent package causes some strange require race behavior against relative paths, so we have to call them at execution time
   // eslint-disable-next-line
   let http = require('../http')
@@ -23,7 +17,7 @@ module.exports = function cli(params={}, callback) {
   let sandbox = require('../index')
 
   if (!params.version) params.version = ver
-  sandbox.start(params, function watching(err, close) {
+  sandbox.start(params, function watching (err, close) {
     if (err) {
       // Hydration errors already reported, no need to log
       if (err.message !== 'hydration_error') console.log(err)
@@ -41,7 +35,7 @@ module.exports = function cli(params={}, callback) {
     let separator = path.posix.sep
 
     // Arc stuff
-    let {arc} = readArc()
+    let { arc } = readArc()
     let arcFile = new RegExp(`${workingDirectory}${separator}(\\.arc|app\\.arc|arc\\.yaml|arc\\.json)`)
     let folderSetting = tuple => tuple[0] === 'folder'
     let staticFolder = arc.static && arc.static.some(folderSetting) ? arc.static.find(folderSetting)[1] : 'public'
@@ -89,7 +83,7 @@ module.exports = function cli(params={}, callback) {
       let rehydrate = ({ only, msg }) => {
         let start = Date.now()
         update.status(msg)
-        hydrate.shared({only}, () => {
+        hydrate.shared({ only }, () => {
           let end = Date.now()
           update.done(`Files rehydrated into functions in ${end - start}ms`)
         })
@@ -102,7 +96,7 @@ module.exports = function cli(params={}, callback) {
         clearTimeout(arcEventTimer)
         arcEventTimer = setTimeout(() => {
           // TODO add arc pragma diffing, reload tables, events, etc.
-          let {arc} = readArc()
+          let { arc } = readArc()
 
           // Always attempt to close the http server, but only reload if necessary
           http.close()
@@ -130,7 +124,7 @@ module.exports = function cli(params={}, callback) {
                   if (deprecated) {
                     let only = 'arcFile'
                     let msg = 'Rehydrating functions with new project manifest'
-                    rehydrate({only, msg})
+                    rehydrate({ only, msg })
                   }
                 }
               })
@@ -153,7 +147,7 @@ module.exports = function cli(params={}, callback) {
           ts()
           let only = 'shared'
           let msg = 'Shared file changed, rehydrating functions...'
-          rehydrate({only, msg})
+          rehydrate({ only, msg })
         }, 50)
       }
 
@@ -167,7 +161,7 @@ module.exports = function cli(params={}, callback) {
           ts()
           let only = 'views'
           let msg = 'Views file changed, rehydrating views...'
-          rehydrate({only, msg})
+          rehydrate({ only, msg })
         }, 50)
       }
 
@@ -181,14 +175,14 @@ module.exports = function cli(params={}, callback) {
         fingerprintTimer = setTimeout(() => {
           ts()
           let start = Date.now()
-          fingerprint({}, function next(err, result) {
+          fingerprint({}, function next (err, result) {
             if (err) update.error(err)
             else {
               if (result) {
                 let end = Date.now()
                 let only = 'staticJson'
                 let msg = `Regenerated public/static.json in ${end - start}ms`
-                rehydrate({only, msg})
+                rehydrate({ only, msg })
               }
             }
           })
@@ -201,7 +195,7 @@ module.exports = function cli(params={}, callback) {
     /**
      * Watch for sandbox errors
      */
-    watcher.on('error', function(err) {
+    watcher.on('error', function (err) {
       update.error(`Error:`, err)
     })
   })

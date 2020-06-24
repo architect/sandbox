@@ -1,7 +1,7 @@
 let test = require('tape')
 let tiny = require('tiny-json-http')
 let sandbox = require('../../../src')
-let {join} = require('path')
+let { join } = require('path')
 let origCwd = process.cwd()
 let url = 'http://localhost:6666'
 
@@ -35,7 +35,7 @@ test('sandbox returns a Promise', async t => {
     t.pass('sandbox.end returned Promise (without params)')
     let returnedStr = typeof result === 'string'
     t.ok(returnedStr, `sandbox.end resolved and returned string: ${result}`)
-    await tiny.get({url}) // Will fail; final test in catch block
+    await tiny.get({ url }) // Will fail; final test in catch block
   }
   catch (err) {
     if (err) shutdown(t, err)
@@ -43,7 +43,7 @@ test('sandbox returns a Promise', async t => {
   }
 
   try {
-    let end = await sandbox.start({foo: 'bar'})
+    let end = await sandbox.start({ foo: 'bar' })
     t.pass('sandbox.start returned Promise (with params)')
     let returnedFn = end instanceof Function
     t.ok(returnedFn, 'sandbox.start resolved and returned function (with params)')
@@ -51,7 +51,7 @@ test('sandbox returns a Promise', async t => {
     t.pass('Function returned by sandbox.start returns a Promise')
     let returnedStr = typeof result === 'string'
     t.ok(returnedStr, `Function returned by sandbox.start returned string: ${result}`)
-    await tiny.get({url}) // Will fail; final test in catch block
+    await tiny.get({ url }) // Will fail; final test in catch block
   }
   catch (err) {
     if (err) shutdown(t, err)
@@ -72,7 +72,7 @@ test('Sandbox uses continuation passing', t => {
       t.ok(isFunction, 'sandbox.start returned sandbox.end')
       end(() => {
         t.pass('Function returned by sandbox.start executed callback')
-        tiny.get({url}, err => {
+        tiny.get({ url }, err => {
           if (err) shutdown(t, err)
           else t.fail('Sandbox did not shut down')
         })
@@ -81,13 +81,13 @@ test('Sandbox uses continuation passing', t => {
   }, 50)
 
   setTimeout(() => {
-    sandbox.start({port: 3333, options: [], version: ' '},
-    () => (t.pass('sandbox.start executed callback (with params)')))
+    sandbox.start({ port: 3333, options: [], version: ' ' },
+      () => (t.pass('sandbox.start executed callback (with params)')))
   }, 50)
   setTimeout(() => {
     sandbox.end(() => {
       t.pass('sandbox.end executed callback')
-      tiny.get({url}, err => {
+      tiny.get({ url }, err => {
         if (err) shutdown(t, err)
         else t.fail('Sandbox did not shut down')
       })
@@ -111,7 +111,7 @@ let envVars = [
 ]
 // TODO: tests for: ARC_SANDBOX_PATH_TO_STATIC, ARC_EVENTS_PORT, ARC_TABLES_PORT
 
-function cleanEnv(t) {
+function cleanEnv (t) {
   envVars.forEach(v => delete process.env[v])
   let isClean = envVars.some(v => !process.env[v])
   t.ok(isClean, 'Sandbox env vars cleaned')
@@ -136,7 +136,7 @@ test('sandbox has correct env vars populated', async t => {
         t.equal(process.env[v], '', `${v} is falsy`)
     })
     await end()
-    await tiny.get({url}) // Will fail; final test in catch block
+    await tiny.get({ url }) // Will fail; final test in catch block
   }
   catch (err) {
     if (err) shutdown(t, err)
@@ -157,7 +157,7 @@ test('sandbox has correct env vars populated', async t => {
         t.equal(process.env[v], '', `${v} is falsy`)
     })
     await end()
-    await tiny.get({url}) // Will fail; final test in catch block
+    await tiny.get({ url }) // Will fail; final test in catch block
   }
   catch (err) {
     if (err) shutdown(t, err)
@@ -178,7 +178,7 @@ test('sandbox has correct env vars populated', async t => {
         t.equal(process.env[v], '', `${v} is falsy`)
     })
     await end()
-    await tiny.get({url}) // Will fail; final test in catch block
+    await tiny.get({ url }) // Will fail; final test in catch block
   }
   catch (err) {
     if (err) shutdown(t, err)
@@ -195,7 +195,7 @@ test('sandbox (Architect v5) has correct env vars populated', async t => {
   // Architect 5 (local)
   try {
     cleanEnv(t)
-    let end = await sandbox.start({version: 'Architect 5.x'})
+    let end = await sandbox.start({ version: 'Architect 5.x' })
     envVars.forEach(v => {
       if (v === 'ARC_CLOUDFORMATION')
         t.notOk(process.env[v], `${v} is not set`)
@@ -205,7 +205,7 @@ test('sandbox (Architect v5) has correct env vars populated', async t => {
         t.equal(process.env[v], '', `${v} is falsy`)
     })
     await end()
-    await tiny.get({url}) // Will fail; final test in catch block
+    await tiny.get({ url }) // Will fail; final test in catch block
   }
   catch (err) {
     if (err) shutdown(t, err)
@@ -216,7 +216,7 @@ test('sandbox (Architect v5) has correct env vars populated', async t => {
   try {
     cleanEnv(t)
     process.env.NODE_ENV = 'staging'
-    let end = await sandbox.start({version: 'Architect 5.x'})
+    let end = await sandbox.start({ version: 'Architect 5.x' })
     envVars.forEach(v => {
       if (v === 'ARC_CLOUDFORMATION')
         t.notOk(process.env[v], `${v} is not set`)
@@ -226,7 +226,7 @@ test('sandbox (Architect v5) has correct env vars populated', async t => {
         t.equal(process.env[v], '', `${v} is falsy`)
     })
     await end()
-    await tiny.get({url}) // Will fail; final test in catch block
+    await tiny.get({ url }) // Will fail; final test in catch block
   }
   catch (err) {
     if (err) shutdown(t, err)
@@ -237,7 +237,7 @@ test('sandbox (Architect v5) has correct env vars populated', async t => {
   try {
     cleanEnv(t)
     process.env.NODE_ENV = 'production'
-    let end = await sandbox.start({version: 'Architect 5.x'})
+    let end = await sandbox.start({ version: 'Architect 5.x' })
     envVars.forEach(v => {
       if (v === 'ARC_CLOUDFORMATION')
         t.notOk(process.env[v], `${v} is not set`)
@@ -247,7 +247,7 @@ test('sandbox (Architect v5) has correct env vars populated', async t => {
         t.equal(process.env[v], '', `${v} is falsy`)
     })
     await end()
-    await tiny.get({url}) // Will fail; final test in catch block
+    await tiny.get({ url }) // Will fail; final test in catch block
   }
   catch (err) {
     if (err) shutdown(t, err)

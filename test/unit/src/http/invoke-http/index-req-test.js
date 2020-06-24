@@ -8,7 +8,7 @@ let invoke = proxyquire('../../../../../src/http/invoke-http', {
 let reqs = require('../http-req-fixtures')
 
 lambdaStub.yields(null, {})
-let headers = {'Accept-Encoding': 'gzip'}
+let headers = { 'Accept-Encoding': 'gzip' }
 let url = i => `http://localhost:6666${i ? i : ''}`
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${str(item)}`
@@ -63,7 +63,7 @@ test('Architect v6: get /', t => {
   let request = reqs.arc6.getIndex
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -89,7 +89,7 @@ test('Architect v6: get /?whats=up', t => {
   let request = reqs.arc6.getWithQueryString
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -114,7 +114,7 @@ test('Architect v6: get /?whats=up&whats=there', t => {
   let request = reqs.arc6.getWithQueryStringDuplicateKey
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('?whats=up&whats=there'),
     body: {},
@@ -139,7 +139,7 @@ test('Architect v6: get /nature/hiking', t => {
   let request = reqs.arc6.getWithParam
   let verb = 'GET'
   let route = '/nature/:activities'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -165,7 +165,7 @@ test('Architect v6: get /{proxy+}', t => {
   let request = reqs.arc6.getProxyPlus
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('/nature/hiking'),
     resource: '/{proxy+}',
@@ -192,7 +192,7 @@ test('Architect v6: post /form (JSON)', t => {
   let request = reqs.arc6.postJson
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -220,7 +220,7 @@ test('Architect v6: post /form (form URL encoded)', t => {
   let request = reqs.arc6.postFormURL
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -247,7 +247,7 @@ test('Architect v6: post /form (multipart form data)', t => {
   let request = reqs.arc6.postMultiPartFormData
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -274,7 +274,7 @@ test('Architect v6: post /form (octet stream)', t => {
   let request = reqs.arc6.postOctetStream
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -301,7 +301,7 @@ test('Architect v6: put /form (JSON)', t => {
   let request = reqs.arc6.putJson
   let verb = 'PUT'
   let route = '/form'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -328,7 +328,7 @@ test('Architect v6: patch /form (JSON)', t => {
   let request = reqs.arc6.patchJson
   let verb = 'PATCH'
   let route = '/form'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -355,7 +355,7 @@ test('Architect v6: delete /form (JSON)', t => {
   let request = reqs.arc6.deleteJson
   let verb = 'DELETE'
   let route = '/form'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -383,7 +383,7 @@ test('Architect v5: get /', t => {
   process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -410,7 +410,7 @@ test('Architect v5: get /?whats=up', t => {
   process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -436,7 +436,7 @@ test('Architect v5: get /nature/hiking', t => {
   process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/nature/:activities'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -462,7 +462,7 @@ test('Architect v5: post /form (JSON / form URL-encoded)', t => {
   process.env.DEPRECATED = true
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url(route),
     body: request.body,
@@ -488,7 +488,7 @@ test('Architect v5: post /form (multipart form data-encoded)', t => {
   process.env.DEPRECATED = true
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url(route),
     body: request.body,
@@ -514,7 +514,7 @@ test('Architect v5: put /form', t => {
   process.env.DEPRECATED = true
   let verb = 'PUT'
   let route = '/form'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url(route),
     body: request.body,
@@ -540,7 +540,7 @@ test('Architect v5: patch /form', t => {
   process.env.DEPRECATED = true
   let verb = 'PATCH'
   let route = '/form'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url(route),
     body: request.body,
@@ -566,7 +566,7 @@ test('Architect v5: delete /form', t => {
   process.env.DEPRECATED = true
   let verb = 'DELETE'
   let route = '/form'
-  let handler = invoke({verb, route})
+  let handler = invoke({ verb, route })
   let input = {
     url: url(route),
     body: request.body,

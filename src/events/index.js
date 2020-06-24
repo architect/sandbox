@@ -4,20 +4,20 @@ let path = require('path')
 let http = require('http')
 let chalk = require('chalk')
 
-module.exports = {start}
+module.exports = { start }
 
 /**
  * Creates a little web server that listens for events
  */
-function start(callback) {
-  let {arc} = readArc()
+function start (callback) {
+  let { arc } = readArc()
   let quiet = process.env.ARC_QUIET
   function close (callback) {
     if (callback) callback()
   }
 
   if (arc.events || arc.queues) {
-    let server = http.createServer(function listener(req, res) {
+    let server = http.createServer(function listener (req, res) {
       let body = ''
       req.on('data', chunk => {
         body += chunk.toString()
@@ -26,9 +26,11 @@ function start(callback) {
         let message = JSON.parse(body)
         if (req.url === '/queues') {
           message.arcType = 'queue'
-        } else if (req.url === '/events' || req.url === '/') {
+        }
+        else if (req.url === '/events' || req.url === '/') {
           message.arcType = 'event'
-        } else {
+        }
+        else {
           res.statusCode = 404
           res.end('not found')
           if (!quiet) {
@@ -42,7 +44,7 @@ function start(callback) {
         // spawn a fork of the node process
         let subprocess = fork(path.join(__dirname, '_subprocess.js'))
         subprocess.send(message)
-        subprocess.on('message', function _message(msg) {
+        subprocess.on('message', function _message (msg) {
           if (!quiet) {
             console.log(chalk.grey.dim(msg.text))
           }
@@ -63,6 +65,6 @@ function start(callback) {
   }
   else {
     callback()
-    return {close}
+    return { close }
   }
 }

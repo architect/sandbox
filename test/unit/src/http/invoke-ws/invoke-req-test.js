@@ -1,7 +1,7 @@
 let test = require('tape')
 let proxyquire = require('proxyquire')
-let lambdaStub = function stub (path, req, callback) {
-  callback(null, {path, req})
+function lambdaStub (path, req, callback) {
+  callback(null, { path, req })
 }
 
 let invoke = proxyquire('../../../../../src/http/invoke-ws', {
@@ -19,9 +19,9 @@ test('Internal WebSocket events: no req, no body', t => {
     action,
     connectionId
   }
-  invoke(params, function compare(err, result) {
+  invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
-    let {path, req} = result
+    let { path, req } = result
     t.equal(action, path, match('Invocation path', path))
     t.equal(connectionId, req.requestContext.connectionId, match('connectionId', req.requestContext.connectionId))
     t.notOk(req.isBase64Encoded, 'isBase64Encoded set to false')
@@ -35,15 +35,15 @@ test('Internal WebSocket events: body (WS message), no req', t => {
   t.plan(6)
   let action = 'src/ws/default' // not a real action
   let connectionId = 'much-unique-uuid'
-  let body = JSON.stringify({message:'howdy'})
+  let body = JSON.stringify({ message: 'howdy' })
   let params = {
     action,
     body,
     connectionId
   }
-  invoke(params, function compare(err, result) {
+  invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
-    let {path, req} = result
+    let { path, req } = result
     t.equal(action, path, match('Invocation path', path))
     t.equal(connectionId, req.requestContext.connectionId, match('connectionId', req.requestContext.connectionId))
     t.equal(body, req.body, match('body', req.body))
@@ -63,9 +63,9 @@ test('WebSocket connect / disconnect event: get /', t => {
     connectionId,
     req: request
   }
-  invoke(params, function compare(err, result) {
+  invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
-    let {path, req} = result
+    let { path, req } = result
     t.equal(action, path, match('Invocation path', path))
     t.equal(connectionId, req.requestContext.connectionId, match('connectionId', req.requestContext.connectionId))
     t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
@@ -84,9 +84,9 @@ test('WebSocket connect / disconnect event: get /?whats=up', t => {
     connectionId,
     req: request
   }
-  invoke(params, function compare(err, result) {
+  invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
-    let {path, req} = result
+    let { path, req } = result
     t.equal(action, path, match('Invocation path', path))
     t.equal(connectionId, req.requestContext.connectionId, match('connectionId', req.requestContext.connectionId))
     t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))

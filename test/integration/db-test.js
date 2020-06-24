@@ -1,6 +1,6 @@
 let path = require('path')
 let test = require('tape')
-let {db} = require('../../src')
+let { db } = require('../../src')
 let getDBClient = require('../../src/db/_get-db-client')
 let server
 let dynamo
@@ -9,24 +9,24 @@ let TableName2 = 'mockapp-production-pets'
 let cwd = process.cwd()
 
 /* Regular test suite */
-test('db.start', t=> {
+test('db.start', t => {
   t.plan(3)
   t.ok(db, 'got db')
   // move the current process into the mock dir
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
-  server = db.start(function() {
+  server = db.start(function () {
     t.ok(true, '@tables created in local database')
   })
-  getDBClient(function _gotDBClient(err, client) {
+  getDBClient(function _gotDBClient (err, client) {
     if (err) console.log(err) // Yes, but actually no
     dynamo = client
     t.ok(dynamo, 'Got Dynamo client')
   })
 })
 
-test('can list tables', t=> {
+test('can list tables', t => {
   t.plan(1)
-  dynamo.listTables({}, function done(err, result) {
+  dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(Array.isArray(result.TableNames), 'got tables')
@@ -42,7 +42,7 @@ test('default tables present', t => {
     'mockapp-production-arc-sessions',
     'mockapp-staging-arc-sessions',
   ]
-  dynamo.listTables({}, function done(err, result) {
+  dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)
     else {
       for (let table of defaultTables) {
@@ -52,16 +52,16 @@ test('default tables present', t => {
   })
 })
 
-test('can insert a row', t=> {
+test('can insert a row', t => {
   t.plan(1)
   dynamo.putItem({
     TableName,
     Item: {
-      accountID: {S: 'mock-account-id'},
-      email: {S: 'person@email.lol'}
+      accountID: { S: 'mock-account-id' },
+      email: { S: 'person@email.lol' }
     }
   },
-  function _put(err, result) {
+  function _put (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'got result')
@@ -70,12 +70,12 @@ test('can insert a row', t=> {
   })
 })
 
-test('can read index in arc 6', t=> {
+test('can read index in arc 6', t => {
   t.plan(1)
   dynamo.describeTable({
     TableName
   },
-  function _desc(err, result) {
+  function _desc (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result.Table.GlobalSecondaryIndexes[0].IndexName === 'email-index', 'email-index')
@@ -83,12 +83,12 @@ test('can read index in arc 6', t=> {
   })
 })
 
-test('can read index in arc 6', t=> {
+test('can read index in arc 6', t => {
   t.plan(3)
   dynamo.describeTable({
     TableName: TableName2
   },
-  function _desc(err, result) {
+  function _desc (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result.Table.GlobalSecondaryIndexes.length === 2, 'two')
@@ -98,15 +98,15 @@ test('can read index in arc 6', t=> {
   })
 })
 
-test('can read the row', t=> {
+test('can read the row', t => {
   t.plan(1)
   dynamo.getItem({
     TableName,
     Key: {
-      accountID: {S:'fake-account-id'}
+      accountID: { S: 'fake-account-id' }
     }
   },
-  function _desc(err, result) {
+  function _desc (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'got result')
@@ -115,19 +115,19 @@ test('can read the row', t=> {
   })
 })
 
-test('can query the index', t=> {
+test('can query the index', t => {
   t.plan(1)
   dynamo.query({
     TableName,
     IndexName: 'email-index',
     KeyConditions: {
       email: {
-        AttributeValueList: [{S: 'person@email.lol'}],
+        AttributeValueList: [ { S: 'person@email.lol' } ],
         ComparisonOperator: 'EQ'
       }
     }
   },
-  function _desc(err, result) {
+  function _desc (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'got result')
@@ -136,33 +136,33 @@ test('can query the index', t=> {
   })
 })
 
-test('db.close', t=> {
+test('db.close', t => {
   t.plan(1)
   server.close()
   t.ok(true, 'db closed')
 })
 
 /* DEPRECATED mode */
-test('db.start', t=> {
+test('db.start', t => {
   t.plan(3)
   t.ok(db, 'got db')
   // move the current process into the mock dir
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
   process.env.DEPRECATED = true
-  server = db.start(function() {
+  server = db.start(function () {
     t.ok(true, '@tables created in local database')
     console.log(process.env.DEPRECATED)
   })
-  getDBClient(function _gotDBClient(err, client) {
+  getDBClient(function _gotDBClient (err, client) {
     if (err) console.log(err) // Yes, but actually no
     dynamo = client
     t.ok(dynamo, 'Got Dynamo client')
   })
 })
 
-test('can list tables', t=> {
+test('can list tables', t => {
   t.plan(1)
-  dynamo.listTables({}, function done(err, result) {
+  dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(Array.isArray(result.TableNames), 'got tables')
@@ -178,7 +178,7 @@ test('default tables present', t => {
     'mockapp-production-arc-sessions',
     'mockapp-staging-arc-sessions',
   ]
-  dynamo.listTables({}, function done(err, result) {
+  dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)
     else {
       for (let table of defaultTables) {
@@ -188,16 +188,16 @@ test('default tables present', t => {
   })
 })
 
-test('can insert a row', t=> {
+test('can insert a row', t => {
   t.plan(1)
   dynamo.putItem({
     TableName,
     Item: {
-      accountID: {S: 'mock-account-id'},
-      email: {S: 'person@email.lol'}
+      accountID: { S: 'mock-account-id' },
+      email: { S: 'person@email.lol' }
     }
   },
-  function _put(err, result) {
+  function _put (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'got result')
@@ -206,12 +206,12 @@ test('can insert a row', t=> {
   })
 })
 
-test('can read index in arc 5', t=> {
+test('can read index in arc 5', t => {
   t.plan(1)
   dynamo.describeTable({
     TableName
   },
-  function _desc(err, result) {
+  function _desc (err, result) {
     if (err) t.fail(err)
     else {
       console.log(result.Table.GlobalSecondaryIndexes)
@@ -220,12 +220,12 @@ test('can read index in arc 5', t=> {
   })
 })
 
-test('can read index in arc 5', t=> {
+test('can read index in arc 5', t => {
   t.plan(3)
   dynamo.describeTable({
     TableName: TableName2
   },
-  function _desc(err, result) {
+  function _desc (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result.Table.GlobalSecondaryIndexes.length === 2, 'two')
@@ -235,15 +235,15 @@ test('can read index in arc 5', t=> {
   })
 })
 
-test('can read the row', t=> {
+test('can read the row', t => {
   t.plan(1)
   dynamo.getItem({
     TableName,
     Key: {
-      accountID: {S:'fake-account-id'}
+      accountID: { S: 'fake-account-id' }
     }
   },
-  function _desc(err, result) {
+  function _desc (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'got result')
@@ -252,19 +252,19 @@ test('can read the row', t=> {
   })
 })
 
-test('can query the index', t=> {
+test('can query the index', t => {
   t.plan(1)
   dynamo.query({
     TableName,
     IndexName: 'mockapp-production-accounts-email-index',
     KeyConditions: {
       email: {
-        AttributeValueList: [{S: 'person@email.lol'}],
+        AttributeValueList: [ { S: 'person@email.lol' } ],
         ComparisonOperator: 'EQ'
       }
     }
   },
-  function _desc(err, result) {
+  function _desc (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'got result')
@@ -273,7 +273,7 @@ test('can query the index', t=> {
   })
 })
 
-test('db.close', t=> {
+test('db.close', t => {
   t.plan(2)
   delete process.env.DEPRECATED
   server.close()
