@@ -2,6 +2,14 @@
 
 ---
 
+## [1.12.7] 2020-07-01
+
+### Fixed
+
+- Improves compatibility with production REST API behavior for non-get requests to root; fixes #900 /ht @andybee
+
+---
+
 ## [1.12.6] 2020-06-24
 
 ### Added
