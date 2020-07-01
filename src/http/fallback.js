@@ -15,6 +15,7 @@ module.exports = function _public (req, res, next) {
   else {
     let { arc } = readArc()
     let deprecated = process.env.DEPRECATED
+    let method = req.method.toLowerCase()
     // reads all routes
     let routes = arc.http || []
     // add websocket route if necessary
@@ -23,7 +24,7 @@ module.exports = function _public (req, res, next) {
     let tokens = routes.map(r => [ r[0] ].concat(r[1].split('/').filter(Boolean)))
     // tokenize the current req
     let { pathname } = parse(req.url)
-    let current = [ req.method.toLowerCase() ].concat(pathname.split('/').filter(Boolean))
+    let current = [ method ].concat(pathname.split('/').filter(Boolean))
     // get all exact match routes
     let exact = tokens.filter(t => !t.some(v => v.startsWith(':')))
     // get all wildcard routes
@@ -78,10 +79,16 @@ module.exports = function _public (req, res, next) {
       req.requestContext = {} // TODO mock a {proxy+} request payload
       exec(req, res)
     }
+    else if (method !== 'get' && pathname === '/') {
+      res.statusCode = 403
+      res.setHeader('content-type', 'text/html; charset=utf-8;')
+      let message = `Endpoint does not exist for ${method} ${pathname}<br>Add <code>@http ${method} ${pathname}</code> to your Architect project manifest (and create an appropriate handler)`
+      res.end(message)
+    }
     else {
       // invoke the get-index lambda function with a proxy payload
       let exec = invoker({
-        verb: req.method.toLowerCase(),
+        verb: method,
         pathToFunction: join(process.cwd(), 'src', 'http', `get-index`)
       })
       if (isProxy) {

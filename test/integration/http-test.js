@@ -233,6 +233,22 @@ test('delete /delete', t => {
   })
 })
 
+test('post / (should fail, non-get calls to root do not hit get /', t => {
+  t.plan(2)
+  let data = { hi: 'there' }
+  tiny.post({
+    url: url,
+    data,
+  }, function _got (err, result) {
+    if (err) {
+      let message = '@http post /'
+      t.equal(err.statusCode, 403, 'Errors with 403')
+      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
+    }
+    else t.fail(result)
+  })
+})
+
 test('http.close', t => {
   t.plan(1)
   client.close(() => {
