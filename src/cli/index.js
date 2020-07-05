@@ -7,7 +7,8 @@ let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
 let { fingerprint, pathToUnix, updater } = require('@architect/utils')
 let readArc = require('../sandbox/read-arc')
-let osPath = require('ospath')
+let readline = require('readline')
+let { tmpdir } = require('os')
 
 module.exports = function cli (params = {}, callback) {
   // Calling the CLI as a module from a parent package causes some strange require race behavior against relative paths, so we have to call them at execution time
@@ -36,16 +37,19 @@ module.exports = function cli (params = {}, callback) {
 
     // Arc stuff
     let { arc } = readArc()
-    let arcFile = new RegExp(`${workingDirectory}${separator}(\\.arc|app\\.arc|arc\\.yaml|arc\\.json)`)
+    let arcFile = new RegExp(`${workingDirectory}${separator}(app\\.arc|\\.arc|arc\\.yaml|arc\\.json)`)
     let folderSetting = tuple => tuple[0] === 'folder'
     let staticFolder = arc.static && arc.static.some(folderSetting) ? arc.static.find(folderSetting)[1] : 'public'
 
     // Timers
     let lastEvent
     let arcEventTimer
+    let rehydrateArcTimer
     let rehydrateSharedTimer
+    let rehydrateStaticTimer
     let rehydrateViewsTimer
     let fingerprintTimer
+
     let ts = () => {
       if (!process.env.ARC_QUIET) {
         let date = new Date(lastEvent).toLocaleDateString()
@@ -55,11 +59,56 @@ module.exports = function cli (params = {}, callback) {
     }
 
     // Cleanup after any past runs
-    let pauseFile = path.join(osPath.tmp(), '_pause-architect-sandbox-watcher')
+    let pauseFile = path.join(tmpdir(), '_pause-architect-sandbox-watcher')
     if (fs.existsSync(pauseFile)) {
       fs.unlinkSync(pauseFile)
     }
     let paused = false
+
+    // Rehydrator
+    function rehydrate ({ timer, only, msg }) {
+      lastEvent = Date.now()
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        ts()
+        let start = Date.now()
+        update.status(msg)
+        hydrate.shared({ only }, () => {
+          let end = Date.now()
+          update.done(`Files rehydrated into functions in ${end - start}ms`)
+        })
+      }, 50)
+    }
+
+    // Listen for important keystrokes
+    readline.emitKeypressEvents(process.stdin)
+    process.stdin.setRawMode(true)
+    process.stdin.on('keypress', function now (input, key) {
+      if (input === 'H') {
+        rehydrate({
+          timer: arcEventTimer,
+          msg: 'Rehydrating all shared files...'
+        })
+      }
+      if (input === 'S') {
+        rehydrate({
+          timer: rehydrateSharedTimer,
+          only: 'shared',
+          msg: 'Rehydrating src/shared...',
+        })
+      }
+      if (input === 'V') {
+        rehydrate({
+          timer: rehydrateViewsTimer,
+          only: 'views',
+          msg: 'Rehydrating src/views...',
+        })
+      }
+      if (key.sequence === '\u0003') {
+        if (callback) callback(null, close)
+        process.exit(0)
+      }
+    })
 
     /**
      * Watch for pertinent filesystem changes
@@ -80,14 +129,6 @@ module.exports = function cli (params = {}, callback) {
       let updateOrRemove = event === 'update' || event === 'remove'
       fileName = pathToUnix(fileName)
 
-      let rehydrate = ({ only, msg }) => {
-        let start = Date.now()
-        update.status(msg)
-        hydrate.shared({ only }, () => {
-          let end = Date.now()
-          update.done(`Files rehydrated into functions in ${end - start}ms`)
-        })
-      }
 
       /**
        * Reload routes upon changes to Architect project manifest
@@ -122,9 +163,11 @@ module.exports = function cli (params = {}, callback) {
                 else {
                   update.done(`Functions are ready to go!`)
                   if (deprecated) {
-                    let only = 'arcFile'
-                    let msg = 'Rehydrating functions with new project manifest'
-                    rehydrate({ only, msg })
+                    rehydrate({
+                      timer: rehydrateArcTimer,
+                      only: 'arcFile',
+                      msg: 'Rehydrating functions with new project manifest'
+                    })
                   }
                 }
               })
@@ -142,13 +185,11 @@ module.exports = function cli (params = {}, callback) {
        */
       let isShared = fileName.includes(`${workingDirectory}/src/shared`)
       if (updateOrRemove && isShared && !paused) {
-        clearTimeout(rehydrateSharedTimer)
-        rehydrateSharedTimer = setTimeout(() => {
-          ts()
-          let only = 'shared'
-          let msg = 'Shared file changed, rehydrating functions...'
-          rehydrate({ only, msg })
-        }, 50)
+        rehydrate({
+          timer: rehydrateSharedTimer,
+          only: 'shared',
+          msg: 'Shared file changed, rehydrating functions...'
+        })
       }
 
       /**
@@ -156,13 +197,11 @@ module.exports = function cli (params = {}, callback) {
        */
       let isViews = fileName.includes(`${workingDirectory}/src/views`)
       if (updateOrRemove && isViews && !paused) {
-        clearTimeout(rehydrateViewsTimer)
-        rehydrateViewsTimer = setTimeout(() => {
-          ts()
-          let only = 'views'
-          let msg = 'Views file changed, rehydrating views...'
-          rehydrate({ only, msg })
-        }, 50)
+        rehydrate({
+          timer: rehydrateViewsTimer,
+          only: 'views',
+          msg: 'Views file changed, rehydrating views...'
+        })
       }
 
       /**
@@ -173,16 +212,17 @@ module.exports = function cli (params = {}, callback) {
           !fileName.includes(`${workingDirectory}/${staticFolder}/static.json`)) {
         clearTimeout(fingerprintTimer)
         fingerprintTimer = setTimeout(() => {
-          ts()
           let start = Date.now()
           fingerprint({}, function next (err, result) {
             if (err) update.error(err)
             else {
               if (result) {
                 let end = Date.now()
-                let only = 'staticJson'
-                let msg = `Regenerated public/static.json in ${end - start}ms`
-                rehydrate({ only, msg })
+                rehydrate({
+                  timer: rehydrateStaticTimer,
+                  only: 'staticJson',
+                  msg: `Regenerated public/static.json in ${end - start}ms`
+                })
               }
             }
           })

@@ -2,6 +2,18 @@
 
 ---
 
+## [1.13.0] 2020-07-05
+
+### Added
+
+- Added support for manual rehydration while running:
+  - Press `shift` + `H` to rehydrate all shared files
+  - Press `shift` + `S` to rehydrate src/shared
+  - Press `shift` + `V` to rehydrate src/views
+  - Fixes #902, ht @andybee!
+
+---
+
 ## [1.12.7] 2020-07-01
 
 ### Fixed

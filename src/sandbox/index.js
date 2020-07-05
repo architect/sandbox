@@ -1,7 +1,7 @@
 let chalk = require('chalk')
-let exec = require('child_process').execSync
-let exists = require('fs').existsSync
-let join = require('path').join
+let { execSync: exec } = require('child_process')
+let { existsSync: exists } = require('fs')
+let { join } = require('path')
 let db = require('../db')
 let events = require('../events')
 let http = require('../http')
