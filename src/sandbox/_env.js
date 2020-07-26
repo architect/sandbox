@@ -1,5 +1,8 @@
 let { toLogicalID } = require('@architect/utils')
 
+/**
+ * Handle important Architect environment variables
+ */
 module.exports = function env (params) {
   let { arc, port, version } = params
 

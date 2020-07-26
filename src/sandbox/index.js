@@ -101,6 +101,7 @@ function start (params, callback) {
      * Populate additional environment variables
      */
     function _env (callback) {
+      // Handle important Architect env vars and get deprecated status
       deprecated = env({ arc, port, version })
 
       // Read .arc-env
@@ -314,6 +315,7 @@ function end (callback) {
       }
     })
   }
+
   // Read .arc again in case the state changed during the course of usage
   let { arc } = readArc()
   series([

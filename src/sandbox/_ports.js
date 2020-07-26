@@ -1,8 +1,8 @@
+/**
+ * Set up Sandbox ports
+ */
 module.exports = function ports (port, options) {
-  /**
-   * Set up Sandbox ports
-   * CLI args > env var > passed arg
-   */
+  // CLI args > env var > passed arg
   let findPort = option => [ '-p', '--port', 'port' ].includes(option)
   if (options && options.some(findPort)) {
     let thePort = i => options[options.indexOf(i) + 1] || port
