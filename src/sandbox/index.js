@@ -22,7 +22,7 @@ let ports = require('./_ports')
 let readArc = require('./read-arc')
 let env = require('./_env')
 
-
+// Assigned to database and event bus services
 let client
 let bus
 
