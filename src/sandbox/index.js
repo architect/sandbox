@@ -9,9 +9,19 @@ let hydrate = require('@architect/hydrate')
 let maybeHydrate = require('../http/maybe-hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
-let { banner, chars, fingerprint, initEnv,
-  portInUse, toLogicalID, updater } = require('@architect/utils')
+let {
+  banner,
+  chars,
+  fingerprint,
+  initEnv,
+  portInUse,
+  updater
+} = require('@architect/utils')
+
+let ports = require('./_ports')
 let readArc = require('./read-arc')
+let env = require('./_env')
+
 
 let client
 let bus
@@ -20,47 +30,9 @@ function start (params, callback) {
   params = params || {}
   let start = Date.now()
   let { port = 3333, options, version, quiet = false } = params
-  let update = updater('Sandbox')
-  let arc
-  let isDefaultProject
-  let deprecated
-  let verbose
-
-  /**
-   * Set up Sandbox ports
-   * CLI args > env var > passed arg
-   */
-  let findPort = option => [ '-p', '--port', 'port' ].includes(option)
-  if (options && options.some(findPort)) {
-    let thePort = i => options[options.indexOf(i) + 1] || port
-    if (options.includes('-p'))
-      process.env.PORT = thePort('-p')
-    else if (options.includes('--port'))
-      process.env.PORT = thePort('--port')
-    else if (options.includes('port'))
-      process.env.PORT = thePort('port')
-  }
-  port = process.env.PORT = Number(process.env.PORT) || port
-
-  // Validate
-  let notNum = e => e && isNaN(e)
-  if (notNum(process.env.ARC_EVENTS_PORT) ||
-      notNum(process.env.ARC_TABLES_PORT) ||
-      notNum(port)) {
-    throw ReferenceError('Ports must be numbers')
-  }
-
-  // Set non-conflicting ports for running multiple simultaneous Architect projects
-  if (port !== 3333 && !process.env.ARC_EVENTS_PORT) {
-    process.env.ARC_EVENTS_PORT = port + 1
-  }
-  if (port !== 3333 && !process.env.ARC_TABLES_PORT) {
-    process.env.ARC_TABLES_PORT = port + 2
-  }
 
   // Set up quietude
-  quiet = process.env.ARC_QUIET || process.env.QUIET || quiet
-  process.env.ARC_QUIET = quiet || '' // For when sandbox is being run outside of @arc/arc
+  process.env.ARC_QUIET = process.env.ARC_QUIET || process.env.QUIET || quiet || '' // For when sandbox is being run outside of @arc/arc
 
   // Set up verbositude
   let findVerbose = option => [ '-v', '--verbose', 'verbose' ].includes(option)
@@ -68,7 +40,14 @@ function start (params, callback) {
     verbose = true
   }
 
-  // Set up promise if there is no callback
+  // Assigned & used later
+  let update = updater('Sandbox')
+  let arc
+  let isDefaultProject
+  let deprecated
+  let verbose
+
+  // Set up promise if there's no callback
   let promise
   if (!callback) {
     promise = new Promise(function (res, rej) {
@@ -79,6 +58,14 @@ function start (params, callback) {
   }
 
   series([
+    /**
+     * Set up Architect ports and related env vars
+     */
+    function _setupPorts (callback) {
+      port = ports(port, options)
+      callback()
+    },
+
     /**
      * Make sure we have access to the desired HTTP port
      */
@@ -100,7 +87,7 @@ function start (params, callback) {
     function _checkArc (callback) {
       let check = readArc()
       arc = check.arc
-      if (!quiet && !check.filepath) {
+      if (!check.filepath) {
         update.warn('No Architect project manifest found, using default project')
       }
       else {
@@ -114,46 +101,7 @@ function start (params, callback) {
      * Populate additional environment variables
      */
     function _env (callback) {
-      /**
-       * Ensure env is one of: 'testing', 'staging', or 'production'
-       * - By default, set (or override) to 'testing'
-       * - Some test harnesses (ahem) will automatically populate NODE_ENV with their own values, unbidden
-       */
-      let env = process.env.NODE_ENV
-      let isNotStagingOrProd = env !== 'staging' && env !== 'production'
-      if (!env || isNotStagingOrProd) {
-        process.env.NODE_ENV = 'testing'
-      }
-
-      // Set Arc 5 / 6+ Lambda config env
-      if (version && version.startsWith('Architect 5') || process.env.DEPRECATED) {
-        deprecated = process.env.DEPRECATED = true
-        process.env.ARC_HTTP = 'aws'
-      }
-      else {
-        process.env.ARC_HTTP = 'aws_proxy'
-        if (env === 'staging' ||
-            env === 'production') {
-          let capEnv = env.charAt(0).toUpperCase() + env.substr(1)
-          process.env.ARC_CLOUDFORMATION = `${toLogicalID(arc.app[0])}${capEnv}`
-        }
-        let spaSetting = tuple => tuple[0] === 'spa'
-        // findIndex instead of find so we don't mix up bools
-        let spa = arc.static && arc.static.some(spaSetting) && arc.static.findIndex(spaSetting)
-        let spaIsValid = arc.static && arc.static[spa] && typeof arc.static[spa][1] === 'boolean'
-        if (spaIsValid) process.env.ARC_STATIC_SPA = arc.static[spa][1]
-      }
-
-      // Populate session table (if not present)
-      if (!process.env.SESSION_TABLE_NAME) {
-        process.env.SESSION_TABLE_NAME = 'jwe'
-      }
-
-      // Declare a bucket for implicit proxy
-      process.env.ARC_STATIC_BUCKET = 'sandbox'
-
-      // Set default WebSocket URL
-      process.env.ARC_WSS_URL = `ws://localhost:${port}`
+      deprecated = env({ arc, port, version })
 
       // Read .arc-env
       initEnv(callback)
@@ -170,7 +118,7 @@ function start (params, callback) {
         fingerprint({}, function next (err, result) {
           if (err) callback(err)
           else {
-            if (result && !quiet) {
+            if (result) {
               update.done('Static asset fingerpringing enabled, public/static.json generated')
             }
             callback()
@@ -203,9 +151,7 @@ function start (params, callback) {
       hydrate({ install: false }, function next (err) {
         if (err) callback(err)
         else {
-          if (!quiet) {
-            update.done('Project files hydrated into functions')
-          }
+          update.done('Project files hydrated into functions')
           callback()
         }
       })
@@ -217,9 +163,7 @@ function start (params, callback) {
     function _db (callback) {
       if (arc.tables) {
         client = db.start(function () {
-          if (!quiet) {
-            update.done('@tables created in local database')
-          }
+          update.done('@tables created in local database')
           callback()
         })
       }
@@ -232,9 +176,7 @@ function start (params, callback) {
     function _events (callback) {
       if (arc.events || arc.queues) {
         bus = events.start(function () {
-          if (!quiet) {
-            update.done('@events and @queues ready on local event bus')
-          }
+          update.done('@events and @queues ready on local event bus')
           callback()
         })
       }
@@ -285,17 +227,14 @@ function start (params, callback) {
       let initJS = join(process.cwd(), 'scripts', 'sandbox-startup.js')
       let initPy = join(process.cwd(), 'scripts', 'sandbox-startup.py')
       let initRb = join(process.cwd(), 'scripts', 'sandbox-startup.rb')
+
       let script
-      if (exists(initJS))
-        script = initJS
-      else if (exists(initPy))
-        script = initPy
-      else if (exists(initRb))
-        script = initRb
+      if (exists(initJS))       script = initJS
+      else if (exists(initPy))  script = initPy
+      else if (exists(initRb))  script = initRb
+
       if (script) {
-        if (!quiet) {
-          update.status('Running sandbox init script')
-        }
+        update.status('Running sandbox init script')
         let now = Date.now()
         let run
         let runtime
@@ -316,9 +255,7 @@ function start (params, callback) {
         Promise.resolve(run).then(
           function done (result) {
             if (result) {
-              if (!quiet) {
-                update.done(`Init (${runtime}):`)
-              }
+              update.done(`Init (${runtime}):`)
               let print =
                 result
                   .toString()
@@ -328,9 +265,7 @@ function start (params, callback) {
                   .join('\n')
               console.log(print)
             }
-            if (!quiet) {
-              update.done(`Sandbox init script ran in ${Date.now() - now}ms`)
-            }
+            update.done(`Sandbox init script ran in ${Date.now() - now}ms`)
             callback()
           }
         )
@@ -346,7 +281,7 @@ function start (params, callback) {
       let dir = __dirname
       if (!dir.startsWith(cwd)) {
         let awsDir = join(__dirname.split('@architect')[0], 'aws-sdk', 'package.json')
-        if (!exists(awsDir) && !quiet) {
+        if (!exists(awsDir)) {
           update.warn(`Possibly found a global install of Architect without a global install of AWS-SDK, please run: npm i -g aws-sdk`)
         }
       }
@@ -356,7 +291,7 @@ function start (params, callback) {
   function _done (err) {
     if (err) callback(err)
     else {
-      if (verbose && process.env.ARC_AWS_CREDS === 'dummy' && !quiet) {
+      if (verbose && process.env.ARC_AWS_CREDS === 'dummy') {
         update.warn('Missing or invalid AWS credentials or credentials file, using dummy credentials (this is probably ok)')
       }
       /**
