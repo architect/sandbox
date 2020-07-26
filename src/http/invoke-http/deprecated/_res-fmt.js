@@ -1,4 +1,4 @@
-let headerFormatter = require('./_res-header-fmt')
+let headerFormatter = require('../rest/_res-header-fmt')
 
 /**
  * Arc <6 response formatter

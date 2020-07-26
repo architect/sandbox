@@ -1,8 +1,8 @@
 let invoke = require('../../invoke-lambda')
-let requestFormatter = require('./_req-fmt')
-let requestFormatterDeprecated = require('./_req-fmt-deprecated')
-let responseFormatter = require('./_res-fmt')
-let responseFormatterDeprecated = require('./_res-fmt-deprecated')
+let requestFormatter = require('./rest/_req-fmt')
+let requestFormatterDeprecated = require('./deprecated/_req-fmt')
+let responseFormatter = require('./rest/_res-fmt')
+let responseFormatterDeprecated = require('./deprecated/_res-fmt')
 let validator = require('./_validator')
 
 /**

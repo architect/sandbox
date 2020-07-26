@@ -1,5 +1,5 @@
 let test = require('tape')
-let headerFormatter = require('../../../../../src/http/invoke-http/_req-header-fmt')
+let headerFormatter = require('../../../../../../src/http/invoke-http/rest/_req-header-fmt')
 
 test('Set up env', t => {
   t.plan(1)
