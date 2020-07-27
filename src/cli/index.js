@@ -73,7 +73,7 @@ module.exports = function cli (params = {}, callback) {
         ts()
         let start = Date.now()
         update.status(msg)
-        hydrate.shared({ only }, () => {
+        hydrate.shared({ only, sandbox: true }, () => {
           let end = Date.now()
           update.done(`Files rehydrated into functions in ${end - start}ms`)
         })

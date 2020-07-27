@@ -200,7 +200,7 @@ function start (params, callback) {
      * ... then hydrate Architect project files into functions
      */
     function _hydrateShared (callback) {
-      hydrate({ install: false }, function next (err) {
+      hydrate({ install: false, sandbox: true }, function next (err) {
         if (err) callback(err)
         else {
           if (!quiet) {

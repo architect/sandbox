@@ -1,5 +1,10 @@
 # Architect Sandbox changelog
 
+### Change
+
+- Speed up hydration by using symlinks instead of copying, whenever the
+  filesystem supports this.
+
 ---
 
 ## [1.13.0] 2020-07-05
