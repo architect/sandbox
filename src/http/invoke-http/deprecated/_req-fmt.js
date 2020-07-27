@@ -2,7 +2,7 @@ let URL = require('url')
 let headerFormatter = require('../rest/_req-header-fmt')
 
 /**
- * Arc <6 request formatter
+ * Arc <6 REST + Lambda integration (non-proxy) request formatter
  * - Mocks request object shape from API Gateway VTL
  */
 module.exports = function requestFormatterDeprecated ({ verb, req }) {

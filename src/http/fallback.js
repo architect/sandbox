@@ -5,11 +5,11 @@ let { parse } = require('url')
 let invoker = require('./invoke-http')
 
 /**
- * serves static assets found in /public
- * - if /public/index.html exists it will serve it as /
- *   (even if `get /` http lambda is defined)
+ * Emulates REST `/{proxy+}` & HTTP `$default`
+ * - Forwards unmatched requests to `get /` (if present)
+ * - Otherwise serves static assets found in /public
  */
-module.exports = function _public (req, res, next) {
+module.exports = function fallback (req, res, next) {
   // immediately exit to normal flow if /
   if (req.path === '/') next()
   else {
@@ -52,53 +52,47 @@ module.exports = function _public (req, res, next) {
     // Arc v5 doesn't support implicit proxy at root, move along
     let invalid = proxyAtRoot && deprecated
 
-    // Determine whether this is an SPA req
-    let isProxy = pathname !== '/'
+    // Determine whether this is a proxy req
+    let nonGetRequestToRoot = method !== 'get' && pathname === '/'
+    let isProxy = pathname !== '/' || nonGetRequestToRoot
 
     if (match || invalid) {
       next()
     }
-    else if (proxyAtRoot && !deprecated) {
-      // Sandbox running as a dependency (most common use case)
-      let arcProxy = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
-      // Sandbox running as a global install
-      let global = join(__dirname, '..', '..', '..', 'http-proxy', 'dist')
-      // Sandbox running from a local (symlink) context (usually testing/dev)
-      let local = join(__dirname, '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
-      if (exists(global)) arcProxy = global
-      else if (exists(local)) arcProxy = local
-
-      let exec = invoker({
-        verb: 'GET',
-        pathToFunction: arcProxy,
-        apiType
-      })
-      if (isProxy) {
-        req.resource = '/{proxy+}'
-        req.params = { proxy: pathname }
-      }
-      else req.resource = pathname
-      req.requestContext = {} // TODO mock a {proxy+} request payload
-      exec(req, res)
-    }
-    else if (method !== 'get' && pathname === '/') {
+    else if (nonGetRequestToRoot && apiType === 'rest') {
+      // /{proxy+} captures all requests not specifically to root
+      // However, $default captures all uncaptured requests, so this failure path only applies to REST APIs
       res.statusCode = 403
       res.setHeader('content-type', 'text/html; charset=utf-8;')
       let message = `Endpoint does not exist for ${method} ${pathname}<br>Add <code>@http ${method} ${pathname}</code> to your Architect project manifest (and create an appropriate handler)`
       res.end(message)
     }
     else {
-      // invoke the get-index lambda function with a proxy payload
+      let pathToFunction = join(process.cwd(), 'src', 'http', `get-index`)
+      if (proxyAtRoot && !deprecated) {
+        // Sandbox running as a dependency (most common use case)
+        pathToFunction = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
+        // Sandbox running as a global install
+        let global = join(__dirname, '..', '..', '..', 'http-proxy', 'dist')
+        // Sandbox running from a local (symlink) context (usually testing/dev)
+        let local = join(__dirname, '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
+        if (exists(global)) pathToFunction = global
+        else if (exists(local)) pathToFunction = local
+      }
+
+      // Invoke with a proxy / $default payload
       let exec = invoker({
         verb: method,
-        pathToFunction: join(process.cwd(), 'src', 'http', `get-index`)
+        pathToFunction,
+        apiType,
+        $default: true
       })
       if (isProxy) {
         req.resource = '/{proxy+}'
         req.params = { proxy: pathname }
       }
       else req.resource = pathname
-      req.requestContext = {} // TODO mock a {proxy+} request payload
+      req.requestContext = {} // TODO mock a proxy request payload
       exec(req, res)
     }
   }

@@ -2,9 +2,9 @@ let URL = require('url')
 let headerFormatter = require('./_req-header-fmt')
 
 /**
- * Arc 6+ request formatter
- * - Mocks request object shape from API Gateway / Lambda proxy integration
- * - HTTP APIs emulate these request payloads with the Lambda 1.0 payload, but it's not an exact match because reasons
+ * Arc 6+ REST + Lambda & HTTP + Lambda v1.0 request formatter
+ * - Mocks request object shape from API Gateway <> Lambda proxy integration
+ * - HTTP APIs can emulate these REST API request payloads with the Lambda 1.0 payload, but AWS didn't make it an exact match because reasons
  */
 module.exports = function requestFormatter ({ verb, route, req }, rest) {
   let { body, params, url } = req
@@ -58,6 +58,9 @@ module.exports = function requestFormatter ({ verb, route, req }, rest) {
 
   // Pass through resource param, importantly: '/' or '/{proxy+}'
   if (req.resource) request.resource = req.resource
+
+  // HTTP API + Lambda v1.0 payload
+  if (rest) request.version = '1.0'
 
   return request
 }
