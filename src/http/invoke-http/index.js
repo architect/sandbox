@@ -1,9 +1,13 @@
 let invoke = require('../../invoke-lambda')
-let requestFormatter = require('./rest/_req-fmt')
-let requestFormatterDeprecated = require('./deprecated/_req-fmt')
-let responseFormatter = require('./rest/_res-fmt')
-let responseFormatterDeprecated = require('./deprecated/_res-fmt')
 let validator = require('./_validator')
+// Request formatters
+let requestFormatterDeprecated = require('./deprecated/_req-fmt')
+let requestFormatterRest = require('./rest/_req-fmt')
+// let requestFormatterHttp = require('./http/_req-fmt')
+// Response formatters
+let responseFormatterDeprecated = require('./deprecated/_res-fmt')
+let responseFormatterRest = require('./rest/_res-fmt')
+// let responseFormatterHttp = require('./http/_res-fmt')
 
 /**
  * Formats and validates HTTP request and response event objects
@@ -11,12 +15,26 @@ let validator = require('./_validator')
 module.exports = function invokeHTTP ({ verb, pathToFunction, route }) {
   if (verb) verb = verb.toUpperCase()
   let deprecated = process.env.DEPRECATED
+  let apiType = process.env.ARC_API_TYPE || 'rest'
+  let restApi = apiType === 'rest'
+  let httpApiV1 = apiType === 'httpv1'
 
   return function respond (req, res) {
     // Set up request shape
-    let request = deprecated
-      ? requestFormatterDeprecated({ verb, req })
-      : requestFormatter({ verb, req, route })
+    let request
+
+    if (deprecated) {
+      request = requestFormatterDeprecated({ verb, req })
+    }
+    else if (restApi) {
+      request = requestFormatterRest({ verb, req, route })
+    }
+    else if (httpApiV1) {
+      request = requestFormatterRest({ verb, req, route }, true)
+    }
+    // else {
+    //   request = requestFormatterHttp({ verb, req, route })
+    // }
 
     // Run the lambda sig locally
     invoke(pathToFunction, request, function _res (err, result) {
@@ -27,9 +45,16 @@ module.exports = function invokeHTTP ({ verb, pathToFunction, route }) {
           res.end(body)
         }
         else {
-          let body = deprecated
-            ? responseFormatterDeprecated({ res, result })
-            : responseFormatter({ res, result })
+          let body
+          if (deprecated) {
+            body = responseFormatterDeprecated({ res, result })
+          }
+          else if (restApi || httpApiV1) {
+            body = responseFormatterRest({ res, result })
+          }
+          // else {
+          //  body = responseFormatterHttp({ res, result })
+          // }
           res.end(body || '')
         }
       }

@@ -2,8 +2,10 @@
  * AWS sometimes drops or mangles HTTP headers
  * - See: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-known-issues.html
  *   - TODO: write a script to scrape this page every once in a while I guess
+ * - Funny story: HTTP APIs include emulation of REST API header mangling and deletion
+ *   - But wouldn't you know it: HTTP emulation of REST APIs isn't actually exactly the same (surprisedpikachu)
  */
-module.exports = function requestHeaderFormatter (reqHeaders = {}) {
+module.exports = function requestHeaderFormatter (reqHeaders = {}, rest) {
   let headers = {}
   let multiValueHeaders = {}
 
@@ -14,7 +16,7 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}) {
    */
   Object.keys(reqHeaders).forEach(header => {
     let h = header.toLowerCase()
-    if (h === 'authorization') {
+    if (h === 'authorization' && rest) {
       headers.Authorization = reqHeaders[header]
     }
     else if (h === 'host') {
@@ -23,7 +25,7 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}) {
     else if (h === 'user-agent') {
       headers['User-Agent'] = reqHeaders[header]
     }
-    else if (h === 'date') {
+    else if (h === 'date' && rest) {
       headers.Date = reqHeaders[header]
     }
     else headers[h] = reqHeaders[header]
@@ -32,21 +34,28 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}) {
   /**
    * Drops: sometimes AWS drops headers because reasons
    */
+  // These headers are dropped in REST APIs & HTTP APIs + Lambda 1.0 payload
+  let drops = [
+    'connection',
+    'expect',
+    'proxy-authenticate',
+    'te',
+    'transfer-encoding',
+    'upgrade',
+  ]
+  // These headers are only dropped in REST APIs
+  let restDrops = [
+    'content-md5',
+    'max-forwards',
+    'server',
+    'trailer',
+    'www-authenticate',
+  ]
+  if (rest) {
+    drops = drops.concat(restDrops)
+  }
   Object.keys(reqHeaders).forEach(header => {
     let h = header.toLowerCase()
-    let drops = [
-      'connection',
-      'content-md5',
-      'expect',
-      'max-forwards',
-      'proxy-authenticate',
-      'server',
-      'te',
-      'trailer',
-      'transfer-encoding',
-      'upgrade',
-      'www-authenticate',
-    ]
     if (drops.includes(h)) {
       delete headers[header]
     }
