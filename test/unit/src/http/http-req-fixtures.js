@@ -1,5 +1,8 @@
 let b64enc = i => new Buffer.from(i).toString('base64')
-let headers = { 'Accept-Encoding': 'gzip' }
+let headers = {
+  'Accept-Encoding': 'gzip',
+  cookie: '_idx=abc123DEF456'
+}
 
 /**
  * Standard mock request set used in:

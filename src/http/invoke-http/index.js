@@ -13,18 +13,12 @@ module.exports = function invokeHTTP ({ verb, pathToFunction, route }) {
   let deprecated = process.env.DEPRECATED
 
   return function respond (req, res) {
-
-    // Coerce API Gateway 'Cookie' from express 'cookie'
-    req.headers.Cookie = req.headers.cookie
-    delete req.headers.cookie
-    if (!req.headers.Cookie) delete req.headers.Cookie
-
     // Set up request shape
     let request = deprecated
       ? requestFormatterDeprecated({ verb, req })
       : requestFormatter({ verb, req, route })
 
-    // run the lambda sig locally
+    // Run the lambda sig locally
     invoke(pathToFunction, request, function _res (err, result) {
       if (err) res.end(err.message)
       else {

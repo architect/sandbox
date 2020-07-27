@@ -8,7 +8,22 @@ let invoke = proxyquire('../../../../../src/http/invoke-http', {
 let reqs = require('../http-req-fixtures')
 
 lambdaStub.yields(null, {})
-let headers = { 'Accept-Encoding': 'gzip' }
+
+// Header normalization
+let headers = {
+  'Accept-Encoding': 'gzip',
+  cookie: '_idx=abc123DEF456'
+}
+function apiGwHeaders (headers, v5) {
+  let normal = {}
+  Object.entries(headers).forEach(([ h, v ]) => {
+    let header = h.toLowerCase()
+    if (header === 'cookie' && v5) header = 'Cookie'
+    normal[header] = v
+  })
+  return normal
+}
+
 let url = i => `http://localhost:6666${i ? i : ''}`
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${str(item)}`
@@ -31,9 +46,10 @@ let teardown = () => {
  * Checks AWS's funky multiValueHeaders + multiValueQueryStringParameters
  */
 function checkMultiValueHeaders (mock, req, t) {
+  let headers = apiGwHeaders(mock.headers)
   // Fixtures always have headers
-  for (let header of Object.keys(mock.headers)) {
-    if (mock.headers[header] !== req.multiValueHeaders[header][0])
+  for (let header of Object.keys(headers)) {
+    if (headers[header] !== req.multiValueHeaders[header][0])
       t.fail(`Could not find ${header} in multiValueHeaders`)
   }
   t.pass('multiValueHeaders checked out')
@@ -75,7 +91,7 @@ test('Architect v6: get /', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
   t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
@@ -100,7 +116,7 @@ test('Architect v6: get /?whats=up', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
   t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
@@ -125,7 +141,7 @@ test('Architect v6: get /?whats=up&whats=there', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
   t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
@@ -151,7 +167,7 @@ test('Architect v6: get /nature/hiking', t => {
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
   t.equal(str(request.resource), str(req.resource), match('req.resource', req.resource))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
   t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
@@ -178,7 +194,7 @@ test('Architect v6: get /{proxy+}', t => {
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
   t.equal(str(request.resource), str(req.resource), match('req.resource', req.resource))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
   t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
@@ -204,7 +220,7 @@ test('Architect v6: post /form (JSON)', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
   t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
@@ -232,7 +248,7 @@ test('Architect v6: post /form (form URL encoded)', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
   t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
@@ -259,7 +275,7 @@ test('Architect v6: post /form (multipart form data)', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
   t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
@@ -286,7 +302,7 @@ test('Architect v6: post /form (octet stream)', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
   t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
@@ -313,7 +329,7 @@ test('Architect v6: put /form (JSON)', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
   t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
@@ -340,7 +356,7 @@ test('Architect v6: patch /form (JSON)', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
   t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
@@ -367,7 +383,7 @@ test('Architect v6: delete /form (JSON)', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
   t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
   t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
   t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
@@ -395,7 +411,7 @@ test('Architect v5: get /', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
   if (request.httpMethod === request.method)
     t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
@@ -421,7 +437,7 @@ test('Architect v5: get /?whats=up', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
   if (request.httpMethod === request.method)
     t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
@@ -447,7 +463,7 @@ test('Architect v5: get /nature/hiking', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
   if (request.httpMethod === request.method)
     t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
@@ -473,7 +489,7 @@ test('Architect v5: post /form (JSON / form URL-encoded)', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
   if (request.httpMethod === request.method)
     t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
@@ -499,7 +515,7 @@ test('Architect v5: post /form (multipart form data-encoded)', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
   if (request.httpMethod === request.method)
     t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
@@ -525,7 +541,7 @@ test('Architect v5: put /form', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
   if (request.httpMethod === request.method)
     t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
@@ -551,7 +567,7 @@ test('Architect v5: patch /form', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
   if (request.httpMethod === request.method)
     t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
   t.equal(str(request.params), str(req.params), match('req.params', req.params))
@@ -577,7 +593,7 @@ test('Architect v5: delete /form', t => {
   let req = lambdaStub.args[0][1]
   t.equal(str(request.body), str(req.body), match('req.body', req.body))
   t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
+  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
   if (request.httpMethod === request.method)
     t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
   t.equal(str(request.params), str(req.params), match('req.params', req.params))

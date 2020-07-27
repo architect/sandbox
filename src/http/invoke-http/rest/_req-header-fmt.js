@@ -9,6 +9,7 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}) {
 
   /**
    * Manglings: for whatever reason Authorization, Date, Host, and User-Agent are force-Pascal-kebab-cased
+   * Everything else is force-lowercased
    * No, this isn't documented.
    */
   Object.keys(reqHeaders).forEach(header => {
@@ -25,7 +26,7 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}) {
     else if (h === 'date') {
       headers.Date = reqHeaders[header]
     }
-    else headers[header] = reqHeaders[header]
+    else headers[h] = reqHeaders[header]
   })
 
   /**
