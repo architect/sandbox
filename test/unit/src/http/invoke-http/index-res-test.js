@@ -40,7 +40,7 @@ let teardown = () => {
   delete process.env.DEPRECATED
 }
 
-test('Architect v6 dependency-free responses', t => {
+test('Architect v6 dependency-free responses (REST API mode)', t => {
   t.plan(13)
   let run = (response, callback) => {
     let output = {
@@ -51,7 +51,7 @@ test('Architect v6 dependency-free responses', t => {
       end: sinon.fake.returns()
     }
     lambdaStub.yields(null, response)
-    let handler = invoke({ verb: 'GET', route: '/' })
+    let handler = invoke({ verb: 'GET', route: '/', apiType: 'rest' })
     handler(input, output)
     let res = parseOutput(output)
     callback(res)
@@ -82,7 +82,7 @@ test('Architect v6 dependency-free responses', t => {
   teardown()
 })
 
-test('Architect v5 dependency-free responses', t => {
+test('Architect v5 dependency-free responses (REST API mode)', t => {
   t.plan(9)
   process.env.DEPRECATED = true
   let run = (response, callback) => {
@@ -94,7 +94,7 @@ test('Architect v5 dependency-free responses', t => {
       end: sinon.fake.returns()
     }
     lambdaStub.yields(null, response)
-    let handler = invoke({ verb: 'GET', route: '/' })
+    let handler = invoke({ verb: 'GET', route: '/', apiType: 'rest' })
     handler(input, output)
     let res = parseOutput(output)
     callback(res)
@@ -122,7 +122,7 @@ test('Architect v5 dependency-free responses', t => {
   teardown()
 })
 
-test('Architect v5 + Functions', t => {
+test('Architect v5 + Functions (REST API mode)', t => {
   t.plan(11)
   process.env.DEPRECATED = true
   let antiCache = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
@@ -136,7 +136,7 @@ test('Architect v5 + Functions', t => {
   }
   let run = (response, callback) => {
     lambdaStub.yields(null, response)
-    let handler = invoke({ verb: 'GET', route: '/' })
+    let handler = invoke({ verb: 'GET', route: '/', apiType: 'rest' })
     handler(input, output)
     let res = parseOutput(output)
     callback(res)
@@ -174,7 +174,7 @@ test('Architect v5 + Functions', t => {
   teardown()
 })
 
-test('Architect <6 + Functions response params', t => {
+test('Architect <6 + Functions response params (REST API mode)', t => {
   t.plan(4)
   process.env.DEPRECATED = true
   let run = (response, callback) => {
@@ -186,7 +186,7 @@ test('Architect <6 + Functions response params', t => {
       end: sinon.fake.returns()
     }
     lambdaStub.yields(null, response)
-    let handler = invoke({ verb: 'GET', route: '/' })
+    let handler = invoke({ verb: 'GET', route: '/', apiType: 'rest' })
     handler(input, output)
     let res = parseOutput(output)
     callback(res)
@@ -228,7 +228,7 @@ test('invoke-http should replace cookie header with ssl and path modifications w
 
 test('invoke-http should replace cookie header with ssl and path modifications when lambda returns Architect v6 style response', t => {
   t.plan(1)
-  let handler = invoke({})
+  let handler = invoke({ apiType: 'rest' })
   lambdaStub.yields(null, {
     headers: {
       'Set-Cookie': 'nomnom; Secure'

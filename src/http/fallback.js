@@ -14,6 +14,7 @@ module.exports = function _public (req, res, next) {
   if (req.path === '/') next()
   else {
     let { arc } = readArc()
+    let apiType = process.env.ARC_API_TYPE
     let deprecated = process.env.DEPRECATED
     let method = req.method.toLowerCase()
     // reads all routes
@@ -69,7 +70,8 @@ module.exports = function _public (req, res, next) {
 
       let exec = invoker({
         verb: 'GET',
-        pathToFunction: arcProxy
+        pathToFunction: arcProxy,
+        apiType
       })
       if (isProxy) {
         req.resource = '/{proxy+}'

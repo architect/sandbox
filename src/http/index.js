@@ -41,25 +41,30 @@ app.use(body.urlencoded({
 app.use(publicMiddleware)
 app.use(fallback)
 
-// keep a reference up here for fns below
+// Keep a reference up here for fns below
 let server
 let websocket
 
-// starts the http server
+// Starts the HTTP server
 app.start = function start (callback) {
-
-  // read the arc file
   let { arc } = readArc()
+
+  // Handle API type
+  let findAPIType = s => s[0] && s[0] === 'apigateway' && s[1]
+  let arcAPIType = arc.aws && arc.aws.some(findAPIType) && arc.aws.find(findAPIType)[1]
+  let apiIsValid = arcAPIType && [ 'http', 'httpv1', 'httpv2', 'rest' ].some(arcAPIType)
+  let api = apiIsValid ? arcAPIType : 'rest'
+  process.env.ARC_API_TYPE = process.env.ARC_API_TYPE || api
+
+  // Allow override of 'public' folder
   let staticFolder = tuple => tuple[0] === 'folder'
   let folder = arc.static && arc.static.some(staticFolder) ? arc.static.find(staticFolder)[1] : 'public'
-
-  // allow override of 'public' folder
   process.env.ARC_SANDBOX_PATH_TO_STATIC = join(process.cwd(), folder)
 
-  // always registering http routes (falling back to get / proxy)
+  // Always registering http routes (falling back to get / proxy)
   registerHTTP(app, '@http', 'http', arc.http || [])
 
-  // create an actual server; how quaint!
+  // Create an actual server; how quaint!
   server = http.createServer(function _request (req, res) {
     if (process.env.ARC_SANDBOX_ENABLE_CORS) {
       res.setHeader('access-control-allow-origin', '*')

@@ -28,6 +28,8 @@ module.exports = function env (params) {
       let capEnv = env.charAt(0).toUpperCase() + env.substr(1)
       process.env.ARC_CLOUDFORMATION = `${toLogicalID(arc.app[0])}${capEnv}`
     }
+
+    // @static spa
     let spaSetting = tuple => tuple[0] === 'spa'
     // findIndex instead of find so we don't mix up bools
     let spa = arc.static && arc.static.some(spaSetting) && arc.static.findIndex(spaSetting)

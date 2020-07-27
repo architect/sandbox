@@ -74,12 +74,13 @@ function checkMultiValueQueryStringParameters (mock, req, t) {
   }
 }
 
-test('Architect v6: get /', t => {
+test('Architect v6 (REST API mode): get /', t => {
   t.plan(8)
   let request = reqs.arc6.getIndex
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -100,12 +101,13 @@ test('Architect v6: get /', t => {
   teardown()
 })
 
-test('Architect v6: get /?whats=up', t => {
+test('Architect v6 (REST API mode): get /?whats=up', t => {
   t.plan(8)
   let request = reqs.arc6.getWithQueryString
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -125,12 +127,13 @@ test('Architect v6: get /?whats=up', t => {
   teardown()
 })
 
-test('Architect v6: get /?whats=up&whats=there', t => {
+test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
   t.plan(8)
   let request = reqs.arc6.getWithQueryStringDuplicateKey
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('?whats=up&whats=there'),
     body: {},
@@ -150,12 +153,13 @@ test('Architect v6: get /?whats=up&whats=there', t => {
   teardown()
 })
 
-test('Architect v6: get /nature/hiking', t => {
+test('Architect v6 (REST API mode): get /nature/hiking', t => {
   t.plan(9)
   let request = reqs.arc6.getWithParam
   let verb = 'GET'
   let route = '/nature/:activities'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -176,12 +180,13 @@ test('Architect v6: get /nature/hiking', t => {
   teardown()
 })
 
-test('Architect v6: get /{proxy+}', t => {
+test('Architect v6 (REST API mode): get /{proxy+}', t => {
   t.plan(9)
   let request = reqs.arc6.getProxyPlus
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/nature/hiking'),
     resource: '/{proxy+}',
@@ -203,12 +208,13 @@ test('Architect v6: get /{proxy+}', t => {
   teardown()
 })
 
-test('Architect v6: post /form (JSON)', t => {
+test('Architect v6 (REST API mode): post /form (JSON)', t => {
   t.plan(9)
   let request = reqs.arc6.postJson
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -231,12 +237,13 @@ test('Architect v6: post /form (JSON)', t => {
   teardown()
 })
 
-test('Architect v6: post /form (form URL encoded)', t => {
+test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
   t.plan(9)
   let request = reqs.arc6.postFormURL
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -258,12 +265,13 @@ test('Architect v6: post /form (form URL encoded)', t => {
   teardown()
 })
 
-test('Architect v6: post /form (multipart form data)', t => {
+test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
   t.plan(9)
   let request = reqs.arc6.postMultiPartFormData
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -285,12 +293,13 @@ test('Architect v6: post /form (multipart form data)', t => {
   teardown()
 })
 
-test('Architect v6: post /form (octet stream)', t => {
+test('Architect v6 (REST API mode): post /form (octet stream)', t => {
   t.plan(9)
   let request = reqs.arc6.postOctetStream
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -312,12 +321,13 @@ test('Architect v6: post /form (octet stream)', t => {
   teardown()
 })
 
-test('Architect v6: put /form (JSON)', t => {
+test('Architect v6 (REST API mode): put /form (JSON)', t => {
   t.plan(9)
   let request = reqs.arc6.putJson
   let verb = 'PUT'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -339,12 +349,13 @@ test('Architect v6: put /form (JSON)', t => {
   teardown()
 })
 
-test('Architect v6: patch /form (JSON)', t => {
+test('Architect v6 (REST API mode): patch /form (JSON)', t => {
   t.plan(9)
   let request = reqs.arc6.patchJson
   let verb = 'PATCH'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -366,12 +377,13 @@ test('Architect v6: patch /form (JSON)', t => {
   teardown()
 })
 
-test('Architect v6: delete /form (JSON)', t => {
+test('Architect v6 (REST API mode): delete /form (JSON)', t => {
   t.plan(9)
   let request = reqs.arc6.deleteJson
   let verb = 'DELETE'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
     body: request.body,
@@ -393,13 +405,14 @@ test('Architect v6: delete /form (JSON)', t => {
   teardown()
 })
 
-test('Architect v5: get /', t => {
+test('Architect v5 (REST API mode): get /', t => {
   t.plan(6)
   let request = reqs.arc5.getIndex
   process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -420,13 +433,14 @@ test('Architect v5: get /', t => {
   teardown()
 })
 
-test('Architect v5: get /?whats=up', t => {
+test('Architect v5 (REST API mode): get /?whats=up', t => {
   t.plan(6)
   let request = reqs.arc5.getWithQueryString
   process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -446,13 +460,14 @@ test('Architect v5: get /?whats=up', t => {
   teardown()
 })
 
-test('Architect v5: get /nature/hiking', t => {
+test('Architect v5 (REST API mode): get /nature/hiking', t => {
   t.plan(6)
   let request = reqs.arc5.getWithParam
   process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/nature/:activities'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -472,13 +487,14 @@ test('Architect v5: get /nature/hiking', t => {
   teardown()
 })
 
-test('Architect v5: post /form (JSON / form URL-encoded)', t => {
+test('Architect v5 (REST API mode): post /form (JSON / form URL-encoded)', t => {
   t.plan(6)
   let request = reqs.arc5.post
   process.env.DEPRECATED = true
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
     body: request.body,
@@ -498,13 +514,14 @@ test('Architect v5: post /form (JSON / form URL-encoded)', t => {
   teardown()
 })
 
-test('Architect v5: post /form (multipart form data-encoded)', t => {
+test('Architect v5 (REST API mode): post /form (multipart form data-encoded)', t => {
   t.plan(6)
   let request = reqs.arc5.postBinary
   process.env.DEPRECATED = true
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
     body: request.body,
@@ -524,13 +541,14 @@ test('Architect v5: post /form (multipart form data-encoded)', t => {
   teardown()
 })
 
-test('Architect v5: put /form', t => {
+test('Architect v5 (REST API mode): put /form', t => {
   t.plan(6)
   let request = reqs.arc5.put
   process.env.DEPRECATED = true
   let verb = 'PUT'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
     body: request.body,
@@ -550,13 +568,14 @@ test('Architect v5: put /form', t => {
   teardown()
 })
 
-test('Architect v5: patch /form', t => {
+test('Architect v5 (REST API mode): patch /form', t => {
   t.plan(6)
   let request = reqs.arc5.patch
   process.env.DEPRECATED = true
   let verb = 'PATCH'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
     body: request.body,
@@ -576,13 +595,14 @@ test('Architect v5: patch /form', t => {
   teardown()
 })
 
-test('Architect v5: delete /form', t => {
+test('Architect v5 (REST API mode): delete /form', t => {
   t.plan(6)
   let request = reqs.arc5.delete
   process.env.DEPRECATED = true
   let verb = 'DELETE'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
     body: request.body,

@@ -12,10 +12,9 @@ let responseFormatterRest = require('./rest/_res-fmt')
 /**
  * Formats and validates HTTP request and response event objects
  */
-module.exports = function invokeHTTP ({ verb, pathToFunction, route }) {
+module.exports = function invokeHTTP ({ verb, pathToFunction, route, apiType }) {
   if (verb) verb = verb.toUpperCase()
   let deprecated = process.env.DEPRECATED
-  let apiType = process.env.ARC_API_TYPE || 'rest'
   let restApi = apiType === 'rest'
   let httpApiV1 = apiType === 'httpv1'
 
