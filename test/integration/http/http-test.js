@@ -1,8 +1,8 @@
 let path = require('path')
 let tiny = require('tiny-json-http')
 let test = require('tape')
-let sandbox = require('../../src')
-let { http } = require('../../src')
+let sandbox = require('../../../src')
+let { http } = require('../../../src')
 
 let cwd = process.cwd()
 let b64dec = i => Buffer.from(i, 'base64').toString()
@@ -26,7 +26,7 @@ test('env', t => {
 test('http.start', t => {
   t.plan(2)
   // move to test/mock
-  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
+  process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
   client = http.start(function () {
     t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
     t.ok(client, '@http mounted')
@@ -265,7 +265,7 @@ test('http.close', t => {
 let end
 test('sandbox.start', t => {
   t.plan(3)
-  process.chdir(path.join(__dirname, '..', 'mock', 'no-index-fail'))
+  process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-index-fail'))
   sandbox.start({}, function (err, close) {
     if (err) t.fail(err)
     else {
@@ -305,7 +305,7 @@ test('shut down sandbox', t => {
  */
 test('sandbox.start', t => {
   t.plan(3)
-  process.chdir(path.join(__dirname, '..', 'mock', 'no-index-pass'))
+  process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-index-pass'))
   sandbox.start({}, function (err, close) {
     if (err) t.fail(err)
     else {
@@ -344,7 +344,7 @@ test('shut down sandbox', t => {
  */
 test('sandbox.start', t => {
   t.plan(1)
-  process.chdir(path.join(__dirname, '..', 'mock', 'no-http'))
+  process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-http'))
   sandbox.start({}, function (err, close) {
     if (err) t.fail(err)
     else {
@@ -376,7 +376,7 @@ test('shut down sandbox', t => {
  */
 test('sandbox.start', t => {
   t.plan(2)
-  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
+  process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
   sandbox.start({ version: 'Architect 5.x' }, function (err, close) {
     if (err) t.fail(err)
     else {
