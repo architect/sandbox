@@ -1,13 +1,16 @@
 let invoke = require('../../invoke-lambda')
-let validator = require('./_validator')
-// Request formatters
+
+// REST APIs
 let requestFormatterDeprecated = require('./deprecated/_req-fmt')
 let requestFormatterRest = require('./rest/_req-fmt')
-let requestFormatterHttp = require('./http/_req-fmt')
-// Response formatters
 let responseFormatterDeprecated = require('./deprecated/_res-fmt')
 let responseFormatterRest = require('./rest/_res-fmt')
-// let responseFormatterHttp = require('./http/_res-fmt')
+let responseValidatorRest = require('./rest/_res-validate')
+
+// HTTP APIs
+let requestFormatterHttp = require('./http/_req-fmt')
+let responseFormatterHttp = require('./http/_res-fmt')
+let responseValidatorHttp = require('./http/_res-validate')
 
 /**
  * Formats and validates HTTP request and response event objects
@@ -37,29 +40,37 @@ module.exports = function invokeHTTP (params) {
       request = requestFormatterHttp({ verb, route, req, $default })
     }
 
-    // Run the lambda sig locally
+    // Run the Lambda sig locally
     invoke(pathToFunction, request, function _res (err, result) {
       if (err) res.end(err.message)
       else {
-        let { valid, body } = validator({ res, result })
-        if (!valid) {
-          res.end(body)
-        }
-        else {
-          let body
-          if (deprecated) {
-            body = responseFormatterDeprecated({ res, result })
-          }
-          else if (restApi || httpApiV1) {
-            body = responseFormatterRest({ res, result })
+        // Totally separate out response validation paths to ensure type checks don't inadvertently blow everything up
+        let resty = deprecated || restApi || httpApiV1
+        if (resty) {
+          let { body, valid } = responseValidatorRest({ res, result })
+          if (!valid) {
+            res.end(body)
           }
           else {
-            body = responseFormatterRest({ res, result })
+            let body
+            if (deprecated) {
+              body = responseFormatterDeprecated({ res, result })
+            }
+            else if (restApi || httpApiV1) {
+              body = responseFormatterRest({ res, result })
+            }
+            res.end(body || '')
           }
-          // else {
-          //  body = responseFormatterHttp({ res, result })
-          // }
-          res.end(body || '')
+        }
+        else {
+          let { body, valid } = responseValidatorHttp({ res, result })
+          if (!valid) {
+            res.end(body)
+          }
+          else {
+            let body = responseFormatterHttp({ res, result })
+            res.end(body || '')
+          }
         }
       }
     })

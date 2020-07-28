@@ -2,7 +2,7 @@ let URL = require('url')
 let headerFormatter = require('./_req-header-fmt')
 
 /**
- * Arc 6+ REST + Lambda & HTTP + Lambda v1.0 request formatter
+ * Arc 6+ REST API + Lambda & HTTP API + Lambda v1.0 request formatter
  * - Mocks request object shape from API Gateway <> Lambda proxy integration
  * - HTTP APIs can emulate these REST API request payloads with the Lambda 1.0 payload, but AWS didn't make it an exact match because reasons
  */
@@ -12,9 +12,7 @@ module.exports = function requestFormatter ({ verb, route, req }, rest) {
   let query = {}
   let multiValueQueryStringParameters = {}
   let queryData = URL.parse(url, true).query
-  // API Gateway places Array-type query strings into its own property
-  // located at req.multiValueQueryStringParameters.
-  // This mimicks that behavior.
+  // API Gateway places Array-type query strings into multiValueQueryStringParameters
   for (let param of Object.keys(queryData)) {
     if (Array.isArray(queryData[param])) {
       query[param] = queryData[param][queryData[param].length - 1]

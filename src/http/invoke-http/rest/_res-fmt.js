@@ -1,17 +1,18 @@
 let headerFormatter = require('./_res-header-fmt')
 
 /**
- * Arc 6+ response formatter
+ * Arc 6+ REST API + Lambda & HTTP API + Lambda v1.0 response formatter
  * - Mocks response object shape for API Gateway / Lambda proxy integration
  */
 module.exports = function responseFormatter ({ res, result }) {
+  let { body, headers, multiValueHeaders, statusCode, isBase64Encoded } = result
+
   // HTTP status
-  res.statusCode = result.statusCode || 200
+  res.statusCode = statusCode || 200
 
   // Content type
   // Note: result.headers is a case-sensitive js object,
   //       res.get/setHeader is not (e.g. 'set-cookie' == 'Set-Cookie')
-  let { headers, multiValueHeaders } = result
   let contentType = (multiValueHeaders && multiValueHeaders['Content-Type']) ||
                     (multiValueHeaders && multiValueHeaders['content-type']) ||
                     (headers && headers['Content-Type']) ||
@@ -57,38 +58,18 @@ module.exports = function responseFormatter ({ res, result }) {
   }
 
   /**
-   * Body handling
-   */
-  // Reject raw, unencoded buffers (as does APIG)
-  let isBuffer = () => {
-    let body = result.body
-    if (body && body instanceof Buffer) return true
-    if (body && body.type && body.type === 'Buffer' && body.data instanceof Array) return true
-    return false
-  }
-  if (isBuffer()) {
-    res.statusCode = 502
-    res.setHeader('content-type', 'text/html; charset=utf-8;')
-    result.body = `Cannot respond with a raw buffer.
-
-Please base64 encode your response and include a 'isBase64Encoded: true' parameter, or run your response through @architect/functions`
-    return result.body
-  }
-
-  /**
    * Arc v6 endpoint binary responses
    * - Any endpoint can emit binary responses via base64-encoded body + isBase64Encoded: true
    */
-  let base64EncodedBody = result.isBase64Encoded &&
-                          (result.body && typeof result.body === 'string')
+  let base64EncodedBody = isBase64Encoded && (body && typeof body === 'string')
   if (base64EncodedBody) {
-    result.body = Buffer.from(result.body, 'base64')
+    body = Buffer.from(body, 'base64')
   }
 
   // isBase64Encoded flag passthrough
-  if (result.isBase64Encoded) {
+  if (isBase64Encoded) {
     res.isBase64Encoded = true
   }
 
-  return result.body
+  return body
 }

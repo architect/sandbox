@@ -1,9 +1,9 @@
 /**
- * AWS sometimes drops or mangles HTTP headers
+ * API Gateway sometimes drops or mangles headers
  * - See: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-known-issues.html
  *   - TODO: write a script to scrape this page every once in a while I guess
  * - Funny story: HTTP APIs include emulation of REST API header mangling and deletion
- *   - But wouldn't you know it: HTTP emulation of REST APIs isn't actually exactly the same (surprisedpikachu)
+ *   - But wouldn't you know it: HTTP emulation of REST APIs isn't actually exactly the same because reasons (surprisedpikachu)
  */
 module.exports = function requestHeaderFormatter (reqHeaders = {}, rest) {
   let headers = {}
@@ -32,7 +32,7 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}, rest) {
   })
 
   /**
-   * Drops: sometimes AWS drops headers because reasons
+   * Sometimes AWS drops headers because reasons
    */
   // These headers are dropped in REST APIs & HTTP APIs + Lambda 1.0 payload
   let drops = [

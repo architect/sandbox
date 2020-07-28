@@ -57,7 +57,7 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
     callback(res)
   }
   run(responses.arc6.isBase64Encoded, res => {
-    t.equal(responses.arc6.isBase64Encoded.body, res.body, match('res.body', res.body))
+    t.equal(b64dec(responses.arc6.isBase64Encoded.body), b64dec(res.body), match('res.body', res.body))
     t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
