@@ -23,8 +23,9 @@ let readArc = require('./read-arc')
 let env = require('./_env')
 
 // Assigned to database and event bus services
-let client
-let bus
+let httpServer
+let eventBus
+let dynamo
 
 function start (params, callback) {
   params = params || {}
@@ -163,7 +164,7 @@ function start (params, callback) {
      */
     function _db (callback) {
       if (arc.tables) {
-        client = db.start(function () {
+        dynamo = db.start(function () {
           update.done('@tables created in local database')
           callback()
         })
@@ -176,7 +177,7 @@ function start (params, callback) {
      */
     function _events (callback) {
       if (arc.events || arc.queues) {
-        bus = events.start(function () {
+        eventBus = events.start(function () {
           update.done('@events and @queues ready on local event bus')
           callback()
         })
@@ -206,7 +207,12 @@ function start (params, callback) {
       // Arc 6 may start with proxy at root, or empty `@http` pragma
       let arc6 = !deprecated && arc.static || arc.http
       if (arc5 || arc6) {
-        http.start(function () {
+        /**
+         * Continually overwrite server objects
+         * Reusing the same server (or keeping it in global scope) leads to very tricky state issues with routes (and their assigned functions) when stopping/(re)starting during a long-lived process
+         */
+        httpServer = http()
+        httpServer.start(function () {
           ok()
           if (!quiet) {
             let link = chalk.green.bold.underline(`http://localhost:${port}\n`)
@@ -319,16 +325,16 @@ function end (callback) {
   // Read .arc again in case the state changed during the course of usage
   let { arc } = readArc()
   series([
-    function _client (callback) {
-      if (arc.tables) client.close(callback)
+    function _httpServer (callback) {
+      if (arc.http || arc.ws) httpServer.close(callback)
       else callback()
     },
-    function _bus (callback) {
-      if (arc.events || arc.queues) bus.close(callback)
+    function _eventBus (callback) {
+      if (arc.events || arc.queues) eventBus.close(callback)
       else callback()
     },
-    function _http (callback) {
-      if (arc.http || arc.ws) http.close(callback)
+    function _dynamo (callback) {
+      if (arc.tables) dynamo.close(callback)
       else callback()
     }
   ], function closed (err) {
