@@ -69,9 +69,26 @@ function checkMultiValueQueryStringParameters (mock, req, t) {
   }
 }
 
+function checkV6RestResult (params, mock, req, t) {
+  params.forEach(param => {
+    t.equal(
+      str(mock[param]),
+      str(req[param]),
+      match(`${param}`, req[param])
+    )
+  })
+  checkMultiValueHeaders(mock, req, t)
+  checkMultiValueQueryStringParameters(mock, req, t)
+  teardown()
+}
+
+/**
+ * Arc v6 (REST)
+ */
 test('Architect v6 (REST API mode): get /', t => {
-  t.plan(8)
-  let request = arc6.rest.getIndex
+  let mock = arc6.rest.getIndex
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/'
   let apiType = 'rest'
@@ -85,20 +102,13 @@ test('Architect v6 (REST API mode): get /', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  teardown()
+  checkV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): get /?whats=up', t => {
-  t.plan(8)
-  let request = arc6.rest.getWithQueryString
+  let mock = arc6.rest.getWithQueryString
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/'
   let apiType = 'rest'
@@ -111,20 +121,13 @@ test('Architect v6 (REST API mode): get /?whats=up', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  teardown()
+  checkV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
-  t.plan(8)
-  let request = arc6.rest.getWithQueryStringDuplicateKey
+  let mock = arc6.rest.getWithQueryStringDuplicateKey
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/'
   let apiType = 'rest'
@@ -137,20 +140,13 @@ test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  teardown()
+  checkV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): get /nature/hiking', t => {
-  t.plan(9)
-  let request = arc6.rest.getWithParam
+  let mock = arc6.rest.getWithParam
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/nature/:activities'
   let apiType = 'rest'
@@ -159,25 +155,17 @@ test('Architect v6 (REST API mode): get /nature/hiking', t => {
     url: url('/nature/hiking'),
     body: {},
     headers,
-    params: request.pathParameters
+    params: mock.pathParameters
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.resource), str(req.resource), match('req.resource', req.resource))
-  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  teardown()
+  checkV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): get /{proxy+}', t => {
-  t.plan(9)
-  let request = arc6.rest.getProxyPlus
+  let mock = arc6.rest.getProxyPlus
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/'
   let apiType = 'rest'
@@ -187,219 +175,157 @@ test('Architect v6 (REST API mode): get /{proxy+}', t => {
     resource: '/{proxy+}',
     body: {},
     headers,
-    params: request.pathParameters
+    params: mock.pathParameters
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.resource), str(req.resource), match('req.resource', req.resource))
-  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  teardown()
+  checkV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): post /form (JSON)', t => {
-  t.plan(9)
-  let request = arc6.rest.postJson
+  let mock = arc6.rest.postJson
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'POST'
   let route = '/form'
   let apiType = 'rest'
   let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true // Assumes flag is set in binary handler
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  lambdaStub.reset()
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  teardown()
+  checkV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
-  t.plan(9)
-  let request = arc6.rest.postFormURL
+  let mock = arc6.rest.postFormURL
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'POST'
   let route = '/form'
   let apiType = 'rest'
   let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
+  checkV6RestResult(params, mock, req, t)
   teardown()
 })
 
 test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
-  t.plan(9)
-  let request = arc6.rest.postMultiPartFormData
+  let mock = arc6.rest.postMultiPartFormData
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'POST'
   let route = '/form'
   let apiType = 'rest'
   let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  teardown()
+  checkV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): post /form (octet stream)', t => {
-  t.plan(9)
-  let request = arc6.rest.postOctetStream
+  let mock = arc6.rest.postOctetStream
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'POST'
   let route = '/form'
   let apiType = 'rest'
   let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  teardown()
+  checkV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): put /form (JSON)', t => {
-  t.plan(9)
-  let request = arc6.rest.putJson
+  let mock = arc6.rest.putJson
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'PUT'
   let route = '/form'
   let apiType = 'rest'
   let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  teardown()
+  checkV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): patch /form (JSON)', t => {
-  t.plan(9)
-  let request = arc6.rest.patchJson
+  let mock = arc6.rest.patchJson
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'PATCH'
   let route = '/form'
   let apiType = 'rest'
   let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  teardown()
+  checkV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): delete /form (JSON)', t => {
-  t.plan(9)
-  let request = arc6.rest.deleteJson
+  let mock = arc6.rest.deleteJson
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'DELETE'
   let route = '/form'
   let apiType = 'rest'
   let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers)), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  teardown()
+  checkV6RestResult(params, mock, req, t)
 })
 
+/**
+ * Arc v5
+ */
 test('Architect v5 (REST API mode): get /', t => {
   t.plan(6)
   let request = arc5.getIndex

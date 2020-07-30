@@ -1,7 +1,13 @@
 let b64enc = i => new Buffer.from(i).toString('base64')
+// Normal
 let headers = {
-  'Accept-Encoding': 'gzip',
+  'accept-encoding': 'gzip',
   cookie: '_idx=abc123DEF456'
+}
+// Arc 6 REST
+let multiValueHeaders = {
+  'accept-encoding': [ 'gzip' ],
+  cookie: [ '_idx=abc123DEF456' ]
 }
 
 /**
@@ -15,131 +21,169 @@ let arc6 = {}
 arc6.rest = {
   // get /
   getIndex: {
-    body: null,
+    resource: '/',
     path: '/',
-    headers,
     httpMethod: 'GET',
+    headers,
+    multiValueHeaders,
+    queryStringParameters: null,
+    multiValueQueryStringParameters: null,
     pathParameters: null,
-    queryStringParameters: null
+    body: null,
+    isBase64Encoded: false,
   },
 
   // get /?whats=up
   getWithQueryString: {
-    body: null,
+    resource: '/',
     path: '/',
-    headers,
     httpMethod: 'GET',
+    headers,
+    multiValueHeaders,
+    queryStringParameters: { whats: 'up' },
+    multiValueQueryStringParameters: { whats: [ 'up' ] },
     pathParameters: null,
-    queryStringParameters: { whats: 'up' }
+    body: null,
+    isBase64Encoded: false,
   },
 
   // get /?whats=up&whats=there
   getWithQueryStringDuplicateKey: {
-    body: null,
+    resource: '/',
     path: '/',
-    headers,
     httpMethod: 'GET',
-    pathParameters: null,
+    headers,
+    multiValueHeaders,
     queryStringParameters: { whats: 'there' },
-    multiValueQueryStringParameters: { whats: [ 'up', 'there' ] }
+    multiValueQueryStringParameters: { whats: [ 'up', 'there' ] },
+    pathParameters: null,
+    body: null,
+    isBase64Encoded: false,
   },
 
   // get /nature/hiking
   getWithParam: {
-    body: null,
-    path: '/nature/hiking',
     resource: '/nature/{activities}',
-    headers,
+    path: '/nature/hiking',
     httpMethod: 'GET',
+    headers,
+    multiValueHeaders,
+    queryStringParameters: null,
+    multiValueQueryStringParameters: null,
     pathParameters: { activities: 'hiking' },
-    queryStringParameters: null
+    body: null,
+    isBase64Encoded: false,
   },
 
   // get /{proxy+}
   getProxyPlus: {
-    body: null,
-    path: '/nature/hiking',
     resource: '/{proxy+}',
-    headers,
+    path: '/nature/hiking',
     httpMethod: 'GET',
+    headers,
+    multiValueHeaders,
+    queryStringParameters: null,
+    multiValueQueryStringParameters: null,
     pathParameters: { proxy: '/nature/hiking' },
-    queryStringParameters: null
+    body: null,
+    isBase64Encoded: false,
   },
 
   // post /form (JSON)
   postJson: {
-    body: b64enc(JSON.stringify({ hi: 'there' })),
+    resource: '/form',
     path: '/form',
-    headers: { 'Content-Type': 'application/json' },
     httpMethod: 'POST',
-    pathParameters: null,
+    headers: { 'content-type': 'application/json' },
+    multiValueHeaders: { 'content-type': [ 'application/json' ] },
     queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: null,
+    body: b64enc(JSON.stringify({ hi: 'there' })),
     isBase64Encoded: true
   },
 
   // post /form (form URL encoded)
   postFormURL: {
-    body: b64enc('hi=there'),
+    resource: '/form',
     path: '/form',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     httpMethod: 'POST',
-    pathParameters: null,
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    multiValueHeaders: { 'content-type': [ 'application/x-www-form-urlencoded' ] },
     queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: null,
+    body: b64enc('hi=there'),
     isBase64Encoded: true
   },
 
   // post /form (multipart form data)
   postMultiPartFormData: {
-    body: b64enc('hi there'), // not a valid multipart form data payload but that's for userland validation
+    resource: '/form',
     path: '/form',
-    headers: { 'Content-Type': 'multipart/form-data' },
     httpMethod: 'POST',
-    pathParameters: null,
+    headers: { 'content-type': 'multipart/form-data' },
+    multiValueHeaders: { 'content-type': [ 'multipart/form-data' ] },
     queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: null,
+    body: b64enc('hi there'), // not a valid multipart form data payload but that's for userland validation
     isBase64Encoded: true
   },
 
   // post /form (octet stream)
   postOctetStream: {
-    body: b64enc('hi there\n'),
+    resource: '/form',
     path: '/form',
-    headers: { 'Content-Type': 'application/octet-stream' },
     httpMethod: 'POST',
-    pathParameters: null,
+    headers: { 'content-type': 'application/octet-stream' },
+    multiValueHeaders: { 'content-type': [ 'application/octet-stream' ] },
     queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: null,
+    body: b64enc('hi there\n'),
     isBase64Encoded: true
   },
 
   // put /form (JSON)
   putJson: {
-    body: b64enc(JSON.stringify({ hi: 'there' })),
+    resource: '/form',
     path: '/form',
-    headers: { 'Content-Type': 'application/json' },
     httpMethod: 'PUT',
-    pathParameters: null,
+    headers: { 'content-type': 'application/json' },
+    multiValueHeaders: { 'content-type': [ 'application/json' ] },
     queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: null,
+    body: b64enc(JSON.stringify({ hi: 'there' })),
     isBase64Encoded: true
   },
 
   // patch /form (JSON)
   patchJson: {
-    body: b64enc(JSON.stringify({ hi: 'there' })),
+    resource: '/form',
     path: '/form',
-    headers: { 'Content-Type': 'application/json' },
     httpMethod: 'PATCH',
-    pathParameters: null,
+    headers: { 'content-type': 'application/json' },
+    multiValueHeaders: { 'content-type': [ 'application/json' ] },
     queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: null,
+    body: b64enc(JSON.stringify({ hi: 'there' })),
     isBase64Encoded: true
   },
 
   // delete /form (JSON)
   deleteJson: {
-    body: b64enc(JSON.stringify({ hi: 'there' })),
+    resource: '/form',
     path: '/form',
-    headers: { 'Content-Type': 'application/json' },
     httpMethod: 'DELETE',
-    pathParameters: null,
+    headers: { 'content-type': 'application/json' },
+    multiValueHeaders: { 'content-type': [ 'application/json' ] },
     queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: null,
+    body: b64enc(JSON.stringify({ hi: 'there' })),
     isBase64Encoded: true
   }
 }

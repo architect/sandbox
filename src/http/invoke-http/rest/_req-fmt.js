@@ -52,7 +52,7 @@ module.exports = function requestFormatter ({ verb, route, req }, rest) {
   }
 
   // Base64 encoding status set by binary handler middleware
-  if (req.isBase64Encoded) request.isBase64Encoded = true
+  request.isBase64Encoded = !!(req.isBase64Encoded)
 
   // Pass through resource param, importantly: '/' or '/{proxy+}'
   if (req.resource) request.resource = req.resource
