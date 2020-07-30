@@ -1,8 +1,9 @@
-// Boilerplate Lambda function pulled from AWS
 exports.handler = async (event) => {
-  const response = {
+  const body = event
+  body.message = 'Hello from put /put'
+  return {
     statusCode: 200,
-    body: JSON.stringify(event),
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body)
   }
-  return response
 }

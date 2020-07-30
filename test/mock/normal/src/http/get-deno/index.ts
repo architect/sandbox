@@ -1,7 +1,9 @@
 exports.handler = async (event) => {
-  const response = {
+  const body = event
+  body.message = 'Hello from get /deno'
+  return {
     statusCode: 200,
-    body: JSON.stringify('Hello from Architect Sandbox running deno!'),
-  };
-  return response;
-};
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body)
+  }
+}

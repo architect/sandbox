@@ -74,10 +74,10 @@ module.exports = function responseFormatter ({ res, result }) {
     body = Buffer.from(body, 'base64')
   }
 
-  // // isBase64Encoded flag passthrough
-  // if (isBase64Encoded) {
-  //   res.isBase64Encoded = true
-  // }
+  // isBase64Encoded flag passthrough
+  if (isBase64Encoded) {
+    res.isBase64Encoded = true
+  }
 
   return body
 }

@@ -1,8 +1,10 @@
-# Boilerplate Lambda function pulled from AWS
 import json
 
 def handler(event, context):
+    body = event
+    body['message'] = 'Hello from get /python3.7 (running python3.7)'
     return {
         'statusCode': 200,
-        'body': json.dumps('Hello from Architect Sandbox running python3.7!')
+        'headers': { 'content-type': 'application/json' },
+        'body': json.dumps(body)
     }

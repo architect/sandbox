@@ -1,7 +1,7 @@
 let cli = require('./cli')
 let db = require('./db')
 let events = require('./events')
-let http = require('./http')
+let http = require('./http')()
 let sandbox = require('./sandbox')
 
 module.exports = {

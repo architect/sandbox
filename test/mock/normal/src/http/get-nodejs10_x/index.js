@@ -1,8 +1,9 @@
-// Boilerplate Lambda function pulled from AWS
 exports.handler = async (event) => {
-  const response = {
+  const body = event
+  body.message = 'Hello from get /nodejs10.x (running nodejs10.x)'
+  return {
     statusCode: 200,
-    body: JSON.stringify('Hello from Architect Sandbox running nodejs10.x!'),
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body)
   }
-  return response
 }

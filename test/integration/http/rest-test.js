@@ -10,12 +10,12 @@ let b64dec = i => Buffer.from(i, 'base64').toString()
 
 test('Set up env', t => {
   t.plan(2)
-  process.env.ARC_API_TYPE = 'http'
+  process.env.ARC_API_TYPE = 'rest'
   t.ok(sandbox, 'got sandbox')
   t.ok(http, 'got http')
 })
 
-test('[HTTP mode] Start Sandbox', t => {
+test('[REST mode] Start Sandbox', t => {
   t.plan(3)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
   sandbox.start({}, function (err) {
@@ -28,7 +28,7 @@ test('[HTTP mode] Start Sandbox', t => {
   })
 })
 
-test('[HTTP mode] get /', t => {
+test('[REST mode] get /', t => {
   t.plan(3)
   tiny.get({
     url
@@ -37,14 +37,14 @@ test('[HTTP mode] get /', t => {
     else {
       t.ok(result, 'got /')
       let { message, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
       console.log({ result })
     }
   })
 })
 
-test('[HTTP mode] get /binary', t => {
+test('[REST mode] get /binary', t => {
   t.plan(3)
   tiny.get({
     url: url + '/binary'
@@ -54,14 +54,14 @@ test('[HTTP mode] get /binary', t => {
       const img = Buffer.from(result.body).toString('base64')
       t.ok(result, 'got /binary')
       let { version } = result.headers
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.ok(img.includes('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
       console.log({ result })
     }
   })
 })
 
-test('[HTTP mode] get /nodejs12.x', t => {
+test('[REST mode] get /nodejs12.x', t => {
   t.plan(3)
   tiny.get({
     url: url + '/nodejs12.x'
@@ -70,14 +70,14 @@ test('[HTTP mode] get /nodejs12.x', t => {
     else {
       t.ok(result, 'got /')
       let { message, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get /nodejs12.x (running nodejs12.x)', 'Got correct handler response')
       console.log({ result })
     }
   })
 })
 
-test('[HTTP mode] get /nodejs10.x', t => {
+test('[REST mode] get /nodejs10.x', t => {
   t.plan(3)
   tiny.get({
     url: url + '/nodejs10.x'
@@ -86,14 +86,14 @@ test('[HTTP mode] get /nodejs10.x', t => {
     else {
       t.ok(result, 'got /')
       let { message, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get /nodejs10.x (running nodejs10.x)', 'Got correct handler response')
       console.log({ result })
     }
   })
 })
 
-test('[HTTP mode] get /nodejs8.10', t => {
+test('[REST mode] get /nodejs8.10', t => {
   t.plan(3)
   tiny.get({
     url: url + '/nodejs8.10'
@@ -102,14 +102,14 @@ test('[HTTP mode] get /nodejs8.10', t => {
     else {
       t.ok(result, 'got /')
       let { message, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get /nodejs8.10 (running nodejs8.10)', 'Got correct handler response')
       console.log({ result })
     }
   })
 })
 
-test('[HTTP mode] get /python3.8', t => {
+test('[REST mode] get /python3.8', t => {
   t.plan(3)
   tiny.get({
     url: url + '/python3.8'
@@ -118,14 +118,14 @@ test('[HTTP mode] get /python3.8', t => {
     else {
       t.ok(result, 'got /')
       let { message, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get /python3.8 (running python3.8)', 'Got correct handler response')
       console.log({ result })
     }
   })
 })
 
-test('[HTTP mode] get /python3.7', t => {
+test('[REST mode] get /python3.7', t => {
   t.plan(3)
   tiny.get({
     url: url + '/python3.7'
@@ -134,14 +134,14 @@ test('[HTTP mode] get /python3.7', t => {
     else {
       t.ok(result, 'got /')
       let { message, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get /python3.7 (running python3.7)', 'Got correct handler response')
       console.log({ result })
     }
   })
 })
 
-test('[HTTP mode] get /python3.6', t => {
+test('[REST mode] get /python3.6', t => {
   t.plan(3)
   tiny.get({
     url: url + '/python3.6'
@@ -150,14 +150,14 @@ test('[HTTP mode] get /python3.6', t => {
     else {
       t.ok(result, 'got /')
       let { message, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get /python3.6 (running python3.6)', 'Got correct handler response')
       console.log({ result })
     }
   })
 })
 
-test('[HTTP mode] get /ruby2.5', t => {
+test('[REST mode] get /ruby2.5', t => {
   t.plan(3)
   tiny.get({
     url: url + '/ruby2.5'
@@ -166,14 +166,14 @@ test('[HTTP mode] get /ruby2.5', t => {
     else {
       t.ok(result, 'got /')
       let { message, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from Architect Sandbox running ruby2.5!', 'Got correct handler response')
       console.log({ result })
     }
   })
 })
 
-test('[HTTP mode] post /post', t => {
+test('[REST mode] post /post', t => {
   t.plan(5)
   let data = { hi: 'there' }
   tiny.post({
@@ -185,7 +185,7 @@ test('[HTTP mode] post /post', t => {
     else {
       t.ok(result, 'posted /post')
       let { body, message, isBase64Encoded, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from post /post', 'Got correct handler response')
       t.equal(b64dec(body), 'hi=there', 'Got base64-encoded form URL-encoded body payload')
       t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
@@ -194,7 +194,7 @@ test('[HTTP mode] post /post', t => {
   })
 })
 
-test('[HTTP mode] put /put', t => {
+test('[REST mode] put /put', t => {
   t.plan(5)
   let data = { hi: 'there' }
   tiny.put({
@@ -205,7 +205,7 @@ test('[HTTP mode] put /put', t => {
     else {
       t.ok(result, 'put /put')
       let { body, message, isBase64Encoded, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from put /put', 'Got correct handler response')
       t.equal(b64dec(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
       t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
@@ -218,7 +218,7 @@ test('[HTTP mode] put /put', t => {
  * Uncomment this when tiny supports patch :)
  */
 /*
-test('[HTTP mode] patch /patch', t=> {
+test('[REST mode] patch /patch', t=> {
   t.plan(5)
   let data = {hi: 'there'}
   tiny.patch({
@@ -229,7 +229,7 @@ test('[HTTP mode] patch /patch', t=> {
     else {
       t.ok(result, 'patched /patch')
       let { body, message, isBase64Encoded, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from patch /patch', 'Got correct handler response')
       t.equal(b64dec(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
       t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
@@ -239,7 +239,7 @@ test('[HTTP mode] patch /patch', t=> {
 })
 */
 
-test('[HTTP mode] delete /delete', t => {
+test('[REST mode] delete /delete', t => {
   t.plan(5)
   let data = { hi: 'there' }
   tiny.del({
@@ -250,7 +250,7 @@ test('[HTTP mode] delete /delete', t => {
     else {
       t.ok(result, 'deleted /delete')
       let { body, message, isBase64Encoded, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from delete /delete', 'Got correct handler response')
       t.equal(b64dec(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
       t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
@@ -259,25 +259,23 @@ test('[HTTP mode] delete /delete', t => {
   })
 })
 
-test('[HTTP mode] post / – non-get calls to root should hit $default when route is not explicitly defined', t => {
-  t.plan(3)
+test('[REST mode] post / - non-get calls to root should fail when route is not explicitly defined', t => {
+  t.plan(2)
   let data = { hi: 'there' }
   tiny.post({
     url,
     data,
   }, function _got (err, result) {
-    if (err) t.fail(err)
-    else {
-      t.ok(result, 'posted /')
-      let { message, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
-      t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
-      console.log({ result })
+    if (err) {
+      let message = '@http post /'
+      t.equal(err.statusCode, 403, 'Errors with 403')
+      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
     }
+    else t.fail(result)
   })
 })
 
-test('[HTTP mode] Shut down Sandbox', t => {
+test('[REST mode] Shut down Sandbox', t => {
   t.plan(1)
   shutdown(t)
 })
@@ -285,7 +283,7 @@ test('[HTTP mode] Shut down Sandbox', t => {
 /**
  * Arc v6: test failing to load index.html without get / defined
  */
-test('[HTTP mode] Start Sandbox', t => {
+test('[REST mode] Start Sandbox', t => {
   t.plan(3)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-index-fail'))
   sandbox.start({}, function (err) {
@@ -298,7 +296,7 @@ test('[HTTP mode] Start Sandbox', t => {
   })
 })
 
-test('[HTTP mode] get / without defining get / should fail if index.html not present', t => {
+test('[REST mode] get / without defining get / should fail if index.html not present', t => {
   t.plan(1)
   tiny.get({
     url
@@ -308,7 +306,7 @@ test('[HTTP mode] get / without defining get / should fail if index.html not pre
   })
 })
 
-test('[HTTP mode] Shut down Sandbox', t => {
+test('[REST mode] Shut down Sandbox', t => {
   t.plan(1)
   shutdown(t)
 })
@@ -316,7 +314,7 @@ test('[HTTP mode] Shut down Sandbox', t => {
 /**
  * Arc v6: test successfully loading index.html without get / defined
  */
-test('[HTTP mode] Start Sandbox', t => {
+test('[REST mode] Start Sandbox', t => {
   t.plan(3)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-index-pass'))
   sandbox.start({}, function (err) {
@@ -329,7 +327,7 @@ test('[HTTP mode] Start Sandbox', t => {
   })
 })
 
-test('[HTTP mode] get / without defining get / should succeed if index.html is present', t => {
+test('[REST mode] get / without defining get / should succeed if index.html is present', t => {
   t.plan(2)
   tiny.get({
     url
@@ -344,7 +342,7 @@ test('[HTTP mode] get / without defining get / should succeed if index.html is p
   })
 })
 
-test('[HTTP mode] Shut down Sandbox', t => {
+test('[REST mode] Shut down Sandbox', t => {
   t.plan(1)
   shutdown(t)
 })
@@ -352,7 +350,7 @@ test('[HTTP mode] Shut down Sandbox', t => {
 /**
  * Test to ensure sandbox loads without defining @http
  */
-test('[HTTP mode] Start Sandbox', t => {
+test('[REST mode] Start Sandbox', t => {
   t.plan(1)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-http'))
   sandbox.start({}, function (err) {
@@ -363,7 +361,7 @@ test('[HTTP mode] Start Sandbox', t => {
   })
 })
 
-test('[HTTP mode] get / without defining @http', t => {
+test('[REST mode] get / without defining @http', t => {
   t.plan(1)
   tiny.get({
     url
@@ -373,7 +371,7 @@ test('[HTTP mode] get / without defining @http', t => {
   })
 })
 
-test('[HTTP mode] Teardown', t => {
+test('[REST mode] Teardown', t => {
   t.plan(3)
   shutdown(t)
   delete process.env.ARC_API_TYPE
