@@ -5,7 +5,7 @@ let headerFormatter = require('./_res-header-fmt')
  * - Mocks response object shape for API Gateway / Lambda proxy integration
  */
 module.exports = function responseFormatter ({ res, result }) {
-  let { body, cookies = [], headers, statusCode } = result
+  let { body, cookies = [], headers, statusCode, isBase64Encoded } = result
 
   // Apply all that funky stuff AWS loves doing to our headers
   headers = headerFormatter(headers)
@@ -63,6 +63,20 @@ module.exports = function responseFormatter ({ res, result }) {
   //   res.setHeader(k, headers[k].replace('; Secure', '; Path=/'))
   // else {
   //   res.setHeader(k, headers[k].map(value => value.replace('; Secure', '; Path=/')))
+  // }
+
+  /**
+   * Arc v6 endpoint binary responses
+   * - Any endpoint can emit binary responses via base64-encoded body + isBase64Encoded: true
+   */
+  let base64EncodedBody = isBase64Encoded && (body && typeof body === 'string')
+  if (base64EncodedBody) {
+    body = Buffer.from(body, 'base64')
+  }
+
+  // // isBase64Encoded flag passthrough
+  // if (isBase64Encoded) {
+  //   res.isBase64Encoded = true
   // }
 
   return body

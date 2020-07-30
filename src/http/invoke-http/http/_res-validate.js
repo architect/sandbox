@@ -7,7 +7,7 @@ module.exports = function responseValidator ({ res, result }) {
   let { statusCode, body, headers, cookies, isBase64Encoded } = result
 
   // Basic type checking
-  if (!statusCode || !Number.isInteger(statusCode)) {
+  if (statusCode && !Number.isInteger(statusCode)) {
     let body = errors.invalidType('statusCode', 'Number')
     return invalid(res, body)
   }
