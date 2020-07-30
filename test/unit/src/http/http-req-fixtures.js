@@ -10,7 +10,9 @@ let headers = {
  * - [Architect Sandbox](test/unit/src/http/http-req-fixtures.js)
  * If you make changes to either, reflect it in the other(s)!
  */
-let arc6 = {
+let arc6 = {}
+
+arc6.rest = {
   // get /
   getIndex: {
     body: null,
@@ -244,5 +246,6 @@ let arc5 = {
 
 module.exports = {
   arc6,
-  arc5
+  arc5,
+  headers
 }

@@ -15,7 +15,9 @@ let json = { hi: 'there' }
 let text = 'hi there'
 let xml = '<hi>there</hi>'
 
-let arc6 = {
+let arc6 = {}
+
+arc6.rest = {
   /**
    * New params introduced with Arc 6+ APG-proxy-Lambda
    */

@@ -5,15 +5,10 @@ let lambdaStub = sinon.stub().yields()
 let invoke = proxyquire('../../../../../src/http/invoke-http', {
   '../../invoke-lambda': lambdaStub
 })
-let reqs = require('../http-req-fixtures')
+let { arc6, arc5, headers } = require('../http-req-fixtures')
 
 lambdaStub.yields(null, {})
 
-// Header normalization
-let headers = {
-  'Accept-Encoding': 'gzip',
-  cookie: '_idx=abc123DEF456'
-}
 function apiGwHeaders (headers, v5) {
   let normal = {}
   Object.entries(headers).forEach(([ h, v ]) => {
@@ -76,7 +71,7 @@ function checkMultiValueQueryStringParameters (mock, req, t) {
 
 test('Architect v6 (REST API mode): get /', t => {
   t.plan(8)
-  let request = reqs.arc6.getIndex
+  let request = arc6.rest.getIndex
   let verb = 'GET'
   let route = '/'
   let apiType = 'rest'
@@ -103,7 +98,7 @@ test('Architect v6 (REST API mode): get /', t => {
 
 test('Architect v6 (REST API mode): get /?whats=up', t => {
   t.plan(8)
-  let request = reqs.arc6.getWithQueryString
+  let request = arc6.rest.getWithQueryString
   let verb = 'GET'
   let route = '/'
   let apiType = 'rest'
@@ -129,7 +124,7 @@ test('Architect v6 (REST API mode): get /?whats=up', t => {
 
 test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
   t.plan(8)
-  let request = reqs.arc6.getWithQueryStringDuplicateKey
+  let request = arc6.rest.getWithQueryStringDuplicateKey
   let verb = 'GET'
   let route = '/'
   let apiType = 'rest'
@@ -155,7 +150,7 @@ test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
 
 test('Architect v6 (REST API mode): get /nature/hiking', t => {
   t.plan(9)
-  let request = reqs.arc6.getWithParam
+  let request = arc6.rest.getWithParam
   let verb = 'GET'
   let route = '/nature/:activities'
   let apiType = 'rest'
@@ -182,7 +177,7 @@ test('Architect v6 (REST API mode): get /nature/hiking', t => {
 
 test('Architect v6 (REST API mode): get /{proxy+}', t => {
   t.plan(9)
-  let request = reqs.arc6.getProxyPlus
+  let request = arc6.rest.getProxyPlus
   let verb = 'GET'
   let route = '/'
   let apiType = 'rest'
@@ -210,7 +205,7 @@ test('Architect v6 (REST API mode): get /{proxy+}', t => {
 
 test('Architect v6 (REST API mode): post /form (JSON)', t => {
   t.plan(9)
-  let request = reqs.arc6.postJson
+  let request = arc6.rest.postJson
   let verb = 'POST'
   let route = '/form'
   let apiType = 'rest'
@@ -239,7 +234,7 @@ test('Architect v6 (REST API mode): post /form (JSON)', t => {
 
 test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
   t.plan(9)
-  let request = reqs.arc6.postFormURL
+  let request = arc6.rest.postFormURL
   let verb = 'POST'
   let route = '/form'
   let apiType = 'rest'
@@ -267,7 +262,7 @@ test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
 
 test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
   t.plan(9)
-  let request = reqs.arc6.postMultiPartFormData
+  let request = arc6.rest.postMultiPartFormData
   let verb = 'POST'
   let route = '/form'
   let apiType = 'rest'
@@ -295,7 +290,7 @@ test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
 
 test('Architect v6 (REST API mode): post /form (octet stream)', t => {
   t.plan(9)
-  let request = reqs.arc6.postOctetStream
+  let request = arc6.rest.postOctetStream
   let verb = 'POST'
   let route = '/form'
   let apiType = 'rest'
@@ -323,7 +318,7 @@ test('Architect v6 (REST API mode): post /form (octet stream)', t => {
 
 test('Architect v6 (REST API mode): put /form (JSON)', t => {
   t.plan(9)
-  let request = reqs.arc6.putJson
+  let request = arc6.rest.putJson
   let verb = 'PUT'
   let route = '/form'
   let apiType = 'rest'
@@ -351,7 +346,7 @@ test('Architect v6 (REST API mode): put /form (JSON)', t => {
 
 test('Architect v6 (REST API mode): patch /form (JSON)', t => {
   t.plan(9)
-  let request = reqs.arc6.patchJson
+  let request = arc6.rest.patchJson
   let verb = 'PATCH'
   let route = '/form'
   let apiType = 'rest'
@@ -379,7 +374,7 @@ test('Architect v6 (REST API mode): patch /form (JSON)', t => {
 
 test('Architect v6 (REST API mode): delete /form (JSON)', t => {
   t.plan(9)
-  let request = reqs.arc6.deleteJson
+  let request = arc6.rest.deleteJson
   let verb = 'DELETE'
   let route = '/form'
   let apiType = 'rest'
@@ -407,7 +402,7 @@ test('Architect v6 (REST API mode): delete /form (JSON)', t => {
 
 test('Architect v5 (REST API mode): get /', t => {
   t.plan(6)
-  let request = reqs.arc5.getIndex
+  let request = arc5.getIndex
   process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/'
@@ -435,7 +430,7 @@ test('Architect v5 (REST API mode): get /', t => {
 
 test('Architect v5 (REST API mode): get /?whats=up', t => {
   t.plan(6)
-  let request = reqs.arc5.getWithQueryString
+  let request = arc5.getWithQueryString
   process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/'
@@ -462,7 +457,7 @@ test('Architect v5 (REST API mode): get /?whats=up', t => {
 
 test('Architect v5 (REST API mode): get /nature/hiking', t => {
   t.plan(6)
-  let request = reqs.arc5.getWithParam
+  let request = arc5.getWithParam
   process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/nature/:activities'
@@ -489,7 +484,7 @@ test('Architect v5 (REST API mode): get /nature/hiking', t => {
 
 test('Architect v5 (REST API mode): post /form (JSON / form URL-encoded)', t => {
   t.plan(6)
-  let request = reqs.arc5.post
+  let request = arc5.post
   process.env.DEPRECATED = true
   let verb = 'POST'
   let route = '/form'
@@ -516,7 +511,7 @@ test('Architect v5 (REST API mode): post /form (JSON / form URL-encoded)', t => 
 
 test('Architect v5 (REST API mode): post /form (multipart form data-encoded)', t => {
   t.plan(6)
-  let request = reqs.arc5.postBinary
+  let request = arc5.postBinary
   process.env.DEPRECATED = true
   let verb = 'POST'
   let route = '/form'
@@ -543,7 +538,7 @@ test('Architect v5 (REST API mode): post /form (multipart form data-encoded)', t
 
 test('Architect v5 (REST API mode): put /form', t => {
   t.plan(6)
-  let request = reqs.arc5.put
+  let request = arc5.put
   process.env.DEPRECATED = true
   let verb = 'PUT'
   let route = '/form'
@@ -570,7 +565,7 @@ test('Architect v5 (REST API mode): put /form', t => {
 
 test('Architect v5 (REST API mode): patch /form', t => {
   t.plan(6)
-  let request = reqs.arc5.patch
+  let request = arc5.patch
   process.env.DEPRECATED = true
   let verb = 'PATCH'
   let route = '/form'
@@ -597,7 +592,7 @@ test('Architect v5 (REST API mode): patch /form', t => {
 
 test('Architect v5 (REST API mode): delete /form', t => {
   t.plan(6)
-  let request = reqs.arc5.delete
+  let request = arc5.delete
   process.env.DEPRECATED = true
   let verb = 'DELETE'
   let route = '/form'

@@ -5,7 +5,7 @@ let lambdaStub = sinon.stub().yields()
 let invoke = proxyquire('../../../../../src/http/invoke-http', {
   '../../invoke-lambda': lambdaStub
 })
-let responses = require('../http-res-fixtures')
+let { arc6, arc5, arc } = require('../http-res-fixtures')
 
 let b64dec = i => Buffer.from(i, 'base64').toString('utf8')
 let str = i => JSON.stringify(i)
@@ -56,26 +56,26 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
     let res = parseOutput(output)
     callback(res)
   }
-  run(responses.arc6.isBase64Encoded, res => {
-    t.equal(b64dec(responses.arc6.isBase64Encoded.body), b64dec(res.body), match('res.body', res.body))
+  run(arc6.rest.isBase64Encoded, res => {
+    t.equal(b64dec(arc6.rest.isBase64Encoded.body), b64dec(res.body), match('res.body', res.body))
     t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
-  run(responses.arc6.buffer, res => {
+  run(arc6.rest.buffer, res => {
     t.ok(res.body.includes('Cannot respond with a raw buffer'), 'Raw buffer response causes error')
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
-  run(responses.arc6.encodedWithBinaryType, res => {
+  run(arc6.rest.encodedWithBinaryType, res => {
     t.ok(typeof res.body === 'string', 'Body is (likely) base64 encoded')
     t.equal(b64dec(res.body), 'hi there\n', 'Body still base64 encoded')
     t.notOk(res.isBase64Encoded, 'isBase64Encoded param NOT set automatically')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
-  run(responses.arc6.multiValueHeaders, res => {
+  run(arc6.rest.multiValueHeaders, res => {
     t.deepEqual(res.headers['set-cookie'], [ 'Foo', 'Bar', 'Baz' ], 'Header values set')
     t.deepEqual(res.headers['content-type'], [ 'text/plain' ], 'Content-Type favors multiValueHeaders')
   })
-  run(responses.arc5.cookie, res => {
+  run(arc5.cookie, res => {
     t.ok(res.body.includes('Invalid response parameter'), 'Arc v5 style parameter causes error')
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
@@ -99,23 +99,23 @@ test('Architect v5 dependency-free responses (REST API mode)', t => {
     let res = parseOutput(output)
     callback(res)
   }
-  run(responses.arc5.type, res => {
-    t.equal(responses.arc5.type.type, res.headers['Content-Type'], `type matches res.headers['Content-Type']: ${res.headers['Content-Type']}`)
+  run(arc5.type, res => {
+    t.equal(arc5.type.type, res.headers['Content-Type'], `type matches res.headers['Content-Type']: ${res.headers['Content-Type']}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
   // Testing that cookie is set, not that a valid cookie was passed
-  responses.arc5.cookie.cookie = '_idx=foo'
-  run(responses.arc5.cookie, res => {
+  arc5.cookie.cookie = '_idx=foo'
+  run(arc5.cookie, res => {
     t.ok(res.headers['Set-Cookie'].includes('_idx='), `Cookie set: ${res.headers['Set-Cookie'].substr(0, 75)}...`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
-  run(responses.arc5.cors, res => {
+  run(arc5.cors, res => {
     t.equal(res.headers['Access-Control-Allow-Origin'], '*', `CORS boolean set res.headers['Access-Control-Allow-Origin'] === '*'`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
-  run(responses.arc5.isBase64Encoded, res => {
-    // responses.arc5.isBase64Encoded.body mutated by invoke, so this test is not amazing ↓
-    t.equal(responses.arc5.isBase64Encoded.body, res.body, match('res.body', res.body))
+  run(arc5.isBase64Encoded, res => {
+    // arc5.isBase64Encoded.body mutated by invoke, so this test is not amazing ↓
+    t.equal(arc5.isBase64Encoded.body, res.body, match('res.body', res.body))
     t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
@@ -142,24 +142,24 @@ test('Architect v5 + Functions (REST API mode)', t => {
     callback(res)
   }
   output.getHeader = sinon.fake(getHeader.bind({}, null))
-  run(responses.arc5.body, res => {
-    t.equal(str(responses.arc5.body.body), str(res.body), match('res.body', res.body))
+  run(arc5.body, res => {
+    t.equal(str(arc5.body.body), str(res.body), match('res.body', res.body))
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
   // Same getHeader for arc5.cacheControl as in arc5.body
-  run(responses.arc5.cacheControl, res => {
-    t.equal(responses.arc5.cacheControl.headers['cache-control'], res.headers['Cache-Control'], match(`res.headers['Cache-Control']`, res.headers['Cache-Control']))
-    if (responses.arc5.cacheControl.headers['cache-control'] && !res.headers['cache-control'])
+  run(arc5.cacheControl, res => {
+    t.equal(arc5.cacheControl.headers['cache-control'], res.headers['Cache-Control'], match(`res.headers['Cache-Control']`, res.headers['Cache-Control']))
+    if (arc5.cacheControl.headers['cache-control'] && !res.headers['cache-control'])
       t.pass(`Headers normalized and de-duped: ${str(res.headers)}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
-  output.getHeader = sinon.fake(getHeader.bind({}, responses.arc5.noCacheControlHTML.headers['Content-Type']))
-  run(responses.arc5.noCacheControlHTML, res => {
+  output.getHeader = sinon.fake(getHeader.bind({}, arc5.noCacheControlHTML.headers['Content-Type']))
+  run(arc5.noCacheControlHTML, res => {
     t.equal(res.headers['Cache-Control'], antiCache, 'Default anti-caching headers set for HTML response')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
-  output.getHeader = sinon.fake(getHeader.bind({}, responses.arc5.noCacheControlOther.headers['Content-Type']))
-  run(responses.arc5.noCacheControlOther, res => {
+  output.getHeader = sinon.fake(getHeader.bind({}, arc5.noCacheControlOther.headers['Content-Type']))
+  run(arc5.noCacheControlOther, res => {
     let def = 'max-age=86400'
     t.equal(res.headers['Cache-Control'], def, 'Default caching headers set for non-HTML/JSON response')
     t.equal(res.statusCode, 200, 'Responded with 200')
@@ -167,7 +167,7 @@ test('Architect v5 + Functions (REST API mode)', t => {
   // The following is not a great test ↓
   //   with Sinon we have to mock the Content-Type fallback instead of letting it work
   output.getHeader = sinon.fake(getHeader.bind({}, null))
-  run(responses.arc5.defaultsToJson, res => {
+  run(arc5.defaultsToJson, res => {
     t.ok(res.headers['Content-Type'].includes('application/json'), 'Unspecified content type defaults to JSON')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
@@ -191,17 +191,17 @@ test('Architect <6 + Functions response params (REST API mode)', t => {
     let res = parseOutput(output)
     callback(res)
   }
-  run(responses.arc.locationHi, res => {
-    t.equal(responses.arc.locationHi.location, res.headers.Location, match('res.headers.Location', res.headers.Location))
+  run(arc.locationHi, res => {
+    t.equal(arc.locationHi.location, res.headers.Location, match('res.headers.Location', res.headers.Location))
   })
-  run(responses.arc.status201, res => {
-    t.equal(responses.arc.status201.status, res.statusCode, match('status', res.statusCode))
+  run(arc.status201, res => {
+    t.equal(arc.status201.status, res.statusCode, match('status', res.statusCode))
   })
-  run(responses.arc.code201, res => {
-    t.equal(responses.arc.code201.code, res.statusCode, match('code', res.statusCode))
+  run(arc.code201, res => {
+    t.equal(arc.code201.code, res.statusCode, match('code', res.statusCode))
   })
-  run(responses.arc.statusCode201, res => {
-    t.equal(responses.arc.statusCode201.statusCode, res.statusCode, match('statusCode', res.statusCode))
+  run(arc.statusCode201, res => {
+    t.equal(arc.statusCode201.statusCode, res.statusCode, match('statusCode', res.statusCode))
   })
   teardown()
 })
