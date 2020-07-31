@@ -39,7 +39,7 @@ function createHttpServer () {
   // Direct static asset delivery via /_static
   app.use(_static)
 
-  // Proxy / $default greedy catch-alls
+  // REST `/{proxy+}` & HTTP `$default` greedy catch-alls
   app.use(fallback)
 
   // Keep a reference up here for fns below
@@ -54,7 +54,7 @@ function createHttpServer () {
     let findAPIType = s => s[0] && s[0] === 'apigateway' && s[1]
     let arcAPIType = arc.aws && arc.aws.some(findAPIType) && arc.aws.find(findAPIType)[1]
     let apiIsValid = arcAPIType && [ 'http', 'httpv1', 'httpv2', 'rest' ].some(arcAPIType)
-    let api = apiIsValid ? arcAPIType : 'rest'
+    let api = apiIsValid ? arcAPIType : 'http'
     process.env.ARC_API_TYPE = process.env.ARC_API_TYPE || api
 
     // Allow override of 'public' folder
