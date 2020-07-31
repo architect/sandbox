@@ -32,7 +32,7 @@ let response = {
   end: sinon.fake.returns()
 }
 
-let teardown = () => {
+function teardown () {
   lambdaStub.reset() // mostly jic
   delete process.env.DEPRECATED
 }
