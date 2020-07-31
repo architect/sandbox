@@ -580,12 +580,38 @@ test('Architect v6 (REST API mode): delete /form (JSON)', t => {
   checkArcV6RestResult(params, mock, req, t)
 })
 
+
 /**
  * Arc v5 (REST)
  */
+function upcaseCookie (headers) {
+  let sheet = {}
+  Object.entries(headers).forEach(([ header, value ]) => {
+    if (header === 'cookie') sheet.Cookie = value
+    else sheet[header] = value
+  })
+  return sheet
+}
+
+// Reusable result checker
+function checkArcV5RestResult (params, mock, req, t) {
+  params.forEach(param => {
+    let ref = param === 'headers'
+      ? upcaseCookie(mock[param])
+      : mock[param]
+    t.equal(
+      str(ref),
+      str(req[param]),
+      match(`${param}`, req[param])
+    )
+  })
+  teardown()
+}
+
 test('Architect v5 (REST): get /', t => {
-  t.plan(6)
-  let request = arc5.getIndex
+  let mock = arc5.getIndex
+  let params = Object.keys(mock)
+  t.plan(params.length)
   process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/'
@@ -600,20 +626,13 @@ test('Architect v5 (REST): get /', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })
 
 test('Architect v5 (REST): get /?whats=up', t => {
-  t.plan(6)
-  let request = arc5.getWithQueryString
+  let mock = arc5.getWithQueryString
+  let params = Object.keys(mock)
+  t.plan(params.length)
   process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/'
@@ -627,20 +646,13 @@ test('Architect v5 (REST): get /?whats=up', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })
 
 test('Architect v5 (REST): get /nature/hiking', t => {
-  t.plan(6)
-  let request = arc5.getWithParam
+  let mock = arc5.getWithParam
+  let params = Object.keys(mock)
+  t.plan(params.length)
   process.env.DEPRECATED = true
   let verb = 'GET'
   let route = '/nature/:activities'
@@ -650,24 +662,17 @@ test('Architect v5 (REST): get /nature/hiking', t => {
     url: url('/nature/hiking'),
     body: {},
     headers,
-    params: request.params
+    params: mock.params
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })
 
 test('Architect v5 (REST): post /form (JSON / form URL-encoded)', t => {
-  t.plan(6)
-  let request = arc5.post
+  let mock = arc5.post
+  let params = Object.keys(mock)
+  t.plan(params.length)
   process.env.DEPRECATED = true
   let verb = 'POST'
   let route = '/form'
@@ -675,26 +680,19 @@ test('Architect v5 (REST): post /form (JSON / form URL-encoded)', t => {
   let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
-    body: request.body,
+    body: mock.body,
     headers,
     params: {}
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })
 
 test('Architect v5 (REST): post /form (multipart form data-encoded)', t => {
-  t.plan(6)
-  let request = arc5.postBinary
+  let mock = arc5.postBinary
+  let params = Object.keys(mock)
+  t.plan(params.length)
   process.env.DEPRECATED = true
   let verb = 'POST'
   let route = '/form'
@@ -702,26 +700,19 @@ test('Architect v5 (REST): post /form (multipart form data-encoded)', t => {
   let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
-    body: request.body,
+    body: mock.body,
     headers,
     params: {}
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })
 
 test('Architect v5 (REST): put /form', t => {
-  t.plan(6)
-  let request = arc5.put
+  let mock = arc5.put
+  let params = Object.keys(mock)
+  t.plan(params.length)
   process.env.DEPRECATED = true
   let verb = 'PUT'
   let route = '/form'
@@ -729,26 +720,19 @@ test('Architect v5 (REST): put /form', t => {
   let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
-    body: request.body,
+    body: mock.body,
     headers,
     params: {}
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })
 
 test('Architect v5 (REST): patch /form', t => {
-  t.plan(6)
-  let request = arc5.patch
+  let mock = arc5.patch
+  let params = Object.keys(mock)
+  t.plan(params.length)
   process.env.DEPRECATED = true
   let verb = 'PATCH'
   let route = '/form'
@@ -756,26 +740,19 @@ test('Architect v5 (REST): patch /form', t => {
   let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
-    body: request.body,
+    body: mock.body,
     headers,
     params: {}
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })
 
 test('Architect v5 (REST): delete /form', t => {
-  t.plan(6)
-  let request = arc5.delete
+  let mock = arc5.delete
+  let params = Object.keys(mock)
+  t.plan(params.length)
   process.env.DEPRECATED = true
   let verb = 'DELETE'
   let route = '/form'
@@ -783,19 +760,11 @@ test('Architect v5 (REST): delete /form', t => {
   let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
-    body: request.body,
+    body: mock.body,
     headers,
     params: {}
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(apiGwHeaders(request.headers, true)), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })
