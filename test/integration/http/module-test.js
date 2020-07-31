@@ -19,7 +19,7 @@ test('http.start', t => {
   t.plan(3)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
   http.start(function () {
-    t.equal(process.env.ARC_API_TYPE, 'rest', 'API type set to REST')
+    t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
     t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
     t.pass('@http mounted')
   })

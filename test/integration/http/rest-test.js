@@ -2,26 +2,25 @@ let path = require('path')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sandbox = require('../../../src')
-let { http } = require('../../../src')
 let { url, shutdown } = require('./_utils')
 
 let cwd = process.cwd()
 let b64dec = i => Buffer.from(i, 'base64').toString()
 
 test('Set up env', t => {
-  t.plan(2)
+  t.plan(1)
   process.env.ARC_API_TYPE = 'rest'
   t.ok(sandbox, 'got sandbox')
-  t.ok(http, 'got http')
 })
 
 test('[REST mode] Start Sandbox', t => {
-  t.plan(3)
+  t.plan(4)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
   sandbox.start({}, function (err) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_API_TYPE, 'rest', 'API type set to rest')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
       t.pass('Sandbox started')
     }
@@ -170,6 +169,20 @@ test('[REST mode] get /ruby2.5', t => {
       t.equal(message, 'Hello from Architect Sandbox running ruby2.5!', 'Got correct handler response')
       console.log({ result })
     }
+  })
+})
+
+test('[REST mode] get /no-return (noop)', t => {
+  t.plan(2)
+  tiny.get({
+    url: url + '/no-return'
+  }, function _got (err, result) {
+    if (err) {
+      let message = 'Async error'
+      t.equal(err.statusCode, 500, 'Errors with 500')
+      t.ok(err.body.includes(message), `Errors with message: '${message}'`)
+    }
+    else t.fail(result)
   })
 })
 

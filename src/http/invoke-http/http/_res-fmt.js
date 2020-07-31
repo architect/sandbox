@@ -5,11 +5,6 @@ let headerFormatter = require('./_res-header-fmt')
  * - Mocks response object shape for API Gateway / Lambda proxy integration
  */
 module.exports = function responseFormatter ({ res, result }) {
-  let { body, cookies = [], headers, statusCode, isBase64Encoded } = result
-
-  // Apply all that funky stuff AWS loves doing to our headers
-  headers = headerFormatter(headers)
-
   /**
    * Implicit JSON returns
    */
@@ -18,11 +13,17 @@ module.exports = function responseFormatter ({ res, result }) {
     res.setHeader('content-type', 'application/json') // For some reason, sans 'charset=utf-8'
     return response
   }
-
-  // Yes, HTTP API implicit JSON returns really do all these things
+  // Bail early if no return. This is actual API Gateway behavior.
   if (!result) {
     return okGw('null')
   }
+
+  let { body, cookies = [], headers, statusCode, isBase64Encoded } = result
+
+  // Apply all that funky stuff AWS loves doing to our headers
+  headers = headerFormatter(headers)
+
+  // Yes, HTTP API implicit JSON returns really do all these things
   if (!statusCode) {
     if (typeof result === 'string') {
       return okGw(result)

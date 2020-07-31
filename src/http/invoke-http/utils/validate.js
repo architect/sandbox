@@ -20,8 +20,8 @@ let errors = {
 
 function invalid (res, body) {
   res.statusCode = 502
-  res.setHeader('Content-Type', 'text/html; charset=utf-8;')
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0')
+  res.setHeader('content-type', 'text/html; charset=utf-8;')
+  res.setHeader('cache-control', 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0')
   return {
     valid: false,
     body

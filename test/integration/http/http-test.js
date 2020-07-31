@@ -2,26 +2,25 @@ let path = require('path')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sandbox = require('../../../src')
-let { http } = require('../../../src')
 let { url, shutdown } = require('./_utils')
 
 let cwd = process.cwd()
 let b64dec = i => Buffer.from(i, 'base64').toString()
 
 test('Set up env', t => {
-  t.plan(2)
+  t.plan(1)
   process.env.ARC_API_TYPE = 'http'
   t.ok(sandbox, 'got sandbox')
-  t.ok(http, 'got http')
 })
 
 test('[HTTP mode] Start Sandbox', t => {
-  t.plan(3)
+  t.plan(4)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
   sandbox.start({}, function (err) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
       t.pass('Sandbox started')
     }
@@ -168,6 +167,23 @@ test('[HTTP mode] get /ruby2.5', t => {
       let { message, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from Architect Sandbox running ruby2.5!', 'Got correct handler response')
+      console.log({ result })
+    }
+  })
+})
+
+test('[HTTP mode] get /no-return (noop)', t => {
+  t.plan(3)
+  tiny.get({
+    url: url + '/no-return'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'got /no-return')
+      let { headers, body } = result
+      t.equal(headers['content-type'], 'application/json', 'Returned JSON response')
+      // FYI: Tiny parses 'null' into a null literal
+      t.equal(body, null, `Got 'null' string back, which is definitely not valid JSON`)
       console.log({ result })
     }
   })

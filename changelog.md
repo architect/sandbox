@@ -2,13 +2,18 @@
 
 ---
 
-## [1.14.0] 2020-07-28
+## [2.0.0] 2020-07-31
 
 ### Added
 
 - Added support for HTTP APIs (with v1.0 and v2.0 payload formats)
   - Valid API types: `rest` (default), `http` (aliased to `httpv2`), `httpv1`, `httpv2`
   - Types can be specified in the Architect project manifest as `@aws apigateway {type}`, or with the `ARC_API_TYPE` env var
+
+
+### Fixed
+
+- Fixed issue where Lambda timeouts were only respected if >3 seconds; now >=1 second is valid
 
 ---
 

@@ -4,6 +4,9 @@ let { isBuffer, errors, invalid } = require('../utils/validate')
  * Arc 6+ HTTP API + Lambda v2.0 response validator
  */
 module.exports = function responseValidator ({ res, result }) {
+  // Somehow HTTP APIs don't care if nothing is returned
+  if (!result) return { valid: true }
+
   let { statusCode, body, headers, cookies, isBase64Encoded } = result
 
   // Basic type checking
