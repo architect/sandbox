@@ -18,34 +18,34 @@ let pub
 test('Set up env', t => {
   // Set up stubs here or during initialization this test interferes with other' fs readFileSync calls lol
   existsStub = sinon.stub(fs, 'existsSync').returns(true)
-  pub = proxyquire('../../../../src/http/public-middleware', {
+  pub = proxyquire('../../../../src/http/static-path', {
     'send': sendStub
   })
   t.end()
 })
 
-test('public-middleware test setup', t => {
+test('_static test setup', t => {
   t.plan(1)
   process.chdir(mock)
   process.env.ARC_SANDBOX_PATH_TO_STATIC = path.join(mock, 'public')
   t.equals(process.cwd(), mock)
 })
 
-test('public-middleware should invoke next() if url does not start with _static', t => {
+test('_static should invoke next() if url does not start with _static', t => {
   t.plan(1)
   let fake = sinon.fake()
   pub({ url: '/api/signup' }, null, fake)
   t.ok(fake.calledOnce, 'next() invoked')
 })
 
-test('public-middleware should invoke next() if url starts with _static but does not exist', t => {
+test('_static should invoke next() if url starts with _static but does not exist', t => {
   t.plan(1)
   existsStub.returns(false)
   let fake = sinon.fake()
   pub({ url: '/_static/my.css' }, null, fake)
   t.ok(fake.calledOnce, 'next() invoked')
 })
-test('public-middleware should invoke send() with file location if url starts with _static and exists', t => {
+test('_static should invoke send() with file location if url starts with _static and exists', t => {
   t.plan(2)
   existsStub.returns(true)
   existsStub.resetHistory()
@@ -59,7 +59,7 @@ test('public-middleware should invoke send() with file location if url starts wi
   statStub.restore()
 })
 
-test('public-middleware test teardown', t => {
+test('_static test teardown', t => {
   t.plan(1)
   process.chdir(origCwd)
   process.env.ARC_SANDBOX_PATH_TO_STATIC = origEnv

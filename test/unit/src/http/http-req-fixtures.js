@@ -1,14 +1,44 @@
 let b64enc = i => new Buffer.from(i).toString('base64')
-// Normal
-let headers = {
-  'accept-encoding': 'gzip',
-  cookie: '_idx=abc123DEF456'
+
+// Generate a recurring set of headers, with the ability to expand them to include additional headers if needed by the fixture
+function makeHeaders (additional) {
+  let headers = {
+    'accept-encoding': 'gzip',
+    cookie: '_idx=abc123DEF456'
+  }
+  if (additional) headers = Object.assign(headers, additional)
+  let multiValueHeaders = {}
+  Object.entries(headers).forEach(([ header, value ]) => {
+    multiValueHeaders[header] = [ value ]
+  })
+  return { headers, multiValueHeaders }
 }
-// Arc 6 REST
-let multiValueHeaders = {
-  'accept-encoding': [ 'gzip' ],
-  cookie: [ '_idx=abc123DEF456' ]
-}
+
+let {
+  headers, // Just a regular set of baseline headers
+  multiValueHeaders // Arc 6 REST-specific header format
+} = makeHeaders()
+
+// Recurring header cases
+let {
+  headers: headersJson,
+  multiValueHeaders: multiValueHeadersJson
+} = makeHeaders({ 'content-type': 'application/json' })
+let {
+  headers: headersFormUrl,
+  multiValueHeaders: multiValueHeadersFormUrl
+} = makeHeaders({ 'content-type': 'application/x-www-form-urlencoded' })
+let {
+  headers: headersFormData,
+  multiValueHeaders: multiValueHeadersFormData
+} = makeHeaders({ 'content-type': 'multipart/form-data' })
+let {
+  headers: headersOctet,
+  multiValueHeaders: multiValueHeadersOctet
+} = makeHeaders({ 'content-type': 'application/octet-stream' })
+
+// Arc 6 HTTP
+let cookies = [ headers.cookie ]
 
 /**
  * Standard mock request set used in:
@@ -17,6 +47,234 @@ let multiValueHeaders = {
  * If you make changes to either, reflect it in the other(s)!
  */
 let arc6 = {}
+
+arc6.http = {
+  // get /
+  getIndex: {
+    version: '2.0',
+    routeKey: 'GET /',
+    rawPath: '/',
+    rawQueryString: '',
+    cookies,
+    headers,
+    requestContext: {
+      http: {
+        method: 'GET',
+        path: '/',
+      },
+      routeKey: 'GET /',
+    },
+    isBase64Encoded: false
+  },
+
+  // get /?whats=up
+  getWithQueryString: {
+    version: '2.0',
+    routeKey: 'GET /',
+    rawPath: '/',
+    rawQueryString: 'whats=up',
+    cookies,
+    headers,
+    queryStringParameters: { whats: 'up' },
+    requestContext: {
+      http: {
+        method: 'GET',
+        path: '/',
+      },
+      routeKey: 'GET /',
+    },
+    isBase64Encoded: false
+  },
+
+  // get /?whats=up&whats=there
+  getWithQueryStringDuplicateKey: {
+    version: '2.0',
+    routeKey: 'GET /',
+    rawPath: '/',
+    rawQueryString: 'whats=up&whats=there',
+    cookies,
+    headers,
+    queryStringParameters: { whats: 'up,there' },
+    requestContext: {
+      http: {
+        method: 'GET',
+        path: '/',
+      },
+      routeKey: 'GET /',
+    },
+    isBase64Encoded: false
+  },
+
+  // get /nature/hiking
+  getWithParam: {
+    version: '2.0',
+    routeKey: 'GET /nature/{activities}',
+    rawPath: '/nature/hiking',
+    rawQueryString: '',
+    cookies,
+    headers,
+    requestContext: {
+      http: {
+        method: 'GET',
+        path: '/nature/hiking',
+      },
+      routeKey: 'GET /nature/{activities}',
+    },
+    pathParameters: { nature: 'hiking' },
+    isBase64Encoded: false
+  },
+
+  // get /$default
+  get$default: {
+    version: '2.0',
+    routeKey: '$default',
+    rawPath: '/nature/hiking',
+    rawQueryString: '',
+    cookies,
+    headers,
+    requestContext: {
+      http: {
+        method: 'GET',
+        path: '/nature/hiking',
+      },
+      routeKey: '$default',
+    },
+    isBase64Encoded: false
+  },
+
+  // post /form (JSON)
+  postJson: {
+    version: '2.0',
+    routeKey: 'POST /form',
+    rawPath: '/form',
+    rawQueryString: '',
+    cookies,
+    headers: headersJson,
+    requestContext: {
+      http: {
+        method: 'POST',
+        path: '/form',
+      },
+      routeKey: 'POST /form',
+    },
+    body: '{"hi":"there"}',
+    isBase64Encoded: false
+  },
+
+  // post /form (form URL encoded)
+  postFormURL: {
+    version: '2.0',
+    routeKey: 'POST /form',
+    rawPath: '/form',
+    rawQueryString: '',
+    cookies,
+    headers: headersFormUrl,
+    requestContext: {
+      http: {
+        method: 'POST',
+        path: '/form',
+      },
+      routeKey: 'POST /form',
+    },
+    body: b64enc('hi=there'),
+    isBase64Encoded: true
+  },
+
+  // post /form (multipart form data)
+  postMultiPartFormData: {
+    version: '2.0',
+    routeKey: 'POST /form',
+    rawPath: '/form',
+    rawQueryString: '',
+    cookies,
+    headers: headersFormData,
+    requestContext: {
+      http: {
+        method: 'POST',
+        path: '/form',
+      },
+      routeKey: 'POST /form',
+    },
+    body: b64enc('hi there'),
+    isBase64Encoded: true
+  },
+
+  // post /form (octet stream)
+  postOctetStream: {
+    version: '2.0',
+    routeKey: 'POST /form',
+    rawPath: '/form',
+    rawQueryString: '',
+    cookies,
+    headers: headersOctet,
+    requestContext: {
+      http: {
+        method: 'POST',
+        path: '/form',
+      },
+      routeKey: 'POST /form',
+    },
+    body: b64enc('hi there\n'),
+    isBase64Encoded: true
+  },
+
+  // put /form (JSON)
+  putJson: {
+    version: '2.0',
+    routeKey: 'PUT /form',
+    rawPath: '/form',
+    rawQueryString: '',
+    cookies,
+    headers: headersJson,
+    requestContext: {
+      http: {
+        method: 'PUT',
+        path: '/form',
+      },
+      routeKey: 'PUT /form',
+    },
+    body: '{"hi":"there"}',
+    isBase64Encoded: false
+  },
+
+  // patch /form (JSON)
+  patchJson: {
+    version: '2.0',
+    routeKey: 'PATCH /form',
+    rawPath: '/form',
+    rawQueryString: '',
+    cookies,
+    headers: headersJson,
+    requestContext: {
+      http: {
+        method: 'PATCH',
+        path: '/form',
+      },
+      routeKey: 'PATCH /form',
+    },
+    body: '{"hi":"there"}',
+    isBase64Encoded: false
+  },
+
+  // delete /form (JSON)
+  deleteJson: {
+    version: '2.0',
+    routeKey: 'DELETE /form',
+    rawPath: '/form',
+    rawQueryString: '',
+    cookies,
+    headers: headersJson,
+    requestContext: {
+      http: {
+        method: 'DELETE',
+        path: '/form',
+      },
+      routeKey: 'DELETE /form',
+    },
+    body: '{"hi":"there"}',
+    isBase64Encoded: false
+  }
+}
 
 arc6.rest = {
   // get /
@@ -94,8 +352,8 @@ arc6.rest = {
     resource: '/form',
     path: '/form',
     httpMethod: 'POST',
-    headers: { 'content-type': 'application/json' },
-    multiValueHeaders: { 'content-type': [ 'application/json' ] },
+    headers: headersJson,
+    multiValueHeaders: multiValueHeadersJson,
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
@@ -108,8 +366,8 @@ arc6.rest = {
     resource: '/form',
     path: '/form',
     httpMethod: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    multiValueHeaders: { 'content-type': [ 'application/x-www-form-urlencoded' ] },
+    headers: headersFormUrl,
+    multiValueHeaders: multiValueHeadersFormUrl,
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
@@ -122,8 +380,8 @@ arc6.rest = {
     resource: '/form',
     path: '/form',
     httpMethod: 'POST',
-    headers: { 'content-type': 'multipart/form-data' },
-    multiValueHeaders: { 'content-type': [ 'multipart/form-data' ] },
+    headers: headersFormData,
+    multiValueHeaders: multiValueHeadersFormData,
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
@@ -136,8 +394,8 @@ arc6.rest = {
     resource: '/form',
     path: '/form',
     httpMethod: 'POST',
-    headers: { 'content-type': 'application/octet-stream' },
-    multiValueHeaders: { 'content-type': [ 'application/octet-stream' ] },
+    headers: headersOctet,
+    multiValueHeaders: multiValueHeadersOctet,
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
@@ -150,8 +408,8 @@ arc6.rest = {
     resource: '/form',
     path: '/form',
     httpMethod: 'PUT',
-    headers: { 'content-type': 'application/json' },
-    multiValueHeaders: { 'content-type': [ 'application/json' ] },
+    headers: headersJson,
+    multiValueHeaders: multiValueHeadersJson,
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
@@ -164,8 +422,8 @@ arc6.rest = {
     resource: '/form',
     path: '/form',
     httpMethod: 'PATCH',
-    headers: { 'content-type': 'application/json' },
-    multiValueHeaders: { 'content-type': [ 'application/json' ] },
+    headers: headersJson,
+    multiValueHeaders: multiValueHeadersJson,
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
@@ -178,8 +436,8 @@ arc6.rest = {
     resource: '/form',
     path: '/form',
     httpMethod: 'DELETE',
-    headers: { 'content-type': 'application/json' },
-    multiValueHeaders: { 'content-type': [ 'application/json' ] },
+    headers: headersJson,
+    multiValueHeaders: multiValueHeadersJson,
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,

@@ -30,10 +30,14 @@ module.exports = function requestFormatter ({ verb, route, req, $default }) {
   request.rawPath = rawPath
 
   // Query string things
-  request.rawQueryStrng = query || ''
-  if (request.rawQueryStrng) {
+  request.rawQueryString = query || ''
+  if (request.rawQueryString) {
     let { query } = URL.parse(url, true)
-    request.queryStringParameters = query
+    let queryStringParameters = {}
+    Object.entries(query).forEach(([ key, value ]) => {
+      queryStringParameters[key] = Array.isArray(value) ? value.join(',') : value
+    })
+    request.queryStringParameters = queryStringParameters
   }
 
   // Headers + cookies
@@ -56,9 +60,12 @@ module.exports = function requestFormatter ({ verb, route, req, $default }) {
   }
 
   // Body
-  let hasBody = typeof body === 'string'
-  if (hasBody) request.body = body
-  request.isBase64Encoded = hasBody
+  if (typeof body === 'string') {
+    request.body = body
+  }
+
+  // Base64 encoding status set by binary handler middleware
+  request.isBase64Encoded = !!(req.isBase64Encoded)
 
   return request
 }

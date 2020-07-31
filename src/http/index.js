@@ -1,52 +1,52 @@
+// Built-ins
+let http = require('http')
+let { join } = require('path')
+
 // 3rd party
 let Router = require('router')
 let body = require('body-parser')
 let finalhandler = require('finalhandler')
-let readArc = require('../sandbox/read-arc')
 let series = require('run-series')
 
-// built ins
-let http = require('http')
-let join = require('path').join
-
-// local modules
+// Local
+let binary = require('./binary-handler')
+let _static = require('./static-path')
+let fallback = require('./fallback')
+let readArc = require('../sandbox/read-arc')
 let registerHTTP = require('./register-http')
 let registerWS = require('./register-websocket')
-let binary = require('./binary-handler')
-let publicMiddleware = require('./public-middleware')
-let fallback = require('./fallback')
 
 function createHttpServer () {
-  // config arcana
+  // Config arcana
   let jsonTypes = /^application\/.*json/
   let formURLenc = /^application\/x-www-form-urlencoded/
   let isWSsend = req => req.url === '/__arc'
   let limit = '6mb'
   let app = Router({ mergeParams: true })
 
+  // Binary payload / base64 encoding handler
   app.use(binary)
 
-  app.use(body.json({
-    limit,
-    type: req => jsonTypes.test(req.headers['content-type']) &&
-                 (!req.isBase64Encoded || isWSsend(req))
-  }))
+  // Pass along parsed JSON or URL-encoded bodies under certain circumstances
+  let parseJson = req => jsonTypes.test(req.headers['content-type']) &&
+                         (!req.isBase64Encoded || isWSsend(req)) &&
+                         process.env.ARC_API_TYPE !== 'http'
+  let parseUrlE = req => formURLenc.test(req.headers['content-type']) &&
+                         (!req.isBase64Encoded || isWSsend(req))
+  app.use(body.json({ limit, type: parseJson }))
+  app.use(body.urlencoded({ limit, type: parseUrlE, extended: false }))
 
-  app.use(body.urlencoded({
-    extended: false,
-    limit,
-    type: req => formURLenc.test(req.headers['content-type']) &&
-                 (!req.isBase64Encoded || isWSsend(req))
-  }))
+  // Direct static asset delivery via /_static
+  app.use(_static)
 
-  app.use(publicMiddleware)
+  // Proxy / $default greedy catch-alls
   app.use(fallback)
 
   // Keep a reference up here for fns below
   let server
   let websocket
 
-  // Starts the HTTP server
+  // Start the HTTP server
   app.start = function start (callback) {
     let { arc } = readArc()
 

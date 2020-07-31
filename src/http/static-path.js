@@ -2,12 +2,11 @@ let fs = require('fs')
 let url = require('url')
 let send = require('send')
 let path = require('path')
-let exists = fs.existsSync
 
 /**
- * serves static assets found in ./public at /_static
+ * Serves static assets out of /_static
  */
-module.exports = function publicMiddleware (req, res, next) {
+module.exports = function _static (req, res, next) {
   let isStatic = req.url.startsWith('/_static')
   if (isStatic) {
     sends(req, res, next)
@@ -18,7 +17,6 @@ module.exports = function publicMiddleware (req, res, next) {
 }
 
 function sends (req, res, next) {
-
   let basePath = req.url.replace('/_static', '')
   if (!basePath || basePath === '/')
     basePath = 'index.html'
@@ -27,7 +25,7 @@ function sends (req, res, next) {
   let pathToFile = url.parse(basePath).pathname
   let fullPath = path.join(root, decodeURI(pathToFile))
 
-  let found = exists(fullPath) && fs.statSync(fullPath).isFile()
+  let found = fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()
   if (!found) {
     next()
   }

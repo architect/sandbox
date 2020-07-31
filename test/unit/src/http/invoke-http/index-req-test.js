@@ -37,9 +37,268 @@ let teardown = () => {
   delete process.env.DEPRECATED
 }
 
+
 /**
- * Checks AWS's funky multiValueHeaders + multiValueQueryStringParameters
+ * Arc v6 (HTTP API mode)
  */
+let httpParams = [
+  'version',
+  'routeKey',
+  'rawPath',
+  'rawQueryString',
+  'cookies',                // Not always present
+  'headers',
+  'queryStringParameters',  // Not always present
+  'requestContext',
+  'pathParameters',         // Not always present
+  'body',                   // Not always present
+  'isBase64Encoded',
+]
+// HTTP APIs mutate headers when it contains cookies
+// tbqh I also can't resist eating cookies, either
+function eatCookies (headers) {
+  let sheet = {}
+  Object.entries(headers).forEach(([ header, value ]) => {
+    if (header !== 'cookie') sheet[header] = value
+  })
+  return sheet
+}
+
+// Reusable result checker
+function checkArcV6HttpResult (mock, req, t) {
+  httpParams.forEach(param => {
+    let ref = param === 'headers'
+      ? eatCookies(mock[param])
+      : mock[param]
+    t.equal(
+      str(ref),
+      str(req[param]),
+      match(`${param}`, req[param])
+    )
+  })
+  teardown()
+}
+
+test('Architect v6 (HTTP API mode): get /', t => {
+  let mock = arc6.http.getIndex
+  t.plan(httpParams.length)
+  let verb = 'GET'
+  let route = '/'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url(), // Set by `router` (interpolated, API passes path param)
+    body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
+    headers,    // Set by requesting client
+    params: {}  // {} set by `router` (Arc 5 == {}, Arc 6 == null)
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): get /?whats=up', t => {
+  let mock = arc6.http.getWithQueryString
+  t.plan(httpParams.length)
+  let verb = 'GET'
+  let route = '/'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('?whats=up'),
+    body: {},
+    headers,
+    params: {}
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): get /?whats=up&whats=there', t => {
+  let mock = arc6.http.getWithQueryStringDuplicateKey
+  t.plan(httpParams.length)
+  let verb = 'GET'
+  let route = '/'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('?whats=up&whats=there'),
+    body: {},
+    headers,
+    params: {}
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): get /nature/hiking', t => {
+  let mock = arc6.http.getWithParam
+  t.plan(httpParams.length)
+  let verb = 'GET'
+  let route = '/nature/:activities'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/nature/hiking'),
+    body: {},
+    headers,
+    params: mock.pathParameters
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): get /$default', t => {
+  let mock = arc6.http.get$default
+  t.plan(httpParams.length)
+  let verb = 'GET'
+  let $default = true // Unlike normal requests, fallbacks to $default don't include a route
+  let apiType = 'http'
+  let handler = invoke({ verb, apiType, $default })
+  let input = {
+    url: url('/nature/hiking'),
+    body: {},
+    headers,
+    params: {}
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): post /form (JSON)', t => {
+  let mock = arc6.http.postJson
+  t.plan(httpParams.length)
+  let verb = 'POST'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: false // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): post /form (multipart form data)', t => {
+  let mock = arc6.http.postMultiPartFormData
+  t.plan(httpParams.length)
+  let verb = 'POST'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: true // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): post /form (octet stream)', t => {
+  let mock = arc6.http.postOctetStream
+  t.plan(httpParams.length)
+  let verb = 'POST'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: true // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): put /form (JSON)', t => {
+  let mock = arc6.http.putJson
+  t.plan(httpParams.length)
+  let verb = 'PUT'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: false // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): patch /form (JSON)', t => {
+  let mock = arc6.http.patchJson
+  t.plan(httpParams.length)
+  let verb = 'PATCH'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: false // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): delete /form (JSON)', t => {
+  let mock = arc6.http.deleteJson
+  t.plan(httpParams.length)
+  let verb = 'DELETE'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: false // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+
+/**
+ * Arc v6 (REST API mode)
+ */
+// Checks AWS's funky multiValueHeaders + multiValueQueryStringParameters
 function checkMultiValueHeaders (mock, req, t) {
   let headers = apiGwHeaders(mock.headers)
   // Fixtures always have headers
@@ -69,7 +328,8 @@ function checkMultiValueQueryStringParameters (mock, req, t) {
   }
 }
 
-function checkV6RestResult (params, mock, req, t) {
+// Reusable result checker
+function checkArcV6RestResult (params, mock, req, t) {
   params.forEach(param => {
     t.equal(
       str(mock[param]),
@@ -82,9 +342,6 @@ function checkV6RestResult (params, mock, req, t) {
   teardown()
 }
 
-/**
- * Arc v6 (REST)
- */
 test('Architect v6 (REST API mode): get /', t => {
   let mock = arc6.rest.getIndex
   let params = Object.keys(mock)
@@ -102,7 +359,7 @@ test('Architect v6 (REST API mode): get /', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  checkV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): get /?whats=up', t => {
@@ -121,7 +378,7 @@ test('Architect v6 (REST API mode): get /?whats=up', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  checkV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
@@ -140,7 +397,7 @@ test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  checkV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): get /nature/hiking', t => {
@@ -159,7 +416,7 @@ test('Architect v6 (REST API mode): get /nature/hiking', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  checkV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): get /{proxy+}', t => {
@@ -179,7 +436,7 @@ test('Architect v6 (REST API mode): get /{proxy+}', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  checkV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): post /form (JSON)', t => {
@@ -199,7 +456,7 @@ test('Architect v6 (REST API mode): post /form (JSON)', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  checkV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
@@ -219,7 +476,7 @@ test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  checkV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, req, t)
   teardown()
 })
 
@@ -240,7 +497,7 @@ test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  checkV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): post /form (octet stream)', t => {
@@ -260,7 +517,7 @@ test('Architect v6 (REST API mode): post /form (octet stream)', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  checkV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): put /form (JSON)', t => {
@@ -280,7 +537,7 @@ test('Architect v6 (REST API mode): put /form (JSON)', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  checkV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): patch /form (JSON)', t => {
@@ -300,7 +557,7 @@ test('Architect v6 (REST API mode): patch /form (JSON)', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  checkV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, req, t)
 })
 
 test('Architect v6 (REST API mode): delete /form (JSON)', t => {
@@ -320,13 +577,13 @@ test('Architect v6 (REST API mode): delete /form (JSON)', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  checkV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, req, t)
 })
 
 /**
- * Arc v5
+ * Arc v5 (REST)
  */
-test('Architect v5 (REST API mode): get /', t => {
+test('Architect v5 (REST): get /', t => {
   t.plan(6)
   let request = arc5.getIndex
   process.env.DEPRECATED = true
@@ -354,7 +611,7 @@ test('Architect v5 (REST API mode): get /', t => {
   teardown()
 })
 
-test('Architect v5 (REST API mode): get /?whats=up', t => {
+test('Architect v5 (REST): get /?whats=up', t => {
   t.plan(6)
   let request = arc5.getWithQueryString
   process.env.DEPRECATED = true
@@ -381,7 +638,7 @@ test('Architect v5 (REST API mode): get /?whats=up', t => {
   teardown()
 })
 
-test('Architect v5 (REST API mode): get /nature/hiking', t => {
+test('Architect v5 (REST): get /nature/hiking', t => {
   t.plan(6)
   let request = arc5.getWithParam
   process.env.DEPRECATED = true
@@ -408,7 +665,7 @@ test('Architect v5 (REST API mode): get /nature/hiking', t => {
   teardown()
 })
 
-test('Architect v5 (REST API mode): post /form (JSON / form URL-encoded)', t => {
+test('Architect v5 (REST): post /form (JSON / form URL-encoded)', t => {
   t.plan(6)
   let request = arc5.post
   process.env.DEPRECATED = true
@@ -435,7 +692,7 @@ test('Architect v5 (REST API mode): post /form (JSON / form URL-encoded)', t => 
   teardown()
 })
 
-test('Architect v5 (REST API mode): post /form (multipart form data-encoded)', t => {
+test('Architect v5 (REST): post /form (multipart form data-encoded)', t => {
   t.plan(6)
   let request = arc5.postBinary
   process.env.DEPRECATED = true
@@ -462,7 +719,7 @@ test('Architect v5 (REST API mode): post /form (multipart form data-encoded)', t
   teardown()
 })
 
-test('Architect v5 (REST API mode): put /form', t => {
+test('Architect v5 (REST): put /form', t => {
   t.plan(6)
   let request = arc5.put
   process.env.DEPRECATED = true
@@ -489,7 +746,7 @@ test('Architect v5 (REST API mode): put /form', t => {
   teardown()
 })
 
-test('Architect v5 (REST API mode): patch /form', t => {
+test('Architect v5 (REST): patch /form', t => {
   t.plan(6)
   let request = arc5.patch
   process.env.DEPRECATED = true
@@ -516,7 +773,7 @@ test('Architect v5 (REST API mode): patch /form', t => {
   teardown()
 })
 
-test('Architect v5 (REST API mode): delete /form', t => {
+test('Architect v5 (REST): delete /form', t => {
   t.plan(6)
   let request = arc5.delete
   process.env.DEPRECATED = true

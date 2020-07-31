@@ -173,13 +173,13 @@ test('[HTTP mode] get /ruby2.5', t => {
   })
 })
 
-test('[HTTP mode] post /post', t => {
+// Write (POST, PUT, etc.) tests exercise HTTP API mode's implicit JSON passthrough
+test('[HTTP mode] post /post (plain JSON)', t => {
   t.plan(5)
   let data = { hi: 'there' }
   tiny.post({
     url: url + '/post',
-    data,
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    data
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
@@ -187,12 +187,36 @@ test('[HTTP mode] post /post', t => {
       let { body, message, isBase64Encoded, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from post /post', 'Got correct handler response')
-      t.equal(b64dec(body), 'hi=there', 'Got base64-encoded form URL-encoded body payload')
-      t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
+      t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
+      t.equal(isBase64Encoded, false, 'Got isBase64Encoded flag')
       console.log(body)
     }
   })
 })
+
+/**
+ * Uncomment this when tiny fixes JSON type/vendor boog
+ */
+// test('[HTTP mode] post /post (flavored JSON)', t => {
+//   t.plan(5)
+//   let data = { hi: 'there' }
+//   tiny.post({
+//     url: url + '/post',
+//     data,
+//     headers: { 'Content-Type': 'application/ld+json' }, // Exercise the JSON regex
+//   }, function _got (err, result) {
+//     if (err) t.fail(err)
+//     else {
+//       t.ok(result, 'posted /post')
+//       let { body, message, isBase64Encoded, version } = result.body
+//       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+//       t.equal(message, 'Hello from post /post', 'Got correct handler response')
+//       t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
+//       t.equal(isBase64Encoded, false, 'Got isBase64Encoded flag')
+//       console.log(body)
+//     }
+//   })
+// })
 
 test('[HTTP mode] put /put', t => {
   t.plan(5)
@@ -200,6 +224,7 @@ test('[HTTP mode] put /put', t => {
   tiny.put({
     url: url + '/put',
     data,
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
@@ -207,7 +232,7 @@ test('[HTTP mode] put /put', t => {
       let { body, message, isBase64Encoded, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from put /put', 'Got correct handler response')
-      t.equal(b64dec(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
+      t.equal(b64dec(body), 'hi=there', 'Got base64-encoded form URL-encoded body payload')
       t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
       console.log(body)
     }
@@ -244,7 +269,7 @@ test('[HTTP mode] delete /delete', t => {
   let data = { hi: 'there' }
   tiny.del({
     url: url + '/delete',
-    data,
+    data
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
@@ -252,15 +277,15 @@ test('[HTTP mode] delete /delete', t => {
       let { body, message, isBase64Encoded, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from delete /delete', 'Got correct handler response')
-      t.equal(b64dec(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
-      t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
+      t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
+      t.equal(isBase64Encoded, false, 'Got isBase64Encoded flag')
       console.log(body)
     }
   })
 })
 
 test('[HTTP mode] post / – non-get calls to root should hit $default when route is not explicitly defined', t => {
-  t.plan(3)
+  t.plan(5)
   let data = { hi: 'there' }
   tiny.post({
     url,
@@ -269,9 +294,11 @@ test('[HTTP mode] post / – non-get calls to root should hit $default when rout
     if (err) t.fail(err)
     else {
       t.ok(result, 'posted /')
-      let { message, version } = result.body
+      let { body, message, isBase64Encoded, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
+      t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
+      t.equal(isBase64Encoded, false, 'Got isBase64Encoded flag')
       console.log({ result })
     }
   })
