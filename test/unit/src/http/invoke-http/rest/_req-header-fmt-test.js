@@ -1,5 +1,7 @@
 let test = require('tape')
-let headerFormatter = require('../../../../../../src/http/invoke-http/rest/_req-header-fmt')
+let { join } = require('path')
+let sut = join(process.cwd(), 'src', 'http', 'invoke-http', 'rest', '_req-header-fmt')
+let headerFormatter = require(sut)
 
 test('Set up env', t => {
   t.plan(1)
@@ -13,6 +15,9 @@ test('Basics', t => {
   t.ok(result.multiValueHeaders, 'Got back multiValueHeaders')
 })
 
+/**
+ * Arc v6 (HTTP + Lambda 1.0 payload)
+ */
 test('Header mangling (HTTP + Lambda 1.0 payload)', t => {
   t.plan(18)
   let reqHeaders = {
@@ -45,6 +50,30 @@ test('Header mangling (HTTP + Lambda 1.0 payload)', t => {
   t.notOk(multiValueHeaders.Date, 'Did not get back upcased Date')
 })
 
+test('Header drops (HTTP + Lambda 1.0 payload)', t => {
+  t.plan(2)
+  let reqHeaders = {
+    'ok': 'fine', // Should come through, everything else not so much
+    'connection': 'whatev',
+    'content-md5': 'whatev',
+    'expect': 'whatev',
+    'max-forwards': 'whatev',
+    'proxy-authenticate': 'whatev',
+    'server': 'whatev',
+    'te': 'whatev',
+    'transfer-encoding': 'whatev',
+    'trailer': 'whatev',
+    'upgrade': 'whatev',
+    'www-authenticate': 'whatev',
+  }
+  let { headers, multiValueHeaders } = headerFormatter(reqHeaders, true)
+  t.equal(Object.keys(headers).length, 6, 'Dropped appropriate headers')
+  t.equal(Object.keys(multiValueHeaders).length, 6, 'Dropped appropriate multiValueHeaders')
+})
+
+/**
+ * Arc v6 (REST)
+ */
 test('Header mangling (REST)', t => {
   t.plan(18)
   let reqHeaders = {
@@ -75,27 +104,6 @@ test('Header mangling (REST)', t => {
   t.notOk(multiValueHeaders.host, 'Did not get back lowcased host')
   t.notOk(multiValueHeaders['user-agent'], 'Did not get back lowcased user-agent')
   t.notOk(multiValueHeaders.date, 'Did not get back lowcased date')
-})
-
-test('Header drops (HTTP + Lambda 1.0 payload)', t => {
-  t.plan(2)
-  let reqHeaders = {
-    'ok': 'fine', // Should come through, everything else not so much
-    'connection': 'whatev',
-    'content-md5': 'whatev',
-    'expect': 'whatev',
-    'max-forwards': 'whatev',
-    'proxy-authenticate': 'whatev',
-    'server': 'whatev',
-    'te': 'whatev',
-    'transfer-encoding': 'whatev',
-    'trailer': 'whatev',
-    'upgrade': 'whatev',
-    'www-authenticate': 'whatev',
-  }
-  let { headers, multiValueHeaders } = headerFormatter(reqHeaders, true)
-  t.equal(Object.keys(headers).length, 6, 'Dropped appropriate headers')
-  t.equal(Object.keys(multiValueHeaders).length, 6, 'Dropped appropriate multiValueHeaders')
 })
 
 test('Header drops (REST)', t => {

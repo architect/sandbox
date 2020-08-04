@@ -2,7 +2,9 @@ let test = require('tape')
 let sinon = require('sinon')
 let proxyquire = require('proxyquire')
 let lambdaStub = sinon.stub().yields()
-let invoke = proxyquire('../../../../../src/http/invoke-http', {
+let { join } = require('path')
+let sut = join(process.cwd(), 'src', 'http', 'invoke-http')
+let invoke = proxyquire(sut, {
   '../../invoke-lambda': lambdaStub
 })
 let { arc6, arc5, arc } = require('../http-res-fixtures')
