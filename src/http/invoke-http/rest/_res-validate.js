@@ -3,7 +3,7 @@ let { isBuffer, errors, invalid } = require('../utils/validate')
 /**
 * Arc 6+ REST API + Lambda & HTTP API + Lambda v1.0 response validator
  */
-module.exports = function responseValidator ({ res, result }) {
+module.exports = function responseValidator ({ res, result }, httpApi) {
   let { statusCode, body, headers, multiValueHeaders, isBase64Encoded } = result
 
   let params = Object.getOwnPropertyNames(result)
@@ -52,7 +52,7 @@ module.exports = function responseValidator ({ res, result }) {
 
   // Check for invalid params
   let invalidParams = params.some(p => !validParams.includes(p))
-  if (invalidParams && !deprecated) {
+  if (invalidParams && !deprecated && !httpApi) {
     let body = errors.invalidParam(validParams) + `Recieved:<pre> ${JSON.stringify(result, null, 2)}</pre>`
     return invalid(res, body)
   }

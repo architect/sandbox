@@ -24,17 +24,12 @@ module.exports = function invokeHTTP (params) {
   let httpApiV1 = apiType === 'httpv1'
 
   return function respond (req, res) {
-    // Set up request shape
     let request
-
     if (deprecated) {
       request = requestFormatterDeprecated({ verb, req })
     }
-    else if (restApi) {
-      request = requestFormatterRest({ verb, route, req })
-    }
-    else if (httpApiV1) {
-      request = requestFormatterRest({ verb, route, req }, true)
+    else if (restApi || httpApiV1) {
+      request = requestFormatterRest({ verb, route, req }, httpApiV1)
     }
     else {
       request = requestFormatterHttp({ verb, route, req, $default })
@@ -47,7 +42,7 @@ module.exports = function invokeHTTP (params) {
         // Totally separate out response validation paths to ensure type checks don't inadvertently blow everything up
         let resty = deprecated || restApi || httpApiV1
         if (resty) {
-          let { body, valid } = responseValidatorRest({ res, result })
+          let { body, valid } = responseValidatorRest({ res, result }, httpApiV1)
           if (!valid) {
             res.end(body)
           }
@@ -57,7 +52,7 @@ module.exports = function invokeHTTP (params) {
               body = responseFormatterDeprecated({ res, result })
             }
             else if (restApi || httpApiV1) {
-              body = responseFormatterRest({ res, result })
+              body = responseFormatterRest({ res, result }, httpApiV1)
             }
             res.end(body || '')
           }

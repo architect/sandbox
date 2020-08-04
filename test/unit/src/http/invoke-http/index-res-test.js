@@ -255,7 +255,7 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
 })
 
 test('Architect v5 (REST API mode) & Architect Functions', t => {
-  t.plan(15)
+  t.plan(28)
   process.env.DEPRECATED = true
   let params = { verb: 'GET', route: '/', apiType: 'rest' }
   let run = getInvoker.bind({}, params)
@@ -303,23 +303,11 @@ test('Architect v5 (REST API mode) & Architect Functions', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  // The following is not a great test ↓
-  //   with Sinon we have to mock the Content-Type fallback instead of letting it work
   mock = arc5.defaultsToJson
   run(mock, res => {
     t.ok(res.headers['Content-Type'].includes('application/json'), 'Unspecified content type defaults to JSON')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
-
-  teardown()
-})
-
-test('Architect v5 dependency-free responses (REST API mode)', t => {
-  t.plan(13)
-  process.env.DEPRECATED = true
-  let params = { verb: 'GET', route: '/', apiType: 'rest' }
-  let run = getInvoker.bind({}, params)
-  let mock
 
   mock = arc5.type
   run(mock, res => {

@@ -5,7 +5,7 @@
  * - Funny story: HTTP APIs include emulation of REST API header mangling and deletion
  *   - But wouldn't you know it: HTTP emulation of REST APIs isn't actually exactly the same because reasons (surprisedpikachu)
  */
-module.exports = function requestHeaderFormatter (reqHeaders = {}, rest) {
+module.exports = function requestHeaderFormatter (reqHeaders = {}, httpApi) {
   let headers = {}
   let multiValueHeaders = {}
 
@@ -16,7 +16,7 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}, rest) {
    */
   Object.keys(reqHeaders).forEach(header => {
     let h = header.toLowerCase()
-    if (h === 'authorization' && rest) {
+    if (h === 'authorization' && !httpApi) {
       headers.Authorization = reqHeaders[header]
     }
     else if (h === 'host') {
@@ -25,7 +25,7 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}, rest) {
     else if (h === 'user-agent') {
       headers['User-Agent'] = reqHeaders[header]
     }
-    else if (h === 'date' && rest) {
+    else if (h === 'date' && !httpApi) {
       headers.Date = reqHeaders[header]
     }
     else headers[h] = reqHeaders[header]
@@ -51,7 +51,7 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}, rest) {
     'trailer',
     'www-authenticate',
   ]
-  if (rest) {
+  if (!httpApi) {
     drops = drops.concat(restDrops)
   }
   Object.keys(reqHeaders).forEach(header => {
