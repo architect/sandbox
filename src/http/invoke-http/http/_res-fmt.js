@@ -39,7 +39,7 @@ module.exports = function responseFormatter ({ res, result }) {
    *   ie we got a statusCode
    */
   // HTTP status
-  res.statusCode = result.statusCode || 200
+  res.statusCode = result.statusCode
 
   // Content type
   // Special because it gets a fallback
