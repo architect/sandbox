@@ -34,9 +34,16 @@ module.exports = function responseValidator ({ res, result }) {
     let body = errors.invalidType('headers', 'Object')
     return invalid(res, body)
   }
-  if (multiValueHeaders && (typeof multiValueHeaders !== 'object' || Array.isArray(multiValueHeaders))) {
-    let body = errors.invalidType('multiValueHeaders', 'Object')
-    return invalid(res, body)
+  if (multiValueHeaders) {
+    if (typeof multiValueHeaders !== 'object' || Array.isArray(multiValueHeaders)) {
+      let body = errors.invalidType('multiValueHeaders', 'Object')
+      return invalid(res, body)
+    }
+    let isAllArrays = Object.values(multiValueHeaders).every(v => Array.isArray(v))
+    if (!isAllArrays) {
+      let body = errors.invalidType('multiValueHeaders', 'Arrays')
+      return invalid(res, body)
+    }
   }
   if (typeof isBase64Encoded !== 'undefined' && typeof isBase64Encoded !== 'boolean') {
     let body = errors.invalidType('isBase64Encoded', 'Boolean')

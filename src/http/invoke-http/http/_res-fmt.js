@@ -14,8 +14,11 @@ module.exports = function responseFormatter ({ res, result }) {
     return response
   }
   // Bail early if no return. This is actual API Gateway behavior.
-  if (!result) {
+  if (typeof result === 'undefined') {
     return okGw('null')
+  }
+  if (result === '') {
+    return okGw('')
   }
 
   let { body, cookies = [], headers, statusCode, isBase64Encoded } = result
@@ -27,9 +30,6 @@ module.exports = function responseFormatter ({ res, result }) {
   if (!statusCode) {
     if (typeof result === 'string') {
       return okGw(result)
-    }
-    if (typeof body === 'string') {
-      return okGw(body)
     }
     return okGw(JSON.stringify(result))
   }
@@ -44,7 +44,7 @@ module.exports = function responseFormatter ({ res, result }) {
   // Content type
   // Special because it gets a fallback
   let contentType = headers && headers['content-type']
-  res.setHeader('content-type', contentType || 'text/plain; charset=utf-8;')
+  res.setHeader('content-type', contentType || 'text/plain; charset=utf-8')
 
   // Headers
   if (headers) {
@@ -56,15 +56,9 @@ module.exports = function responseFormatter ({ res, result }) {
 
   // Cookie time
   if (cookies.length) {
-    let sheet = cookies.join('; ')
+    let sheet = cookies.join('; ').replace(/; Secure/g, '; Path=/')
     res.setHeader('set-cookie', sheet)
   }
-  // TODO reimpl?
-  // if (!Array.isArray(headers[k]))
-  //   res.setHeader(k, headers[k].replace('; Secure', '; Path=/'))
-  // else {
-  //   res.setHeader(k, headers[k].map(value => value.replace('; Secure', '; Path=/')))
-  // }
 
   /**
    * Arc v6 endpoint binary responses

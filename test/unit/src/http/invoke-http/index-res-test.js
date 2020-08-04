@@ -7,21 +7,20 @@ let invoke = proxyquire('../../../../../src/http/invoke-http', {
 })
 let { arc6, arc5, arc } = require('../http-res-fixtures')
 
-let b64dec = i => Buffer.from(i, 'base64').toString('utf8')
+let b64dec = i => Buffer.from(i, 'base64').toString()
+let b64enc = i => Buffer.from(i).toString('base64')
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${item}`
-let input = {
-  url: 'http://localhost:6666',
-  body: {},
-  headers: { 'Accept-Encoding': 'gzip' },
-  params: {}
-}
-let getHeader = (type, header) => {
-  if (header && header.toLowerCase() === 'cache-control') return undefined
-  if (header && header.toLowerCase() === 'content-type') return type || 'application/json; charset=utf-8'
-}
-let parseOutput = output => {
-  // Reconstructs response from Sinon stub
+let json = 'application/json'
+let utf8 = '; charset=utf-8'
+let jsonUtf8 = json + utf8
+let htmlUtf8 = `text/html${utf8};`
+let textUtf8 = `text/plain${utf8}`
+// Used for checking Sandbox mutation of SSL → local cookies
+let localCookie = 'hi=there; Path=/'
+
+// Reconstructs response from Sinon stub
+function parseOutput (output) {
   let res = {
     body: output.end.args[0][0],
     headers: {}
@@ -35,214 +34,363 @@ let parseOutput = output => {
   if (output.isBase64Encoded) res.isBase64Encoded = output.isBase64Encoded
   return res
 }
-let teardown = () => {
+
+// Assembles response invokation for each test block
+function getInvoker (params, response, callback) {
+  // Generic input (shouldn't impact tests)
+  let input = {
+    url: 'http://localhost:6666',
+    body: {},
+    headers: { 'Accept-Encoding': 'gzip' },
+    params: {}
+  }
+  // Mocked res object
+  let output = {
+    getHeader: sinon.fake.returns(),
+    removeHeader: sinon.fake.returns(),
+    statusCode: sinon.fake.returns(),
+    setHeader: sinon.fake.returns(),
+    end: sinon.fake.returns()
+  }
+  lambdaStub.yields(null, response)
+  let handler = invoke(params)
+  handler(input, output)
+  let res = parseOutput(output)
+  callback(res)
+}
+function teardown () {
   lambdaStub.reset() // mostly jic
   delete process.env.DEPRECATED
 }
 
-test('Architect v6 dependency-free responses (REST API mode)', t => {
-  t.plan(13)
-  let run = (response, callback) => {
-    let output = {
-      getHeader: sinon.fake(getHeader.bind({}, null)),
-      removeHeader: sinon.fake.returns(true),
-      statusCode: sinon.fake.returns(),
-      setHeader: sinon.fake.returns(),
-      end: sinon.fake.returns()
-    }
-    lambdaStub.yields(null, response)
-    let handler = invoke({ verb: 'GET', route: '/', apiType: 'rest' })
-    handler(input, output)
-    let res = parseOutput(output)
-    callback(res)
-  }
-  run(arc6.rest.isBase64Encoded, res => {
-    t.equal(b64dec(arc6.rest.isBase64Encoded.body), b64dec(res.body), match('res.body', res.body))
+test('Architect v6 dependency-free responses (HTTP API mode)', t => {
+  t.plan(44)
+  let params = { verb: 'GET', route: '/', apiType: 'http' }
+  let run = getInvoker.bind({}, params)
+  let mock
+
+  mock = arc6.http.noReturn
+  run(mock, res => {
+    t.equal(res.body, 'null', `Returned string: 'null'`)
+    t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
+    t.equal(res.statusCode, 200, 'Responded with: 200')
+  })
+
+  mock = arc6.http.emptyReturn
+  run(mock, res => {
+    t.equal(res.body, mock, `Returned empty string: ${mock}`)
+    t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
+    t.equal(res.statusCode, 200, 'Responded with: 200')
+  })
+
+  mock = arc6.http.string
+  run(mock, res => {
+    t.equal(res.body, mock, `Returned string: ${mock}`)
+    t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
+    t.equal(res.statusCode, 200, 'Responded with: 200')
+  })
+
+  mock = arc6.http.object
+  run(mock, res => {
+    t.equal(res.body, str(mock), `Returned JSON-serialized object: ${str(mock)}`)
+    t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
+    t.equal(res.statusCode, 200, 'Responded with: 200')
+  })
+
+  mock = arc6.http.array
+  run(mock, res => {
+    t.equal(res.body, str(mock), `Returned JSON-serialized array: ${str(mock)}`)
+    t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
+    t.equal(res.statusCode, 200, 'Responded with: 200')
+  })
+
+  mock = arc6.http.buffer
+  run(mock, res => {
+    t.equal(res.body, str(mock), `Returned JSON-serialized buffer: ${str(mock)}`)
+    t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
+    t.equal(res.statusCode, 200, 'Responded with: 200')
+  })
+
+  mock = arc6.http.number
+  run(mock, res => {
+    t.equal(res.body, str(mock), `Returned string: ${str(mock)}`)
+    t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
+    t.equal(res.statusCode, 200, 'Responded with: 200')
+  })
+
+  mock = arc6.http.bodyOnly
+  run(mock, res => {
+    t.equal(res.body, str(mock), `Returned string: ${str(mock)}`)
+    t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
+    t.equal(res.statusCode, 200, 'Responded with: 200')
+  })
+
+  mock = arc6.http.bodyWithStatus
+  run(mock, res => {
+    t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
+    t.equal(res.headers['content-type'], textUtf8, `Returned correct content-type: ${textUtf8}`)
+    t.equal(res.statusCode, 200, 'Responded with: 200')
+  })
+
+  mock = arc6.http.bodyWithStatusAndContentType
+  run(mock, res => {
+    t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
+    t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
+    t.equal(res.statusCode, 200, 'Responded with: 200')
+  })
+
+  mock = arc6.http.encodedWithBinaryType
+  run(mock, res => {
+    t.ok(res.body instanceof Buffer, 'Body is a buffer')
+    t.equal(b64enc(res.body), mock.body, 'Passed back same buffer')
+    t.equal(res.headers['content-type'], 'application/pdf', `Returned correct content-type: application/pdf`)
     t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
-  run(arc6.rest.buffer, res => {
-    t.ok(res.body.includes('Cannot respond with a raw buffer'), 'Raw buffer response causes error')
-    t.equal(res.statusCode, 502, 'Responded with 502')
+
+  mock = arc6.http.cookies
+  run(mock, res => {
+    t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
+    t.equal(res.headers['set-cookie'], mock.cookies.join('; '), `Returned correct cookies: ${res.headers['set-cookie']}`)
+    t.equal(res.statusCode, 200, 'Responded with 200')
   })
-  run(arc6.rest.encodedWithBinaryType, res => {
-    t.ok(typeof res.body === 'string', 'Body is (likely) base64 encoded')
-    t.equal(b64dec(res.body), 'hi there\n', 'Body still base64 encoded')
+
+  mock = arc6.http.secureCookies
+  run(mock, res => {
+    let cookies = `${localCookie}; ${localCookie}`
+    t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
+    t.equal(res.headers['set-cookie'], cookies, `Returned correct cookies: ${cookies}`)
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc6.http.secureCookieHeader
+  run(mock, res => {
+    t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
+    t.equal(res.headers['set-cookie'], localCookie, `Returned correct cookies: ${localCookie}`)
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  teardown()
+})
+
+test('Architect v6 dependency-free responses (REST API mode)', t => {
+  t.plan(32)
+  let params = { verb: 'GET', route: '/', apiType: 'rest' }
+  let run = getInvoker.bind({}, params)
+  let mock
+
+  mock = arc6.rest.body
+  run(mock, res => {
+    t.equal(res.body, mock.body, match('res.body', res.body))
+    t.equal(res.headers['content-type'], jsonUtf8, `Returned correct content-type: ${jsonUtf8}`)
     t.notOk(res.isBase64Encoded, 'isBase64Encoded param NOT set automatically')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
-  run(arc6.rest.multiValueHeaders, res => {
-    t.deepEqual(res.headers['set-cookie'], [ 'Foo', 'Bar', 'Baz' ], 'Header values set')
-    t.deepEqual(res.headers['content-type'], [ 'text/plain' ], 'Content-Type favors multiValueHeaders')
+
+  mock = arc6.rest.isBase64Encoded
+  run(mock, res => {
+    t.equal(b64dec(mock.body), b64dec(res.body), match('res.body', res.body))
+    t.equal(res.headers['content-type'], jsonUtf8, `Returned correct content-type: ${jsonUtf8}`)
+    t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
+    t.equal(res.statusCode, 200, 'Responded with 200')
   })
-  run(arc5.cookie, res => {
-    t.ok(res.body.includes('Invalid response parameter'), 'Arc v5 style parameter causes error')
+
+  mock = arc6.rest.buffer
+  run(mock, res => {
+    t.ok(res.body.includes('Cannot respond with a raw buffer'), 'Raw buffer response causes error')
+    t.equal(res.headers['content-type'], htmlUtf8, `Returned correct content-type: ${htmlUtf8}`)
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
+
+  mock = arc6.rest.encodedWithBinaryTypeBad
+  run(mock, res => {
+    t.ok(typeof res.body === 'string', 'Body is (likely) base64 encoded')
+    t.equal(b64dec(res.body), 'hi there\n', 'Body still base64 encoded')
+    t.equal(res.headers['content-type'], 'application/pdf', `Returned correct content-type: application/pdf`)
+    t.notOk(res.isBase64Encoded, 'isBase64Encoded param NOT set automatically')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc6.rest.encodedWithBinaryTypeGood
+  run(mock, res => {
+    t.ok(res.body instanceof Buffer, 'Body is a buffer')
+    t.equal(b64enc(res.body), mock.body, 'Passed back same buffer')
+    t.equal(res.headers['content-type'], 'application/pdf', `Returned correct content-type: application/pdf`)
+    t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc6.rest.secureCookieHeader
+  run(mock, res => {
+    t.equal(res.headers['set-cookie'], localCookie, `Cookie SSL replaced with local path modification: ${localCookie}`)
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc6.rest.secureCookieMultiValueHeader
+  run(mock, res => {
+    t.equal(res.headers['set-cookie'][0], localCookie, `Cookie 1 SSL replaced with local path modification: ${localCookie}`)
+    t.equal(res.headers['set-cookie'][1], localCookie, `Cookie 2 SSL replaced with local path modification: ${localCookie}`)
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc5.cookie
+  run(mock, res => {
+    t.ok(res.body.includes('Invalid response parameter'), 'Arc v5 style cookie parameter causes error')
+    t.equal(res.statusCode, 502, 'Responded with 502')
+  })
+
+  mock = arc6.rest.multiValueHeaders
+  run(mock, res => {
+    t.deepEqual(res.headers['set-cookie'], [ 'Foo', 'Bar', 'Baz' ], 'Header values set')
+    t.equal(res.headers['content-type'], 'text/plain', 'Content-Type favors multiValueHeaders')
+  })
+
+  mock = arc6.rest.invalidMultiValueHeaders
+  run(mock, res => {
+    t.ok(res.body.includes('Invalid response type'), 'Invalid multiValueHeaders causes error')
+    t.equal(res.statusCode, 502, 'Responded with 502')
+  })
+
+  teardown()
+})
+
+test('Architect v5 (REST API mode) & Architect Functions', t => {
+  t.plan(15)
+  process.env.DEPRECATED = true
+  let params = { verb: 'GET', route: '/', apiType: 'rest' }
+  let run = getInvoker.bind({}, params)
+  let mock
+  let cacheControl = 'max-age=86400'
+  let antiCache = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
+
+  mock = arc5.body
+  run(mock, res => {
+    t.equal(str(mock.body), str(res.body), match('res.body', res.body))
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  // Same getHeader for arc5.cacheControl as in arc5.body
+  mock = arc5.cacheControl
+  run(mock, res => {
+    t.equal(mock.headers['cache-control'], res.headers['Cache-Control'], match(`res.headers['Cache-Control']`, res.headers['Cache-Control']))
+    if (mock.headers['cache-control'] && !res.headers['cache-control'])
+      t.pass(`Headers normalized and de-duped: ${str(res.headers)}`)
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc5.noCacheControlHTML
+  run(mock, res => {
+    t.equal(res.headers['Cache-Control'], antiCache, 'Default anti-caching headers set for HTML response')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc5.noCacheControlJSON
+  run(mock, res => {
+    t.equal(res.headers['Cache-Control'], antiCache, 'Default anti-caching headers set for JSON response')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  // Architect v5 only detected plain JSON, and not vendored JSON
+  mock = arc5.noCacheControlJSONapi
+  run(mock, res => {
+    t.equal(res.headers['Cache-Control'], cacheControl, 'Default caching headers set for vnd.api+json response')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc5.noCacheControlOther
+  run(mock, res => {
+    t.equal(res.headers['Cache-Control'], cacheControl, 'Default caching headers set for non-HTML/JSON response')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  // The following is not a great test ↓
+  //   with Sinon we have to mock the Content-Type fallback instead of letting it work
+  mock = arc5.defaultsToJson
+  run(mock, res => {
+    t.ok(res.headers['Content-Type'].includes('application/json'), 'Unspecified content type defaults to JSON')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
   teardown()
 })
 
 test('Architect v5 dependency-free responses (REST API mode)', t => {
-  t.plan(9)
+  t.plan(13)
   process.env.DEPRECATED = true
-  let run = (response, callback) => {
-    let output = {
-      getHeader: sinon.fake(getHeader.bind({}, null)),
-      removeHeader: sinon.fake.returns(true),
-      statusCode: sinon.fake.returns(),
-      setHeader: sinon.fake.returns(),
-      end: sinon.fake.returns()
-    }
-    lambdaStub.yields(null, response)
-    let handler = invoke({ verb: 'GET', route: '/', apiType: 'rest' })
-    handler(input, output)
-    let res = parseOutput(output)
-    callback(res)
-  }
-  run(arc5.type, res => {
-    t.equal(arc5.type.type, res.headers['Content-Type'], `type matches res.headers['Content-Type']: ${res.headers['Content-Type']}`)
+  let params = { verb: 'GET', route: '/', apiType: 'rest' }
+  let run = getInvoker.bind({}, params)
+  let mock
+
+  mock = arc5.type
+  run(mock, res => {
+    t.equal(mock.type, res.headers['Content-Type'], `type matches res.headers['Content-Type']: ${res.headers['Content-Type']}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
+
   // Testing that cookie is set, not that a valid cookie was passed
-  arc5.cookie.cookie = '_idx=foo'
-  run(arc5.cookie, res => {
-    t.ok(res.headers['Set-Cookie'].includes('_idx='), `Cookie set: ${res.headers['Set-Cookie'].substr(0, 75)}...`)
+  mock = arc5.cookie
+  run(mock, res => {
+    t.equal(res.headers['Set-Cookie'], mock.cookie, `Cookie set: ${mock.cookie}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
-  run(arc5.cors, res => {
+
+  mock = arc5.secureCookie
+  run(mock, res => {
+    // Upcased bc VTL iirc
+    t.equal(res.headers['Set-Cookie'], localCookie, `Cookie SSL replaced with local path modification: ${localCookie}`)
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc5.secureCookieHeader
+  run(mock, res => {
+    // Lowcased by default otherwise iirc
+    t.equal(res.headers['set-cookie'], localCookie, `Cookie SSL replaced with local path modification: ${localCookie}`)
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc5.cors
+  run(mock, res => {
     t.equal(res.headers['Access-Control-Allow-Origin'], '*', `CORS boolean set res.headers['Access-Control-Allow-Origin'] === '*'`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
-  run(arc5.isBase64Encoded, res => {
+
+  mock = arc5.isBase64Encoded
+  run(mock, res => {
     // arc5.isBase64Encoded.body mutated by invoke, so this test is not amazing ↓
-    t.equal(arc5.isBase64Encoded.body, res.body, match('res.body', res.body))
+    t.equal(mock.body, res.body, match('res.body', res.body))
     t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
+
   teardown()
 })
 
-test('Architect v5 + Functions (REST API mode)', t => {
-  t.plan(11)
-  process.env.DEPRECATED = true
-  let antiCache = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
-  // Output able to be out of run()'s scope here to be mutated by tests
-  let output = {
-    getHeader: sinon.fake(getHeader.bind({}, null)),
-    removeHeader: sinon.fake.returns(true),
-    statusCode: sinon.fake.returns(),
-    setHeader: sinon.fake.returns(),
-    end: sinon.fake.returns()
-  }
-  let run = (response, callback) => {
-    lambdaStub.yields(null, response)
-    let handler = invoke({ verb: 'GET', route: '/', apiType: 'rest' })
-    handler(input, output)
-    let res = parseOutput(output)
-    callback(res)
-  }
-  output.getHeader = sinon.fake(getHeader.bind({}, null))
-  run(arc5.body, res => {
-    t.equal(str(arc5.body.body), str(res.body), match('res.body', res.body))
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-  // Same getHeader for arc5.cacheControl as in arc5.body
-  run(arc5.cacheControl, res => {
-    t.equal(arc5.cacheControl.headers['cache-control'], res.headers['Cache-Control'], match(`res.headers['Cache-Control']`, res.headers['Cache-Control']))
-    if (arc5.cacheControl.headers['cache-control'] && !res.headers['cache-control'])
-      t.pass(`Headers normalized and de-duped: ${str(res.headers)}`)
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-  output.getHeader = sinon.fake(getHeader.bind({}, arc5.noCacheControlHTML.headers['Content-Type']))
-  run(arc5.noCacheControlHTML, res => {
-    t.equal(res.headers['Cache-Control'], antiCache, 'Default anti-caching headers set for HTML response')
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-  output.getHeader = sinon.fake(getHeader.bind({}, arc5.noCacheControlOther.headers['Content-Type']))
-  run(arc5.noCacheControlOther, res => {
-    let def = 'max-age=86400'
-    t.equal(res.headers['Cache-Control'], def, 'Default caching headers set for non-HTML/JSON response')
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-  // The following is not a great test ↓
-  //   with Sinon we have to mock the Content-Type fallback instead of letting it work
-  output.getHeader = sinon.fake(getHeader.bind({}, null))
-  run(arc5.defaultsToJson, res => {
-    t.ok(res.headers['Content-Type'].includes('application/json'), 'Unspecified content type defaults to JSON')
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-  teardown()
-})
-
-test('Architect <6 + Functions response params (REST API mode)', t => {
+test('Architect <6 (REST API mode) & Architect Functions', t => {
   t.plan(4)
   process.env.DEPRECATED = true
-  let run = (response, callback) => {
-    let output = {
-      getHeader: sinon.fake(getHeader.bind({}, null)),
-      removeHeader: sinon.fake.returns(true),
-      statusCode: sinon.fake.returns(),
-      setHeader: sinon.fake.returns(),
-      end: sinon.fake.returns()
-    }
-    lambdaStub.yields(null, response)
-    let handler = invoke({ verb: 'GET', route: '/', apiType: 'rest' })
-    handler(input, output)
-    let res = parseOutput(output)
-    callback(res)
-  }
-  run(arc.locationHi, res => {
-    t.equal(arc.locationHi.location, res.headers.Location, match('res.headers.Location', res.headers.Location))
-  })
-  run(arc.status201, res => {
-    t.equal(arc.status201.status, res.statusCode, match('status', res.statusCode))
-  })
-  run(arc.code201, res => {
-    t.equal(arc.code201.code, res.statusCode, match('code', res.statusCode))
-  })
-  run(arc.statusCode201, res => {
-    t.equal(arc.statusCode201.statusCode, res.statusCode, match('statusCode', res.statusCode))
-  })
-  teardown()
-})
+  let params = { verb: 'GET', route: '/', apiType: 'rest' }
+  let run = getInvoker.bind({}, params)
+  let mock
 
-test('invoke-http should replace cookie header with ssl and path modifications when lambda returns Architect v5 style response', t => {
-  t.plan(1)
-  process.env.DEPRECATED = true
-  let handler = invoke({})
-  lambdaStub.yields(null, {
-    cookie: 'nomnom; Secure'
+  mock = arc.location
+  run(mock, res => {
+    t.equal(mock.location, res.headers.Location, match('res.headers.Location', res.headers.Location))
   })
-  let req = input
-  let res = {
-    getHeader: sinon.fake(getHeader.bind({}, null)),
-    removeHeader: sinon.fake.returns(true),
-    statusCode: sinon.fake.returns(),
-    setHeader: sinon.fake.returns(),
-    end: sinon.fake.returns()
-  }
-  handler(req, res)
-  t.ok(res.setHeader.calledWith('Set-Cookie', 'nomnom; Path=/'), 'setHeader called with modified cookie')
-  teardown()
-})
 
-test('invoke-http should replace cookie header with ssl and path modifications when lambda returns Architect v6 style response', t => {
-  t.plan(1)
-  let handler = invoke({ apiType: 'rest' })
-  lambdaStub.yields(null, {
-    headers: {
-      'Set-Cookie': 'nomnom; Secure'
-    }
+  mock = arc.status
+  run(mock, res => {
+    t.equal(mock.status, res.statusCode, match('status', res.statusCode))
   })
-  let req = input
-  let res = {
-    getHeader: sinon.fake(getHeader.bind({}, null)),
-    removeHeader: sinon.fake.returns(true),
-    statusCode: sinon.fake.returns(),
-    setHeader: sinon.fake.returns(),
-    end: sinon.fake.returns()
-  }
-  handler(req, res)
-  t.ok(res.setHeader.calledWith('set-cookie', 'nomnom; Path=/'), 'setHeader called with modified cookie')
+
+  mock = arc.code
+  run(mock, res => {
+    t.equal(mock.code, res.statusCode, match('code', res.statusCode))
+  })
+
+  mock = arc.statusCode
+  run(mock, res => {
+    t.equal(mock.statusCode, res.statusCode, match('statusCode', res.statusCode))
+  })
+
   teardown()
 })

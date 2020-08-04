@@ -14,6 +14,7 @@
 ### Fixed
 
 - Fixed issue where Lambda timeouts were only respected if >3 seconds; now >=1 second is valid
+- Refactored Arc v6 response support for multiValueHeaders to better accommodate use cases where headers & multiValueHeaders are not in conflict with each other
 
 ---
 

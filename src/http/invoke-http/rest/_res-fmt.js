@@ -10,52 +10,53 @@ module.exports = function responseFormatter ({ res, result }) {
   // HTTP status
   res.statusCode = statusCode || 200
 
-  // Content type
-  // Note: result.headers is a case-sensitive js object,
-  //       res.get/setHeader is not (e.g. 'set-cookie' == 'Set-Cookie')
-  let contentType = (multiValueHeaders && multiValueHeaders['Content-Type']) ||
-                    (multiValueHeaders && multiValueHeaders['content-type']) ||
-                    (headers && headers['Content-Type']) ||
-                    (headers && headers['content-type'])
-  // Set content-type, and remove any leftover versions of content-type
-  res.setHeader('content-type', contentType || 'application/json; charset=utf-8')
-  let allHeaders = [ multiValueHeaders || {}, headers || {} ]
-  allHeaders.forEach(headers => {
-    Object.keys(headers).forEach(key => {
-      if (key.toLowerCase() !== 'content-type') return
-      delete headers[key]
-    })
-  })
-
   // Headers
-  let hasHeaders = multiValueHeaders || headers
-  if (hasHeaders) {
-    // APIG merges `headers` and `multiValueHeaders` if both are set, favoring multiValue first
-    if (multiValueHeaders && headers) {
-      headers = Object.entries(headers).reduce((accumulator, [ key, value ]) => {
-        return { ...accumulator, [key]: [ ...(multiValueHeaders[key] || []), value ] }
-      }, headers)
-    }
-
-    // Apply all that funky stuff AWS loves doing to our headers
-    headers = headerFormatter(headers)
-
-    Object.keys(headers).forEach(k => {
-      if (k === 'set-cookie') {
-        if (!Array.isArray(headers[k]))
-          res.setHeader(k, headers[k].replace('; Secure', '; Path=/'))
-        else {
-          res.setHeader(k, headers[k].map(value => value.replace('; Secure', '; Path=/')))
-        }
-      }
-      else if (k === 'cache-control') {
-        res.setHeader('cache-control', headers[k])
-      }
-      else {
-        res.setHeader(k, headers[k])
-      }
+  // APIG merges `headers` and `multiValueHeaders`, favoring multiValue first
+  let merged = {}
+  if (multiValueHeaders) {
+    Object.entries(multiValueHeaders).forEach(([ header, value ]) => {
+      merged[header.toLowerCase()] = value
     })
   }
+  if (headers) {
+    Object.entries(headers).forEach(([ h, value ]) => {
+      let header = h.toLowerCase()
+      if (merged[header]) {
+        // Don't set the same header multiple times
+        if (!merged[header].some(m => m === value)) {
+          merged[header].push(value)
+        }
+      }
+      else merged[header] = [ value ]
+    })
+  }
+
+  // Content type
+  let contentType = (multiValueHeaders && multiValueHeaders['content-type']) ||
+                    (multiValueHeaders && multiValueHeaders['Content-Type']) ||
+                    (headers && headers['content-type']) ||
+                    (headers && headers['Content-Type']) ||
+                    'application/json; charset=utf-8'
+  merged['content-type'] = merged['content-type']
+    ? [ merged['content-type'][0] ]
+    : contentType
+
+  // Apply all that funky stuff AWS loves doing to our headers
+  headers = headerFormatter(merged)
+
+  Object.entries(headers).forEach(([ header, value ]) => {
+    // If possible, coerce string from array – makes test validation easier
+    if (value.length === 1) value = value[0]
+    if (header === 'set-cookie') {
+      let val = Array.isArray(value)
+        ? value.map(value => value.replace('; Secure', '; Path=/'))
+        : value.replace('; Secure', '; Path=/')
+      res.setHeader(header, val)
+    }
+    else {
+      res.setHeader(header, value)
+    }
+  })
 
   /**
    * Arc v6 endpoint binary responses
