@@ -58,6 +58,7 @@ test('WebSocket connect / disconnect event: get /', t => {
   let action = 'src/ws/connect' // not a real action
   let connectionId = 'much-unique-uuid'
   let request = arc6.rest.getIndex
+  request.url = 'localhost'
   let params = {
     action,
     connectionId,
