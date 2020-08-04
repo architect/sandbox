@@ -25,11 +25,11 @@ let url = i => `http://localhost:6666${i ? i : ''}`
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${str(item)}`
 let response = {
-  getHeader: sinon.fake(header => {
-    if (header && header.toLowerCase() === 'cache-control') return undefined
-    if (header && header.toLowerCase() === 'content-type') return 'application/json; charset=utf-8'
+  getHeader: sinon.fake(h => {
+    let header = h && h.toLowerCase()
+    if (header === 'cache-control') return undefined
+    if (header === 'content-type') return 'application/json; charset=utf-8'
   }),
-  removeHeader: sinon.fake.returns(),
   setHeader: sinon.fake.returns(),
   end: sinon.fake.returns()
 }

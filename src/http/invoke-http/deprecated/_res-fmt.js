@@ -6,18 +6,20 @@ let headerFormatter = require('../rest/_res-header-fmt')
  */
 module.exports = function responseFormatterDeprecated ({ res, result }) {
   // HTTP status
-  res.statusCode = result.status || result.code || result.statusCode || 200
+  let { status, code, statusCode } = result
+  res.statusCode = status || code || statusCode || 200
 
   // VTL-based parameters
-  let { cacheControl, cookie, cors, headers, location, type } = result
+  let { body, cacheControl, cookie, cors, headers, location, type, isBase64Encoded } = result
 
   // Content type
   // Note: result.headers is a case-sensitive js object,
   //       res.get/setHeader is not (e.g. 'set-cookie' == 'Set-Cookie')
   let contentType = type ||
                     (headers && headers['Content-Type']) ||
-                    (headers && headers['content-type'])
-  res.setHeader('Content-Type', contentType || 'application/json; charset=utf-8')
+                    (headers && headers['content-type']) ||
+                    'application/json; charset=utf-8'
+  res.setHeader('Content-Type', contentType)
   if (headers && headers['content-type']) delete headers['content-type']
 
   // Cookie
@@ -62,30 +64,11 @@ module.exports = function responseFormatterDeprecated ({ res, result }) {
   // Set default anti-caching headers
   let antiCache = contentType &&
                   (contentType.includes('text/html') || contentType.includes('application/json'))
-  if (!result.cacheControl && antiCache) {
+  if (!cacheControl && antiCache) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0')
   }
-  else if (!result.cacheControl && !res.getHeader('Cache-Control')) {
+  else if (!cacheControl && !res.getHeader('Cache-Control')) {
     res.setHeader('Cache-Control', 'max-age=86400') // Default cache to one day unless otherwise specified
-  }
-
-  /**
-   * Body handling
-   */
-  // Reject raw, unencoded buffers (as does APIG)
-  let isBuffer = () => {
-    let body = result.body
-    if (body && body instanceof Buffer) return true
-    if (body && body.type && body.type === 'Buffer' && body.data instanceof Array) return true
-    return false
-  }
-  if (isBuffer()) {
-    res.statusCode = 502
-    res.setHeader('Content-Type', 'text/html; charset=utf-8;')
-    result.body = `Cannot respond with a raw buffer.
-
-Please base64 encode your response and include a 'isBase64Encoded: true' parameter, or run your response through @architect/functions`
-    return result.body
   }
 
   /**
@@ -94,9 +77,7 @@ Please base64 encode your response and include a 'isBase64Encoded: true' paramet
    *   - /{proxy+} (possibly also paired with arc.proxy()) can emit binary responses via base64-encoded body + isBase64Encoded: true
    *   - Specified doc types convert to strings
    */
-  let base64EncodedBody = result.isBase64Encoded &&
-                          result.body &&
-                          typeof result.body === 'string'
+  let base64EncodedBody = isBase64Encoded && body && typeof body === 'string'
   if (base64EncodedBody) {
     // Doc types defined in Arc v5 for conversion
     //   all other doc types
@@ -112,38 +93,18 @@ Please base64 encode your response and include a 'isBase64Encoded: true' paramet
     // Check to see if it's a known-supported doc without assuming normalized header casing
     // Gross but it works
     let isText = documents.some(d => {
-      let match =
-        res.getHeader('Content-Type') &&
-        res.getHeader('Content-Type').includes(d) ||
-        result.type && result.type.includes(d)
-      return match
+      return contentType.includes(d) || (type && type.includes(d))
     })
     if (isText) // It's an encoded string
-      result.body = Buffer.from(result.body, 'base64').toString()
+      body = Buffer.from(body, 'base64').toString()
     else // It's a binary
-      result.body = Buffer.from(result.body, 'base64')
+      body = Buffer.from(body, 'base64')
   }
 
   // isBase64Encoded flag passthrough
-  if (result.isBase64Encoded) {
+  if (isBase64Encoded) {
     res.isBase64Encoded = true
   }
 
-  // Re-encode nested JSON responses
-  if (typeof result.json !== 'undefined') {
-    // CYA in case we receive an object instead of encoded JSON
-    try {
-      let body = result.body // noop the try
-      // Real JSON will create an object
-      let maybeRealJSON = JSON.parse(result.body)
-      if (typeof maybeRealJSON !== 'object')
-        result.body = body
-    }
-    catch (e) {
-      // JSON-parsing an object will fail, so JSON stringify it
-      result.body = JSON.stringify(result.body)
-    }
-  }
-
-  return result.body
+  return body
 }

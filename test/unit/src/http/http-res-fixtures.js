@@ -224,7 +224,21 @@ let arc5 = {
   isBase64Encoded: {
     body: b64enc('hi there\n'),
     isBase64Encoded: true
-  }
+  },
+
+  // ... with type param
+  isBase64EncodedType: {
+    body: b64enc('hi there\n'),
+    type: 'application/json',
+    isBase64Encoded: true
+  },
+
+  // ... with an unknown document type (in type param)
+  isBase64EncodedUnknownCT: {
+    body: b64enc('hi there\n'),
+    headers: { 'content-type': 'application/pdf' },
+    isBase64Encoded: true
+  },
 }
 
 let arc4 = {

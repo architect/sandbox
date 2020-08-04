@@ -1,5 +1,3 @@
-let invoke = require('../../invoke-lambda')
-
 // REST APIs
 let requestFormatterDeprecated = require('./deprecated/_req-fmt')
 let requestFormatterRest = require('./rest/_req-fmt')
@@ -12,13 +10,17 @@ let requestFormatterHttp = require('./http/_req-fmt')
 let responseFormatterHttp = require('./http/_res-fmt')
 let responseValidatorHttp = require('./http/_res-validate')
 
+// Etc.
+let invoke = require('../../invoke-lambda')
+let { errors, invalid } = require('./utils/validate')
+
 /**
  * Formats and validates HTTP request and response event objects
  */
 module.exports = function invokeHTTP (params) {
   let { verb, pathToFunction, route, apiType, $default } = params
 
-  if (verb) verb = verb.toUpperCase()
+  verb = verb.toUpperCase()
   let deprecated = process.env.DEPRECATED
   let restApi = apiType === 'rest'
   let httpApiV1 = apiType === 'httpv1'
@@ -28,7 +30,7 @@ module.exports = function invokeHTTP (params) {
     if (deprecated) {
       request = requestFormatterDeprecated({ verb, req })
     }
-    else if (restApi || httpApiV1) {
+    else if (httpApiV1 || restApi) {
       request = requestFormatterRest({ verb, route, req }, httpApiV1)
     }
     else {
@@ -37,7 +39,11 @@ module.exports = function invokeHTTP (params) {
 
     // Run the Lambda sig locally
     invoke(pathToFunction, request, function _res (err, result) {
-      if (err) res.end(err.message)
+      if (err) {
+        let body = errors.other('Unknown error', err.message)
+        invalid(res, body)
+        res.end(body)
+      }
       else {
         // Totally separate out response validation paths to ensure type checks don't inadvertently blow everything up
         let resty = deprecated || restApi || httpApiV1
@@ -51,7 +57,7 @@ module.exports = function invokeHTTP (params) {
             if (deprecated) {
               body = responseFormatterDeprecated({ res, result })
             }
-            else if (restApi || httpApiV1) {
+            else {
               body = responseFormatterRest({ res, result }, httpApiV1)
             }
             res.end(body || '')

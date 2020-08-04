@@ -20,6 +20,8 @@ let htmlUtf8 = `text/html${utf8};`
 let textUtf8 = `text/plain${utf8}`
 // Used for checking Sandbox mutation of SSL → local cookies
 let localCookie = 'hi=there; Path=/'
+// Test invocation errors
+let returnError = false
 
 // Reconstructs response from Sinon stub
 function parseOutput (output) {
@@ -48,13 +50,19 @@ function getInvoker (params, response, callback) {
   }
   // Mocked res object
   let output = {
-    getHeader: sinon.fake.returns(),
-    removeHeader: sinon.fake.returns(),
+    getHeader: sinon.fake(h => {
+      let header = h && h.toLowerCase()
+      if (header === 'cache-control') return undefined
+      if (header === 'content-type') return 'application/json; charset=utf-8'
+    }),
     statusCode: sinon.fake.returns(),
     setHeader: sinon.fake.returns(),
     end: sinon.fake.returns()
   }
-  lambdaStub.yields(null, response)
+  // Path for returning an invocation error
+  if (returnError) lambdaStub.yields(returnError)
+  else lambdaStub.yields(null, response)
+
   let handler = invoke(params)
   handler(input, output)
   let res = parseOutput(output)
@@ -62,8 +70,26 @@ function getInvoker (params, response, callback) {
 }
 function teardown () {
   lambdaStub.reset() // mostly jic
+  returnError = false
   delete process.env.DEPRECATED
 }
+
+test('Unknown invocation error', t => {
+  t.plan(2)
+  let params = { verb: 'GET', route: '/', apiType: 'http' }
+  let run = getInvoker.bind({}, params)
+  let mock
+  let msg = 'Some invocation error'
+  returnError = Error(msg)
+
+  mock = arc6.http.noReturn
+  run(mock, res => {
+    t.ok(res.body.includes(msg), 'Invocation error passes along error message')
+    t.equal(res.statusCode, 502, 'Responded with: 502')
+  })
+
+  teardown()
+})
 
 test('Architect v6 dependency-free responses (HTTP API mode)', t => {
   t.plan(46)
@@ -344,7 +370,7 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
 })
 
 test('Architect v5 (REST API mode) & Architect Functions', t => {
-  t.plan(28)
+  t.plan(35)
   process.env.DEPRECATED = true
   let params = { verb: 'GET', route: '/', apiType: 'rest' }
   let run = getInvoker.bind({}, params)
@@ -354,15 +380,15 @@ test('Architect v5 (REST API mode) & Architect Functions', t => {
 
   mock = arc5.body
   run(mock, res => {
-    t.equal(str(mock.body), str(res.body), match('res.body', res.body))
+    t.equal(str(res.body), str(mock.body), match('res.body', res.body))
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
   // Same getHeader for arc5.cacheControl as in arc5.body
   mock = arc5.cacheControl
   run(mock, res => {
-    t.equal(mock.headers['cache-control'], res.headers['Cache-Control'], match(`res.headers['Cache-Control']`, res.headers['Cache-Control']))
-    if (mock.headers['cache-control'] && !res.headers['cache-control'])
+    t.equal(res.headers['Cache-Control'], mock.headers['cache-control'], match(`res.headers['Cache-Control']`, res.headers['Cache-Control']))
+    if (!res.headers['cache-control'] && mock.headers['cache-control'])
       t.pass(`Headers normalized and de-duped: ${str(res.headers)}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
@@ -400,7 +426,7 @@ test('Architect v5 (REST API mode) & Architect Functions', t => {
 
   mock = arc5.type
   run(mock, res => {
-    t.equal(mock.type, res.headers['Content-Type'], `type matches res.headers['Content-Type']: ${res.headers['Content-Type']}`)
+    t.equal(res.headers['Content-Type'], mock.type, `type matches res.headers['Content-Type']: ${res.headers['Content-Type']}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
@@ -433,8 +459,22 @@ test('Architect v5 (REST API mode) & Architect Functions', t => {
 
   mock = arc5.isBase64Encoded
   run(mock, res => {
-    // arc5.isBase64Encoded.body mutated by invoke, so this test is not amazing ↓
-    t.equal(mock.body, res.body, match('res.body', res.body))
+    t.equal(b64enc(res.body), mock.body, match('res.body', res.body))
+    t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc5.isBase64EncodedType
+  run(mock, res => {
+    t.equal(b64enc(res.body), mock.body, match('res.body', res.body))
+    t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc5.isBase64EncodedUnknownCT
+  run(mock, res => {
+    t.ok(res.body instanceof Buffer, 'Unknown type returned raw buffer')
+    t.equal(b64enc(res.body), mock.body, match('res.body', res.body))
     t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })

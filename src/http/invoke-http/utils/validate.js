@@ -3,9 +3,7 @@
  */
 
 let isBuffer = body => {
-  let deprecated = process.env.DEPRECATED
   if (body && body instanceof Buffer) return true
-  if (deprecated && body && body.type && body.type === 'Buffer' && body.data instanceof Array) return true
   return false
 }
 
