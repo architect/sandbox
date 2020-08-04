@@ -32,9 +32,6 @@ function start (params, callback) {
   let start = Date.now()
   let { port = 3333, options, version, quiet = false } = params
 
-  // Set up quietude
-  process.env.ARC_QUIET = process.env.ARC_QUIET || process.env.QUIET || quiet || '' // For when sandbox is being run outside of @arc/arc
-
   // Set up verbositude
   let findVerbose = option => [ '-v', '--verbose', 'verbose' ].includes(option)
   if (options && options.some(findVerbose)) {
@@ -103,7 +100,7 @@ function start (params, callback) {
      */
     function _env (callback) {
       // Handle important Architect env vars and get deprecated status
-      deprecated = env({ arc, port, version })
+      deprecated = env({ arc, port, version, quiet })
 
       // Read .arc-env
       initEnv(callback)

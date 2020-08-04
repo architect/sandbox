@@ -4,7 +4,10 @@ let { toLogicalID } = require('@architect/utils')
  * Handle important Architect environment variables
  */
 module.exports = function env (params) {
-  let { arc, port, version } = params
+  let { arc, port, version, quiet } = params
+
+  // Set up quietude
+  process.env.ARC_QUIET = process.env.ARC_QUIET || process.env.QUIET || quiet || '' // For when sandbox is being run outside of @arc/arc
 
   /**
    * Ensure env is one of: 'testing', 'staging', or 'production'
