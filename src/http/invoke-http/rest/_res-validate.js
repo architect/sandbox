@@ -16,6 +16,14 @@ module.exports = function responseValidator ({ res, result }, httpApi) {
     'isBase64Encoded'
   ]
 
+  // Malformed returns – must be an object
+  if (!(typeof result === 'object' && !Array.isArray(result))) {
+    let title = 'Handler must return an object'
+    let text = 'HTTP handlers must return an <code>object</code>.'
+    let body = errors.other(title, text)
+    return invalid(res, body)
+  }
+
   // Basic type checking
   if (statusCode && !Number.isInteger(statusCode)) {
     let body = errors.invalidType('statusCode', 'Number')
@@ -26,7 +34,7 @@ module.exports = function responseValidator ({ res, result }, httpApi) {
     let body = errors.isRawBuffer
     return invalid(res, body)
   }
-  if (body && typeof body !== 'string' && !deprecated) {
+  if (body && (typeof body !== 'string' && typeof body !== 'number') && !deprecated) {
     let body = errors.invalidType('body', 'String')
     return invalid(res, body)
   }

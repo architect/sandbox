@@ -15,7 +15,9 @@ let errors = {
   invalidParam: validParams => `<h1>Invalid response parameter</h1>
 <p>Only the following parameters are valid in a response: ${validParams.map(p => `<code>${p}</code>`).join(', ')}</p>`,
   isRawBuffer: `<h1>Cannot respond with a raw buffer</h1>
-<p>Please base64 encode your response and include a <code>isBase64Encoded: true</code> parameter, or run your response through <code>@architect/functions</code><p>`
+<p>Please base64 encode your response and include a <code>isBase64Encoded: true</code> parameter, or run your response through <code>@architect/functions</code><p>`,
+  other: (title, body) => `<h1>${title}</h1>
+  <p>${body}<p>`
 }
 
 function invalid (res, body) {

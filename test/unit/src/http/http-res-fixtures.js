@@ -76,6 +76,10 @@ arc6.http = {
     body: text
   },
 
+  // Invalid (HTTP APIs are comparably very forgiving, so we have to explicitly create an invalid payload)
+  invalid: {
+    statusCode: 'idk'
+  }
 }
 
 arc6.rest = {

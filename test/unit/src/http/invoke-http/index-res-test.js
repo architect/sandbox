@@ -64,7 +64,7 @@ function teardown () {
 }
 
 test('Architect v6 dependency-free responses (HTTP API mode)', t => {
-  t.plan(44)
+  t.plan(46)
   let params = { verb: 'GET', route: '/', apiType: 'http' }
   let run = getInvoker.bind({}, params)
   let mock
@@ -168,6 +168,93 @@ test('Architect v6 dependency-free responses (HTTP API mode)', t => {
     t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
     t.equal(res.headers['set-cookie'], localCookie, `Returned correct cookies: ${localCookie}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc6.http.invalid
+  run(mock, res => {
+    t.ok(res.body.includes('Invalid response type'), 'Invalid statusCode causes error')
+    t.equal(res.statusCode, 502, 'Responded with 502')
+  })
+
+  teardown()
+})
+
+test('Architect v6 dependency-free responses (HTTP API + Lambda v1.0)', t => {
+  t.plan(32)
+  let params = { verb: 'GET', route: '/', apiType: 'httpv1' }
+  let run = getInvoker.bind({}, params)
+  let mock
+
+  mock = arc6.rest.body
+  run(mock, res => {
+    t.equal(res.body, mock.body, match('res.body', res.body))
+    t.equal(res.headers['content-type'], jsonUtf8, `Returned correct content-type: ${jsonUtf8}`)
+    t.notOk(res.isBase64Encoded, 'isBase64Encoded param NOT set automatically')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc6.rest.isBase64Encoded
+  run(mock, res => {
+    t.equal(b64dec(mock.body), b64dec(res.body), match('res.body', res.body))
+    t.equal(res.headers['content-type'], jsonUtf8, `Returned correct content-type: ${jsonUtf8}`)
+    t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc6.rest.buffer
+  run(mock, res => {
+    t.ok(res.body.includes('Cannot respond with a raw buffer'), 'Raw buffer response causes error')
+    t.equal(res.headers['content-type'], htmlUtf8, `Returned correct content-type: ${htmlUtf8}`)
+    t.equal(res.statusCode, 502, 'Responded with 502')
+  })
+
+  mock = arc6.rest.encodedWithBinaryTypeBad
+  run(mock, res => {
+    t.ok(typeof res.body === 'string', 'Body is (likely) base64 encoded')
+    t.equal(b64dec(res.body), 'hi there\n', 'Body still base64 encoded')
+    t.equal(res.headers['content-type'], 'application/pdf', `Returned correct content-type: application/pdf`)
+    t.notOk(res.isBase64Encoded, 'isBase64Encoded param NOT set automatically')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc6.rest.encodedWithBinaryTypeGood
+  run(mock, res => {
+    t.ok(res.body instanceof Buffer, 'Body is a buffer')
+    t.equal(b64enc(res.body), mock.body, 'Passed back same buffer')
+    t.equal(res.headers['content-type'], 'application/pdf', `Returned correct content-type: application/pdf`)
+    t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc6.rest.secureCookieHeader
+  run(mock, res => {
+    t.equal(res.headers['set-cookie'], localCookie, `Cookie SSL replaced with local path modification: ${localCookie}`)
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc6.rest.secureCookieMultiValueHeader
+  run(mock, res => {
+    t.equal(res.headers['set-cookie'][0], localCookie, `Cookie 1 SSL replaced with local path modification: ${localCookie}`)
+    t.equal(res.headers['set-cookie'][1], localCookie, `Cookie 2 SSL replaced with local path modification: ${localCookie}`)
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc5.cookie
+  run(mock, res => {
+    t.notOk(res.body.includes('Invalid response parameter'), 'Arc v5 style cookie parameter is ignored')
+    t.equal(res.statusCode, 200, 'Responded with 200')
+  })
+
+  mock = arc6.rest.multiValueHeaders
+  run(mock, res => {
+    t.deepEqual(res.headers['set-cookie'], [ 'Foo', 'Bar', 'Baz' ], 'Header values set')
+    t.equal(res.headers['content-type'], 'text/plain', 'Content-Type favors multiValueHeaders')
+  })
+
+  mock = arc6.rest.invalidMultiValueHeaders
+  run(mock, res => {
+    t.ok(res.body.includes('Invalid response type'), 'Invalid multiValueHeaders causes error')
+    t.equal(res.statusCode, 502, 'Responded with 502')
   })
 
   teardown()
