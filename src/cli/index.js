@@ -99,8 +99,14 @@ module.exports = function cli (params = {}, callback) {
         })
       }
       if (key.sequence === '\u0003') {
-        if (callback) callback()
-        process.exit(0)
+        sandbox.end(function (err) {
+          if (err) {
+            update.err(err)
+            process.exit(1)
+          }
+          if (callback) callback()
+          process.exit(0)
+        })
       }
     })
 
