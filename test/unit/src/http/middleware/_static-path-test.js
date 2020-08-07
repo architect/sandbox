@@ -9,7 +9,7 @@ let sendStub = sinon.stub().returns({
 })
 let origEnv = process.env.ARC_SANDBOX_PATH_TO_STATIC
 let origCwd = process.cwd()
-let mock = path.join(__dirname, '..', '..', '..', 'mock', 'normal')
+let mock = path.join(__dirname, '..', '..', '..', '..', 'mock', 'normal')
 
 // Assigned in test
 let existsStub
@@ -18,7 +18,7 @@ let pub
 test('Set up env', t => {
   // Set up stubs here or during initialization this test interferes with other' fs readFileSync calls lol
   existsStub = sinon.stub(fs, 'existsSync').returns(true)
-  pub = proxyquire('../../../../src/http/static-path', {
+  pub = proxyquire('../../../../../src/http/middleware/_static-path', {
     'send': sendStub
   })
   t.end()

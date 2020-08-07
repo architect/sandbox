@@ -15,11 +15,10 @@ test('CLI env', t => {
 
 test('CLI sandbox', t => {
   t.plan(1)
-  cli({}, function done (err, close) {
+  cli({}, function done (err) {
     if (err) t.fail(err)
     else {
-      if (close) close()
-      t.ok(true, 'Sandbox CLI started')
+      t.pass('Sandbox CLI started')
       t.end()
       process.exit(0) // CLI holds process open, ofc
     }

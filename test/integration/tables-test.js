@@ -1,21 +1,20 @@
 let path = require('path')
 let test = require('tape')
-let { db } = require('../../src')
-let getDBClient = require('../../src/db/_get-db-client')
-let server
+let { tables } = require('../../src')
+let getDBClient = require('../../src/tables/_get-db-client')
 let dynamo
 let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
 let cwd = process.cwd()
 
 /* Regular test suite */
-test('db.start', t => {
+test('tables.start', t => {
   t.plan(3)
-  t.ok(db, 'got db')
+  t.ok(tables, 'got tables')
   // move the current process into the mock dir
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
-  server = db.start(function () {
-    t.ok(true, '@tables created in local database')
+  tables.start({}, function () {
+    t.pass('@tables created in local database')
   })
   getDBClient(function _gotDBClient (err, client) {
     if (err) console.log(err) // Yes, but actually no
@@ -136,21 +135,22 @@ test('can query the index', t => {
   })
 })
 
-test('db.close', t => {
+test('tables.end', t => {
   t.plan(1)
-  server.close()
-  t.ok(true, 'db closed')
+  tables.end(() => {
+    t.pass('db ended')
+  })
 })
 
 /* DEPRECATED mode */
-test('db.start', t => {
+test('tables.start', t => {
   t.plan(3)
-  t.ok(db, 'got db')
+  t.ok(tables, 'got tables')
   // move the current process into the mock dir
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
   process.env.DEPRECATED = true
-  server = db.start(function () {
-    t.ok(true, '@tables created in local database')
+  tables.start({}, function () {
+    t.pass('@tables created in local database')
     console.log(process.env.DEPRECATED)
   })
   getDBClient(function _gotDBClient (err, client) {
@@ -273,11 +273,12 @@ test('can query the index', t => {
   })
 })
 
-test('db.close', t => {
+test('tables.end', t => {
   t.plan(2)
   delete process.env.DEPRECATED
-  server.close()
-  t.ok(true, 'db closed')
-  process.chdir(cwd)
-  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
+  tables.end(() => {
+    t.ok(true, 'db ended')
+    process.chdir(cwd)
+    t.equal(process.cwd(), cwd, 'Switched back to original working dir')
+  })
 })

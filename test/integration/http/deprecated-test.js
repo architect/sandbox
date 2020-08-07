@@ -197,8 +197,6 @@ test('[REST mode / deprecated] post /post', t => {
     else {
       t.ok(result, 'posted /post')
       let { body, message, isBase64Encoded, version } = result.body
-      // TODO ↓ remove me! ↓
-      console.log(`result.body:`, result.body)
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from post /post', 'Got correct handler response')
       // t.equal(b64dec(body), 'hi=there', 'Got base64-encoded form URL-encoded body payload')

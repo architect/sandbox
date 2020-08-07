@@ -1,0 +1,76 @@
+let { banner } = require('@architect/utils')
+let { env, getPorts, checkPort, readArc } = require('../helpers')
+let init = require('./_init')
+let dynalite = require('dynalite')
+let series = require('run-series')
+
+/**
+ * Starts an in-memory Dynalite DynamoDB server
+ * - Automatically creates any tables or indexes defined by the project
+ * - Also creates local session table(s) just in case
+ */
+module.exports = function createTables () {
+  let { arc } = readArc()
+
+  if (arc.tables) {
+    let tables = {}
+    let dynamo
+
+    tables.start = function start (options, callback) {
+      let { all, port, update } = options
+
+      // Set up ports and env vars
+      let { tablesPort } = getPorts(port)
+      env(options)
+
+      series([
+        // Ensure the port is free
+        function _checkPort (callback) {
+          checkPort(tablesPort, callback)
+        },
+
+        // Print the banner (which also loads AWS env vars / creds necessary for Dynamo)
+        function _printBanner (callback) {
+          if (!all) {
+            banner(options)
+            callback()
+          }
+          else callback()
+        },
+
+        function _startDynalite (callback) {
+          let hasExternalDb = process.env.ARC_DB_EXTERNAL
+          if (!hasExternalDb) {
+            dynamo = dynalite({ createTableMs: 0 }).listen(tablesPort, callback)
+          }
+          else callback()
+        },
+
+        function _init (callback) {
+          init(callback)
+        }
+      ],
+      function _started (err) {
+        if (err) callback(err)
+        else {
+          update.done('@tables created in local database')
+          let msg = 'DynamoDB successfully started'
+          callback(null, msg)
+        }
+      })
+
+    }
+
+    tables.end = function end (callback) {
+      dynamo.close(function _closed (err) {
+        if (err) callback(err)
+        else {
+          let msg = 'DynamoDB successfully shut down'
+          callback(null, msg)
+        }
+      })
+    }
+
+    return tables
+  }
+}

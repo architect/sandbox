@@ -43,7 +43,7 @@ function parseOutput (output) {
 function getInvoker (params, response, callback) {
   // Generic input (shouldn't impact tests)
   let input = {
-    url: 'http://localhost:6666',
+    url: `http://localhost:${process.env.PORT || 3333}`,
     body: {},
     headers: { 'Accept-Encoding': 'gzip' },
     params: {}

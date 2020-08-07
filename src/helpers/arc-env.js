@@ -1,10 +1,12 @@
 let { toLogicalID } = require('@architect/utils')
+let readArc = require('./read-arc')
 
 /**
  * Handle important Architect environment variables
  */
 module.exports = function env (params) {
-  let { arc, port, version, quiet } = params
+  let { version, quiet } = params
+  let { arc } = readArc()
 
   // Set up quietude
   process.env.ARC_QUIET = process.env.ARC_QUIET || process.env.QUIET || quiet || '' // For when sandbox is being run outside of @arc/arc
@@ -47,9 +49,4 @@ module.exports = function env (params) {
 
   // Declare a bucket for implicit proxy
   process.env.ARC_STATIC_BUCKET = 'sandbox'
-
-  // Set default WebSocket URL
-  process.env.ARC_WSS_URL = `ws://localhost:${port}`
-
-  return process.env.DEPRECATED
 }

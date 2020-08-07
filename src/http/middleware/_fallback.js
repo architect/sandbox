@@ -1,8 +1,8 @@
-let readArc = require('../sandbox/read-arc')
 let exists = require('fs').existsSync
 let join = require('path').join
 let { parse } = require('url')
-let invoker = require('./invoke-http')
+let invoker = require('../invoke-http')
+let { readArc } = require('../../helpers')
 
 /**
  * Emulates REST `/{proxy+}` & HTTP `$default`
@@ -10,7 +10,7 @@ let invoker = require('./invoke-http')
  * - Otherwise serves static assets found in /public
  */
 module.exports = function fallback (req, res, next) {
-  // immediately exit to normal flow if /
+  // Immediately exit to normal flow if /
   if (req.path === '/') next()
   else {
     let { arc } = readArc()
@@ -73,9 +73,9 @@ module.exports = function fallback (req, res, next) {
         // Sandbox running as a dependency (most common use case)
         pathToFunction = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
         // Sandbox running as a global install
-        let global = join(__dirname, '..', '..', '..', 'http-proxy', 'dist')
+        let global = join(__dirname, '..', '..', '..', '..', 'http-proxy', 'dist')
         // Sandbox running from a local (symlink) context (usually testing/dev)
-        let local = join(__dirname, '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
+        let local = join(__dirname, '..', '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
         if (exists(global)) pathToFunction = global
         else if (exists(local)) pathToFunction = local
       }

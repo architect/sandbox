@@ -1,4 +1,4 @@
-let binaryHandler = require('../../../../src/http/binary-handler')
+let binaryHandler = require('../../../../../src/http/middleware/_binary-handler')
 let { EventEmitter: events } = require('events')
 let { Readable } = require('stream')
 let test = require('tape')

@@ -1,7 +1,6 @@
 let sandbox = require('../../../src')
 let tiny = require('tiny-json-http')
-
-let url = 'http://localhost:6666'
+let url = `http://localhost:${process.env.PORT || 3333}`
 
 // Verify sandbox shut down
 let verifyShutdown = (t, err) => {

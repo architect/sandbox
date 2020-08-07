@@ -4,7 +4,6 @@ let path = require('path')
 let { events } = require('../../src')
 let cwd = process.cwd()
 
-let client
 test('events.start', t => {
   t.plan(2)
   t.ok(events, 'events')
@@ -12,7 +11,7 @@ test('events.start', t => {
   process.env.NODE_ENV = 'testing'
   // move to test/mock
   process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
-  client = events.start(function () {
+  events.start({}, function () {
     t.ok(true, '@events mounted')
   })
 })
@@ -50,14 +49,16 @@ test('arc.queues.publish', t => {
   })
 })
 
-test('events.close', t => {
+test('events.end', t => {
   t.plan(2)
   setTimeout(() => {
-    client.close(function closed (err) {
+    events.end(function ended (err) {
       if (err) t.fail(err)
-      else t.ok(true, '@events closed')
+      else {
+        t.pass('@events ended')
+        process.chdir(cwd)
+        t.equal(process.cwd(), cwd, 'Switched back to original working dir')
+      }
     })
-  }, 1000)
-  process.chdir(cwd)
-  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
+  }, 100)
 })

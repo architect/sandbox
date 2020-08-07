@@ -1,7 +1,7 @@
 let join = require('path').join
 let utils = require('@architect/utils')
 let log = require('./pretty-print-route')
-let invoker = require('./invoke-http')
+let invoker = require('../invoke-http')
 let name = utils.getLambdaName
 let updater = utils.updater
 

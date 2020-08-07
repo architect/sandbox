@@ -1,32 +1,27 @@
 let hydrate = require('@architect/hydrate')
-let maybeHydrate = require('../http/maybe-hydrate')
+let { maybeHydrate } = require('../helpers')
 let path = require('path')
 let fs = require('fs')
 let pkgVer = require('../../package.json').version
 let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
 let { fingerprint, pathToUnix, updater } = require('@architect/utils')
-let readArc = require('../sandbox/read-arc')
+let { readArc } = require('../helpers')
 let readline = require('readline')
 let { tmpdir } = require('os')
+let sandbox = require('../sandbox')
 
 module.exports = function cli (params = {}, callback) {
-  // Calling the CLI as a module from a parent package causes some strange require race behavior against relative paths, so we have to call them at execution time
-  // eslint-disable-next-line
-  let http = require('../http')
-  // eslint-disable-next-line
-  let sandbox = require('../index')
-
   if (!params.version) params.version = ver
-  sandbox.start(params, function watching (err, close) {
+  sandbox.start(params, function watching (err) {
     if (err) {
       // Hydration errors already reported, no need to log
       if (err.message !== 'hydration_error') console.log(err)
-      if (close) close()
+      sandbox.end()
       if (callback) callback(err)
       else process.exit(1)
     }
-    else if (callback) callback(null, close)
+    else if (callback) callback()
 
     // Setup
     let update = updater('Sandbox')
@@ -105,7 +100,7 @@ module.exports = function cli (params = {}, callback) {
         })
       }
       if (key.sequence === '\u0003') {
-        if (callback) callback(null, close)
+        if (callback) callback()
         process.exit(0)
       }
     })
@@ -140,7 +135,7 @@ module.exports = function cli (params = {}, callback) {
           let { arc } = readArc()
 
           // Always attempt to close the http server, but only reload if necessary
-          http.close()
+          sandbox.http.end()
 
           // Arc 5 only starts if it's got actual routes to load
           let arc5 = deprecated && arc.http && arc.http.length
@@ -152,7 +147,7 @@ module.exports = function cli (params = {}, callback) {
             process.env.ARC_QUIET = true
             let start = Date.now()
             update.status('Architect project manifest changed, loading HTTP routes...')
-            http.start(function () {
+            sandbox.http.start(function () {
               let end = Date.now()
               if (!quiet) delete process.env.ARC_QUIET
               update.done(`HTTP routes reloaded in ${end - start}ms`)

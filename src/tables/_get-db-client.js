@@ -21,8 +21,8 @@ module.exports = function initDynamoClient (callback) {
     process.env.AWS_ACCESS_KEY_ID = 'xxx'
   }
 
-  let port = process.env.ARC_TABLES_PORT || 5000
-  let endpoint = new aws.Endpoint(`http://localhost:${port}`)
+  let tablesPort = process.env.ARC_TABLES_PORT || 5000
+  let endpoint = new aws.Endpoint(`http://localhost:${tablesPort}`)
   let region = 'us-west-2'
   let dynamo = new aws.DynamoDB({ endpoint, region })
   callback(null, dynamo)
