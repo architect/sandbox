@@ -33,6 +33,9 @@
   - `tables.start()` and `.end()` starts and ends just the local DynamoDB service:
     - `tables.start(options[, callback]) → [Promise]`
     - `tables.end([callback]) → [Promise]`
+- ~3x expansion of test coverage:
+  - Integration test suite expanded by 3x (124 to 358 integration tests)
+  - Unit test suite expanded by 2.5x (432 to 1,090 unit tests)
 
 
 ### Changed
