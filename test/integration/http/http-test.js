@@ -16,13 +16,13 @@ test('Set up env', t => {
 test('[HTTP mode] Start Sandbox', t => {
   t.plan(4)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
-  sandbox.start({}, function (err) {
+  sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
-      t.pass('Sandbox started')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
     }
   })
 })
@@ -38,7 +38,6 @@ test('[HTTP mode] get /', t => {
       let { message, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -55,7 +54,6 @@ test('[HTTP mode] get /binary', t => {
       let { version } = result.headers
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.ok(img.includes('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
-      console.log({ result })
     }
   })
 })
@@ -71,7 +69,6 @@ test('[HTTP mode] get /nodejs12.x', t => {
       let { message, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from get /nodejs12.x (running nodejs12.x)', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -87,7 +84,6 @@ test('[HTTP mode] get /nodejs10.x', t => {
       let { message, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from get /nodejs10.x (running nodejs10.x)', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -103,7 +99,6 @@ test('[HTTP mode] get /nodejs8.10', t => {
       let { message, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from get /nodejs8.10 (running nodejs8.10)', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -119,7 +114,6 @@ test('[HTTP mode] get /python3.8', t => {
       let { message, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from get /python3.8 (running python3.8)', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -135,7 +129,6 @@ test('[HTTP mode] get /python3.7', t => {
       let { message, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from get /python3.7 (running python3.7)', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -151,7 +144,6 @@ test('[HTTP mode] get /python3.6', t => {
       let { message, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from get /python3.6 (running python3.6)', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -167,7 +159,6 @@ test('[HTTP mode] get /ruby2.5', t => {
       let { message, version } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from Architect Sandbox running ruby2.5!', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -184,7 +175,6 @@ test('[HTTP mode] get /no-return (noop)', t => {
       t.equal(headers['content-type'], 'application/json', 'Returned JSON response')
       // FYI: Tiny parses 'null' into a null literal
       t.equal(body, null, `Got 'null' string back, which is definitely not valid JSON`)
-      console.log({ result })
     }
   })
 })
@@ -205,7 +195,6 @@ test('[HTTP mode] post /post (plain JSON)', t => {
       t.equal(message, 'Hello from post /post', 'Got correct handler response')
       t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
       t.equal(isBase64Encoded, false, 'Got isBase64Encoded flag')
-      console.log(body)
     }
   })
 })
@@ -229,7 +218,6 @@ test('[HTTP mode] post /post (plain JSON)', t => {
 //       t.equal(message, 'Hello from post /post', 'Got correct handler response')
 //       t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
 //       t.equal(isBase64Encoded, false, 'Got isBase64Encoded flag')
-//       console.log(body)
 //     }
 //   })
 // })
@@ -250,7 +238,6 @@ test('[HTTP mode] put /put', t => {
       t.equal(message, 'Hello from put /put', 'Got correct handler response')
       t.equal(b64dec(body), 'hi=there', 'Got base64-encoded form URL-encoded body payload')
       t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
-      console.log(body)
     }
   })
 })
@@ -274,7 +261,6 @@ test('[HTTP mode] patch /patch', t=> {
       t.equal(message, 'Hello from patch /patch', 'Got correct handler response')
       t.equal(b64dec(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
       t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
-      console.log(body)
     }
   })
 })
@@ -295,7 +281,6 @@ test('[HTTP mode] delete /delete', t => {
       t.equal(message, 'Hello from delete /delete', 'Got correct handler response')
       t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
       t.equal(isBase64Encoded, false, 'Got isBase64Encoded flag')
-      console.log(body)
     }
   })
 })
@@ -315,7 +300,6 @@ test('[HTTP mode] post / – non-get calls to root should hit $default when rout
       t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
       t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
       t.equal(isBase64Encoded, false, 'Got isBase64Encoded flag')
-      console.log({ result })
     }
   })
 })
@@ -331,12 +315,12 @@ test('[HTTP mode] Shut down Sandbox', t => {
 test('[HTTP mode] Start Sandbox', t => {
   t.plan(3)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-index-fail'))
-  sandbox.start({}, function (err) {
+  sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
-      t.pass('Sandbox started')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
     }
   })
 })
@@ -362,12 +346,12 @@ test('[HTTP mode] Shut down Sandbox', t => {
 test('[HTTP mode] Start Sandbox', t => {
   t.plan(3)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-index-pass'))
-  sandbox.start({}, function (err) {
+  sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
-      t.pass('Sandbox started')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
     }
   })
 })
@@ -382,7 +366,6 @@ test('[HTTP mode] get / without defining get / should succeed if index.html is p
       t.ok(result, 'got /')
       let { body } = result
       t.equal(body, 'Hello world!')
-      console.log(body)
     }
   })
 })
@@ -398,11 +381,9 @@ test('[HTTP mode] Shut down Sandbox', t => {
 test('[HTTP mode] Start Sandbox', t => {
   t.plan(1)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-http'))
-  sandbox.start({}, function (err) {
+  sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
-    else {
-      t.pass('Sandbox started')
-    }
+    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
 })
 

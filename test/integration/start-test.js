@@ -10,15 +10,15 @@ let shutdown = (t, err) => {
   t.equal(err.code, 'ECONNREFUSED', 'Sandbox succssfully shut down')
 }
 
-test('sandbox.start', t => {
+test('Set up env', t => {
   t.plan(2)
-  t.ok(sandbox, 'Has sandbox')
-  t.ok(sandbox.start, 'Has sandbox.start')
+  t.ok(sandbox, 'Sandbox is present')
+  t.ok(sandbox.start, 'sandbox.start module is present')
+  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
 })
 
-test('Async sandbox.start test/mock', async t => {
+test('Async sandbox.start', async t => {
   t.plan(1)
-  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
   try {
     await sandbox.start()
     t.pass('Sandbox started (async)')
@@ -39,13 +39,11 @@ test('Async sandbox.end', async t => {
   }
 })
 
-test('Sync sandbox.start test/mock', t => {
+test('Sync sandbox.start', t => {
   t.plan(1)
   sandbox.start({}, function (err) {
     if (err) t.fail('Sandbox failed (sync)')
-    else {
-      t.pass('Sandbox started (sync)')
-    }
+    else t.pass('Sandbox started (sync)')
   })
 })
 

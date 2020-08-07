@@ -15,13 +15,13 @@ test('Set up env', t => {
 test('[REST mode / deprecated] Start Sandbox', t => {
   t.plan(4)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
-  sandbox.start({}, function (err) {
+  sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(process.env.DEPRECATED, 'Arc v5 deprecated status set')
       t.equal(process.env.ARC_API_TYPE, 'rest', 'API type set to rest')
       t.equal(process.env.ARC_HTTP, 'aws', 'aws_proxy mode not enabled')
-      t.pass('Sandbox started')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
     }
   })
 })
@@ -37,7 +37,6 @@ test('[REST mode / deprecated] get /', t => {
       let { message, version } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -54,7 +53,6 @@ test('[REST mode / deprecated] get /binary', t => {
       let { version } = result.headers
       t.notOk(version, 'No Lambda payload version specified')
       t.ok(img.includes('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
-      console.log({ result })
     }
   })
 })
@@ -70,7 +68,6 @@ test('[REST mode / deprecated] get /nodejs12.x', t => {
       let { message, version } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get /nodejs12.x (running nodejs12.x)', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -86,7 +83,6 @@ test('[REST mode / deprecated] get /nodejs10.x', t => {
       let { message, version } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get /nodejs10.x (running nodejs10.x)', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -102,7 +98,6 @@ test('[REST mode / deprecated] get /nodejs8.10', t => {
       let { message, version } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get /nodejs8.10 (running nodejs8.10)', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -118,7 +113,6 @@ test('[REST mode / deprecated] get /python3.8', t => {
       let { message, version } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get /python3.8 (running python3.8)', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -134,7 +128,6 @@ test('[REST mode / deprecated] get /python3.7', t => {
       let { message, version } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get /python3.7 (running python3.7)', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -150,7 +143,6 @@ test('[REST mode / deprecated] get /python3.6', t => {
       let { message, version } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get /python3.6 (running python3.6)', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -166,7 +158,6 @@ test('[REST mode / deprecated] get /ruby2.5', t => {
       let { message, version } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from Architect Sandbox running ruby2.5!', 'Got correct handler response')
-      console.log({ result })
     }
   })
 })
@@ -202,7 +193,6 @@ test('[REST mode / deprecated] post /post', t => {
       // t.equal(b64dec(body), 'hi=there', 'Got base64-encoded form URL-encoded body payload')
       t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
       t.notOk(isBase64Encoded, 'No isBase64Encoded flag')
-      console.log(body)
     }
   })
 })
@@ -222,7 +212,6 @@ test('[REST mode / deprecated] put /put', t => {
       t.equal(message, 'Hello from put /put', 'Got correct handler response')
       t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.notOk(isBase64Encoded, 'No isBase64Encoded flag')
-      console.log(body)
     }
   })
 })
@@ -246,7 +235,6 @@ test('[REST mode / deprecated] patch /patch', t=> {
       t.equal(message, 'Hello from patch /patch', 'Got correct handler response')
       t.equal(b64dec(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
       t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
-      console.log(body)
     }
   })
 })
@@ -267,7 +255,6 @@ test('[REST mode / deprecated] delete /delete', t => {
       t.equal(message, 'Hello from delete /delete', 'Got correct handler response')
       t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
       t.notOk(isBase64Encoded, 'No isBase64Encoded flag')
-      console.log(body)
     }
   })
 })
@@ -299,12 +286,12 @@ test('[REST mode / deprecated] Shut down Sandbox', t => {
 test('[REST mode / deprecated] Start Sandbox', t => {
   t.plan(3)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-index-fail'))
-  sandbox.start({}, function (err) {
+  sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(process.env.DEPRECATED, 'Arc v5 deprecated status set')
       t.equal(process.env.ARC_HTTP, 'aws', 'aws_proxy mode not enabled')
-      t.pass('Sandbox started')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
     }
   })
 })
@@ -330,12 +317,12 @@ test('[REST mode / deprecated] Shut down Sandbox', t => {
 test('[REST mode / deprecated] Start Sandbox', t => {
   t.plan(3)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-index-pass'))
-  sandbox.start({}, function (err) {
+  sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(process.env.DEPRECATED, 'Arc v5 deprecated status set')
       t.equal(process.env.ARC_HTTP, 'aws', 'aws_proxy mode not enabled')
-      t.pass('Sandbox started')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
     }
   })
 })
@@ -361,11 +348,9 @@ test('[REST mode / deprecated] Shut down Sandbox', t => {
 test('[REST mode / deprecated] Start Sandbox', t => {
   t.plan(1)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-http'))
-  sandbox.start({}, function (err) {
+  sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
-    else {
-      t.pass('Sandbox started')
-    }
+    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
 })
 

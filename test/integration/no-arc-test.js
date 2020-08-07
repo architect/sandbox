@@ -11,9 +11,10 @@ let shutdown = (t, err) => {
   t.equal(err.code, 'ECONNREFUSED', 'Sandbox succssfully shut down')
 }
 
-test('Env', t => {
+test('Set up env', t => {
   t.plan(1)
-  t.ok(sandbox, 'got sandbox')
+  t.ok(sandbox, 'Sandbox is present')
+  process.chdir(path.join(__dirname, '..', 'mock', 'no-arc'))
 })
 
 /**
@@ -21,13 +22,9 @@ test('Env', t => {
  */
 test('Start Sandbox without an Architect project manifest', t => {
   t.plan(1)
-  // move to test/mock
-  process.chdir(path.join(__dirname, '..', 'mock', 'no-arc'))
   sandbox.start({}, function (err) {
     if (err) t.fail('Sandbox failed (sync)')
-    else {
-      t.pass('Sandbox started (sync)')
-    }
+    else t.pass('Sandbox started (sync)')
   })
 })
 
@@ -39,7 +36,6 @@ test('get /', t => {
       else {
         t.ok(data, 'got /')
         t.ok(data.body.startsWith('Hello from Architect Sandbox running without an Architect file!'), 'is hello world')
-        console.log({ data })
       }
     })
 })
@@ -58,10 +54,7 @@ test('Can list tables', t => {
   t.plan(1)
   dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)
-    else {
-      t.ok(Array.isArray(result.TableNames), 'got tables')
-      console.log(result)
-    }
+    else t.ok(Array.isArray(result.TableNames), 'got tables')
   })
 })
 

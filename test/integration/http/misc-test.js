@@ -14,13 +14,13 @@ test('Set up env', t => {
 test('[Misc] Start Sandbox', t => {
   t.plan(4)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
-  sandbox.start({}, function (err) {
+  sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
-      t.pass('Sandbox started')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
     }
   })
 })

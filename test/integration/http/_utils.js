@@ -8,7 +8,11 @@ let verifyShutdown = (t, err) => {
 }
 
 let shutdown = (t) => {
-  sandbox.end(() => {
+  sandbox.end((err, result) => {
+    if (err) t.fail(err)
+    if (result !== 'Sandbox successfully shut down') {
+      t.fail('Did not get back Sandbox shutdown message')
+    }
     tiny.get({
       url
     }, err => {

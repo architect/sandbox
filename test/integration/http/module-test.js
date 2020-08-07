@@ -18,10 +18,11 @@ test('Set up env', t => {
 test('Sync http.start', t => {
   t.plan(3)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
-  http.start({}, function () {
+  http.start({}, function (err, result) {
+    if (err) t.fail(err)
     t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
     t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
-    t.pass('@http mounted')
+    t.equal(result, 'HTTP successfully started', 'HTTP started')
   })
 })
 
@@ -33,14 +34,17 @@ test('get /', t => {
       else {
         t.ok(data, 'got /')
         t.ok(data.body.message.includes('Hello from get / running the default runtime'), 'is hello world')
-        console.log({ data })
       }
     })
 })
 
 test('Sync http.end', t => {
   t.plan(1)
-  http.end(() => {
+  http.end((err, result) => {
+    if (err) t.fail(err)
+    if (result !== 'HTTP successfully shut down') {
+      t.fail('Did not get back HTTP shutdown message')
+    }
     tiny.get({ url }, err => {
       if (err) verifyShutdown(t, err)
       else t.fail('http did not shut down')
@@ -51,10 +55,9 @@ test('Sync http.end', t => {
 test('Async http.start', async t => {
   t.plan(3)
   process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
-
   try {
-    await http.start({})
-    t.pass('http started (async)')
+    let result = await http.start({})
+    t.equal(result, 'HTTP successfully started', 'Sandbox started')
     t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
     t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
   }
@@ -71,7 +74,6 @@ test('get /', t => {
       else {
         t.ok(data, 'got /')
         t.ok(data.body.message.includes('Hello from get / running the default runtime'), 'is hello world')
-        console.log({ data })
       }
     })
 })

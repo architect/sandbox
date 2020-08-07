@@ -1,4 +1,4 @@
-let path = require('path')
+let { join } = require('path')
 let test = require('tape')
 let { tables } = require('../../src')
 let getDBClient = require('../../src/tables/_get-db-client')
@@ -7,15 +7,25 @@ let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
 let cwd = process.cwd()
 
-/* Regular test suite */
-test('tables.start', t => {
-  t.plan(3)
-  t.ok(tables, 'got tables')
-  // move the current process into the mock dir
-  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
-  tables.start({}, function () {
-    t.pass('@tables created in local database')
-  })
+test('Set up env', t => {
+  t.plan(1)
+  t.ok(tables, 'Tables module is present')
+  process.chdir(join(__dirname, '..', 'mock', 'normal'))
+})
+
+test('Async tables.start', async t => {
+  t.plan(1)
+  try {
+    let result = await tables.start({})
+    t.equal(result, 'DynamoDB successfully started', 'Tables started (async)')
+  }
+  catch (err) {
+    t.fail(err)
+  }
+})
+
+test('Get client', t => {
+  t.plan(1)
   getDBClient(function _gotDBClient (err, client) {
     if (err) console.log(err) // Yes, but actually no
     dynamo = client
@@ -23,18 +33,46 @@ test('tables.start', t => {
   })
 })
 
-test('can list tables', t => {
+test('Can list tables', t => {
   t.plan(1)
   dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(Array.isArray(result.TableNames), 'got tables')
-      console.log(result)
+      let { TableNames } = result
+      t.ok(Array.isArray(TableNames), `Got tables back from the DB: ${TableNames}`)
     }
   })
 })
 
-test('default tables present', t => {
+test('Async tables.end', async t => {
+  t.plan(1)
+  try {
+    let ended = await tables.end()
+    t.equal(ended, 'DynamoDB successfully shut down', 'Tables ended')
+  }
+  catch (err) {
+    t.fail(err)
+  }
+})
+
+test('Sync tables.start', t => {
+  t.plan(1)
+  tables.start({}, function (err, result) {
+    if (err) t.fail(err)
+    else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
+  })
+})
+
+test('Get client', t => {
+  t.plan(1)
+  getDBClient(function _gotDBClient (err, client) {
+    if (err) console.log(err) // Yes, but actually no
+    dynamo = client
+    t.ok(dynamo, 'Got Dynamo client')
+  })
+})
+
+test('Default tables are present', t => {
   t.plan(3)
   let defaultTables = [
     'arc-sessions',
@@ -45,13 +83,13 @@ test('default tables present', t => {
     if (err) t.fail(err)
     else {
       for (let table of defaultTables) {
-        t.ok(result.TableNames.includes(table), `found ${table}`)
+        t.ok(result.TableNames.includes(table), `Found table: ${table}`)
       }
     }
   })
 })
 
-test('can insert a row', t => {
+test('Can insert a row', t => {
   t.plan(1)
   dynamo.putItem({
     TableName,
@@ -62,27 +100,22 @@ test('can insert a row', t => {
   },
   function _put (err, result) {
     if (err) t.fail(err)
-    else {
-      t.ok(result, 'got result')
-      console.log(result)
-    }
+    else t.ok(result, `Got result: ${result}`)
   })
 })
 
-test('can read index in arc 6', t => {
+test('Can read index in Arc 6', t => {
   t.plan(1)
   dynamo.describeTable({
     TableName
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else {
-      t.ok(result.Table.GlobalSecondaryIndexes[0].IndexName === 'email-index', 'email-index')
-    }
+    else t.equal(result.Table.GlobalSecondaryIndexes[0].IndexName, 'email-index', 'Got index: email-index')
   })
 })
 
-test('can read index in arc 6', t => {
+test('Can read index in Arc 6', t => {
   t.plan(3)
   dynamo.describeTable({
     TableName: TableName2
@@ -90,14 +123,15 @@ test('can read index in arc 6', t => {
   function _desc (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result.Table.GlobalSecondaryIndexes.length === 2, 'two')
-      t.ok(result.Table.GlobalSecondaryIndexes[0].IndexName === 'petID-index', 'petID-index')
-      t.ok(result.Table.GlobalSecondaryIndexes[1].IndexName === 'accountID-petID-index', 'accountID-petID-index')
+      let indexes = result.Table.GlobalSecondaryIndexes
+      t.equal(indexes.length, 2, 'Got back two indexes')
+      t.equal(indexes[0].IndexName, 'petID-index', 'Got index: petID-index')
+      t.equal(indexes[1].IndexName, 'accountID-petID-index', 'Got index: accountID-petID-index')
     }
   })
 })
 
-test('can read the row', t => {
+test('Can read the row', t => {
   t.plan(1)
   dynamo.getItem({
     TableName,
@@ -107,14 +141,11 @@ test('can read the row', t => {
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else {
-      t.ok(result, 'got result')
-      console.log(result)
-    }
+    else t.ok(result, `Got result: ${result}`)
   })
 })
 
-test('can query the index', t => {
+test('Can query the index', t => {
   t.plan(1)
   dynamo.query({
     TableName,
@@ -128,31 +159,32 @@ test('can query the index', t => {
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else {
-      t.ok(result, 'got result')
-      console.log(result)
-    }
+    else t.ok(result, `Got result: ${result}`)
   })
 })
 
-test('tables.end', t => {
+test('Sync tables.end', t => {
   t.plan(1)
-  tables.end(() => {
-    t.pass('db ended')
+  tables.end(function (err, result) {
+    if (err) t.fail(err)
+    else t.equal(result, 'DynamoDB successfully shut down', 'Tables ended')
   })
 })
 
-/* DEPRECATED mode */
-test('tables.start', t => {
-  t.plan(3)
-  t.ok(tables, 'got tables')
-  // move the current process into the mock dir
-  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
+/**
+ * DEPRECATED mode
+ */
+test('Sync tables.start (deprecated)', t => {
+  t.plan(1)
   process.env.DEPRECATED = true
-  tables.start({}, function () {
-    t.pass('@tables created in local database')
-    console.log(process.env.DEPRECATED)
+  tables.start({}, function (err, result) {
+    if (err) t.fail(err)
+    else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
   })
+})
+
+test('Get client', t => {
+  t.plan(1)
   getDBClient(function _gotDBClient (err, client) {
     if (err) console.log(err) // Yes, but actually no
     dynamo = client
@@ -160,18 +192,18 @@ test('tables.start', t => {
   })
 })
 
-test('can list tables', t => {
+test('Can list tables', t => {
   t.plan(1)
   dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(Array.isArray(result.TableNames), 'got tables')
-      console.log(result)
+      let { TableNames } = result
+      t.ok(Array.isArray(TableNames), `Got tables back from the DB: ${TableNames}`)
     }
   })
 })
 
-test('default tables present', t => {
+test('Default tables are present', t => {
   t.plan(3)
   let defaultTables = [
     'arc-sessions',
@@ -182,13 +214,13 @@ test('default tables present', t => {
     if (err) t.fail(err)
     else {
       for (let table of defaultTables) {
-        t.ok(result.TableNames.includes(table), `found ${table}`)
+        t.ok(result.TableNames.includes(table), `Found table: ${table}`)
       }
     }
   })
 })
 
-test('can insert a row', t => {
+test('Can insert a row', t => {
   t.plan(1)
   dynamo.putItem({
     TableName,
@@ -199,28 +231,22 @@ test('can insert a row', t => {
   },
   function _put (err, result) {
     if (err) t.fail(err)
-    else {
-      t.ok(result, 'got result')
-      console.log(result)
-    }
+    else t.ok(result, `Got result: ${result}`)
   })
 })
 
-test('can read index in arc 5', t => {
+test('Can read index in arc 5', t => {
   t.plan(1)
   dynamo.describeTable({
     TableName
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else {
-      console.log(result.Table.GlobalSecondaryIndexes)
-      t.ok(result.Table.GlobalSecondaryIndexes[0].IndexName === 'mockapp-production-accounts-email-index', 'email-index')
-    }
+    else t.equal(result.Table.GlobalSecondaryIndexes[0].IndexName, 'mockapp-production-accounts-email-index', 'Got index: mockapp-production-accounts-email-index')
   })
 })
 
-test('can read index in arc 5', t => {
+test('Can read index in Arc 5', t => {
   t.plan(3)
   dynamo.describeTable({
     TableName: TableName2
@@ -228,14 +254,15 @@ test('can read index in arc 5', t => {
   function _desc (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result.Table.GlobalSecondaryIndexes.length === 2, 'two')
-      t.ok(result.Table.GlobalSecondaryIndexes[0].IndexName === 'mockapp-production-pets-petID-index', 'petID-index')
-      t.ok(result.Table.GlobalSecondaryIndexes[1].IndexName === 'mockapp-production-pets-accountID-petID-index', 'accountID-petID-index')
+      let indexes = result.Table.GlobalSecondaryIndexes
+      t.equal(indexes.length, 2, 'Got back two indexes')
+      t.equal(indexes[0].IndexName, 'mockapp-production-pets-petID-index', 'Got index: mockapp-production-pets-petID-index')
+      t.equal(indexes[1].IndexName, 'mockapp-production-pets-accountID-petID-index', 'Got index: mockapp-production-pets-accountID-petID-index')
     }
   })
 })
 
-test('can read the row', t => {
+test('Can read the row', t => {
   t.plan(1)
   dynamo.getItem({
     TableName,
@@ -245,14 +272,11 @@ test('can read the row', t => {
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else {
-      t.ok(result, 'got result')
-      console.log(result)
-    }
+    else t.ok(result, `Got result: ${result}`)
   })
 })
 
-test('can query the index', t => {
+test('Can query the index', t => {
   t.plan(1)
   dynamo.query({
     TableName,
@@ -266,19 +290,19 @@ test('can query the index', t => {
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else {
-      t.ok(result, 'got result')
-      console.log(result)
-    }
+    else t.ok(result, `Got result: ${result}`)
   })
 })
 
-test('tables.end', t => {
+test('Sync tables.end (deprecated)', t => {
   t.plan(2)
   delete process.env.DEPRECATED
-  tables.end(() => {
-    t.ok(true, 'db ended')
-    process.chdir(cwd)
-    t.equal(process.cwd(), cwd, 'Switched back to original working dir')
+  tables.end(function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.equal(result, 'DynamoDB successfully shut down', 'Tables ended')
+      process.chdir(cwd)
+      t.equal(process.cwd(), cwd, 'Switched back to original working dir')
+    }
   })
 })

@@ -28,7 +28,7 @@
     "@architect/http-proxy": "~3.12.3",
     "@architect/hydrate": "~1.5.0",
     "@architect/parser": "~2.1.6",
-    "@architect/utils": "~1.5.9",
+    "@architect/utils": "~1.5.11",
     "@begin/hashid": "~1.0.0",
     "aws-sdk": "~2.644.0",
     "body-parser": "~1.19.0",

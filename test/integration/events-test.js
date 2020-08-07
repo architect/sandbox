@@ -1,19 +1,24 @@
 let arc = require('@architect/functions')
 let test = require('tape')
-let path = require('path')
+let { join } = require('path')
 let { events } = require('../../src')
 let cwd = process.cwd()
 
-test('events.start', t => {
-  t.plan(2)
-  t.ok(events, 'events')
-  // ensure we are testing
-  process.env.NODE_ENV = 'testing'
-  // move to test/mock
-  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
-  events.start({}, function () {
-    t.ok(true, '@events mounted')
-  })
+test('Set up env', t => {
+  t.plan(1)
+  t.ok(events, 'Events module is present')
+  process.chdir(join(__dirname, '..', 'mock', 'normal'))
+})
+
+test('Async events.start', async t => {
+  t.plan(1)
+  try {
+    let result = await events.start({})
+    t.equal(result, 'Event bus successfully started', 'Events started (async)')
+  }
+  catch (err) {
+    t.fail(err)
+  }
 })
 
 test('arc.events.publish', t => {
@@ -27,9 +32,26 @@ test('arc.events.publish', t => {
   },
   function done (err) {
     if (err) t.fail(err)
-    else {
-      t.ok(true, 'published')
-    }
+    else t.pass('Successfully published event')
+  })
+})
+
+test('Async events.end', async t => {
+  t.plan(1)
+  try {
+    let ended = await events.end()
+    t.equal(ended, 'Event bus successfully shut down', 'Events ended')
+  }
+  catch (err) {
+    t.fail(err)
+  }
+})
+
+test('Sync events.start', t => {
+  t.plan(1)
+  events.start({}, function (err, result) {
+    if (err) t.fail(err)
+    else t.equal(result, 'Event bus successfully started', 'Events started (sync)')
   })
 })
 
@@ -43,19 +65,17 @@ test('arc.queues.publish', t => {
   },
   function done (err) {
     if (err) t.fail(err)
-    else {
-      t.ok(true, 'published')
-    }
+    else t.pass('Successfully published queue')
   })
 })
 
-test('events.end', t => {
+test('Sync events.end', t => {
   t.plan(2)
   setTimeout(() => {
-    events.end(function ended (err) {
+    events.end(function (err, result) {
       if (err) t.fail(err)
       else {
-        t.pass('@events ended')
+        t.equal(result, 'Event bus successfully shut down', 'Events ended')
         process.chdir(cwd)
         t.equal(process.cwd(), cwd, 'Switched back to original working dir')
       }

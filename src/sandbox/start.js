@@ -135,8 +135,7 @@ module.exports = function _start (params, callback) {
       if (apiType && apiType === 'http' || apiType === 'httpv2') {
         update.warn('Sandbox is emulating an API Gateway v2 (HTTP) API. If this is an existing project with an API Gateway v1 (REST) API, please restart Sandbox with ARC_API_TYPE=rest')
       }
-      // Finally, pass a function to shut everything down if this is being used as a module
-      callback()
+      callback(null, 'Sandbox successfully started')
     }
   })
 }
