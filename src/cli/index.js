@@ -1,5 +1,4 @@
 let hydrate = require('@architect/hydrate')
-let { maybeHydrate } = require('../helpers')
 let path = require('path')
 let fs = require('fs')
 let pkgVer = require('../../package.json').version
@@ -124,54 +123,36 @@ module.exports = function cli (params = {}, callback) {
       let updateOrRemove = event === 'update' || event === 'remove'
       fileName = pathToUnix(fileName)
 
-
       /**
        * Reload routes upon changes to Architect project manifest
        */
       if (fileUpdate && fileName.match(arcFile) && !paused) {
         clearTimeout(arcEventTimer)
         arcEventTimer = setTimeout(() => {
-          // TODO add arc pragma diffing, reload tables, events, etc.
-          let { arc } = readArc()
-
+          ts()
           // Always attempt to close the http server, but only reload if necessary
           sandbox.http.end()
+          update.status('Architect project manifest changed')
 
-          // Arc 5 only starts if it's got actual routes to load
-          let arc5 = deprecated && arc.http && arc.http.length
-          // Arc 6 may start with proxy at root, or empty `@http` pragma
-          let arc6 = !deprecated && arc.static || arc.http
-          if (arc5 || arc6) {
-            ts()
-            let quiet = process.env.ARC_QUIET
-            process.env.ARC_QUIET = true
-            let start = Date.now()
-            update.status('Architect project manifest changed, loading HTTP routes...')
-            sandbox.http.start(function () {
+          let start = Date.now()
+          let quiet = process.env.ARC_QUIET
+          process.env.ARC_QUIET = true
+          sandbox.http.start({ quiet: true }, function (err, result) {
+            if (!quiet) delete process.env.ARC_QUIET
+            if (err) update.err(err)
+            // HTTP passes back success message if it actually did need to (re)start
+            if (result === 'HTTP successfully started') {
               let end = Date.now()
-              if (!quiet) delete process.env.ARC_QUIET
               update.done(`HTTP routes reloaded in ${end - start}ms`)
-              maybeHydrate(function (err) {
-                if (err) {
-                  update.error(`Error hydrating new functions:`, err)
-                }
-                else {
-                  update.done(`Functions are ready to go!`)
-                  if (deprecated) {
-                    rehydrate({
-                      timer: rehydrateArcTimer,
-                      only: 'arcFile',
-                      msg: 'Rehydrating functions with new project manifest'
-                    })
-                  }
-                }
-              })
-            })
-          }
-          else {
-            ts()
-            update.status('Architect project manifest changed')
-          }
+              if (deprecated) {
+                rehydrate({
+                  timer: rehydrateArcTimer,
+                  only: 'arcFile',
+                  msg: 'Rehydrating functions with new project manifest'
+                })
+              }
+            }
+          })
         }, 50)
       }
 

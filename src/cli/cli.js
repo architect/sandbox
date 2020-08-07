@@ -6,7 +6,7 @@ let ver = pkg.version
 let options = process.argv
 
 /**
- * Entry for actual CLI
+ * Entry for Sandbox running its own CLI
  *   Same as the @architect/architect caller, but calls updater + sets own version
  */
 update({ pkg, shouldNotifyInNpmScript: true })
