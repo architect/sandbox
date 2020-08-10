@@ -216,29 +216,24 @@ test('[REST mode / deprecated] put /put', t => {
   })
 })
 
-/**
- * Uncomment this when tiny supports patch :)
- */
-/*
-test('[REST mode / deprecated] patch /patch', t=> {
+test('[REST mode / deprecated] patch /patch', t => {
   t.plan(5)
-  let data = {hi: 'there'}
+  let data = { hi: 'there' }
   tiny.patch({
     url: url + '/patch',
     data,
-  }, function _got(err, result) {
+  }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'patched /patch')
       let { body, message, isBase64Encoded, version } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from patch /patch', 'Got correct handler response')
-      t.equal(b64dec(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
-      t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
+      t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
+      t.notOk(isBase64Encoded, 'No isBase64Encoded flag')
     }
   })
 })
-*/
 
 test('[REST mode / deprecated] delete /delete', t => {
   t.plan(5)

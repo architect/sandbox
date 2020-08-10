@@ -216,17 +216,13 @@ test('[REST mode] put /put', t => {
   })
 })
 
-/**
- * Uncomment this when tiny supports patch :)
- */
-/*
-test('[REST mode] patch /patch', t=> {
+test('[REST mode] patch /patch', t => {
   t.plan(5)
-  let data = {hi: 'there'}
+  let data = { hi: 'there' }
   tiny.patch({
     url: url + '/patch',
     data,
-  }, function _got(err, result) {
+  }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'patched /patch')
@@ -238,7 +234,6 @@ test('[REST mode] patch /patch', t=> {
     }
   })
 })
-*/
 
 test('[REST mode] delete /delete', t => {
   t.plan(5)
