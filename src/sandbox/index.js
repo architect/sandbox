@@ -100,11 +100,13 @@ function start (params, callback) {
     function _checkArc (callback) {
       let check = readArc()
       arc = check.arc
-      if (!quiet && !check.filepath) {
-        update.warn('No Architect project manifest found, using default project')
-      }
-      else {
-        update.done('Found Architect project manifest, starting up')
+      if (!quiet) {
+        if (!check.filepath) {
+          update.warn('No Architect project manifest found, using default project')
+        }
+        else {
+          update.done('Found Architect project manifest, starting up')
+        }
       }
       isDefaultProject = check.isDefaultProject ? true : false
       callback()
