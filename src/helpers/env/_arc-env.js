@@ -1,10 +1,10 @@
 let { toLogicalID } = require('@architect/utils')
-let readArc = require('./read-arc')
+let readArc = require('../read-arc')
 
 /**
  * Handle important Architect environment variables
  */
-module.exports = function env (params) {
+module.exports = function env (params, callback) {
   let { version, quiet } = params
   let { arc } = readArc()
 
@@ -49,4 +49,6 @@ module.exports = function env (params) {
 
   // Declare a bucket for implicit proxy
   process.env.ARC_STATIC_BUCKET = 'sandbox'
+
+  callback()
 }

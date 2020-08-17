@@ -19,9 +19,14 @@ module.exports = function createEventBus () {
 
       // Set up ports and env vars
       let { eventsPort } = getPorts(port)
-      env(options)
 
       series([
+        // Set up Arc + userland env vars
+        function _env (callback) {
+          if (!all) env(options, callback)
+          else callback()
+        },
+
         // Ensure the port is free
         function _checkPort (callback) {
           checkPort(eventsPort, callback)

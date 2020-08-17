@@ -5,7 +5,7 @@ let hydrate = require('@architect/hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
 let { banner, chars } = require('@architect/utils')
-let { maybeHydrate, readArc } = require('../helpers')
+let { env, maybeHydrate, readArc } = require('../helpers')
 let startupScripts = require('./_startup-scripts')
 
 module.exports = function _start (params, callback) {
@@ -35,6 +35,11 @@ module.exports = function _start (params, callback) {
   let deprecated = process.env.DEPRECATED
 
   series([
+    // Set up Arc + userland env vars
+    function _env (callback) {
+      env(params, callback)
+    },
+
     // Print the banner (which also loads AWS env vars / creds necessary for Dynamo)
     function _printBanner (callback) {
       banner(params)
@@ -53,7 +58,7 @@ module.exports = function _start (params, callback) {
     },
 
     // Initialize any missing functions on startup
-    function _maybeInit (callback) {
+    function _init (callback) {
       if (!deprecated) {
         create({}, callback)
       }

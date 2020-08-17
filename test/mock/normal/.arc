@@ -18,6 +18,7 @@ get /python3.7
 get /python3.6
 get /ruby2.5
 get /deno
+get /env        # runs default
 get /no-return  # runs default
 get /times-out  # runs default
 post /post

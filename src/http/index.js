@@ -41,18 +41,23 @@ module.exports = function createHttpServer () {
     app.start = function start (options, callback) {
       let { all, port, quiet, update } = options
 
-      // Set up ports and env vars
+      // Set up ports and HTTP-specific env vars
       let { httpPort } = getPorts(port)
-      env(options)
       httpEnv(arc)
 
       series([
+        // Set up Arc + userland env vars
+        function _env (callback) {
+          if (!all) env(options, callback)
+          else callback()
+        },
+
         // Ensure the port is free
         function _checkPort (callback) {
           checkPort(httpPort, callback)
         },
 
-        // Maybe generate public/static.json if `@static fingerprint` is enabled
+        // Generate public/static.json if `@static fingerprint` is enabled
         function _maybeWriteStaticManifest (callback) {
           if (!arc.static || isDefaultProject) callback()
           else fingerprint({}, function next (err, result) {

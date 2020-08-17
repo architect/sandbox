@@ -127,7 +127,7 @@ function cleanEnv (t) {
   process.env.PORT = 6666
 }
 
-test('sandbox has correct env vars populated', async t => {
+test('Sandbox has correct env vars populated', async t => {
   let roundsOfTesting = 3
   let tests = (roundsOfTesting * envVars.length) + (roundsOfTesting * 2)
   t.plan(tests)

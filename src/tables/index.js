@@ -21,9 +21,14 @@ module.exports = function createTables () {
 
       // Set up ports and env vars
       let { tablesPort } = getPorts(port)
-      env(options)
 
       series([
+        // Set up Arc + userland env vars
+        function _env (callback) {
+          if (!all) env(options, callback)
+          else callback()
+        },
+
         // Ensure the port is free
         function _checkPort (callback) {
           checkPort(tablesPort, callback)

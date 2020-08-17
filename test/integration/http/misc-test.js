@@ -25,6 +25,22 @@ test('[Misc] Start Sandbox', t => {
   })
 })
 
+test('[Env vars] get /env', t => {
+  t.plan(5)
+  tiny.get({
+    url: url + '/env'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.equal(result.body.USERLAND_ENV_VAR, 'Why hello there!', 'Received userland env var')
+      t.ok(result.body.ARC_HTTP, 'Got ARC_HTTP env var')
+      t.ok(result.body.ARC_STATIC_BUCKET, 'Got ARC_STATIC_BUCKET env var')
+      t.ok(result.body.NODE_ENV, 'Got NODE_ENV env var')
+      t.ok(result.body.SESSION_TABLE_NAME, 'Got SESSION_TABLE_NAME env var')
+    }
+  })
+})
+
 test('[Timeout] get /times-out', t => {
   t.plan(3)
   tiny.get({
