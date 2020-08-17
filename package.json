@@ -30,7 +30,7 @@
     "@architect/parser": "~2.1.5",
     "@architect/utils": "~1.5.9",
     "@begin/hashid": "~1.0.0",
-    "aws-sdk": "~2.644.0",
+    "aws-sdk": "~2.734.0",
     "body-parser": "~1.19.0",
     "chalk": "~4.1.0",
     "depstatus": "~1.1.0",
