@@ -3,12 +3,16 @@ name: Node CI
 # Push tests pushes; PR tests merges
 on: [push, pull_request]
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   # Test the build
   build:
     # Setup
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         node-version: [10.x, 12.x, 14.x]
@@ -45,6 +49,7 @@ jobs:
         VER=`npm --version`; echo "npm ver:    $VER"
         VER=`python --version`; echo "Python ver: $VER"
         VER=`ruby --version`; echo "Ruby ver:   $VER"
+        echo "OS ver:     ${{ runner.os }}"
 
     - name: Install
       run: npm install
