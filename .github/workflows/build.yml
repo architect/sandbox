@@ -45,6 +45,7 @@ jobs:
         VER=`npm --version`; echo "npm ver:    $VER"
         VER=`python --version`; echo "Python ver: $VER"
         VER=`ruby --version`; echo "Ruby ver:   $VER"
+        echo "OS ver:     ${{ runner.os }}"
 
     - name: Install
       run: npm install
