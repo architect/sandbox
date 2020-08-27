@@ -2,6 +2,19 @@
 
 ---
 
+## [1.13.1] 2020-08-27
+
+### Changed
+
+- Updated dependencies
+
+
+### Fixed
+
+- Fixed `process.stdin.setRawMode is not a function` error that may occur in certain circumstances; thanks @kristoferjoseph!
+
+---
+
 ## [1.13.0] 2020-07-05
 
 ### Added
