@@ -1,7 +1,7 @@
 name: Node CI
 
 # Push tests pushes; PR tests merges
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 defaults:
   run:
@@ -15,13 +15,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x]
-        os: [windows-latest, ubuntu-latest, macOS-latest]
+        node-version: [ 10.x, 12.x, 14.x ]
+        os: [ windows-latest, ubuntu-latest, macOS-latest ]
 
     # Go
     steps:
     - name: Check out repo
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
     - name: Set up Node.js
       uses: actions/setup-node@v1
@@ -39,6 +39,11 @@ jobs:
       with:
         ruby-version: '2.5'
 
+    - name: Set up Deno
+      uses: denolib/setup-deno@v2
+      with:
+        deno-version: v1.x
+
     - name: Env
       run: |
         echo "Event name: ${{ github.event_name }}"
@@ -49,6 +54,7 @@ jobs:
         VER=`npm --version`; echo "npm ver:    $VER"
         VER=`python --version`; echo "Python ver: $VER"
         VER=`ruby --version`; echo "Ruby ver:   $VER"
+        VER=`deno --version`; echo "Deno ver:   $VER"
         echo "OS ver:     ${{ runner.os }}"
 
     - name: Install
@@ -82,7 +88,7 @@ jobs:
     # Go
     steps:
       - name: Check out repo
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Set up Node.js
         uses: actions/setup-node@v1
