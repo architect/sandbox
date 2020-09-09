@@ -4,16 +4,15 @@ const context = JSON.parse(env.__ARC_CONTEXT__);
 const root = env.LAMBDA_TASK_ROOT;
 const isWin = Deno.build.os === 'windows';
 const sep = isWin ? '\\' : '/';
-const path = isWin ? `file://${root}` : root;
 
 /* look for index.{js,ts,tsx} and fallback to mod.{js,ts,tsx} */
 const paths = [
-  `${path}${sep}index.js`,
-  `${path}${sep}mod.js`,
-  `${path}${sep}index.ts`,
-  `${path}${sep}mod.ts`,
-  `${path}${sep}index.tsx`,
-  `${path}${sep}mod.tsx`,
+  `${root}${sep}index.js`,
+  `${root}${sep}mod.js`,
+  `${root}${sep}index.ts`,
+  `${root}${sep}mod.ts`,
+  `${root}${sep}index.tsx`,
+  `${root}${sep}mod.tsx`,
 ];
 
 let found = false;
@@ -23,7 +22,7 @@ let handler;
 for (let path of paths) {
   found = await exists(path);
   if (found) {
-    let mod = await import(path);
+    let mod = await import(`file://${path}`);
     handler = mod[method];
     if (typeof handler != "function") {
       found = false;
