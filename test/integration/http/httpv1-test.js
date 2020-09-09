@@ -65,7 +65,7 @@ test('[HTTP v1.0 (REST) mode] get /nodejs12.x', t => {
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /')
+      t.ok(result, 'got /nodejs12.x')
       let { message, version } = result.body
       t.equal(version, '1.0', 'Got Lambda v1.0 payload')
       t.equal(message, 'Hello from get /nodejs12.x (running nodejs12.x)', 'Got correct handler response')
@@ -80,7 +80,7 @@ test('[HTTP v1.0 (REST) mode] get /nodejs10.x', t => {
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /')
+      t.ok(result, 'got /nodejs10.x')
       let { message, version } = result.body
       t.equal(version, '1.0', 'Got Lambda v1.0 payload')
       t.equal(message, 'Hello from get /nodejs10.x (running nodejs10.x)', 'Got correct handler response')
@@ -95,7 +95,7 @@ test('[HTTP v1.0 (REST) mode] get /nodejs8.10', t => {
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /')
+      t.ok(result, 'got /nodejs8.10')
       let { message, version } = result.body
       t.equal(version, '1.0', 'Got Lambda v1.0 payload')
       t.equal(message, 'Hello from get /nodejs8.10 (running nodejs8.10)', 'Got correct handler response')
@@ -110,7 +110,7 @@ test('[HTTP v1.0 (REST) mode] get /python3.8', t => {
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /')
+      t.ok(result, 'got /python3.8')
       let { message, version } = result.body
       t.equal(version, '1.0', 'Got Lambda v1.0 payload')
       t.equal(message, 'Hello from get /python3.8 (running python3.8)', 'Got correct handler response')
@@ -125,7 +125,7 @@ test('[HTTP v1.0 (REST) mode] get /python3.7', t => {
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /')
+      t.ok(result, 'got /python3.7')
       let { message, version } = result.body
       t.equal(version, '1.0', 'Got Lambda v1.0 payload')
       t.equal(message, 'Hello from get /python3.7 (running python3.7)', 'Got correct handler response')
@@ -140,7 +140,7 @@ test('[HTTP v1.0 (REST) mode] get /python3.6', t => {
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /')
+      t.ok(result, 'got /python3.6')
       let { message, version } = result.body
       t.equal(version, '1.0', 'Got Lambda v1.0 payload')
       t.equal(message, 'Hello from get /python3.6 (running python3.6)', 'Got correct handler response')
@@ -155,7 +155,7 @@ test('[HTTP v1.0 (REST) mode] get /ruby2.5', t => {
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /')
+      t.ok(result, 'got /ruby2.5')
       let { message, version } = result.body
       t.equal(version, '1.0', 'Got Lambda v1.0 payload')
       t.equal(message, 'Hello from Architect Sandbox running ruby2.5!', 'Got correct handler response')
