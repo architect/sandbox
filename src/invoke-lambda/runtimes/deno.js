@@ -1,6 +1,6 @@
+const env = Deno.env.toObject();
 const event = JSON.parse(env.__ARC_REQ__);
 const context = JSON.parse(env.__ARC_CONTEXT__);
-const env = Deno.env.toObject();
 const root = env.LAMBDA_TASK_ROOT;
 const isWin = Deno.build.os === 'windows';
 const sep = isWin ? '\\' : '/';
