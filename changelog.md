@@ -54,6 +54,19 @@
 
 ---
 
+## [1.13.2] 2020-09-08
+
+### Changed
+
+- Updated dependencies
+
+
+### Fixed
+
+- Fixed Deno issues on Windows (and added Deno to CI + integration tests), /ht @petruki
+
+---
+
 ## [1.13.1] 2020-08-27
 
 ### Changed

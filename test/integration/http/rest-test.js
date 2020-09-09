@@ -163,6 +163,21 @@ test('[REST mode] get /ruby2.5', t => {
   })
 })
 
+test('[REST mode] get /deno', t => {
+  t.plan(3)
+  tiny.get({
+    url: url + '/deno'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'got /deno')
+      let { message, version } = result.body
+      t.notOk(version, 'No Lambda payload version specified')
+      t.equal(message, 'Hello from Architect Sandbox running deno!', 'Got correct handler response')
+    }
+  })
+})
+
 test('[REST mode] get /no-return (noop)', t => {
   t.plan(2)
   tiny.get({

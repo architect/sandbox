@@ -1,15 +1,18 @@
 const env = Deno.env.toObject();
 const event = JSON.parse(env.__ARC_REQ__);
 const context = JSON.parse(env.__ARC_CONTEXT__);
+const root = env.LAMBDA_TASK_ROOT;
+const isWin = Deno.build.os === 'windows';
+const sep = isWin ? '\\' : '/';
 
-// look for index.{js,ts,tsx} and fallback to mod.{js,ts,tsx}
+/* look for index.{js,ts,tsx} and fallback to mod.{js,ts,tsx} */
 const paths = [
-  `${env.LAMBDA_TASK_ROOT}/index.js`,
-  `${env.LAMBDA_TASK_ROOT}/mod.js`,
-  `${env.LAMBDA_TASK_ROOT}/index.ts`,
-  `${env.LAMBDA_TASK_ROOT}/mod.ts`,
-  `${env.LAMBDA_TASK_ROOT}/index.tsx`,
-  `${env.LAMBDA_TASK_ROOT}/mod.tsx`,
+  `${root}${sep}index.js`,
+  `${root}${sep}mod.js`,
+  `${root}${sep}index.ts`,
+  `${root}${sep}mod.ts`,
+  `${root}${sep}index.tsx`,
+  `${root}${sep}mod.tsx`,
 ];
 
 let found = false;
@@ -19,11 +22,12 @@ let handler;
 for (let path of paths) {
   found = await exists(path);
   if (found) {
-    let mod = await import(path);
+    let mod = await import(`file://${path}`);
     handler = mod[method];
     if (typeof handler != "function") {
       found = false;
-    } else {
+    }
+    else {
       break;
     }
   }
@@ -35,7 +39,7 @@ function callback(err, result) {
     ? { name: err.name, message: err.message, stack: err.stack }
     : result;
   console.log('__ARC__', JSON.stringify(payload), '__ARC_END__');
-  Deno.exit(err? 1 : 0)
+  Deno.exit(err? 1 : 0);
 }
 
 if (handler.constructor.name === 'AsyncFunction') {
@@ -55,9 +59,9 @@ async function exists(filename) {
   } catch (error) {
     if (error instanceof Deno.errors.NotFound) {
       return false;
-    } else {
+    }
+    else {
       throw error;
     }
   }
 }
-
