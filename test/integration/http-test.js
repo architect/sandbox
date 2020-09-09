@@ -159,6 +159,20 @@ test('get /ruby2.5', t => {
   })
 })
 
+test('get /deno', t => {
+  t.plan(2)
+  tiny.get({
+    url: url + '/deno'
+  }, function _got (err, data) {
+    if (err) t.fail(err)
+    else {
+      t.ok(data, 'got /')
+      t.ok(data.body.startsWith('Hello from Architect Sandbox running deno!'), 'is hello world')
+      console.log({ data })
+    }
+  })
+})
+
 test('post /post', t => {
   t.plan(3)
   let data = { hi: 'there' }
