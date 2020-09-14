@@ -4,9 +4,13 @@
 
 ## [1.13.3] 2020-09-14
 
-### Changed
+### Fixed
 
 - Un-break Lambda invocation if an object is present in `.arc-config`
+
+
+### Changed
+
 - Updated dependencies
 
 ---
