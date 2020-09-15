@@ -1,70 +1,87 @@
-let readArc = require('../sandbox/read-arc')
-let fork = require('child_process').fork
-let path = require('path')
+let { env, getPorts, checkPort, maybeHydrate, readArc } = require('../helpers')
+let hydrate = require('@architect/hydrate')
+let listener = require('./_listener')
 let http = require('http')
-let chalk = require('chalk')
-
-module.exports = { start }
+let series = require('run-series')
 
 /**
- * Creates a little web server that listens for events
+ * Creates an event bus that emulates SNS + SQS and listens for `arc.event.publish` events
  */
-function start (callback) {
+module.exports = function createEventBus () {
   let { arc } = readArc()
-  let quiet = process.env.ARC_QUIET
-  function close (callback) {
-    if (callback) callback()
-  }
 
   if (arc.events || arc.queues) {
-    let server = http.createServer(function listener (req, res) {
-      let body = ''
-      req.on('data', chunk => {
-        body += chunk.toString()
-      })
-      req.on('end', () => {
-        let message = JSON.parse(body)
-        if (req.url === '/queues') {
-          message.arcType = 'queue'
-        }
-        else if (req.url === '/events' || req.url === '/') {
-          message.arcType = 'event'
-        }
-        else {
-          res.statusCode = 404
-          res.end('not found')
-          if (!quiet) {
-            console.log(chalk.red.dim('event bus 404 for URL ' + req.url))
-          }
-          return
-        }
-        if (!quiet) {
-          console.log(chalk.grey.dim('@' + message.arcType), chalk.green.dim(JSON.stringify(JSON.parse(body), null, 2)))
-        }
-        // spawn a fork of the node process
-        let subprocess = fork(path.join(__dirname, '_subprocess.js'))
-        subprocess.send(message)
-        subprocess.on('message', function _message (msg) {
-          if (!quiet) {
-            console.log(chalk.grey.dim(msg.text))
-          }
-        })
-        res.statusCode = 200
-        res.end('ok')
-      })
-    })
-    // start listening on 3334
-    let port = process.env.ARC_EVENTS_PORT || 3334
-    server.listen(port, callback ? callback : x => !x)
+    let events = {}
+    let eventBus
 
-    return {
-      close: function (callback) {
-        server.close(callback)
-      }
+    events.start = function start (options, callback) {
+      let { all, port, update } = options
+
+      // Set up ports and env vars
+      let { eventsPort } = getPorts(port)
+
+      series([
+        // Set up Arc + userland env vars
+        function _env (callback) {
+          if (!all) env(options, callback)
+          else callback()
+        },
+
+        // Ensure the port is free
+        function _checkPort (callback) {
+          checkPort(eventsPort, callback)
+        },
+
+        // Loop through functions and see if any need dependency hydration
+        function _maybeHydrate (callback) {
+          if (!all) maybeHydrate(callback)
+          else callback()
+        },
+
+        // ... then hydrate Architect project files into functions
+        function _hydrateShared (callback) {
+          if (!all) {
+            hydrate({ install: false }, function next (err) {
+              if (err) callback(err)
+              else {
+                update.done('Project files hydrated into functions')
+                callback()
+              }
+            })
+          }
+          else callback()
+        },
+
+        function _finalSetup (callback) {
+          eventBus = http.createServer(listener)
+          callback()
+        },
+
+        // Let's go!
+        function _startServer (callback) {
+          eventBus.listen(eventsPort, callback)
+        }
+      ],
+      function _started (err) {
+        if (err) callback(err)
+        else {
+          update.done('@events and @queues ready on local event bus')
+          let msg = 'Event bus successfully started'
+          callback(null, msg)
+        }
+      })
     }
-  }
-  else {
-    callback()
-    return { close }
+
+    events.end = function end (callback) {
+      eventBus.close(function _closed (err) {
+        if (err) callback(err)
+        else {
+          let msg = 'Event bus successfully shut down'
+          callback(null, msg)
+        }
+      })
+    }
+
+    return events
   }
 }

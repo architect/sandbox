@@ -1,4 +1,4 @@
-let clean = require('../../../../../src/db/create-table/_remove-ttl-and-lambda')
+let clean = require('../../../../../src/tables/create-table/_remove-ttl-and-lambda')
 let test = require('tape')
 
 test('_remove-ttl-and-lambda should ignore params with a value of TTL', t => {

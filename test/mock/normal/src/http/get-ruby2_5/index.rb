@@ -3,5 +3,11 @@
 require 'json'
 
 def handler(event, context)
-    { statusCode: 200, body: JSON.generate('Hello from Architect Sandbox running ruby2.5!') }
+    body = event
+    body[:message] = 'Hello from Architect Sandbox running ruby2.5!'
+    {
+        statusCode: 200,
+        headers: { 'content-type': 'application/json' },
+        body: JSON.generate(body)
+    }
 end

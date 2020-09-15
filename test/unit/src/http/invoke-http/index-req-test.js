@@ -2,38 +2,310 @@ let test = require('tape')
 let sinon = require('sinon')
 let proxyquire = require('proxyquire')
 let lambdaStub = sinon.stub().yields()
-let invoke = proxyquire('../../../../../src/http/invoke-http', {
+let { join } = require('path')
+let sut = join(process.cwd(), 'src', 'http', 'invoke-http')
+let invoke = proxyquire(sut, {
   '../../invoke-lambda': lambdaStub
 })
-let reqs = require('../http-req-fixtures')
+let { arc6, arc5, headers } = require('../http-req-fixtures')
 
 lambdaStub.yields(null, {})
-let headers = { 'Accept-Encoding': 'gzip' }
+
+function apiGwHeaders (headers, v5) {
+  let normal = {}
+  Object.entries(headers).forEach(([ h, v ]) => {
+    let header = h.toLowerCase()
+    if (header === 'cookie' && v5) header = 'Cookie'
+    normal[header] = v
+  })
+  return normal
+}
+
 let url = i => `http://localhost:6666${i ? i : ''}`
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${str(item)}`
 let response = {
-  getHeader: sinon.fake(header => {
-    if (header && header.toLowerCase() === 'cache-control') return undefined
-    if (header && header.toLowerCase() === 'content-type') return 'application/json; charset=utf-8'
+  getHeader: sinon.fake(h => {
+    let header = h && h.toLowerCase()
+    if (header === 'cache-control') return undefined
+    if (header === 'content-type') return 'application/json; charset=utf-8'
   }),
-  removeHeader: sinon.fake.returns(),
   setHeader: sinon.fake.returns(),
   end: sinon.fake.returns()
 }
 
-let teardown = () => {
+function teardown () {
   lambdaStub.reset() // mostly jic
   delete process.env.DEPRECATED
 }
 
+
 /**
- * Checks AWS's funky multiValueHeaders + multiValueQueryStringParameters
+ * Arc v6 (HTTP API mode)
  */
+let httpParams = [
+  'version',
+  'routeKey',
+  'rawPath',
+  'rawQueryString',
+  'cookies',                // Not always present
+  'headers',
+  'queryStringParameters',  // Not always present
+  'requestContext',
+  'pathParameters',         // Not always present
+  'body',                   // Not always present
+  'isBase64Encoded',
+]
+// HTTP APIs mutate headers when it contains cookies
+// tbqh I also can't resist eating cookies, either
+function eatCookies (headers) {
+  let sheet = {}
+  Object.entries(headers).forEach(([ header, value ]) => {
+    if (header !== 'cookie') sheet[header] = value
+  })
+  return sheet
+}
+
+// Reusable result checker
+function checkArcV6HttpResult (mock, req, t) {
+  httpParams.forEach(param => {
+    let ref = param === 'headers'
+      ? eatCookies(mock[param])
+      : mock[param]
+    t.equal(
+      str(ref),
+      str(req[param]),
+      match(`${param}`, req[param])
+    )
+  })
+  teardown()
+}
+
+test('Architect v6 (HTTP API mode): get /', t => {
+  let mock = arc6.http.getIndex
+  t.plan(httpParams.length)
+  let verb = 'GET'
+  let route = '/'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url(), // Set by `router` (interpolated, API passes path param)
+    body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
+    headers,    // Set by requesting client
+    params: {}  // {} set by `router` (Arc 5 == {}, Arc 6 == null)
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): get /?whats=up', t => {
+  let mock = arc6.http.getWithQueryString
+  t.plan(httpParams.length)
+  let verb = 'GET'
+  let route = '/'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('?whats=up'),
+    body: {},
+    headers,
+    params: {}
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): get /?whats=up&whats=there', t => {
+  let mock = arc6.http.getWithQueryStringDuplicateKey
+  t.plan(httpParams.length)
+  let verb = 'GET'
+  let route = '/'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('?whats=up&whats=there'),
+    body: {},
+    headers,
+    params: {}
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): get /nature/hiking', t => {
+  let mock = arc6.http.getWithParam
+  t.plan(httpParams.length)
+  let verb = 'GET'
+  let route = '/nature/:activities'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/nature/hiking'),
+    body: {},
+    headers,
+    params: mock.pathParameters
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): get /$default', t => {
+  let mock = arc6.http.get$default
+  t.plan(httpParams.length)
+  let verb = 'GET'
+  let $default = true // Unlike normal requests, fallbacks to $default don't include a route
+  let apiType = 'http'
+  let handler = invoke({ verb, apiType, $default })
+  let input = {
+    url: url('/nature/hiking'),
+    body: {},
+    headers,
+    params: {}
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): post /form (JSON)', t => {
+  let mock = arc6.http.postJson
+  t.plan(httpParams.length)
+  let verb = 'POST'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: false // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): post /form (multipart form data)', t => {
+  let mock = arc6.http.postMultiPartFormData
+  t.plan(httpParams.length)
+  let verb = 'POST'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: true // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): post /form (octet stream)', t => {
+  let mock = arc6.http.postOctetStream
+  t.plan(httpParams.length)
+  let verb = 'POST'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: true // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): put /form (JSON)', t => {
+  let mock = arc6.http.putJson
+  t.plan(httpParams.length)
+  let verb = 'PUT'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: false // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): patch /form (JSON)', t => {
+  let mock = arc6.http.patchJson
+  t.plan(httpParams.length)
+  let verb = 'PATCH'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: false // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+test('Architect v6 (HTTP API mode): delete /form (JSON)', t => {
+  let mock = arc6.http.deleteJson
+  t.plan(httpParams.length)
+  let verb = 'DELETE'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: false // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV6HttpResult(mock, req, t)
+})
+
+
+/**
+ * Arc v6 (REST API mode)
+ */
+// Checks AWS's funky multiValueHeaders + multiValueQueryStringParameters
 function checkMultiValueHeaders (mock, req, t) {
+  let headers = apiGwHeaders(mock.headers)
   // Fixtures always have headers
-  for (let header of Object.keys(mock.headers)) {
-    if (mock.headers[header] !== req.multiValueHeaders[header][0])
+  for (let header of Object.keys(headers)) {
+    if (headers[header] !== req.multiValueHeaders[header][0])
       t.fail(`Could not find ${header} in multiValueHeaders`)
   }
   t.pass('multiValueHeaders checked out')
@@ -58,12 +330,31 @@ function checkMultiValueQueryStringParameters (mock, req, t) {
   }
 }
 
-test('Architect v6: get /', t => {
-  t.plan(8)
-  let request = reqs.arc6.getIndex
+// Reusable result checker
+function checkArcV6RestResult (params, mock, req, t) {
+  params.forEach(param => {
+    t.equal(
+      str(mock[param]),
+      str(req[param]),
+      match(`${param}`, req[param])
+    )
+  })
+  checkMultiValueHeaders(mock, req, t)
+  checkMultiValueQueryStringParameters(mock, req, t)
+  teardown()
+}
+
+/**
+ * Arc v6 (HTTP + Lambda 1.0 payload)
+ */
+test('Architect v6 (HTTP + Lambda 1.0 payload): get /', t => {
+  let mock = arc6.rest.getIndex
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({ verb, route })
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -73,23 +364,17 @@ test('Architect v6: get /', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6: get /?whats=up', t => {
-  t.plan(8)
-  let request = reqs.arc6.getWithQueryString
+test('Architect v6 (HTTP + Lambda 1.0 payload): get /?whats=up', t => {
+  let mock = arc6.rest.getWithQueryString
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({ verb, route })
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -98,23 +383,17 @@ test('Architect v6: get /?whats=up', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6: get /?whats=up&whats=there', t => {
-  t.plan(8)
-  let request = reqs.arc6.getWithQueryStringDuplicateKey
+test('Architect v6 (HTTP + Lambda 1.0 payload): get /?whats=up&whats=there', t => {
+  let mock = arc6.rest.getWithQueryStringDuplicateKey
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({ verb, route })
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('?whats=up&whats=there'),
     body: {},
@@ -123,267 +402,201 @@ test('Architect v6: get /?whats=up&whats=there', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6: get /nature/hiking', t => {
-  t.plan(9)
-  let request = reqs.arc6.getWithParam
+test('Architect v6 (HTTP + Lambda 1.0 payload): get /nature/hiking', t => {
+  let mock = arc6.rest.getWithParam
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/nature/:activities'
-  let handler = invoke({ verb, route })
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/nature/hiking'),
     body: {},
     headers,
-    params: request.pathParameters
+    params: mock.pathParameters
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.resource), str(req.resource), match('req.resource', req.resource))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6: get /{proxy+}', t => {
-  t.plan(9)
-  let request = reqs.arc6.getProxyPlus
+test('Architect v6 (HTTP + Lambda 1.0 payload): get /{proxy+}', t => {
+  let mock = arc6.rest.getProxyPlus
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({ verb, route })
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/nature/hiking'),
     resource: '/{proxy+}',
     body: {},
     headers,
-    params: request.pathParameters
+    params: mock.pathParameters
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.resource), str(req.resource), match('req.resource', req.resource))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6: post /form (JSON)', t => {
-  t.plan(9)
-  let request = reqs.arc6.postJson
+test('Architect v6 (HTTP + Lambda 1.0 payload): post /form (JSON)', t => {
+  let mock = arc6.rest.postJson
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true // Assumes flag is set in binary handler
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  lambdaStub.reset()
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6: post /form (form URL encoded)', t => {
-  t.plan(9)
-  let request = reqs.arc6.postFormURL
+test('Architect v6 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', t => {
+  let mock = arc6.rest.postFormURL
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
+  checkArcV6RestResult(params, mock, req, t)
   teardown()
 })
 
-test('Architect v6: post /form (multipart form data)', t => {
-  t.plan(9)
-  let request = reqs.arc6.postMultiPartFormData
+test('Architect v6 (HTTP + Lambda 1.0 payload): post /form (multipart form data)', t => {
+  let mock = arc6.rest.postMultiPartFormData
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6: post /form (octet stream)', t => {
-  t.plan(9)
-  let request = reqs.arc6.postOctetStream
+test('Architect v6 (HTTP + Lambda 1.0 payload): post /form (octet stream)', t => {
+  let mock = arc6.rest.postOctetStream
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6: put /form (JSON)', t => {
-  t.plan(9)
-  let request = reqs.arc6.putJson
+test('Architect v6 (HTTP + Lambda 1.0 payload): put /form (JSON)', t => {
+  let mock = arc6.rest.putJson
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'PUT'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6: patch /form (JSON)', t => {
-  t.plan(9)
-  let request = reqs.arc6.patchJson
+test('Architect v6 (HTTP + Lambda 1.0 payload): patch /form (JSON)', t => {
+  let mock = arc6.rest.patchJson
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'PATCH'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6: delete /form (JSON)', t => {
-  t.plan(9)
-  let request = reqs.arc6.deleteJson
+test('Architect v6 (HTTP + Lambda 1.0 payload): delete /form (JSON)', t => {
+  let mock = arc6.rest.deleteJson
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'DELETE'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/form'),
-    body: request.body,
-    headers: request.headers,
+    body: mock.body,
+    headers: mock.headers,
     params: {},
     isBase64Encoded: true
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  t.equal(str(request.httpMethod), str(req.httpMethod), match('req.httpMethod', req.httpMethod))
-  t.equal(str(request.pathParameters), str(req.pathParameters), match('req.pathParameters', req.pathParameters))
-  t.equal(str(request.queryStringParameters), str(req.queryStringParameters), match('req.queryStringParameters', req.queryStringParameters))
-  checkMultiValueHeaders(request, req, t)
-  checkMultiValueQueryStringParameters(request, req, t)
-  t.ok(req.isBase64Encoded, 'req.isBase64Encoded present')
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v5: get /', t => {
-  t.plan(6)
-  let request = reqs.arc5.getIndex
-  process.env.DEPRECATED = true
+
+/**
+ * Arc v6 (REST)
+ */
+test('Architect v6 (REST API mode): get /', t => {
+  let mock = arc6.rest.getIndex
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -393,24 +606,17 @@ test('Architect v5: get /', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v5: get /?whats=up', t => {
-  t.plan(6)
-  let request = reqs.arc5.getWithQueryString
-  process.env.DEPRECATED = true
+test('Architect v6 (REST API mode): get /?whats=up', t => {
+  let mock = arc6.rest.getWithQueryString
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -419,169 +625,393 @@ test('Architect v5: get /?whats=up', t => {
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v5: get /nature/hiking', t => {
-  t.plan(6)
-  let request = reqs.arc5.getWithParam
-  process.env.DEPRECATED = true
+test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
+  let mock = arc6.rest.getWithQueryStringDuplicateKey
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
+  let verb = 'GET'
+  let route = '/'
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('?whats=up&whats=there'),
+    body: {},
+    headers,
+    params: {}
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV6RestResult(params, mock, req, t)
+})
+
+test('Architect v6 (REST API mode): get /nature/hiking', t => {
+  let mock = arc6.rest.getWithParam
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'GET'
   let route = '/nature/:activities'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url('/nature/hiking'),
     body: {},
     headers,
-    params: request.params
+    params: mock.pathParameters
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
+  checkArcV6RestResult(params, mock, req, t)
+})
+
+test('Architect v6 (REST API mode): get /{proxy+}', t => {
+  let mock = arc6.rest.getProxyPlus
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
+  let verb = 'GET'
+  let route = '/'
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/nature/hiking'),
+    resource: '/{proxy+}',
+    body: {},
+    headers,
+    params: mock.pathParameters
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV6RestResult(params, mock, req, t)
+})
+
+test('Architect v6 (REST API mode): post /form (JSON)', t => {
+  let mock = arc6.rest.postJson
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
+  let verb = 'POST'
+  let route = '/form'
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: true // Assumes flag is set in binary handler
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV6RestResult(params, mock, req, t)
+})
+
+test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
+  let mock = arc6.rest.postFormURL
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
+  let verb = 'POST'
+  let route = '/form'
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: true
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV6RestResult(params, mock, req, t)
   teardown()
 })
 
-test('Architect v5: post /form (JSON / form URL-encoded)', t => {
-  t.plan(6)
-  let request = reqs.arc5.post
-  process.env.DEPRECATED = true
+test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
+  let mock = arc6.rest.postMultiPartFormData
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
-    url: url(route),
-    body: request.body,
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: true
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV6RestResult(params, mock, req, t)
+})
+
+test('Architect v6 (REST API mode): post /form (octet stream)', t => {
+  let mock = arc6.rest.postOctetStream
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
+  let verb = 'POST'
+  let route = '/form'
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: true
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV6RestResult(params, mock, req, t)
+})
+
+test('Architect v6 (REST API mode): put /form (JSON)', t => {
+  let mock = arc6.rest.putJson
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
+  let verb = 'PUT'
+  let route = '/form'
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: true
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV6RestResult(params, mock, req, t)
+})
+
+test('Architect v6 (REST API mode): patch /form (JSON)', t => {
+  let mock = arc6.rest.patchJson
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
+  let verb = 'PATCH'
+  let route = '/form'
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: true
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV6RestResult(params, mock, req, t)
+})
+
+test('Architect v6 (REST API mode): delete /form (JSON)', t => {
+  let mock = arc6.rest.deleteJson
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
+  let verb = 'DELETE'
+  let route = '/form'
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: true
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV6RestResult(params, mock, req, t)
+})
+
+
+/**
+ * Arc v5 (REST)
+ */
+function upcaseCookie (headers) {
+  let sheet = {}
+  Object.entries(headers).forEach(([ header, value ]) => {
+    if (header === 'cookie') sheet.Cookie = value
+    else sheet[header] = value
+  })
+  return sheet
+}
+
+// Reusable result checker
+function checkArcV5RestResult (params, mock, req, t) {
+  params.forEach(param => {
+    let ref = param === 'headers'
+      ? upcaseCookie(mock[param])
+      : mock[param]
+    t.equal(
+      str(ref),
+      str(req[param]),
+      match(`${param}`, req[param])
+    )
+  })
+  teardown()
+}
+
+test('Architect v5 (REST API mode): get /', t => {
+  let mock = arc5.getIndex
+  let params = Object.keys(mock)
+  t.plan(params.length)
+  process.env.DEPRECATED = true
+  let verb = 'GET'
+  let route = '/'
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url(), // Set by `router` (interpolated, API passes path param)
+    body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
+    headers,    // Set by requesting client
+    params: {}  // {} set by `router` (Arc 5 == {}, Arc 6 == null)
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV5RestResult(params, mock, req, t)
+})
+
+test('Architect v5 (REST API mode): get /?whats=up', t => {
+  let mock = arc5.getWithQueryString
+  let params = Object.keys(mock)
+  t.plan(params.length)
+  process.env.DEPRECATED = true
+  let verb = 'GET'
+  let route = '/'
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('?whats=up'),
+    body: {},
     headers,
     params: {}
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })
 
-test('Architect v5: post /form (multipart form data-encoded)', t => {
-  t.plan(6)
-  let request = reqs.arc5.postBinary
+test('Architect v5 (REST API mode): get /nature/hiking', t => {
+  let mock = arc5.getWithParam
+  let params = Object.keys(mock)
+  t.plan(params.length)
+  process.env.DEPRECATED = true
+  let verb = 'GET'
+  let route = '/nature/:activities'
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/nature/hiking'),
+    body: {},
+    headers,
+    params: mock.params
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV5RestResult(params, mock, req, t)
+})
+
+test('Architect v5 (REST API mode): post /form (JSON / form URL-encoded)', t => {
+  let mock = arc5.post
+  let params = Object.keys(mock)
+  t.plan(params.length)
   process.env.DEPRECATED = true
   let verb = 'POST'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
-    body: request.body,
+    body: mock.body,
     headers,
     params: {}
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })
 
-test('Architect v5: put /form', t => {
-  t.plan(6)
-  let request = reqs.arc5.put
+test('Architect v5 (REST API mode): post /form (multipart form data-encoded)', t => {
+  let mock = arc5.postBinary
+  let params = Object.keys(mock)
+  t.plan(params.length)
+  process.env.DEPRECATED = true
+  let verb = 'POST'
+  let route = '/form'
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url(route),
+    body: mock.body,
+    headers,
+    params: {}
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV5RestResult(params, mock, req, t)
+})
+
+test('Architect v5 (REST API mode): put /form', t => {
+  let mock = arc5.put
+  let params = Object.keys(mock)
+  t.plan(params.length)
   process.env.DEPRECATED = true
   let verb = 'PUT'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
-    body: request.body,
+    body: mock.body,
     headers,
     params: {}
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })
 
-test('Architect v5: patch /form', t => {
-  t.plan(6)
-  let request = reqs.arc5.patch
+test('Architect v5 (REST API mode): patch /form', t => {
+  let mock = arc5.patch
+  let params = Object.keys(mock)
+  t.plan(params.length)
   process.env.DEPRECATED = true
   let verb = 'PATCH'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
-    body: request.body,
+    body: mock.body,
     headers,
     params: {}
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })
 
-test('Architect v5: delete /form', t => {
-  t.plan(6)
-  let request = reqs.arc5.delete
+test('Architect v5 (REST API mode): delete /form', t => {
+  let mock = arc5.delete
+  let params = Object.keys(mock)
+  t.plan(params.length)
   process.env.DEPRECATED = true
   let verb = 'DELETE'
   let route = '/form'
-  let handler = invoke({ verb, route })
+  let apiType = 'rest'
+  let handler = invoke({ verb, route, apiType })
   let input = {
     url: url(route),
-    body: request.body,
+    body: mock.body,
     headers,
     params: {}
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
-  t.equal(str(request.body), str(req.body), match('req.body', req.body))
-  t.equal(str(request.path), str(req.path), match('req.path', req.path))
-  t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
-  if (request.httpMethod === request.method)
-    t.equal(req.httpMethod, req.method, match('req.method/httpMethod', req.method))
-  t.equal(str(request.params), str(req.params), match('req.params', req.params))
-  if (str(request.query) === str(req.query))
-    t.equal(str(req.queryStringParameters), str(req.query), match('req.query/queryStringParameters', req.query))
-  teardown()
+  checkArcV5RestResult(params, mock, req, t)
 })

@@ -6,7 +6,7 @@ let ver = pkg.version
 let options = process.argv
 
 /**
- * Entry for actual CLI
+ * Entry for Sandbox running its own CLI
  *   Same as the @architect/architect caller, but calls updater + sets own version
  */
 update({ pkg, shouldNotifyInNpmScript: true })
@@ -19,11 +19,29 @@ update({ pkg, shouldNotifyInNpmScript: true })
     dimBorder: true
   } })
 
+// Get the base port for HTTP / WebSockets; tables + events key off this
+// CLI args > env var
+function port () {
+  let port = Number(process.env.PORT) || 3333
+  let findPort = option => [ '-p', '--port', 'port' ].includes(option)
+  if (options && options.some(findPort)) {
+    let thePort = i => options[options.indexOf(i) + 1]
+    if (options.includes('-p'))
+      port = thePort('-p')
+    else if (options.includes('--port'))
+      port = thePort('--port')
+    else if (options.includes('port'))
+      port = thePort('port')
+  }
+  return port
+}
+
 // Hit it
 cli({
   needsValidCreds: false,
   options,
-  version: `Sandbox ${ver}`
+  version: `Sandbox ${ver}`,
+  port: port()
 },
 function _done (err) {
   if (err) {

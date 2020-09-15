@@ -1,106 +1,150 @@
+// Built-ins
+let http = require('http')
+
 // 3rd party
 let Router = require('router')
-let body = require('body-parser')
 let finalhandler = require('finalhandler')
-let readArc = require('../sandbox/read-arc')
 let series = require('run-series')
+let chalk = require('chalk')
 
-// built ins
-let http = require('http')
-let join = require('path').join
-
-// local modules
+// Local
+let { fingerprint } = require('@architect/utils')
+let { env, getPorts, checkPort, maybeHydrate, readArc } = require('../helpers')
+let middleware = require('./middleware')
+let httpEnv = require('./_http-env')
+let hydrate = require('@architect/hydrate')
 let registerHTTP = require('./register-http')
 let registerWS = require('./register-websocket')
-let binary = require('./binary-handler')
-let publicMiddleware = require('./public-middleware')
-let fallback = require('./fallback')
 
-// config arcana
-let jsonTypes = /^application\/.*json/
-let formURLenc = /^application\/x-www-form-urlencoded/
-let isWSsend = req => req.url === '/__arc'
-let limit = '6mb'
-let app = Router({ mergeParams: true })
+/**
+ * Creates an HTTP + WebSocket server that emulates API Gateway
+ */
+module.exports = function createHttpServer () {
+  let { arc, isDefaultProject } = readArc()
+  let deprecated = process.env.DEPRECATED
 
-app.use(binary)
+  // Arc 5 only starts if it's got actual routes to load
+  let arc5 = deprecated && arc.http && arc.http.length
+  // Arc 6 may start with proxy at root, or empty `@http` pragma
+  let arc6 = !deprecated && arc.static || arc.http
 
-app.use(body.json({
-  limit,
-  type: req => jsonTypes.test(req.headers['content-type']) &&
-               (!req.isBase64Encoded || isWSsend(req))
-}))
+  if (arc5 || arc6) {
+    let app = Router({ mergeParams: true })
 
-app.use(body.urlencoded({
-  extended: false,
-  limit,
-  type: req => formURLenc.test(req.headers['content-type']) &&
-               (!req.isBase64Encoded || isWSsend(req))
-}))
+    app = middleware(app)
 
-app.use(publicMiddleware)
-app.use(fallback)
+    // Keep a reference up here for fns below
+    let httpServer
+    let websocketServer
 
-// keep a reference up here for fns below
-let server
-let websocket
+    // Start the HTTP server
+    app.start = function start (options, callback) {
+      let { all, port, quiet, update } = options
 
-// starts the http server
-app.start = function start (callback) {
+      // Set up ports and HTTP-specific env vars
+      let { httpPort } = getPorts(port)
+      httpEnv(arc)
 
-  // read the arc file
-  let { arc } = readArc()
-  let staticFolder = tuple => tuple[0] === 'folder'
-  let folder = arc.static && arc.static.some(staticFolder) ? arc.static.find(staticFolder)[1] : 'public'
+      series([
+        // Set up Arc + userland env vars
+        function _env (callback) {
+          if (!all) env(options, callback)
+          else callback()
+        },
 
-  // allow override of 'public' folder
-  process.env.ARC_SANDBOX_PATH_TO_STATIC = join(process.cwd(), folder)
+        // Ensure the port is free
+        function _checkPort (callback) {
+          checkPort(httpPort, callback)
+        },
 
-  // always registering http routes (falling back to get / proxy)
-  registerHTTP(app, '@http', 'http', arc.http || [])
+        // Generate public/static.json if `@static fingerprint` is enabled
+        function _maybeWriteStaticManifest (callback) {
+          if (!arc.static || isDefaultProject) callback()
+          else fingerprint({}, function next (err, result) {
+            if (err) callback(err)
+            else {
+              let msg = 'Static asset fingerpringing enabled, public/static.json generated'
+              if (result) update.done(msg)
+              callback()
+            }
+          })
+        },
 
-  // create an actual server; how quaint!
-  server = http.createServer(function _request (req, res) {
-    if (process.env.ARC_SANDBOX_ENABLE_CORS) {
-      res.setHeader('access-control-allow-origin', '*')
-      res.setHeader('access-control-request-method', '*')
-      res.setHeader('access-control-allow-methods', 'OPTIONS, GET')
-      res.setHeader('access-control-allow-headers', '*')
-      if (req.method === 'OPTIONS') {
-        res.writeHead(200)
-        res.end()
-        return
-      }
+        // Loop through functions and see if any need dependency hydration
+        function _maybeHydrate (callback) {
+          if (!all) maybeHydrate(callback)
+          else callback()
+        },
+
+        // ... then hydrate Architect project files into functions
+        function _hydrateShared (callback) {
+          if (!all) {
+            hydrate({ install: false }, function next (err) {
+              if (err) callback(err)
+              else {
+                update.done('Project files hydrated into functions')
+                callback()
+              }
+            })
+          }
+          else callback()
+        },
+
+        function _finalSetup (callback) {
+          // Always register HTTP routes
+          registerHTTP(app, '@http', 'http', arc.http || [])
+
+          // Create an actual server; how quaint!
+          httpServer = http.createServer(function _request (req, res) {
+            app(req, res, finalhandler(req, res))
+          })
+
+          // Bind WebSocket app to HTTP server
+          if (arc.ws) {
+            let routes = arc.ws
+            websocketServer = registerWS({ app, httpServer, routes })
+          }
+
+          callback()
+        },
+
+        // Let's go!
+        function _startServer (callback) {
+          httpServer.listen(httpPort, callback)
+        }
+      ],
+      function _started (err) {
+        if (err) callback(err)
+        else {
+          if (!quiet) {
+            let link = chalk.green.bold.underline(`http://localhost:${httpPort}\n`)
+            console.log(`\n    ${link}`)
+          }
+          let msg = 'HTTP successfully started'
+          callback(null, msg)
+        }
+      })
     }
-    app(req, res, finalhandler(req, res))
-  })
 
-  // bind ws
-  if (arc.ws) {
-    let routes = arc.ws
-    websocket = registerWS({ app, server, routes })
+    app.end = function end (callback) {
+      series([
+        function _http (callback) {
+          if (httpServer) httpServer.close(callback)
+          else callback()
+        },
+        function _websocket (callback) {
+          if (websocketServer) websocketServer.close(callback)
+          else callback()
+        },
+      ], function _closed (err) {
+        if (err) callback(err)
+        else {
+          let msg = 'HTTP successfully shut down'
+          callback(null, msg)
+        }
+      })
+    }
+
+    return app
   }
-
-  // start listening
-  server.listen(process.env.PORT, callback)
-  return app
 }
-
-app.close = function close (callback) {
-  series([
-    function _server (callback) {
-      if (server) server.close(callback)
-      else callback()
-    },
-    function _websocket (callback) {
-      if (websocket) websocket.close(callback)
-      else callback()
-    },
-  ], function _closed (err) {
-    if (err) console.log(err)
-    if (callback) callback()
-  })
-}
-
-// export the app
-module.exports = app

@@ -1,14 +1,13 @@
 let cli = require('./cli')
-let db = require('./db')
-let events = require('./events')
-let http = require('./http')
-let sandbox = require('./sandbox')
+let { tables, events, http, start, end } = require('./sandbox')
 
 module.exports = {
   cli,
-  db,
+  // Individual service APIs
   events,
   http,
-  start: sandbox.start,
-  end: sandbox.end
+  tables,
+  // Main Sandbox controls
+  start,
+  end
 }

@@ -2,6 +2,58 @@
 
 ---
 
+## [2.0.0] 2020-07-31
+
+### Added
+
+- Added support for API Gateway `HTTP` APIs (with v1.0 and v2.0 payload formats)
+  - API type configuration:
+    - Valid settings: `http` (default), `httpv2` (aliased to `http`), `httpv1`, and `rest`
+    - `http` + `httpv2` uses the latest API Gateway payload format (v2.0)
+      - If you'd like to use `HTTP` APIs with code authored for an existing `REST` API project, manually specify the v1.0 payload format with `httpv1`
+    - Backwards compatibility for `REST` APIs is retained with `rest` setting
+    - More info: https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api.html
+  - Your API type can be specified in the Architect project manifest as `@aws apigateway {type}`, or with the `ARC_API_TYPE` env var
+  - API Gateway `HTTP` APIs as the new default API type in Sandbox **may be a breaking change for local workflows with existing projects**
+    - If so, per above, make sure you set to `REST` mode with `ARC_API_TYPE=rest` or add that configuration to your project manifest
+    - Existing projects with API Gateway `REST` APIs will remain unchanged and will continue to deploy safely, even though Sandbox now defaults to `HTTP`
+- Added unified service interface and nascent API for Sandbox modules
+- Sandbox itself and its various service modules (`http`, `events`, and `tables`) now have a consistent API to improve using Sandbox in your test suites
+  - All Sandbox module methods now accept an options object, and can either return a Promise (e.g. can be used in async/await), or accept an optional callback
+  - Additionally, all Sandbox module methods now properly set their own environment variables, hydrate any necessary dependencies, and handle any other necessary service startup routines
+  - `sandbox.start()` and `.end()` start and end all Sandbox services:
+    - `sandbox.start(options[, callback]) → [Promise]`
+    - `sandbox.end([callback]) → [Promise]`
+  - `http.start()` and `.end()` starts and ends just the HTTP / WebSocket service:
+    - `http.start(options[, callback]) → [Promise]`
+    - `http.end([callback]) → [Promise]`
+  - `events.start()` and `.end()` starts and ends just the event bus service:
+    - `events.start(options[, callback]) → [Promise]`
+    - `events.end([callback]) → [Promise]`
+  - `tables.start()` and `.end()` starts and ends just the local DynamoDB service:
+    - `tables.start(options[, callback]) → [Promise]`
+    - `tables.end([callback]) → [Promise]`
+- ~3x expansion of test coverage:
+  - Integration test suite expanded by 3x (124 to 358 integration tests)
+  - Unit test suite expanded by 2.5x (432 to 1,090 unit tests)
+
+
+### Changed
+
+- A number of seldom used and largely undocumented Sandbox module APIs have a number of breaking changes:
+  - `sandbox.start()` no longer returns a function to shut down, and should now be shut down directly with `sandbox.end()`
+  - `sandbox.db()` is now `sandbox.tables()`
+  - `http.close()` is now `http.end()`
+  - `events.start()` & `tables.start()` no longer return server objects to be invoked with `.close()`, and should now be shut down directly with `events.end()` and `tables.end()`
+
+
+### Fixed
+
+- Fixed issue where Lambda timeouts were only respected if >3 seconds; now >=1 second is valid
+- Refactored Arc v6 response support for multiValueHeaders to better accommodate use cases where headers & multiValueHeaders are not in conflict with each other
+
+---
+
 ## [1.13.3] 2020-09-14
 
 ### Fixed

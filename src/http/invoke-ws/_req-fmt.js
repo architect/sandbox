@@ -24,7 +24,7 @@ module.exports = function requestFormatter ({ req, body, connectionId }) {
     request.headers = req.headers
   }
   if (req && req.url) {
-    let query = URL.parse(req.url, true).query
+    let { query } = URL.parse(req.url, true)
     if (Object.keys(query).length) {
       request.queryStringParameters = query
     }

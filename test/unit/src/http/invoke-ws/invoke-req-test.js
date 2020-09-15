@@ -7,7 +7,7 @@ function lambdaStub (path, req, callback) {
 let invoke = proxyquire('../../../../../src/http/invoke-ws', {
   '../../invoke-lambda': lambdaStub
 })
-let reqs = require('../http-req-fixtures')
+let { arc6 } = require('../http-req-fixtures')
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${str(item)}`
 
@@ -57,7 +57,8 @@ test('WebSocket connect / disconnect event: get /', t => {
   t.plan(4)
   let action = 'src/ws/connect' // not a real action
   let connectionId = 'much-unique-uuid'
-  let request = reqs.arc6.getIndex
+  let request = arc6.rest.getIndex
+  request.url = 'localhost'
   let params = {
     action,
     connectionId,
@@ -77,7 +78,7 @@ test('WebSocket connect / disconnect event: get /?whats=up', t => {
   t.plan(4)
   let action = 'src/ws/connect' // not a real action
   let connectionId = 'much-unique-uuid'
-  let request = reqs.arc6.getIndex // gonna have to manually add query string
+  let request = arc6.rest.getIndex // gonna have to manually add query string
   request.url = 'localhost/?whats=up'
   let params = {
     action,

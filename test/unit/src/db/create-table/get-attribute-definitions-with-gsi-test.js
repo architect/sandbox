@@ -1,5 +1,5 @@
 let test = require('tape')
-let getDefns = require('../../../../../src/db/create-table/_get-attribute-definitions-with-gsi.js')
+let getDefns = require('../../../../../src/tables/create-table/_get-attribute-definitions-with-gsi.js')
 
 test('should not create duplicate table attribute definitions when indices reference a base table attribute definition', t => {
   t.plan(2)

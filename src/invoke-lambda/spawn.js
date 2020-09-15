@@ -6,8 +6,8 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
   let cwd = options.cwd
   let timedout = false
   let headers = {
-    'Content-Type': 'text/html; charset=utf8;',
-    'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
+    'content-type': 'text/html; charset=utf8;',
+    'cache-control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
   }
 
   // deno's stdin interfaces were wonky and unstable at the time of impl
@@ -80,6 +80,7 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
     clearTimeout(to) // ensure the timeout doesn't block
     if (timedout) {
       callback(null, {
+        statusCode: 500,
         headers,
         body: `<h1>Timeout Error</h1>
         <p>Lambda <code>${cwd}</code> timed out after <b>${timeout / 1000} seconds</b></p>`
@@ -95,16 +96,21 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
       })
     }
     else if (code === 0) {
-      // extract the __ARC__ line
+      // Extract the __ARC__ line
       let command = line => line.startsWith('__ARC__')
       let result = stdout.split('\n').find(command)
-      if (result && result !== '__ARC__ undefined __ARC_END__') {
+      let returned = result && result !== '__ARC__ undefined __ARC_END__'
+      let apiType = process.env.ARC_API_TYPE
+      if (!returned && apiType === 'http') {
+        callback()
+      }
+      else if (returned) {
         let raw = result
           .replace('__ARC__', '')
           .replace('__ARC_END__', '')
           .trim()
         let parsed = JSON.parse(raw)
-        // if its an error pretty print it
+        // If it's an error pretty print it
         if (parsed.name && parsed.message && parsed.stack) {
           parsed.body = `
           <h1>${parsed.name}</h1>
@@ -119,6 +125,7 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
       }
       else {
         callback(null, {
+          statusCode: 500,
           headers,
           body: `<h1>Async error</h1>
 <p><strong>Lambda <code>${cwd}</code> ran without executing the completion callback or returning a value.</strong></p>
