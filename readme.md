@@ -23,7 +23,7 @@ npm i @architect/sandbox
 npx sandbox
 ```
 
-Or if running from within @architect/architect:
+Or if running Sandbox from within `@architect/architect`:
 
 ```
 npx arc sandbox
@@ -33,33 +33,39 @@ npx arc sandbox
 ### CLI options
 
 - `-p`, `--port`, `port` - Manually specify HTTP port
-- `-v`, `--verbose`, `verbose` - Enable verbose logging mode
+  - Defaults to `3333`
+- `-v`, `--verbose`, `verbose` - Enable verbose logging
 
 
 ### Environment variables
 
-- `ARC_API_TYPE` - Sets the API Gateway API type
+- `ARC_API_TYPE` - Set the API Gateway API type
   - Can be one of `http` (aliased to `httpv2`), `httpv1`, `rest`
   - Defaults to `http`
-- `ARC_QUIET` - If present, disables (most) logging
+- `ARC_QUIET` - If present, disable (most) logging
 - `PORT` - Manually specify HTTP port
   - Defaults to `3333`
 - `ARC_EVENTS_PORT`- Manually specify event bus port
   - Defaults to `3334`
 - `ARC_TABLES_PORT`- Manually specify local DynamoDB port
   - Defaults to `3335`
-- `ARC_LOCAL`- When used in conjunction with `NODE_ENV=staging|production`, Sandbox will use your `.arc-env` files staging or production environment variables, and connect to live AWS events and DynamoDB infra (with valid AWS credentials)
+- `ARC_LOCAL`- If present and used in conjunction with `NODE_ENV=staging|production`, emulates live `staging` or `production` environment
+  - Uses your local `.arc-env` file's `@staging` or `@production` environment variables
+  - Connects Sandbox to live AWS events and DynamoDB infra
+  - Requires valid AWS credentials with the same profile name as defined in your project manifest
 
 ---
 
 ## API
 
-Sandbox is designed to be integrated into your application's test suite. In most cases you'll only need `sandbox.start()` and `sandbox.end()`. However, individual Sandbox services can also be individually started and stopped.
+Sandbox is designed to be integrated into your application's test suite. In most cases you'll only need to make use of `sandbox.start()` and `sandbox.end()`. However, individual Sandbox services can also be individually started and stopped. ([See below](#individual-sandbox-services).)
 
 All methods must be passed an options object that may containing the following parameters:
 - `port` - **String** - Manually specify HTTP port
   - Defaults to `3333`
 - `quiet` - **Boolean** - Disables (most) logging
+
+---
 
 ### Sandbox
 
@@ -74,6 +80,7 @@ Invokes `callback` once everything is ready, or returns a `promise` if `callback
 
 Shuts down anything started by `sandbox.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
 
+---
 
 ### Individual Sandbox services
 
