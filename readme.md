@@ -67,8 +67,6 @@ All methods must be passed an options object that may containing the following p
 
 ---
 
-### Sandbox
-
 ### `sandbox.start(options[, callback]) → [Promise]`
 
 Starts the Sandbox; first checks that ports are available to consume, prints a banner, loads Architect and userland environment variables, hydrates application dependencies, and starts various Sandbox services (including `events`, `tables` and `http`).
@@ -84,6 +82,9 @@ Shuts down anything started by `sandbox.start()`. Invokes `callback` once shut d
 
 ### Individual Sandbox services
 
+> Useful for starting a subset of Sandbox's service functionality in your tests, either for increased isolation, or to enhance throughput
+
+
 ### Events (`@events`, `@queues`)
 
 ### `sandbox.events.start(options[, callback]) → [Promise]`
@@ -97,6 +98,7 @@ Invokes `callback` once everything is ready, or returns a `promise` if `callback
 
 Shuts down anything started by `sandbox.events.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
 
+---
 
 ### HTTP (`@http`, `@static`, `@ws`)
 
@@ -111,6 +113,7 @@ Invokes `callback` once everything is ready, or returns a `promise` if `callback
 
 Shuts down anything started by `sandbox.http.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
 
+---
 
 ### Tables (`@tables`, `@indexes`)
 
