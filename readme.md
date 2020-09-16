@@ -67,6 +67,11 @@ All methods must be passed an options object that may containing the following p
 
 ---
 
+### Sandbox
+
+> Start and shut down the Sandbox; unless you have specific per-service needs, we generally advise most folks use this interface for testing
+
+
 ### `sandbox.start(options[, callback]) → [Promise]`
 
 Starts the Sandbox; first checks that ports are available to consume, prints a banner, loads Architect and userland environment variables, hydrates application dependencies, and starts various Sandbox services (including `events`, `tables` and `http`).
