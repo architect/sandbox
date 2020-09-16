@@ -2,7 +2,7 @@
 
 ## [`@architect/sandbox`](https://www.npmjs.com/package/@architect/sandbox)
 
-> Architect dev server: run full Architect projects locally & offline in a sandbox
+> Architect local development environment: run full Architect projects locally & offline in an in-memory sandbox
 
 [![GitHub CI status](https://github.com/architect/sandbox/workflows/Node%20CI/badge.svg)](https://github.com/architect/sandbox/actions?query=workflow%3A%22Node+CI%22)
 <!-- [![codecov](https://codecov.io/gh/architect/sandbox/branch/master/graph/badge.svg)](https://codecov.io/gh/architect/sandbox) -->
@@ -13,86 +13,127 @@
 npm i @architect/sandbox
 ```
 
-## Run locally
+---
+
+## CLI
+
+### Start the sandbox
 
 ```
 npx sandbox
 ```
 
+Or if running from within @architect/architect:
 
-## API
-
-### `sandbox.cli({ver}, callback)`
-
-Invokes [`sandbox.start()`][start] to start a sandbox instance, passing the parameter object in. Then sets up a filesystem watcher for changes to:
-
-1. Files within shared folders (`src/shared/, src/views/`, etc.), in which case it will re-[hydrate][hydrate] all functions with the new files, and
-2. The Architect project manifest file, in which case it will re-start the HTTP server by calling into [`http()`][http].
-
-Prints the specified `ver` on init, or falls back to the version string defined in this project's `package.json`.
+```
+npx arc sandbox
+```
 
 
-### `sandbox.db.start(callback)`
+### CLI options
 
-Starts a singleton [local in-memory DynamoDB server](https://www.npmjs.com/package/dynalite), automatically creating any tables or indexes defined in the project manifest's [`@tables`][tables] pragma. Also creates a local session table.
-
-Returns an object with a `close([callback])` method that gracefully shuts the server down.
-
-Invokes `callback` once the DB is up and listening.
+- `-p`, `--port`, `port` - Manually specify HTTP port
+- `-v`, `--verbose`, `verbose` - Enable verbose logging mode
 
 
-### `sandbox.events.start(callback)`
+### Environment variables
 
-If Architect project manifest defines [`@queues`][queues] or [`@events`][events], sets up interprocess communication between your events and queues via a tiny web server.
-
-Returns an object with a `close([callback])` method that gracefully shuts the server down.
-
-Invokes `callback` once the server is up and listening.
-
-
-### `sandbox.http.start(callback)`
-
-If Architect project manifest defines defines [`@http`][http] or [`@websocket`][websocket] routes, starts the necessary servers and sets up routes as defined in the project manifest.
-
-Invokes `callback` once the server is up and listening.
-
-
-### `sandbox.http.close([callback])`
-
-Closes any servers started via [`sandbox.http.start()`][start].
-
-
-### `sandbox.start({port, options, quiet}, callback)`
-
-Initializes the sandbox; first checks that ports are available to consume, prints a banner, loading basic environment variables and necessary AWS credentials, and sets up any local DBs via [`sandbox.db.start()`][db], events or queues via [`sandbox.events.start()`][events-start], HTTP handlers via [`sandbox.http.start()`][http-start].
-
-Invokes `callback` once everything is ready, passing `null` as the first parameter and `sandbox.end` as the second parameter.
-
-Return a `promise` if `callback` is falsy.
-
-
-### `sandbox.end([callback])`
-
-Shuts down the sandbox, closing down all running servers and services. Returns a `promise` if `callback` is falsy.
+- `ARC_API_TYPE` - Sets the API Gateway API type
+  - Can be one of `http` (aliased to `httpv2`), `httpv1`, `rest`
+  - Defaults to `http`
+- `ARC_QUIET` - If present, disables (most) logging
+- `PORT` - Manually specify HTTP port
+  - Defaults to `3333`
+- `ARC_EVENTS_PORT`- Manually specify event bus port
+  - Defaults to `3334`
+- `ARC_TABLES_PORT`- Manually specify local DynamoDB port
+  - Defaults to `3335`
+- `ARC_LOCAL`- When used in conjunction with `NODE_ENV=staging|production`, Sandbox will use your `.arc-env` files staging or production environment variables, and connect to live AWS events and DynamoDB infra (with valid AWS credentials)
 
 ---
 
-## Example Usage
+## API
+
+Sandbox is designed to be integrated into your application's test suite. In most cases you'll only need `sandbox.start()` and `sandbox.end()`. However, individual Sandbox services can also be individually started and stopped.
+
+All methods must be passed an options object that may containing the following parameters:
+- `port` - **String** - Manually specify HTTP port
+  - Defaults to `3333`
+- `quiet` - **Boolean** - Disables (most) logging
+
+### Sandbox
+
+### `sandbox.start(options[, callback]) → [Promise]`
+
+Starts the Sandbox; first checks that ports are available to consume, prints a banner, loads Architect and userland environment variables, hydrates application dependencies, and starts various Sandbox services (including `events`, `tables` and `http`).
+
+Invokes `callback` once everything is ready, or returns a `promise` if `callback` is falsy.
+
+
+### `sandbox.end([callback]) → [Promise]`
+
+Shuts down anything started by `sandbox.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
+
+
+### Individual Sandbox services
+
+### Events (`@events`, `@queues`)
+
+### `sandbox.events.start(options[, callback]) → [Promise]`
+
+Starts up a local event bus, enabling interprocess communication for [`@queues`][queues] and [`@events`][events] functions (if defined in your Architect project manifest).
+
+Invokes `callback` once everything is ready, or returns a `promise` if `callback` is falsy.
+
+
+### `sandbox.events.end([callback]) → [Promise]`
+
+Shuts down anything started by `sandbox.events.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
+
+
+### HTTP (`@http`, `@static`, `@ws`)
+
+### `sandbox.http.start(options[, callback]) → [Promise]`
+
+Starts up a local HTTP and WebSocket servers, enabling [`@http`][http] or [`@websocket`][websocket] functions (if defined in your Architect project manifest).
+
+Invokes `callback` once everything is ready, or returns a `promise` if `callback` is falsy.
+
+
+### `sandbox.http.end([callback]) → [Promise]`
+
+Shuts down anything started by `sandbox.http.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
+
+
+### Tables (`@tables`, `@indexes`)
+
+### `sandbox.tables.start(options[, callback]) → [Promise]`
+
+Starts up a [local in-memory DynamoDB server](https://www.npmjs.com/package/dynalite), enabling [`@tables`][tables] or [`@indexes`][indexes] functions (if defined in your Architect project manifest).
+
+Invokes `callback` once everything is ready, or returns a `promise` if `callback` is falsy.
+
+
+### `sandbox.tables.end([callback]) → [Promise]`
+
+Shuts down anything started by `sandbox.tables.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
+
+---
+
+## Example
 
 ```javascript
-let sandbox = require('@architect/sandbox')
+let sandbox = require('@architect/sandbox');
+
+(async function () {
+  await sandbox.start()
+  // Use various Sandbox resources
+  await sandbox.end()
+})()
 ```
 
-[npm]: https://www.npmjs.com/package/@architect/sandbox
-[cli]: #sandboxcliver-callback
-[db]: #sandboxdbstartcallback
-[events-start]: #sandboxeventsstart
-[http-start]: #sandboxhttpstartcallback
-[http-close]: #sandboxhttpclosecallback
-[start]: #sandboxstartport-options-callback
-[hydrate]: https://www.npmjs.com/package/@architect/hydrate
-[events]: https://arc.codes/reference/events
-[http]: https://arc.codes/reference/http
-[queues]: https://arc.codes/reference/queues
-[tables]: https://arc.codes/reference/tables
-[ws]: https://arc.codes/reference/ws
+[events]: https://arc.codes/reference/arc/events
+[http]: https://arc.codes/reference/arc/http
+[queues]: https://arc.codes/reference/arc/queues
+[tables]: https://arc.codes/reference/arc/tables
+[ws]: https://arc.codes/reference/arc/ws
