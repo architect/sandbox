@@ -137,15 +137,50 @@ Shuts down anything started by `sandbox.tables.start()`. Invokes `callback` once
 
 ## Example
 
-```javascript
-let sandbox = require('@architect/sandbox');
+### Tape
 
-(async function () {
-  await sandbox.start()
-  // Use various Sandbox resources
-  await sandbox.end()
-})()
+```javascript
+let sandbox = require('@architect/sandbox')
+let test = require('tape)
+
+test('Start the Sandbox', async t => {
+  t.plan(1)
+  let result = await sandbox.start()
+  t.equal(result, 'Sandbox successfully started')
+})
+
+test('Tests go here', t => {
+  // Make use of various Sandbox resources in your tests...
+})
+
+test('Shut down the Sandbox', async t => {
+  t.plan(1)
+  let result = await sandbox.end()
+  t.equal(result, 'Sandbox successfully shut down')
+})
 ```
+
+
+### Jest
+
+```javascript
+let sandbox = require('@architect/sandbox')
+
+beforeAll(async () => {
+  let result = await sandbox.start()
+  expect(result).toBe('Sandbox successfully started')
+})
+
+afterAll(async () => {
+  let result = await sandbox.end()
+  expect(result).toBe('Sandbox successfully shut down')
+})
+
+test('Tests go here', () => {
+  // Make use of various Sandbox resources in your tests...
+})
+```
+
 
 [events]: https://arc.codes/reference/arc/events
 [http]: https://arc.codes/reference/arc/http
