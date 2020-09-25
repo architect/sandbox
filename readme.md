@@ -133,6 +133,16 @@ Invokes `callback` once everything is ready, or returns a `promise` if `callback
 
 Shuts down anything started by `sandbox.tables.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
 
+### Scheduled (`@scheduled`)
+
+### `sandbox.scheduled.start(options[, callback]) → [Promise]`
+
+Parses the Architect project configuration and runs the [`@scheduled`][scheduled] functions.
+
+### `sandbox.scheduled.end([callback]) → [Promise]`
+
+Shuts down anything started by `sandbox.scheduled.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
+
 ---
 
 ## Example
@@ -186,4 +196,5 @@ test('Tests go here', () => {
 [http]: https://arc.codes/reference/arc/http
 [queues]: https://arc.codes/reference/arc/queues
 [tables]: https://arc.codes/reference/arc/tables
+[scheduled]: https://arc.codes/reference/arc/scheduled
 [ws]: https://arc.codes/reference/arc/ws

@@ -50,3 +50,7 @@ pets
 pets
   accountID *String
   petID **String
+
+@scheduled
+rate-scheduled rate(2 minutes)
+cron-scheduled cron(0/1 * * * ? *)

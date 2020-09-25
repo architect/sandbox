@@ -18,6 +18,7 @@ module.exports = function _start (params, callback) {
     // Everything else
     update,
     events,
+    scheduled,
     http,
     tables,
   } = params
@@ -90,6 +91,10 @@ module.exports = function _start (params, callback) {
     // Start event bus (@events) listening for `arc.event.publish` events
     function _events (callback) {
       events.start(params, callback)
+    },
+
+    function _scheduled (callback) {
+      scheduled.start(params, callback)
     },
 
     // Start HTTP + WebSocket (@http, @ws) server

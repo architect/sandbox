@@ -178,6 +178,14 @@ module.exports = function cli (params = {}, callback) {
               }
             }
           })
+
+          // Update scheduled events listeners
+          sandbox.scheduled.end()
+          sandbox.scheduled.start({ quiet: true }, function (err) {
+            if (!quiet) delete process.env.ARC_QUIET
+            if (err) return update.err(err)
+            update.done('Scheduled events reloaded')
+          })
         }, 50)
       }
 

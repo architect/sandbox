@@ -1,5 +1,5 @@
 let cli = require('./cli')
-let { tables, events, http, start, end } = require('./sandbox')
+let { tables, events, http, scheduled, start, end } = require('./sandbox')
 
 module.exports = {
   cli,
@@ -7,6 +7,7 @@ module.exports = {
   events,
   http,
   tables,
+  scheduled,
   // Main Sandbox controls
   start,
   end

@@ -1,7 +1,7 @@
 let series = require('run-series')
 
 module.exports = function end (server, callback) {
-  let { events, http, tables } = server
+  let { events, http, tables, scheduled } = server
 
   // Set up promise if there is no callback
   let promise
@@ -24,6 +24,10 @@ module.exports = function end (server, callback) {
     },
     function _dynamo (callback) {
       if (tables) tables.end(callback)
+      else callback()
+    },
+    function _scheduled (callback) {
+      if (scheduled) scheduled.end(callback)
       else callback()
     }
   ], function closed (err) {
