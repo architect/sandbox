@@ -3,8 +3,9 @@ let body = require('body-parser')
 let _static = require('./_static-path')
 let fallback = require('./_fallback')
 let cors = require('./_cors')
+let jwt = require('./_jwt')
 
-module.exports = function loadMiddleware (app) {
+module.exports = function loadMiddleware (app, arc) {
   // Binary payload / base64 encoding handler
   app.use(binary)
 
@@ -30,5 +31,6 @@ module.exports = function loadMiddleware (app) {
   // Special CORS handling
   app.use(cors)
 
+  app.use(jwt(arc));
   return app
 }

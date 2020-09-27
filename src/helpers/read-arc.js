@@ -26,10 +26,11 @@ module.exports = function arcfile () {
   let update = updater('Sandbox')
   let { arc, filepath, errors } = read()
 
-  if (errors) {
-    update.error(errors)
-    process.exit(1)
-  }
+  // if (errors) {
+  //   console.log(errors)
+  //   update.error(errors)
+  //   process.exit(1)
+  // }
   if (filepath === false) {
     arc = parser(lexer(defaultArc))
   }

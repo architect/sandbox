@@ -47,6 +47,11 @@ module.exports = function requestFormatter ({ verb, route, req, $default }) {
 
   // Context, which now contains the HTTP method
   request.requestContext = {
+    authorizer: {
+      jwt: {
+        claims: req.authorizer
+      }
+    },
     http: {
       method: verb.toUpperCase(),
       path: rawPath
