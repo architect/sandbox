@@ -2,6 +2,7 @@ let { env, maybeHydrate, readArc } = require('../helpers')
 let hydrate = require('@architect/hydrate')
 let runner = require('./_runner')
 let series = require('run-series')
+let readline = require('readline')
 
 /**
  * Looks for Scheduled Events and runs them as if they were cloudwatch events:
@@ -16,6 +17,11 @@ module.exports = function createSchedule () {
   let scheduled = {}
   let schedulerBus
 
+  function keypress (input) {
+    if (input === 'T') {
+      schedulerBus && schedulerBus.runEvents()
+    }
+  }
 
   scheduled.start = function start (options, callback) {
     let { all, update } = options
@@ -48,11 +54,17 @@ module.exports = function createSchedule () {
 
       function _finalSetup (callback) {
         try {
-          schedulerBus = runner(arc.scheduled)
+          schedulerBus = runner(arc.scheduled, update)
         }
         catch (e) {
           callback(e)
         }
+
+        readline.emitKeypressEvents(process.stdin)
+        if (process.stdin.isTTY) {
+          process.stdin.setRawMode(true)
+        }
+        process.stdin.on('keypress', keypress)
 
         callback()
       }
@@ -69,6 +81,7 @@ module.exports = function createSchedule () {
   }
 
   scheduled.end = function end (callback) {
+    process.stdin.off('keypress', keypress)
     schedulerBus.stop(function _closed (err) {
       if (err) callback(err)
       else {

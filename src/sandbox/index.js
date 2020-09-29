@@ -13,6 +13,7 @@ let server = {
   events: undefined,
   http: undefined,
   tables: undefined,
+  scheduled: undefined,
 }
 
 /**

@@ -9,7 +9,7 @@ const multipliers = [
   { name: 'day', multiplier: 24 * 60 }
 ]
 
-module.exports = function eventRunner (scheduledEvents) {
+module.exports = function eventRunner (scheduledEvents, update) {
   const quiet = process.env.ARC_QUIET
   // All times are counted from here:
   let schedule
@@ -31,7 +31,8 @@ module.exports = function eventRunner (scheduledEvents) {
 
         offset = multiplier.multiplier * value * 60 * 1000
         nextRun = starter.getTime() + offset
-      } else { // AWS Cron expression (6 items)
+      }
+      else { // AWS Cron expression (6 items)
         const cronString = rule.trim().replace('cron(', '').replace(')', '')
         cron = awsCronParser.parse(cronString)
         nextRun = awsCronParser.next(cron, starter).getTime()
@@ -59,12 +60,21 @@ module.exports = function eventRunner (scheduledEvents) {
     runners.forEach(item => {
       if (item.offset) {
         item.nextRun = runTime + item.offset
-      } else {
+      }
+      else {
         const next = awsCronParser.next(item.cron, new Date())
         item.nextRun = next.getTime()
       }
       run(item)
     })
+  }
+
+  function runEvents () {
+    if (!quiet) {
+      update.status('Running all @scheduled functions')
+    }
+
+    schedule.map(run)
   }
 
   function run (item) {
@@ -81,6 +91,7 @@ module.exports = function eventRunner (scheduledEvents) {
   const interval = setInterval(checkRun, 1000 * 30)
 
   return {
+    runEvents,
     updateRules,
     stop: (cb) => {
       clearInterval(interval)
@@ -88,4 +99,3 @@ module.exports = function eventRunner (scheduledEvents) {
     }
   }
 }
-

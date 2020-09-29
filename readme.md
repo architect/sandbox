@@ -44,6 +44,7 @@ While the Sandbox is running, you can use the following keypresses: (note, they 
 - `H` - Hydrate all files
 - `S` - Hydrate shared files
 - `V` - Hydrate view files
+- `T` - Trigger all scheduled events
 
 ### Environment variables
 
