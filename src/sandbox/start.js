@@ -33,6 +33,13 @@ module.exports = function _start (params, callback) {
     verbose = true
   }
 
+  // Set up scheduled
+  let runScheduled = false
+  let findScheduled = option => [ '-s', '--scheduled', 'scheduled' ].includes(option)
+  if (options && options.some(findScheduled)) {
+    runScheduled = true
+  }
+
   let { arc, filepath } = readArc()
   let deprecated = process.env.DEPRECATED
 
@@ -93,7 +100,14 @@ module.exports = function _start (params, callback) {
       events.start(params, callback)
     },
 
+    // Run scheduled events from arc file (@scheduled)
+    // requires -s / --scheduled option
     function _scheduled (callback) {
+      if (!runScheduled) {
+        let skipMessage = chalk.grey.dim('use --scheduled option to run scheduled events')
+        console.log(`- ${skipMessage}\n`)
+        return callback()
+      }
       scheduled.start(params, callback)
     },
 

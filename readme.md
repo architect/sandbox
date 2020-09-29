@@ -35,7 +35,15 @@ npx arc sandbox
 - `-p`, `--port`, `port` - Manually specify HTTP port
   - Defaults to `3333`
 - `-v`, `--verbose`, `verbose` - Enable verbose logging
+- `-s`, `--scheduled`, `scheduled` - Run scheduled events
 
+### Keyboard Commands
+
+While the Sandbox is running, you can use the following keypresses: (note, they are capital letters)
+
+- `H` - Hydrate all files
+- `S` - Hydrate shared files
+- `V` - Hydrate view files
 
 ### Environment variables
 

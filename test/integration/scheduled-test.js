@@ -26,6 +26,7 @@ test('Runs scheduled events from configuration', async t => {
 
   this.clock.restore()
 
+  // waiting for the async sub processes to finish
   await timeoutPromise(5000)
 
   const history = await rateSpy.getCalls()
