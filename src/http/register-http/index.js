@@ -1,9 +1,7 @@
-let join = require('path').join
-let utils = require('@architect/utils')
+let { join } = require('path')
+let { getLambdaName: name, updater } = require('@architect/utils')
 let log = require('./pretty-print-route')
 let invoker = require('../invoke-http')
-let name = utils.getLambdaName
-let updater = utils.updater
 
 module.exports = function reg (app, api, type, routes) {
   let apiType = process.env.ARC_API_TYPE

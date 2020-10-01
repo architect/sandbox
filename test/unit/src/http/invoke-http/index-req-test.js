@@ -7,7 +7,7 @@ let sut = join(process.cwd(), 'src', 'http', 'invoke-http')
 let invoke = proxyquire(sut, {
   '../../invoke-lambda': lambdaStub
 })
-let { arc6, arc5, headers } = require('../http-req-fixtures')
+let { arc7, arc6, arc5, headers } = require('../http-req-fixtures')
 
 lambdaStub.yields(null, {})
 
@@ -67,7 +67,7 @@ function eatCookies (headers) {
 }
 
 // Reusable result checker
-function checkArcV6HttpResult (mock, req, t) {
+function checkArcV7HttpResult (mock, req, t) {
   httpParams.forEach(param => {
     let ref = param === 'headers'
       ? eatCookies(mock[param])
@@ -81,8 +81,8 @@ function checkArcV6HttpResult (mock, req, t) {
   teardown()
 }
 
-test('Architect v6 (HTTP API mode): get /', t => {
-  let mock = arc6.http.getIndex
+test('Architect v7 (HTTP API mode): get /', t => {
+  let mock = arc7.getIndex
   t.plan(httpParams.length)
   let verb = 'GET'
   let route = '/'
@@ -97,11 +97,11 @@ test('Architect v6 (HTTP API mode): get /', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  checkArcV6HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, req, t)
 })
 
-test('Architect v6 (HTTP API mode): get /?whats=up', t => {
-  let mock = arc6.http.getWithQueryString
+test('Architect v7 (HTTP API mode): get /?whats=up', t => {
+  let mock = arc7.getWithQueryString
   t.plan(httpParams.length)
   let verb = 'GET'
   let route = '/'
@@ -116,11 +116,11 @@ test('Architect v6 (HTTP API mode): get /?whats=up', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  checkArcV6HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, req, t)
 })
 
-test('Architect v6 (HTTP API mode): get /?whats=up&whats=there', t => {
-  let mock = arc6.http.getWithQueryStringDuplicateKey
+test('Architect v7 (HTTP API mode): get /?whats=up&whats=there', t => {
+  let mock = arc7.getWithQueryStringDuplicateKey
   t.plan(httpParams.length)
   let verb = 'GET'
   let route = '/'
@@ -135,11 +135,11 @@ test('Architect v6 (HTTP API mode): get /?whats=up&whats=there', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  checkArcV6HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, req, t)
 })
 
-test('Architect v6 (HTTP API mode): get /nature/hiking', t => {
-  let mock = arc6.http.getWithParam
+test('Architect v7 (HTTP API mode): get /nature/hiking', t => {
+  let mock = arc7.getWithParam
   t.plan(httpParams.length)
   let verb = 'GET'
   let route = '/nature/:activities'
@@ -154,11 +154,11 @@ test('Architect v6 (HTTP API mode): get /nature/hiking', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  checkArcV6HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, req, t)
 })
 
-test('Architect v6 (HTTP API mode): get /$default', t => {
-  let mock = arc6.http.get$default
+test('Architect v7 (HTTP API mode): get /$default', t => {
+  let mock = arc7.get$default
   t.plan(httpParams.length)
   let verb = 'GET'
   let $default = true // Unlike normal requests, fallbacks to $default don't include a route
@@ -173,11 +173,30 @@ test('Architect v6 (HTTP API mode): get /$default', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  checkArcV6HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, req, t)
 })
 
-test('Architect v6 (HTTP API mode): post /form (JSON)', t => {
-  let mock = arc6.http.postJson
+test('Architect v7 (HTTP API mode): get /path/* (/path/hi/there)', t => {
+  let mock = arc7.getCatchall
+  t.plan(httpParams.length)
+  let verb = 'GET'
+  let route = '/path/*'
+  let apiType = 'http'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/path/hi/there'),
+    body: {},
+    headers,
+    params: { '0': mock.pathParameters.proxy }
+  }
+  handler(input, response)
+  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV7HttpResult(mock, req, t)
+})
+
+test('Architect v7 (HTTP API mode): post /form (JSON)', t => {
+  let mock = arc7.postJson
   t.plan(httpParams.length)
   let verb = 'POST'
   let route = '/form'
@@ -193,11 +212,11 @@ test('Architect v6 (HTTP API mode): post /form (JSON)', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  checkArcV6HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, req, t)
 })
 
-test('Architect v6 (HTTP API mode): post /form (multipart form data)', t => {
-  let mock = arc6.http.postMultiPartFormData
+test('Architect v7 (HTTP API mode): post /form (multipart form data)', t => {
+  let mock = arc7.postMultiPartFormData
   t.plan(httpParams.length)
   let verb = 'POST'
   let route = '/form'
@@ -213,11 +232,11 @@ test('Architect v6 (HTTP API mode): post /form (multipart form data)', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  checkArcV6HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, req, t)
 })
 
-test('Architect v6 (HTTP API mode): post /form (octet stream)', t => {
-  let mock = arc6.http.postOctetStream
+test('Architect v7 (HTTP API mode): post /form (octet stream)', t => {
+  let mock = arc7.postOctetStream
   t.plan(httpParams.length)
   let verb = 'POST'
   let route = '/form'
@@ -233,11 +252,11 @@ test('Architect v6 (HTTP API mode): post /form (octet stream)', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  checkArcV6HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, req, t)
 })
 
-test('Architect v6 (HTTP API mode): put /form (JSON)', t => {
-  let mock = arc6.http.putJson
+test('Architect v7 (HTTP API mode): put /form (JSON)', t => {
+  let mock = arc7.putJson
   t.plan(httpParams.length)
   let verb = 'PUT'
   let route = '/form'
@@ -253,11 +272,11 @@ test('Architect v6 (HTTP API mode): put /form (JSON)', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  checkArcV6HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, req, t)
 })
 
-test('Architect v6 (HTTP API mode): patch /form (JSON)', t => {
-  let mock = arc6.http.patchJson
+test('Architect v7 (HTTP API mode): patch /form (JSON)', t => {
+  let mock = arc7.patchJson
   t.plan(httpParams.length)
   let verb = 'PATCH'
   let route = '/form'
@@ -273,11 +292,11 @@ test('Architect v6 (HTTP API mode): patch /form (JSON)', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  checkArcV6HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, req, t)
 })
 
-test('Architect v6 (HTTP API mode): delete /form (JSON)', t => {
-  let mock = arc6.http.deleteJson
+test('Architect v7 (HTTP API mode): delete /form (JSON)', t => {
+  let mock = arc7.deleteJson
   t.plan(httpParams.length)
   let verb = 'DELETE'
   let route = '/form'
@@ -293,7 +312,7 @@ test('Architect v6 (HTTP API mode): delete /form (JSON)', t => {
   handler(input, response)
   // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
-  checkArcV6HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, req, t)
 })
 
 
@@ -347,8 +366,8 @@ function checkArcV6RestResult (params, mock, req, t) {
 /**
  * Arc v6 (HTTP + Lambda 1.0 payload)
  */
-test('Architect v6 (HTTP + Lambda 1.0 payload): get /', t => {
-  let mock = arc6.rest.getIndex
+test('Architect v7 (HTTP + Lambda 1.0 payload): get /', t => {
+  let mock = arc6.getIndex
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'GET'
@@ -367,8 +386,8 @@ test('Architect v6 (HTTP + Lambda 1.0 payload): get /', t => {
   checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6 (HTTP + Lambda 1.0 payload): get /?whats=up', t => {
-  let mock = arc6.rest.getWithQueryString
+test('Architect v7 (HTTP + Lambda 1.0 payload): get /?whats=up', t => {
+  let mock = arc6.getWithQueryString
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'GET'
@@ -386,8 +405,8 @@ test('Architect v6 (HTTP + Lambda 1.0 payload): get /?whats=up', t => {
   checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6 (HTTP + Lambda 1.0 payload): get /?whats=up&whats=there', t => {
-  let mock = arc6.rest.getWithQueryStringDuplicateKey
+test('Architect v7 (HTTP + Lambda 1.0 payload): get /?whats=up&whats=there', t => {
+  let mock = arc6.getWithQueryStringDuplicateKey
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'GET'
@@ -405,8 +424,8 @@ test('Architect v6 (HTTP + Lambda 1.0 payload): get /?whats=up&whats=there', t =
   checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6 (HTTP + Lambda 1.0 payload): get /nature/hiking', t => {
-  let mock = arc6.rest.getWithParam
+test('Architect v7 (HTTP + Lambda 1.0 payload): get /nature/hiking', t => {
+  let mock = arc6.getWithParam
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'GET'
@@ -424,8 +443,8 @@ test('Architect v6 (HTTP + Lambda 1.0 payload): get /nature/hiking', t => {
   checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6 (HTTP + Lambda 1.0 payload): get /{proxy+}', t => {
-  let mock = arc6.rest.getProxyPlus
+test('Architect v7 (HTTP + Lambda 1.0 payload): get /{proxy+}', t => {
+  let mock = arc6.getProxyPlus
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'GET'
@@ -444,8 +463,28 @@ test('Architect v6 (HTTP + Lambda 1.0 payload): get /{proxy+}', t => {
   checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6 (HTTP + Lambda 1.0 payload): post /form (JSON)', t => {
-  let mock = arc6.rest.postJson
+test('Architect v7 (HTTP + Lambda 1.0 payload): get /path/* (/path/hi/there)', t => {
+  let mock = arc6.getCatchall
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
+  let verb = 'GET'
+  let route = '/'
+  let apiType = 'httpv1'
+  let handler = invoke({ verb, route, apiType })
+  let input = {
+    url: url('/path/hi/there'),
+    resource: '/path/{proxy+}',
+    body: {},
+    headers,
+    params: mock.pathParameters
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV6RestResult(params, mock, req, t)
+})
+
+test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (JSON)', t => {
+  let mock = arc6.postJson
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'POST'
@@ -464,8 +503,8 @@ test('Architect v6 (HTTP + Lambda 1.0 payload): post /form (JSON)', t => {
   checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', t => {
-  let mock = arc6.rest.postFormURL
+test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', t => {
+  let mock = arc6.postFormURL
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'POST'
@@ -485,8 +524,8 @@ test('Architect v6 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', 
   teardown()
 })
 
-test('Architect v6 (HTTP + Lambda 1.0 payload): post /form (multipart form data)', t => {
-  let mock = arc6.rest.postMultiPartFormData
+test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (multipart form data)', t => {
+  let mock = arc6.postMultiPartFormData
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'POST'
@@ -505,8 +544,8 @@ test('Architect v6 (HTTP + Lambda 1.0 payload): post /form (multipart form data)
   checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6 (HTTP + Lambda 1.0 payload): post /form (octet stream)', t => {
-  let mock = arc6.rest.postOctetStream
+test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (octet stream)', t => {
+  let mock = arc6.postOctetStream
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'POST'
@@ -525,8 +564,8 @@ test('Architect v6 (HTTP + Lambda 1.0 payload): post /form (octet stream)', t =>
   checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6 (HTTP + Lambda 1.0 payload): put /form (JSON)', t => {
-  let mock = arc6.rest.putJson
+test('Architect v7 (HTTP + Lambda 1.0 payload): put /form (JSON)', t => {
+  let mock = arc6.putJson
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'PUT'
@@ -545,8 +584,8 @@ test('Architect v6 (HTTP + Lambda 1.0 payload): put /form (JSON)', t => {
   checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6 (HTTP + Lambda 1.0 payload): patch /form (JSON)', t => {
-  let mock = arc6.rest.patchJson
+test('Architect v7 (HTTP + Lambda 1.0 payload): patch /form (JSON)', t => {
+  let mock = arc6.patchJson
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'PATCH'
@@ -565,8 +604,8 @@ test('Architect v6 (HTTP + Lambda 1.0 payload): patch /form (JSON)', t => {
   checkArcV6RestResult(params, mock, req, t)
 })
 
-test('Architect v6 (HTTP + Lambda 1.0 payload): delete /form (JSON)', t => {
-  let mock = arc6.rest.deleteJson
+test('Architect v7 (HTTP + Lambda 1.0 payload): delete /form (JSON)', t => {
+  let mock = arc6.deleteJson
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'DELETE'
@@ -590,7 +629,7 @@ test('Architect v6 (HTTP + Lambda 1.0 payload): delete /form (JSON)', t => {
  * Arc v6 (REST)
  */
 test('Architect v6 (REST API mode): get /', t => {
-  let mock = arc6.rest.getIndex
+  let mock = arc6.getIndex
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'GET'
@@ -610,7 +649,7 @@ test('Architect v6 (REST API mode): get /', t => {
 })
 
 test('Architect v6 (REST API mode): get /?whats=up', t => {
-  let mock = arc6.rest.getWithQueryString
+  let mock = arc6.getWithQueryString
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'GET'
@@ -629,7 +668,7 @@ test('Architect v6 (REST API mode): get /?whats=up', t => {
 })
 
 test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
-  let mock = arc6.rest.getWithQueryStringDuplicateKey
+  let mock = arc6.getWithQueryStringDuplicateKey
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'GET'
@@ -648,7 +687,7 @@ test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
 })
 
 test('Architect v6 (REST API mode): get /nature/hiking', t => {
-  let mock = arc6.rest.getWithParam
+  let mock = arc6.getWithParam
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'GET'
@@ -667,7 +706,7 @@ test('Architect v6 (REST API mode): get /nature/hiking', t => {
 })
 
 test('Architect v6 (REST API mode): get /{proxy+}', t => {
-  let mock = arc6.rest.getProxyPlus
+  let mock = arc6.getProxyPlus
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'GET'
@@ -687,7 +726,7 @@ test('Architect v6 (REST API mode): get /{proxy+}', t => {
 })
 
 test('Architect v6 (REST API mode): post /form (JSON)', t => {
-  let mock = arc6.rest.postJson
+  let mock = arc6.postJson
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'POST'
@@ -707,7 +746,7 @@ test('Architect v6 (REST API mode): post /form (JSON)', t => {
 })
 
 test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
-  let mock = arc6.rest.postFormURL
+  let mock = arc6.postFormURL
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'POST'
@@ -728,7 +767,7 @@ test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
 })
 
 test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
-  let mock = arc6.rest.postMultiPartFormData
+  let mock = arc6.postMultiPartFormData
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'POST'
@@ -748,7 +787,7 @@ test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
 })
 
 test('Architect v6 (REST API mode): post /form (octet stream)', t => {
-  let mock = arc6.rest.postOctetStream
+  let mock = arc6.postOctetStream
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'POST'
@@ -768,7 +807,7 @@ test('Architect v6 (REST API mode): post /form (octet stream)', t => {
 })
 
 test('Architect v6 (REST API mode): put /form (JSON)', t => {
-  let mock = arc6.rest.putJson
+  let mock = arc6.putJson
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'PUT'
@@ -788,7 +827,7 @@ test('Architect v6 (REST API mode): put /form (JSON)', t => {
 })
 
 test('Architect v6 (REST API mode): patch /form (JSON)', t => {
-  let mock = arc6.rest.patchJson
+  let mock = arc6.patchJson
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'PATCH'
@@ -808,7 +847,7 @@ test('Architect v6 (REST API mode): patch /form (JSON)', t => {
 })
 
 test('Architect v6 (REST API mode): delete /form (JSON)', t => {
-  let mock = arc6.rest.deleteJson
+  let mock = arc6.deleteJson
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let verb = 'DELETE'

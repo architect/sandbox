@@ -15,9 +15,7 @@ let json = { hi: 'there' }
 let text = 'hi there'
 let xml = '<hi>there</hi>'
 
-let arc6 = {}
-
-arc6.http = {
+let arc7 = {
   // Not returning is valid, and returns a 'null' string as JSON (lol)
   noReturn: undefined,
 
@@ -82,7 +80,7 @@ arc6.http = {
   }
 }
 
-arc6.rest = {
+let arc6 = {
   /**
    * New params introduced with Arc 6+ APG-proxy-Lambda
    */
@@ -284,6 +282,7 @@ let arc = {
 }
 
 module.exports = {
+  arc7,
   arc6,
   arc5,
   arc4,

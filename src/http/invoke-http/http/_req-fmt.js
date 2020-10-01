@@ -11,10 +11,19 @@ module.exports = function requestFormatter ({ verb, route, req, $default }) {
 
   // Maybe de-interpolate path into resource
   let resource = route ? route : '/'
+  // Handle route params
   if (route && route.includes(':')) {
     resource = route.split('/')
       .map(part => part.startsWith(':')
         ? `{${part.replace(':', '')}}`
+        : part)
+      .join('/')
+  }
+  // Handle catchalls
+  if (route && route.includes('*')) {
+    resource = route.split('/')
+      .map(part => part === '*'
+        ? `{proxy+}`
         : part)
       .join('/')
   }
@@ -56,7 +65,9 @@ module.exports = function requestFormatter ({ verb, route, req, $default }) {
 
   // Path parameters
   if (Object.keys(params).length) {
-    request.pathParameters = params
+    request.pathParameters = route && route.endsWith('/*')
+      ? { proxy: params['0'] }
+      : params
   }
 
   // Body

@@ -17,37 +17,50 @@ module.exports = function fallback (req, res, next) {
     let apiType = process.env.ARC_API_TYPE
     let deprecated = process.env.DEPRECATED
     let method = req.method.toLowerCase()
-    // reads all routes
+
+    // Read all routes
     let routes = arc.http || []
-    // add websocket route if necessary
+    // Add WebSocket route if necessary
     if (arc.ws) routes.push([ 'post', '/__arc' ])
-    // tokenize them [['get', '/']]
+
+    // Tokenize all routes: [ ['get', '/'], ... ]
     let tokens = routes.map(r => [ r[0] ].concat(r[1].split('/').filter(Boolean)))
-    // tokenize the current req
+
+    // Tokenize the current req: [ 'get', 'foo' ]
     let { pathname } = parse(req.url)
     let current = [ method ].concat(pathname.split('/').filter(Boolean))
-    // get all exact match routes
-    let exact = tokens.filter(t => !t.some(v => v.startsWith(':')))
-    // get all wildcard routes
-    let wild = tokens.filter(t => t.some(v => v.startsWith(':')))
 
-    // look for an exact match
+
+    // Look for any exactly matching routes
+    let exact = tokens.filter(t => !t.some(v => v.startsWith(':')))
     let exactMatch = exact.some(t => t.join('') === current.join(''))
 
-    // look for a wildcard match
-    let wildMatch = wild.filter(t => t.length === current.length).some(t => {
+    // Look for any route parameter matches
+    let params = tokens.filter(t => t.some(v => v.startsWith(':')))
+    let paramMatch = params.filter(t => t.length === current.length).some(t => {
       // turn :foo tokens into (\S+) regexp
       let exp = t.map(p => p.startsWith(':') ? '(\\S+)' : p).join('/')
       let reg = new RegExp(exp)
       return reg.test(current.join('/'))
     })
 
-    // check to see if we are using the vendored proxy
+    // Look for a catchall matches
+    let catchall = tokens.filter(t => t.some(v => v === '*'))
+    let catchallFound = catchall.some(t => {
+      let exp = t.map(p => p === '*' ? '.*' : p).join('/')
+      let reg = new RegExp(exp)
+      // Ensure trailing slashes match the root of the catchall
+      let path = current.join('/') + `${pathname.endsWith('/') ? '/' : ''}`
+      return reg.test(path)
+    })
+    let catchallMatch = catchallFound && apiType.startsWith('http') // Only supported by us in Arc 7 HTTP
+
+    // Check to see if we're using the vendored proxy
     let findGetIndex = tuple => tuple[0].toLowerCase() === 'get' && tuple[1] === '/'
     let proxyAtRoot = (!arc.http) || (arc.http && !arc.http.some(findGetIndex))
 
-    // if either exact or wildcard match bail
-    let match = exactMatch || wildMatch
+    // Bail on exact, param, or catchall matches
+    let match = exactMatch || paramMatch || catchallMatch
 
     // Arc v5 doesn't support implicit proxy at root, move along
     let invalid = proxyAtRoot && deprecated

@@ -178,6 +178,21 @@ test('[HTTP mode] get /deno', t => {
   })
 })
 
+test('[HTTP mode] get /path/*', t => {
+  t.plan(3)
+  tiny.get({
+    url: url + '/path/hello/there'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'got /path/*')
+      let { message, version } = result.body
+      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.equal(message, 'Hello from get /path/* running the default runtime')
+    }
+  })
+})
+
 test('[HTTP mode] get /no-return (noop)', t => {
   t.plan(3)
   tiny.get({

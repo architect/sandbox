@@ -37,7 +37,7 @@ let {
   multiValueHeaders: multiValueHeadersOctet
 } = makeHeaders({ 'content-type': 'application/octet-stream' })
 
-// Arc 6 HTTP
+// Arc 7 HTTP
 let cookies = [ headers.cookie ]
 
 /**
@@ -46,9 +46,7 @@ let cookies = [ headers.cookie ]
  * - [Architect Sandbox](test/unit/src/http/http-req-fixtures.js)
  * If you make changes to either, reflect it in the other(s)!
  */
-let arc6 = {}
-
-arc6.http = {
+let arc7 = {
   // get /
   getIndex: {
     version: '2.0',
@@ -139,6 +137,25 @@ arc6.http = {
       },
       routeKey: '$default',
     },
+    isBase64Encoded: false
+  },
+
+  // get /path/* (/path/hi/there)
+  getCatchall: {
+    version: '2.0',
+    routeKey: 'GET /path/{proxy+}',
+    rawPath: '/path/hi/there',
+    rawQueryString: '',
+    cookies,
+    headers,
+    requestContext: {
+      http: {
+        method: 'GET',
+        path: '/path/hi/there',
+      },
+      routeKey: 'GET /path/{proxy+}'
+    },
+    pathParameters: { proxy: 'hi/there' },
     isBase64Encoded: false
   },
 
@@ -276,7 +293,7 @@ arc6.http = {
   }
 }
 
-arc6.rest = {
+let arc6 = {
   // get /
   getIndex: {
     resource: '/',
@@ -343,6 +360,20 @@ arc6.rest = {
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: { proxy: '/nature/hiking' },
+    body: null,
+    isBase64Encoded: false,
+  },
+
+  // get /path/* (/path/hi/there)
+  getCatchall: {
+    resource: '/path/{proxy+}',
+    path: '/path/hi/there',
+    httpMethod: 'GET',
+    headers,
+    multiValueHeaders,
+    queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: { proxy: 'hi/there' },
     body: null,
     isBase64Encoded: false,
   },
@@ -547,6 +578,7 @@ let arc5 = {
 }
 
 module.exports = {
+  arc7,
   arc6,
   arc5,
   headers
