@@ -18,16 +18,16 @@ module.exports = function reg (app, api, type, routes) {
   update.done(`Loaded routes (${msg})`)
 
   routes.forEach(r => {
-    let verb = r[0].toLowerCase()
+    let method = r[0].toLowerCase()
     let route = r[1]
     let path = name(route)
-    let pathToFunction = join(process.cwd(), 'src', type, `${verb}${path}`)
+    let pathToFunction = join(process.cwd(), 'src', type, `${method}${path}`)
 
     // pretty print the route reg
-    log({ verb, route, path })
+    log({ method, route, path })
 
     // reg the route with the Router instance
-    let exec = invoker({ verb, pathToFunction, route, apiType })
-    app[verb](route, exec)
+    let exec = invoker({ method, pathToFunction, route, apiType })
+    app[method](route, exec)
   })
 }

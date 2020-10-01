@@ -104,7 +104,7 @@ module.exports = function fallback (req, res, next) {
 
       // Invoke with a proxy / $default payload
       let exec = invoker({
-        verb: method,
+        method,
         pathToFunction,
         apiType,
         $default: true

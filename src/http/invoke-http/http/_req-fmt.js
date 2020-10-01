@@ -5,7 +5,7 @@ let headerFormatter = require('./_req-header-fmt')
  * Arc 6+ HTTP + Lambda v2.0 request formatter
  * - Mocks request object shape from API Gateway <> Lambda proxy integration
  */
-module.exports = function requestFormatter ({ verb, route, req, $default }) {
+module.exports = function requestFormatter ({ method, route, req, $default }) {
   let { body, params, url } = req
   let { pathname: rawPath, query } = URL.parse(url)
 
@@ -34,7 +34,7 @@ module.exports = function requestFormatter ({ verb, route, req, $default }) {
   }
 
   // Path things
-  let routeKey = $default ? '$default' : `${verb.toUpperCase()} ${resource}`
+  let routeKey = $default ? '$default' : `${method.toUpperCase()} ${resource}`
   request.routeKey = routeKey
   request.rawPath = rawPath
 
@@ -57,7 +57,7 @@ module.exports = function requestFormatter ({ verb, route, req, $default }) {
   // Context, which now contains the HTTP method
   request.requestContext = {
     http: {
-      method: verb.toUpperCase(),
+      method: method.toUpperCase(),
       path: rawPath
     },
     routeKey
