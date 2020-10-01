@@ -3,6 +3,7 @@ let join = require('path').join
 let { parse } = require('url')
 let invoker = require('../invoke-http')
 let { readArc } = require('../../helpers')
+let httpProxy = require('http-proxy')
 
 /**
  * Emulates REST `/{proxy+}` & HTTP `$default`
@@ -15,6 +16,7 @@ module.exports = function fallback (req, res, next) {
   else {
     let { arc } = readArc()
     let apiType = process.env.ARC_API_TYPE
+    let httpAPI = apiType.startsWith('http')
     let deprecated = process.env.DEPRECATED
     let method = req.method.toLowerCase()
 
@@ -22,6 +24,8 @@ module.exports = function fallback (req, res, next) {
     let routes = arc.http || []
     // Add WebSocket route if necessary
     if (arc.ws) routes.push([ 'post', '/__arc' ])
+    // Establish proxy
+    let proxy = httpAPI && arc.proxy && arc.proxy.find(s => s[0] === 'testing')
 
     // Tokenize all routes: [ ['get', '/'], ... ]
     let tokens = routes.map(r => [ r[0] ].concat(r[1].split('/').filter(Boolean)))
@@ -29,7 +33,6 @@ module.exports = function fallback (req, res, next) {
     // Tokenize the current req: [ 'get', 'foo' ]
     let { pathname } = parse(req.url)
     let current = [ method ].concat(pathname.split('/').filter(Boolean))
-
 
     // Look for any exactly matching routes
     let exact = tokens.filter(t => !t.some(v => v.startsWith(':')))
@@ -53,7 +56,7 @@ module.exports = function fallback (req, res, next) {
       let path = current.join('/') + `${pathname.endsWith('/') ? '/' : ''}`
       return reg.test(path)
     })
-    let catchallMatch = catchallFound && apiType.startsWith('http') // Only supported by us in Arc 7 HTTP
+    let catchallMatch = catchallFound && httpAPI // Only supported by us in Arc 7 HTTP
 
     // Check to see if we're using the vendored proxy
     let findGetIndex = tuple => tuple[0].toLowerCase() === 'get' && tuple[1] === '/'
@@ -72,7 +75,13 @@ module.exports = function fallback (req, res, next) {
     if (match || invalid) {
       next()
     }
-    else if (nonGetRequestToRoot && apiType === 'rest') {
+    else if (proxy) {
+      let proxyServer = httpProxy.createProxyServer()
+      proxyServer.web(req, res, { target: proxy[1] }, err => {
+        if (err) res.end(err.message)
+      })
+    }
+    else if (nonGetRequestToRoot && !httpAPI) {
       // /{proxy+} captures all requests not specifically to root
       // However, $default captures all uncaptured requests, so this failure path only applies to REST APIs
       res.statusCode = 403

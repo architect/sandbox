@@ -7,7 +7,7 @@
 ### Added
 
 - Add support for `@http` catchall syntax (e.g. `get /api/*`)
-
+- Adds experimental support for `@proxy`
 
 ### Changed
 
