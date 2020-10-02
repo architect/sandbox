@@ -57,7 +57,7 @@ module.exports = function requestFormatter ({ method, route, req, $default }) {
   // Context, which now contains the HTTP method
   request.requestContext = {
     http: {
-      method: method.toUpperCase(),
+      method: req.method || method.toUpperCase(),
       path: rawPath
     },
     routeKey

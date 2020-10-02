@@ -5,6 +5,7 @@ let sandbox = require('../../../src')
 let { url, shutdown } = require('./_utils')
 
 let cwd = process.cwd()
+let data = { hi: 'there' }
 
 test('Set up env', t => {
   t.plan(1)
@@ -193,7 +194,6 @@ test('[REST mode / deprecated] get /no-return (noop)', t => {
 
 test('[REST mode / deprecated] post /post', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.post({
     url: url + '/post',
     data,
@@ -214,7 +214,6 @@ test('[REST mode / deprecated] post /post', t => {
 
 test('[REST mode / deprecated] put /put', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.put({
     url: url + '/put',
     data,
@@ -225,7 +224,7 @@ test('[REST mode / deprecated] put /put', t => {
       let { body, message, isBase64Encoded, version } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from put /put', 'Got correct handler response')
-      t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
+      t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded JSON-serialized body payload')
       t.notOk(isBase64Encoded, 'No isBase64Encoded flag')
     }
   })
@@ -233,7 +232,6 @@ test('[REST mode / deprecated] put /put', t => {
 
 test('[REST mode / deprecated] patch /patch', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.patch({
     url: url + '/patch',
     data,
@@ -244,7 +242,7 @@ test('[REST mode / deprecated] patch /patch', t => {
       let { body, message, isBase64Encoded, version } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from patch /patch', 'Got correct handler response')
-      t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
+      t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded JSON-serialized body payload')
       t.notOk(isBase64Encoded, 'No isBase64Encoded flag')
     }
   })
@@ -252,7 +250,6 @@ test('[REST mode / deprecated] patch /patch', t => {
 
 test('[REST mode / deprecated] delete /delete', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.del({
     url: url + '/delete',
     data,
@@ -263,7 +260,7 @@ test('[REST mode / deprecated] delete /delete', t => {
       let { body, message, isBase64Encoded, version } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from delete /delete', 'Got correct handler response')
-      t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded JSON-encoded body payload')
+      t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded JSON-serialized body payload')
       t.notOk(isBase64Encoded, 'No isBase64Encoded flag')
     }
   })
@@ -271,7 +268,6 @@ test('[REST mode / deprecated] delete /delete', t => {
 
 test('[REST mode / deprecated] post / - non-get calls to root should fail when route is not explicitly defined', t => {
   t.plan(2)
-  let data = { hi: 'there' }
   tiny.post({
     url,
     data,

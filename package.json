@@ -27,7 +27,7 @@
     "@architect/create": "~1.1.4-RC.0",
     "@architect/http-proxy": "~3.12.3",
     "@architect/hydrate": "~1.5.1-RC.0",
-    "@architect/parser": "~2.3.0-RC.0",
+    "@architect/parser": "~2.3.0-RC.2",
     "@architect/utils": "~1.5.12-RC.0",
     "@begin/hashid": "~1.0.0",
     "aws-sdk": "~2.644.0",
@@ -59,7 +59,7 @@
     "sinon": "^9.0.3",
     "tap-spec": "^5.0.0",
     "tape": "^5.0.1",
-    "tiny-json-http": "^7.2.2"
+    "tiny-json-http": "~7.3.0"
   },
   "eslintConfig": {
     "extends": "@architect/eslint-config"

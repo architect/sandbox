@@ -40,7 +40,7 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
   }
 
   let request = {
-    httpMethod: method,
+    httpMethod: req.method || method.toUpperCase(),
     path,
     resource,
     body: nullify(body),

@@ -12,6 +12,8 @@ function teardown () {
   delete process.env.DEPRECATED
 }
 
+let data = { hi: 'there' }
+
 test('Set up env', t => {
   t.plan(1)
   t.ok(responseValidator, 'Got responseValidator module')
@@ -28,7 +30,7 @@ test('Arc v6 control response (HTTP + Lambda 1.0 payload)', t => {
   let result = {
     statusCode: 200,
     body: 'hi',
-    headers: { hi: 'there' },
+    headers: data,
     multiValueHeaders: { hi: [ 'there', 'friend' ] },
     isBase64Encoded: true
   }
@@ -78,7 +80,7 @@ test('Arc v6 response validity (HTTP + Lambda 1.0 payload)', t => {
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
-  result = { body: { hi: 'there' } }
+  result = { body: data }
   check = responseValidator({ res, result }, true)
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
   t.ok(check.body.includes('body'), `Got relevant error message: ${check.body}`)
@@ -147,7 +149,7 @@ test('Arc v6 response validity (HTTP + Lambda 1.0 payload)', t => {
    * Invalid params are ignored
    */
   res = newRes()
-  result = { hi: 'there' }
+  result = data
   check = responseValidator({ res, result }, true)
   t.notOk(res.statusCode, `Invalid params are ignored, and do not set error statusCode: ${res.statusCode}`)
   t.ok(check.valid, `Valid response returned valid: ${check.valid}`)
@@ -167,7 +169,7 @@ test('Arc v6 control response (REST API mode)', t => {
   let result = {
     statusCode: 200,
     body: 'hi',
-    headers: { hi: 'there' },
+    headers: data,
     multiValueHeaders: { hi: [ 'there', 'friend' ] },
     isBase64Encoded: true
   }
@@ -217,7 +219,7 @@ test('Arc v6 response validity (REST API mode)', t => {
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
-  result = { body: { hi: 'there' } }
+  result = { body: data }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
   t.ok(check.body.includes('body'), `Got relevant error message: ${check.body}`)
@@ -285,7 +287,7 @@ test('Arc v6 response validity (REST API mode)', t => {
    * Invalid params
    */
   res = newRes()
-  result = { hi: 'there' }
+  result = data
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
   t.ok(check.body.includes('Invalid response parameter'), `Got relevant error message: ${check.body}`)
@@ -307,7 +309,7 @@ test('Arc v5 control response (REST API mode)', t => {
   let result = {
     statusCode: 200,
     body: 'hi',
-    headers: { hi: 'there' },
+    headers: data,
     multiValueHeaders: { hi: [ 'there', 'friend' ] },
     isBase64Encoded: true
   }
@@ -359,7 +361,7 @@ test('Arc v5 response validity (REST API mode)', t => {
 
   // These bodies are actually valid
   res = newRes()
-  result = { body: { hi: 'there' } }
+  result = { body: data }
   check = responseValidator({ res, result })
   t.notOk(res.statusCode, `Valid response did not set error statusCode: ${res.statusCode}`)
   t.ok(check.valid, `Valid response returned valid: ${check.valid}`)
@@ -425,7 +427,7 @@ test('Arc v5 response validity (REST API mode)', t => {
    * Invalid params are ignored
    */
   res = newRes()
-  result = { hi: 'there' }
+  result = data
   check = responseValidator({ res, result })
   t.notOk(res.statusCode, `Invalid params are ignored, and do not set error statusCode: ${res.statusCode}`)
   t.ok(check.valid, `Valid response returned valid: ${check.valid}`)

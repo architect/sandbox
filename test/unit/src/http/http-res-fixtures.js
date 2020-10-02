@@ -7,11 +7,14 @@ let b64enc = i => Buffer.from(i).toString('base64')
  * If you make changes to either, reflect it in the other(s)!
  */
 
+// Basic obj
+let data = { hi: 'there' }
+
 // Content examples
 let css = '.hi:before {content: "there";}'
 let html = '<span>hi there</span>'
 let js = `console.log('hi there')`
-let json = { hi: 'there' }
+let json = data
 let text = 'hi there'
 let xml = '<hi>there</hi>'
 
@@ -277,7 +280,7 @@ let arc = {
 
   // Set session
   session: {
-    session: { hi: 'there' }
+    session: data
   }
 }
 

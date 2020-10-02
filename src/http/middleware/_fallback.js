@@ -38,6 +38,13 @@ module.exports = function fallback (req, res, next) {
     let exact = tokens.filter(t => !t.some(v => v.startsWith(':')))
     let exactMatch = exact.some(t => t.join('') === current.join(''))
 
+    // Look for method type `any` on a matching route
+    let anyMethodMatch = routes.some(r => {
+      let method = r[0]
+      let path = r[1]
+      return method === 'any' && path === pathname
+    })
+
     // Look for any route parameter matches
     let params = tokens.filter(t => t.some(v => v.startsWith(':')))
     let paramMatch = params.filter(t => t.length === current.length).some(t => {
@@ -63,7 +70,7 @@ module.exports = function fallback (req, res, next) {
     let proxyAtRoot = (!arc.http) || (arc.http && !arc.http.some(findGetIndex))
 
     // Bail on exact, param, or catchall matches
-    let match = exactMatch || paramMatch || catchallMatch
+    let match = exactMatch || anyMethodMatch || paramMatch || catchallMatch
 
     // Arc v5 doesn't support implicit proxy at root, move along
     let invalid = proxyAtRoot && deprecated

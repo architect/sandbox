@@ -9,6 +9,8 @@ function newRes () {
   }
 }
 
+let data = { hi: 'there' }
+
 test('Set up env', t => {
   t.plan(1)
   t.ok(responseValidator, 'Got responseValidator module')
@@ -25,7 +27,7 @@ test('Arc v6 control response (HTTP)', t => {
   let result = {
     statusCode: 200,
     body: 'hi',
-    headers: { hi: 'there' },
+    headers: data,
     cookies: [ 'hi', 'there' ],
     isBase64Encoded: true
   }
@@ -76,7 +78,7 @@ test('Arc v6 response validity (HTTP)', t => {
   res = newRes()
   result = {
     statusCode: 200,
-    body: { hi: 'there' }
+    body: data
   }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)

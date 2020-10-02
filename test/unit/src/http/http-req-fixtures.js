@@ -37,6 +37,9 @@ let {
   multiValueHeaders: multiValueHeadersOctet
 } = makeHeaders({ 'content-type': 'application/octet-stream' })
 
+// Basic obj
+let data = { hi: 'there' }
+
 // Arc 7 HTTP
 let cookies = [ headers.cookie ]
 
@@ -388,7 +391,7 @@ let arc6 = {
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
-    body: b64enc(JSON.stringify({ hi: 'there' })),
+    body: b64enc(JSON.stringify(data)),
     isBase64Encoded: true
   },
 
@@ -444,7 +447,7 @@ let arc6 = {
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
-    body: b64enc(JSON.stringify({ hi: 'there' })),
+    body: b64enc(JSON.stringify(data)),
     isBase64Encoded: true
   },
 
@@ -458,7 +461,7 @@ let arc6 = {
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
-    body: b64enc(JSON.stringify({ hi: 'there' })),
+    body: b64enc(JSON.stringify(data)),
     isBase64Encoded: true
   },
 
@@ -472,7 +475,7 @@ let arc6 = {
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
-    body: b64enc(JSON.stringify({ hi: 'there' })),
+    body: b64enc(JSON.stringify(data)),
     isBase64Encoded: true
   }
 }
@@ -517,7 +520,7 @@ let arc5 = {
   // post /form
   //   accounts for both JSON and form URL-encoded bodies
   post: {
-    body: { hi: 'there' },
+    body: data,
     path: '/form',
     headers,
     method: 'POST',
@@ -542,7 +545,7 @@ let arc5 = {
 
   // put /form
   put: {
-    body: { hi: 'there' },
+    body: data,
     path: '/form',
     headers,
     method: 'PUT',
@@ -554,7 +557,7 @@ let arc5 = {
 
   // patch /form
   patch: {
-    body: { hi: 'there' },
+    body: data,
     path: '/form',
     headers,
     method: 'PATCH',
@@ -566,7 +569,7 @@ let arc5 = {
 
   // delete /form
   delete: {
-    body: { hi: 'there' },
+    body: data,
     path: '/form',
     headers,
     method: 'DELETE',

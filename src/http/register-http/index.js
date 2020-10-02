@@ -26,8 +26,17 @@ module.exports = function reg (app, api, type, routes) {
     // pretty print the route reg
     log({ method, route, path })
 
-    // reg the route with the Router instance
+    // Register the route with the Router instance
     let exec = invoker({ method, pathToFunction, route, apiType })
-    app[method](route, exec)
+    if (method !== 'any') {
+      app[method](route, exec)
+    }
+    // In the case of `any`, register all methods
+    else {
+      let methods = [ 'get', 'post', 'put', 'patch', 'head', 'delete', 'options' ]
+      for (let method of methods) {
+        app[method](route, exec)
+      }
+    }
   })
 }

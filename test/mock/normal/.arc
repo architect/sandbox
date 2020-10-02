@@ -26,6 +26,9 @@ post /post
 put /put
 patch /patch
 delete /delete
+head /head
+options /options
+any /any
 
 @tables
 accounts

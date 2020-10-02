@@ -6,6 +6,7 @@ let { url, shutdown } = require('./_utils')
 
 let cwd = process.cwd()
 let b64dec = i => Buffer.from(i, 'base64').toString()
+let data = { hi: 'there' }
 
 test('Set up env', t => {
   t.plan(1)
@@ -212,10 +213,9 @@ test('[HTTP mode] get /no-return (noop)', t => {
 // Write (POST, PUT, etc.) tests exercise HTTP API mode's implicit JSON passthrough
 test('[HTTP mode] post /post (plain JSON)', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.post({
     url: url + '/post',
-    data
+    data,
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
@@ -231,7 +231,6 @@ test('[HTTP mode] post /post (plain JSON)', t => {
 
 test('[HTTP mode] post /post (flavored JSON)', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.post({
     url: url + '/post',
     data,
@@ -251,7 +250,6 @@ test('[HTTP mode] post /post (flavored JSON)', t => {
 
 test('[HTTP mode] put /put', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.put({
     url: url + '/put',
     data,
@@ -271,7 +269,6 @@ test('[HTTP mode] put /put', t => {
 
 test('[HTTP mode] patch /patch', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.patch({
     url: url + '/patch',
     data,
@@ -290,10 +287,9 @@ test('[HTTP mode] patch /patch', t => {
 
 test('[HTTP mode] delete /delete', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.del({
     url: url + '/delete',
-    data
+    data,
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
@@ -307,9 +303,170 @@ test('[HTTP mode] delete /delete', t => {
   })
 })
 
+test('[HTTP mode] head /head', t => {
+  t.plan(3)
+  tiny.head({
+    url: url + '/head'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'headed /head')
+      let { message, version } = JSON.parse(result.headers.body)
+      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.equal(message, 'Hello from head /head', 'Got correct handler response')
+    }
+  })
+})
+
+test('[HTTP mode] options /options', t => {
+  t.plan(3)
+  tiny.options({
+    url: url + '/options'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'optioned /options')
+      let { message, version } = result.body
+      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.equal(message, 'Hello from options /options', 'Got correct handler response')
+    }
+  })
+})
+
+test('[HTTP mode] get /any', t => {
+  t.plan(5)
+  tiny.get({
+    url: url + '/any',
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'got /any')
+      let { message, version, routeKey, requestContext } = result.body
+      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.equal(routeKey, 'ANY /any', 'Got correct routeKey')
+      t.equal(requestContext.http.method, 'GET', 'Got correct method')
+      t.equal(message, 'Hello from any /any', 'Got correct handler response')
+    }
+  })
+})
+
+test('[HTTP mode] post /any', t => {
+  t.plan(7)
+  tiny.post({
+    url: url + '/any',
+    data,
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'posted /any')
+      let { body, message, isBase64Encoded, version, routeKey, requestContext } = result.body
+      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.equal(routeKey, 'ANY /any', 'Got correct routeKey')
+      t.equal(requestContext.http.method, 'POST', 'Got correct method')
+      t.equal(message, 'Hello from any /any', 'Got correct handler response')
+      t.equal(b64dec(body), 'hi=there', 'Got base64-encoded form URL-encoded body payload')
+      t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
+    }
+  })
+})
+
+test('[HTTP mode] put /any', t => {
+  t.plan(7)
+  tiny.put({
+    url: url + '/any',
+    data,
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'put /any')
+      let { body, message, isBase64Encoded, version, routeKey, requestContext } = result.body
+      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.equal(routeKey, 'ANY /any', 'Got correct routeKey')
+      t.equal(requestContext.http.method, 'PUT', 'Got correct method')
+      t.equal(message, 'Hello from any /any', 'Got correct handler response')
+      t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
+      t.equal(isBase64Encoded, false, 'Got isBase64Encoded flag')
+    }
+  })
+})
+
+test('[HTTP mode] patch /any', t => {
+  t.plan(7)
+  tiny.patch({
+    url: url + '/any',
+    data,
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'patched /any')
+      let { body, message, isBase64Encoded, version, routeKey, requestContext } = result.body
+      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.equal(routeKey, 'ANY /any', 'Got correct routeKey')
+      t.equal(requestContext.http.method, 'PATCH', 'Got correct method')
+      t.equal(message, 'Hello from any /any', 'Got correct handler response')
+      t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
+      t.equal(isBase64Encoded, false, 'Got isBase64Encoded flag')
+    }
+  })
+})
+
+test('[HTTP mode] delete /any', t => {
+  t.plan(7)
+  tiny.del({
+    url: url + '/any',
+    data,
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'deleted /any')
+      let { body, message, isBase64Encoded, version, routeKey, requestContext } = result.body
+      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.equal(routeKey, 'ANY /any', 'Got correct routeKey')
+      t.equal(requestContext.http.method, 'DELETE', 'Got correct method')
+      t.equal(message, 'Hello from any /any', 'Got correct handler response')
+      t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
+      t.equal(isBase64Encoded, false, 'Got isBase64Encoded flag')
+    }
+  })
+})
+
+test('[HTTP mode] head /any', t => {
+  t.plan(5)
+  tiny.head({
+    url: url + '/any',
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'headed /any')
+      let { message, version, routeKey, requestContext } = JSON.parse(result.headers.body)
+      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.equal(routeKey, 'ANY /any', 'Got correct routeKey')
+      t.equal(requestContext.http.method, 'HEAD', 'Got correct method')
+      t.equal(message, 'Hello from any /any', 'Got correct handler response')
+    }
+  })
+})
+
+test('[HTTP mode] options /any', t => {
+  t.plan(5)
+  tiny.options({
+    url: url + '/any',
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'optioned /any')
+      let { message, version, routeKey, requestContext } = result.body
+      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.equal(routeKey, 'ANY /any', 'Got correct routeKey')
+      t.equal(requestContext.http.method, 'OPTIONS', 'Got correct method')
+      t.equal(message, 'Hello from any /any', 'Got correct handler response')
+    }
+  })
+})
+
 test('[HTTP mode] post / – non-get calls to root should hit $default when route is not explicitly defined', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.post({
     url,
     data,
