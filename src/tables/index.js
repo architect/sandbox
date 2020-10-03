@@ -34,6 +34,8 @@ module.exports = function createTables () {
         function _checkPort (callback) {
           if (!hasExternalDb) {
             checkPort(tablesPort, callback)
+          } else {
+            callback()
           }
         },
 
