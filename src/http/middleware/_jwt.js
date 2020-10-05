@@ -9,6 +9,10 @@ module.exports = function (arc) {
 			if (req.headers.authorization) {
 				const tokenValues = jsonwebtoken.decode(req.headers.authorization.split(' ')[1]);
 				req.authorizer = { jwt: { claims: tokenValues } }
+			} else {
+				res.writeHead(401)
+				res.end('{"message":"Unauthorized"}')
+				return
 			}
 		}
 		next()
