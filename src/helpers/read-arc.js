@@ -24,8 +24,10 @@ data
  */
 module.exports = function arcfile () {
   let update = updater('Sandbox')
-  let { arc, filepath, errors } = read()
 
+  // TODO
+  // I need to update the architect/parser package but to do that we need to decide a format to add an authorizer to a route
+  let { arc, filepath, errors } = read()
   // if (errors) {
   //   console.log(errors)
   //   update.error(errors)
