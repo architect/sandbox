@@ -31,6 +31,6 @@ module.exports = function loadMiddleware (app, arc) {
   // Special CORS handling
   app.use(cors)
 
-  app.use(jwt(arc));
+  app.use(jwt(arc))
   return app
 }

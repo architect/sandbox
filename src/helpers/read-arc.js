@@ -28,11 +28,11 @@ module.exports = function arcfile () {
   // TODO
   // I need to update the architect/parser package but to do that we need to decide a format to add an authorizer to a route
   let { arc, filepath, errors } = read()
-  // if (errors) {
-  //   console.log(errors)
-  //   update.error(errors)
-  //   process.exit(1)
-  // }
+  if (errors) {
+    console.log(errors)
+    update.error(errors)
+    process.exit(1)
+  }
   if (filepath === false) {
     arc = parser(lexer(defaultArc))
   }
