@@ -31,7 +31,7 @@ module.exports = function createHttpServer () {
   if (arc5 || arc6) {
     let app = Router({ mergeParams: true })
 
-    app = middleware(app)
+    app = middleware(app, arc)
 
     // Keep a reference up here for fns below
     let httpServer
