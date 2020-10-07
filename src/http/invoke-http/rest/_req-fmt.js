@@ -60,5 +60,8 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
   // HTTP API + Lambda v1.0 payload
   if (httpApi) request.version = '1.0'
 
+  // TODO mock this
+  request.requestContext = {}
+
   return request
 }

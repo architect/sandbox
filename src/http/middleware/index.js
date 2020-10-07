@@ -24,7 +24,7 @@ module.exports = function loadMiddleware (app) {
   // Direct static asset delivery via /_static
   app.use(_static)
 
-  // REST `/{proxy+}` & HTTP `$default` greedy catch-alls
+  // Route fallthrough to @proxy + ASAP
   app.use(fallback)
 
   // Special CORS handling

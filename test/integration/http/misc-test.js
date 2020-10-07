@@ -25,18 +25,18 @@ test('[Misc] Start Sandbox', t => {
   })
 })
 
-test('[Catchall] get /path (non-matching)', t => {
+test('[Catchall] get /path - calls without trailing /* should fall through (and in this case fail)', t => {
   t.plan(2)
   let path = '/path'
   tiny.get({
     url: url + path
   }, function _got (err, result) {
-    if (err) t.fail(err)
-    else {
-      let { message, rawPath } = result.body
-      t.equal(rawPath, path, `got ${rawPath}`)
-      t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
+    if (err) {
+      let message = '@http get /path'
+      t.equal(err.statusCode, 403, 'Errors with 403')
+      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
     }
+    else t.fail(result)
   })
 })
 

@@ -126,6 +126,7 @@ let arc7 = {
   },
 
   // get /$default
+  // Deprecated in Arc 8, but possibly added via Macro
   get$default: {
     version: '2.0',
     routeKey: '$default',

@@ -465,21 +465,18 @@ test('[HTTP mode] options /any', t => {
   })
 })
 
-test('[HTTP mode] post / – non-get calls to root should hit $default when route is not explicitly defined', t => {
-  t.plan(5)
+test('[HTTP mode] post / - non-get calls to root should fail when route is not explicitly defined', t => {
+  t.plan(2)
   tiny.post({
     url,
     data,
   }, function _got (err, result) {
-    if (err) t.fail(err)
-    else {
-      t.ok(result, 'posted /')
-      let { body, message, isBase64Encoded, version } = result.body
-      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
-      t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
-      t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
-      t.equal(isBase64Encoded, false, 'Got isBase64Encoded flag')
+    if (err) {
+      let message = '@http post /'
+      t.equal(err.statusCode, 403, 'Errors with 403')
+      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
     }
+    else t.fail(result)
   })
 })
 

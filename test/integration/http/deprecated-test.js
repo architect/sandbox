@@ -307,7 +307,7 @@ test('[REST mode / deprecated] get / without defining get / should fail if index
   tiny.get({
     url
   }, function _got (err, result) {
-    if (err) t.equal(err.statusCode, 404, 'Got 404 for missing file')
+    if (err) t.equal(err.statusCode, 403, 'Got 403 for missing file')
     else t.fail(result)
   })
 })
@@ -338,7 +338,7 @@ test('[REST mode / deprecated] get / without defining get / should fail if index
   tiny.get({
     url
   }, function _got (err, result) {
-    if (err) t.equal(err.statusCode, 404, 'Got 404 for missing file')
+    if (err) t.equal(err.statusCode, 403, 'Got 403 for missing file')
     else t.fail(result)
   })
 })

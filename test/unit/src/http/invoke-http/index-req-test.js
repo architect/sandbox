@@ -157,25 +157,6 @@ test('Architect v7 (HTTP API mode): get /nature/hiking', t => {
   checkArcV7HttpResult(mock, req, t)
 })
 
-test('Architect v7 (HTTP API mode): get /$default', t => {
-  let mock = arc7.get$default
-  t.plan(httpParams.length)
-  let method = 'GET'
-  let $default = true // Unlike normal requests, fallbacks to $default don't include a route
-  let apiType = 'http'
-  let handler = invoke({ method, apiType, $default })
-  let input = {
-    url: url('/nature/hiking'),
-    body: {},
-    headers,
-    params: {}
-  }
-  handler(input, response)
-  // Compare handler-generated request to mock
-  let req = lambdaStub.args[0][1]
-  checkArcV7HttpResult(mock, req, t)
-})
-
 test('Architect v7 (HTTP API mode): get /path/* (/path/hi/there)', t => {
   let mock = arc7.getCatchall
   t.plan(httpParams.length)

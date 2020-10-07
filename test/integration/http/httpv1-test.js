@@ -436,19 +436,18 @@ test('[HTTP v1.0 (REST) mode] options /any', t => {
   })
 })
 
-test('[HTTP v1.0 (REST) mode] post / - non-get calls to root should hit $default when route is not explicitly defined', t => {
-  t.plan(3)
+test('[HTTP v1.0 (REST) mode] post / - non-get calls to root should fail when route is not explicitly defined', t => {
+  t.plan(2)
   tiny.post({
     url,
     data,
   }, function _got (err, result) {
-    if (err) t.fail(err)
-    else {
-      t.ok(result, 'posted /')
-      let { message, version } = result.body
-      t.equal(version, '1.0', 'Got Lambda v1.0 payload')
-      t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
+    if (err) {
+      let message = '@http post /'
+      t.equal(err.statusCode, 403, 'Errors with 403')
+      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
     }
+    else t.fail(result)
   })
 })
 
