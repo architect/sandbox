@@ -136,10 +136,6 @@ module.exports = function _start (params, callback) {
       if (verbose && process.env.ARC_AWS_CREDS === 'dummy') {
         update.warn('Missing or invalid AWS credentials or credentials file, using dummy credentials (this is probably ok)')
       }
-      let apiType = process.env.ARC_API_TYPE
-      if (apiType && apiType === 'http' || apiType === 'httpv2') {
-        update.warn('Sandbox is emulating an API Gateway v2 (HTTP) API. If this is an existing project with an API Gateway v1 (REST) API, please restart Sandbox with ARC_API_TYPE=rest')
-      }
       callback(null, 'Sandbox successfully started')
     }
   })

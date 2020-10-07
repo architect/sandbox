@@ -13,6 +13,7 @@ module.exports = function createTables () {
   let { arc } = readArc()
 
   if (arc.tables) {
+    let hasExternalDb = process.env.ARC_DB_EXTERNAL
     let tables = {}
     let dynamo
 
@@ -31,7 +32,10 @@ module.exports = function createTables () {
 
         // Ensure the port is free
         function _checkPort (callback) {
-          checkPort(tablesPort, callback)
+          if (!hasExternalDb) {
+            checkPort(tablesPort, callback)
+          }
+          else callback()
         },
 
         // Print the banner (which also loads AWS env vars / creds necessary for Dynamo)
@@ -44,7 +48,6 @@ module.exports = function createTables () {
         },
 
         function _startDynalite (callback) {
-          let hasExternalDb = process.env.ARC_DB_EXTERNAL
           if (!hasExternalDb) {
             dynamo = dynalite({ createTableMs: 0 }).listen(tablesPort, callback)
           }

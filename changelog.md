@@ -20,6 +20,19 @@
 
 ---
 
+## [2.0.2 - 2.0.3] 2020-10-06
+
+### Changed
+
+- Removed startup notice regarding Sandbox defaulting to `HTTP` API emulation mode
+
+
+### Fixed
+
+- Fixed regression when using a non-Sandbox DynamoDB instance via the `ARC_DB_EXTERNAL` env var, thanks @herschel666 & @m-butler!
+
+---
+
 ## [2.0.1] 2020-09-29
 
 ### Changed
