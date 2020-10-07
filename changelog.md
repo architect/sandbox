@@ -2,6 +2,14 @@
 
 ---
 
+## [2.0.2] 2020-10-06
+
+### Fixed
+
+- Fixed regression when using a non-Sandbox DynamoDB instance via the `ARC_DB_EXTERNAL` env var, thanks @herschel666 & @m-butler!
+
+---
+
 ## [2.0.1] 2020-09-29
 
 ### Changed
