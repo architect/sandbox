@@ -2,7 +2,12 @@
 
 ---
 
-## [2.0.2] 2020-10-06
+## [2.0.2 - 2.0.3] 2020-10-06
+
+### Changed
+
+- Removed startup notice regarding Sandbox defaulting to `HTTP` API emulation mode
+
 
 ### Fixed
 
