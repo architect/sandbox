@@ -29,6 +29,8 @@ delete /delete
 head /head
 options /options
 any /any
+any /any-c/*
+any /any-p/:param
 
 @tables
 accounts

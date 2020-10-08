@@ -266,7 +266,7 @@ test('[REST mode / deprecated] delete /delete', t => {
   })
 })
 
-test('[REST mode / deprecated] post / - non-get calls to root should fail when route is not explicitly defined', t => {
+test('[REST mode / deprecated] post / - route should fail when not explicitly defined', t => {
   t.plan(2)
   tiny.post({
     url,

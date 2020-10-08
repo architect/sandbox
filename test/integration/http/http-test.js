@@ -465,7 +465,41 @@ test('[HTTP mode] options /any', t => {
   })
 })
 
-test('[HTTP mode] post / - non-get calls to root should fail when route is not explicitly defined', t => {
+test('[HTTP mode] get /any-c/*', t => {
+  t.plan(5)
+  tiny.get({
+    url: url + '/any-c/hello/there',
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'got /any-c/hello/there')
+      let { message, version, routeKey, requestContext } = result.body
+      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.equal(routeKey, 'ANY /any-c/{proxy+}', 'Got correct routeKey')
+      t.equal(requestContext.http.method, 'GET', 'Got correct method')
+      t.equal(message, 'Hello from any /any-c/*', 'Got correct handler response')
+    }
+  })
+})
+
+test('[HTTP mode] get /any-p/:param', t => {
+  t.plan(5)
+  tiny.get({
+    url: url + '/any-p/hello',
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'got /any-p/hello')
+      let { message, version, routeKey, requestContext } = result.body
+      t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+      t.equal(routeKey, 'ANY /any-p/{param}', 'Got correct routeKey')
+      t.equal(requestContext.http.method, 'GET', 'Got correct method')
+      t.equal(message, 'Hello from any /any-p/:param', 'Got correct handler response')
+    }
+  })
+})
+
+test('[HTTP mode] post / - route should fail when not explicitly defined', t => {
   t.plan(2)
   tiny.post({
     url,

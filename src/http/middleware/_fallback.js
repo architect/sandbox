@@ -48,8 +48,12 @@ module.exports = function fallback (req, res, next) {
 
   // Look for any route parameter matches
   let params = tokens.filter(t => t.some(v => v.startsWith(':')))
-  let paramMatch = params.filter(t => t.length === current.length).some(t => {
-    // turn :foo tokens into (\S+) regexp
+  let paramMatch = params.filter(t => t.length === current.length).some(p => {
+    // Make a copy because we may mutate
+    let t = [ ...p ]
+    // Capture 'any' routes
+    if (t[0] === 'any') t[0] = method
+    // Turn :foo tokens into (\S+) regexp
     let exp = t.map(p => p.startsWith(':') ? '(\\S+)' : p).join('/')
     let reg = new RegExp(exp)
     return reg.test(current.join('/'))
@@ -57,7 +61,11 @@ module.exports = function fallback (req, res, next) {
 
   // Look for a catchall matches
   let catchall = tokens.filter(t => t.some(v => v === '*'))
-  let catchallFound = catchall.some(t => {
+  let catchallFound = catchall.some(p => {
+    // Make a copy because we may mutate
+    let t = [ ...p ]
+    // Capture 'any' routes
+    if (t[0] === 'any') t[0] = method
     let exp = t.map(p => p === '*' ? '.*' : p).join('/')
     let reg = new RegExp(exp)
     // Ensure trailing slashes match the root of the catchall
