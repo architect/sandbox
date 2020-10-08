@@ -10,7 +10,7 @@
 - Added support for `@http` `any` method syntax (e.g. `any /path`)
 - Added support for `@http` `head` + `options` methods
 - Added experimental support for `@proxy`
-
+- Added basic `requestContext` to `REST` API requests
 
 ### Changed
 
