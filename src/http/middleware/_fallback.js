@@ -44,15 +44,15 @@ module.exports = function fallback (req, res, next) {
     let path = r[1]
     return method === 'any' && path === pathname
   })
-  let anyMethodMatch = anyMethodFound && httpAPI // Only supported by us in Arc 7 HTTP
+  let anyMethodMatch = anyMethodFound && httpAPI // Only implemented in Arc 8 HTTP
 
   // Look for any route parameter matches
   let params = tokens.filter(t => t.some(v => v.startsWith(':')))
   let paramMatch = params.filter(t => t.length === current.length).some(p => {
     // Make a copy because we may mutate
     let t = [ ...p ]
-    // Capture 'any' routes
-    if (t[0] === 'any') t[0] = method
+    // Capture 'any' routes (but only in HTTP APIs)
+    if (t[0] === 'any' && httpAPI) t[0] = method
     // Turn :foo tokens into (\S+) regexp
     let exp = t.map(p => p.startsWith(':') ? '(\\S+)' : p).join('/')
     let reg = new RegExp(exp)
@@ -64,23 +64,28 @@ module.exports = function fallback (req, res, next) {
   let catchallFound = catchall.some(p => {
     // Make a copy because we may mutate
     let t = [ ...p ]
-    // Capture 'any' routes
-    if (t[0] === 'any') t[0] = method
+    // Capture 'any' routes (but only in HTTP APIs)
+    if (t[0] === 'any' && httpAPI) t[0] = method
     let exp = t.map(p => p === '*' ? '.*' : p).join('/')
     let reg = new RegExp(exp)
     // Ensure trailing slashes match the root of the catchall
     let path = current.join('/') + `${pathname.endsWith('/') ? '/' : ''}`
     return reg.test(path)
   })
-  let catchallMatch = catchallFound && httpAPI // Only supported by us in Arc 7 HTTP
+  let catchallMatch = catchallFound && httpAPI // Only implemented in Arc 8 HTTP
 
   // Check to see if we're using ASAP
   let findRoot = r => {
     let method = r[0].toLowerCase()
     let path = r[1]
-    let isRootMethod = method === 'get' || method === 'any'
+    let rootParam = path.startsWith('/:') && path.split('/:').length === 2
+    let isRootMethod = httpAPI
+      ? method === 'get' || method === 'any'
+      : method === 'get'
     // Literal root, root catchall, or root params should cancel out ASAP
-    let isRootPath = path === '/' || path === '/*' || path.startsWith('/:')
+    let isRootPath = httpAPI
+      ? path === '/' || path === '/*' || rootParam
+      : path === '/'
     return isRootMethod && isRootPath
   }
   let hasRoot = arc.http && arc.http.some(findRoot)

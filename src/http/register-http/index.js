@@ -23,19 +23,33 @@ module.exports = function reg (app, api, type, routes) {
     let path = name(route)
     let pathToFunction = join(process.cwd(), 'src', type, `${method}${path}`)
 
-    // pretty print the route reg
-    log({ method, route, path })
-
-    // Register the route with the Router instance
-    let exec = invoker({ method, pathToFunction, route, apiType })
-    if (method !== 'any') {
-      app[method](route, exec)
-    }
-    // In the case of `any`, register all methods
-    else {
-      let methods = [ 'get', 'post', 'put', 'patch', 'head', 'delete', 'options' ]
-      for (let method of methods) {
+    // Methods not implemented by Arc for legacy REST APIs
+    if (deprecated || apiType === 'rest') {
+      let httpOnly = [ 'any', 'head', 'options' ]
+      let hasCatchall = route.includes('*')
+      if (!httpOnly.some(h => h === method) && !hasCatchall) {
+        // Pretty print the route reg
+        log({ method, route, path })
+        // Register the route with the Router instance
+        let exec = invoker({ method, pathToFunction, route, apiType })
         app[method](route, exec)
+      }
+    }
+    else {
+      // Pretty print the route reg
+      log({ method, route, path })
+
+      // Register the route with the Router instance
+      let exec = invoker({ method, pathToFunction, route, apiType })
+      if (method !== 'any') {
+        app[method](route, exec)
+      }
+      // In the case of `any`, register all methods
+      else {
+        let methods = [ 'get', 'post', 'put', 'patch', 'head', 'delete', 'options' ]
+        for (let method of methods) {
+          app[method](route, exec)
+        }
       }
     }
   })
