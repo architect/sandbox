@@ -57,7 +57,7 @@ test('WebSocket connect / disconnect event: get /', t => {
   t.plan(4)
   let action = 'src/ws/connect' // not a real action
   let connectionId = 'much-unique-uuid'
-  let request = arc6.rest.getIndex
+  let request = arc6.getIndex
   request.url = 'localhost'
   let params = {
     action,
@@ -78,7 +78,7 @@ test('WebSocket connect / disconnect event: get /?whats=up', t => {
   t.plan(4)
   let action = 'src/ws/connect' // not a real action
   let connectionId = 'much-unique-uuid'
-  let request = arc6.rest.getIndex // gonna have to manually add query string
+  let request = arc6.getIndex // gonna have to manually add query string
   request.url = 'localhost/?whats=up'
   let params = {
     action,

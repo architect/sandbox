@@ -18,9 +18,9 @@ let { errors, invalid } = require('./utils/validate')
  * Formats and validates HTTP request and response event objects
  */
 module.exports = function invokeHTTP (params) {
-  let { verb, pathToFunction, route, apiType, $default } = params
+  let { method, pathToFunction, route, apiType } = params
 
-  verb = verb.toUpperCase()
+  method = method.toUpperCase()
   let deprecated = process.env.DEPRECATED
   let restApi = apiType === 'rest'
   let httpApiV1 = apiType === 'httpv1'
@@ -28,13 +28,13 @@ module.exports = function invokeHTTP (params) {
   return function respond (req, res) {
     let request
     if (deprecated) {
-      request = requestFormatterDeprecated({ verb, req })
+      request = requestFormatterDeprecated({ method, req })
     }
     else if (httpApiV1 || restApi) {
-      request = requestFormatterRest({ verb, route, req }, httpApiV1)
+      request = requestFormatterRest({ method, route, req }, httpApiV1)
     }
     else {
-      request = requestFormatterHttp({ verb, route, req, $default })
+      request = requestFormatterHttp({ method, route, req })
     }
 
     // Run the Lambda sig locally

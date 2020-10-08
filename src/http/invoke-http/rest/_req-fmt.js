@@ -6,7 +6,7 @@ let headerFormatter = require('./_req-header-fmt')
  * - Mocks request object shape from API Gateway <> Lambda proxy integration
  * - HTTP APIs can emulate these REST API request payloads with the Lambda 1.0 payload, but AWS didn't make it an exact match because reasons
  */
-module.exports = function requestFormatter ({ verb, route, req }, httpApi) {
+module.exports = function requestFormatter ({ method, route, req }, httpApi) {
   let { body, params, url } = req
   let path = URL.parse(url).pathname
   let query = {}
@@ -39,8 +39,13 @@ module.exports = function requestFormatter ({ verb, route, req }, httpApi) {
       .join('/')
   }
 
+  // Pass through resource param, importantly: '/' or '/{proxy+}'
+  if (req.resource) resource = req.resource
+
+  let httpMethod = req.method || method.toUpperCase()
+
   let request = {
-    httpMethod: verb,
+    httpMethod,
     path,
     resource,
     body: nullify(body),
@@ -54,11 +59,15 @@ module.exports = function requestFormatter ({ verb, route, req }, httpApi) {
   // Base64 encoding status set by binary handler middleware
   request.isBase64Encoded = !!(req.isBase64Encoded)
 
-  // Pass through resource param, importantly: '/' or '/{proxy+}'
-  if (req.resource) request.resource = req.resource
-
   // HTTP API + Lambda v1.0 payload
   if (httpApi) request.version = '1.0'
+
+  // Context
+  request.requestContext = {
+    httpMethod,
+    path,
+    resourcePath: resource
+  }
 
   return request
 }

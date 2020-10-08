@@ -5,16 +5,25 @@ let headerFormatter = require('./_req-header-fmt')
  * Arc 6+ HTTP + Lambda v2.0 request formatter
  * - Mocks request object shape from API Gateway <> Lambda proxy integration
  */
-module.exports = function requestFormatter ({ verb, route, req, $default }) {
+module.exports = function requestFormatter ({ method, route, req }) {
   let { body, params, url } = req
   let { pathname: rawPath, query } = URL.parse(url)
 
   // Maybe de-interpolate path into resource
   let resource = route ? route : '/'
+  // Handle route params
   if (route && route.includes(':')) {
     resource = route.split('/')
       .map(part => part.startsWith(':')
         ? `{${part.replace(':', '')}}`
+        : part)
+      .join('/')
+  }
+  // Handle catchalls
+  if (route && route.includes('*')) {
+    resource = route.split('/')
+      .map(part => part === '*'
+        ? `{proxy+}`
         : part)
       .join('/')
   }
@@ -25,7 +34,7 @@ module.exports = function requestFormatter ({ verb, route, req, $default }) {
   }
 
   // Path things
-  let routeKey = $default ? '$default' : `${verb.toUpperCase()} ${resource}`
+  let routeKey = `${method.toUpperCase()} ${resource}`
   request.routeKey = routeKey
   request.rawPath = rawPath
 
@@ -48,7 +57,7 @@ module.exports = function requestFormatter ({ verb, route, req, $default }) {
   // Context, which now contains the HTTP method
   request.requestContext = {
     http: {
-      method: verb.toUpperCase(),
+      method: req.method || method.toUpperCase(),
       path: rawPath
     },
     routeKey
@@ -56,7 +65,9 @@ module.exports = function requestFormatter ({ verb, route, req, $default }) {
 
   // Path parameters
   if (Object.keys(params).length) {
-    request.pathParameters = params
+    request.pathParameters = route && route.endsWith('/*')
+      ? { proxy: params['0'] }
+      : params
   }
 
   // Body

@@ -37,7 +37,10 @@ let {
   multiValueHeaders: multiValueHeadersOctet
 } = makeHeaders({ 'content-type': 'application/octet-stream' })
 
-// Arc 6 HTTP
+// Basic obj
+let data = { hi: 'there' }
+
+// Arc 7 HTTP
 let cookies = [ headers.cookie ]
 
 /**
@@ -46,9 +49,7 @@ let cookies = [ headers.cookie ]
  * - [Architect Sandbox](test/unit/src/http/http-req-fixtures.js)
  * If you make changes to either, reflect it in the other(s)!
  */
-let arc6 = {}
-
-arc6.http = {
+let arc7 = {
   // get /
   getIndex: {
     version: '2.0',
@@ -125,6 +126,7 @@ arc6.http = {
   },
 
   // get /$default
+  // Deprecated in Arc 8, but possibly added via Macro
   get$default: {
     version: '2.0',
     routeKey: '$default',
@@ -139,6 +141,25 @@ arc6.http = {
       },
       routeKey: '$default',
     },
+    isBase64Encoded: false
+  },
+
+  // get /path/* (/path/hi/there)
+  getCatchall: {
+    version: '2.0',
+    routeKey: 'GET /path/{proxy+}',
+    rawPath: '/path/hi/there',
+    rawQueryString: '',
+    cookies,
+    headers,
+    requestContext: {
+      http: {
+        method: 'GET',
+        path: '/path/hi/there',
+      },
+      routeKey: 'GET /path/{proxy+}'
+    },
+    pathParameters: { proxy: 'hi/there' },
     isBase64Encoded: false
   },
 
@@ -276,7 +297,7 @@ arc6.http = {
   }
 }
 
-arc6.rest = {
+let arc6 = {
   // get /
   getIndex: {
     resource: '/',
@@ -289,6 +310,11 @@ arc6.rest = {
     pathParameters: null,
     body: null,
     isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/',
+      resourcePath: '/',
+    },
   },
 
   // get /?whats=up
@@ -303,6 +329,11 @@ arc6.rest = {
     pathParameters: null,
     body: null,
     isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/',
+      resourcePath: '/',
+    },
   },
 
   // get /?whats=up&whats=there
@@ -317,6 +348,11 @@ arc6.rest = {
     pathParameters: null,
     body: null,
     isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/',
+      resourcePath: '/',
+    },
   },
 
   // get /nature/hiking
@@ -331,6 +367,11 @@ arc6.rest = {
     pathParameters: { activities: 'hiking' },
     body: null,
     isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/nature/hiking',
+      resourcePath: '/nature/{activities}',
+    },
   },
 
   // get /{proxy+}
@@ -345,6 +386,30 @@ arc6.rest = {
     pathParameters: { proxy: '/nature/hiking' },
     body: null,
     isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/nature/hiking',
+      resourcePath: '/{proxy+}',
+    },
+  },
+
+  // get /path/* (/path/hi/there)
+  getCatchall: {
+    resource: '/path/{proxy+}',
+    path: '/path/hi/there',
+    httpMethod: 'GET',
+    headers,
+    multiValueHeaders,
+    queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: { proxy: 'hi/there' },
+    body: null,
+    isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/path/hi/there',
+      resourcePath: '/path/{proxy+}',
+    },
   },
 
   // post /form (JSON)
@@ -357,8 +422,13 @@ arc6.rest = {
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
-    body: b64enc(JSON.stringify({ hi: 'there' })),
-    isBase64Encoded: true
+    body: b64enc(JSON.stringify(data)),
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'POST',
+      path: '/form',
+      resourcePath: '/form',
+    },
   },
 
   // post /form (form URL encoded)
@@ -372,7 +442,12 @@ arc6.rest = {
     multiValueQueryStringParameters: null,
     pathParameters: null,
     body: b64enc('hi=there'),
-    isBase64Encoded: true
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'POST',
+      path: '/form',
+      resourcePath: '/form',
+    },
   },
 
   // post /form (multipart form data)
@@ -386,7 +461,12 @@ arc6.rest = {
     multiValueQueryStringParameters: null,
     pathParameters: null,
     body: b64enc('hi there'), // not a valid multipart form data payload but that's for userland validation
-    isBase64Encoded: true
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'POST',
+      path: '/form',
+      resourcePath: '/form',
+    },
   },
 
   // post /form (octet stream)
@@ -400,7 +480,12 @@ arc6.rest = {
     multiValueQueryStringParameters: null,
     pathParameters: null,
     body: b64enc('hi there\n'),
-    isBase64Encoded: true
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'POST',
+      path: '/form',
+      resourcePath: '/form',
+    },
   },
 
   // put /form (JSON)
@@ -413,8 +498,13 @@ arc6.rest = {
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
-    body: b64enc(JSON.stringify({ hi: 'there' })),
-    isBase64Encoded: true
+    body: b64enc(JSON.stringify(data)),
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'PUT',
+      path: '/form',
+      resourcePath: '/form',
+    },
   },
 
   // patch /form (JSON)
@@ -427,8 +517,13 @@ arc6.rest = {
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
-    body: b64enc(JSON.stringify({ hi: 'there' })),
-    isBase64Encoded: true
+    body: b64enc(JSON.stringify(data)),
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'PATCH',
+      path: '/form',
+      resourcePath: '/form',
+    },
   },
 
   // delete /form (JSON)
@@ -441,8 +536,13 @@ arc6.rest = {
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
     pathParameters: null,
-    body: b64enc(JSON.stringify({ hi: 'there' })),
-    isBase64Encoded: true
+    body: b64enc(JSON.stringify(data)),
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'DELETE',
+      path: '/form',
+      resourcePath: '/form',
+    },
   }
 }
 
@@ -486,7 +586,7 @@ let arc5 = {
   // post /form
   //   accounts for both JSON and form URL-encoded bodies
   post: {
-    body: { hi: 'there' },
+    body: data,
     path: '/form',
     headers,
     method: 'POST',
@@ -511,7 +611,7 @@ let arc5 = {
 
   // put /form
   put: {
-    body: { hi: 'there' },
+    body: data,
     path: '/form',
     headers,
     method: 'PUT',
@@ -523,7 +623,7 @@ let arc5 = {
 
   // patch /form
   patch: {
-    body: { hi: 'there' },
+    body: data,
     path: '/form',
     headers,
     method: 'PATCH',
@@ -535,7 +635,7 @@ let arc5 = {
 
   // delete /form
   delete: {
-    body: { hi: 'there' },
+    body: data,
     path: '/form',
     headers,
     method: 'DELETE',
@@ -547,6 +647,7 @@ let arc5 = {
 }
 
 module.exports = {
+  arc7,
   arc6,
   arc5,
   headers

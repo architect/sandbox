@@ -5,7 +5,7 @@ let headerFormatter = require('../rest/_req-header-fmt')
  * Arc <6 REST + Lambda integration (non-proxy) request formatter
  * - Mocks request object shape from API Gateway VTL
  */
-module.exports = function requestFormatterDeprecated ({ verb, req }) {
+module.exports = function requestFormatterDeprecated ({ method, req }) {
   let { body, headers, params, url } = req
   let path = URL.parse(url).pathname
   let query = URL.parse(url, true).query
@@ -18,8 +18,8 @@ module.exports = function requestFormatterDeprecated ({ verb, req }) {
   }
 
   let request = {
-    method: verb,
-    httpMethod: verb,
+    method,
+    httpMethod: method,
     path,
     body,
     headers: normalizedHeaders,

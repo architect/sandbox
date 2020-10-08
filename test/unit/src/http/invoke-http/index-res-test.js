@@ -7,7 +7,7 @@ let sut = join(process.cwd(), 'src', 'http', 'invoke-http')
 let invoke = proxyquire(sut, {
   '../../invoke-lambda': lambdaStub
 })
-let { arc6, arc5, arc } = require('../http-res-fixtures')
+let { arc7, arc6, arc5, arc } = require('../http-res-fixtures')
 
 let b64dec = i => Buffer.from(i, 'base64').toString()
 let b64enc = i => Buffer.from(i).toString('base64')
@@ -76,13 +76,13 @@ function teardown () {
 
 test('Unknown invocation error', t => {
   t.plan(2)
-  let params = { verb: 'GET', route: '/', apiType: 'http' }
+  let params = { method: 'GET', route: '/', apiType: 'http' }
   let run = getInvoker.bind({}, params)
   let mock
   let msg = 'Some invocation error'
   returnError = Error(msg)
 
-  mock = arc6.http.noReturn
+  mock = arc7.noReturn
   run(mock, res => {
     t.ok(res.body.includes(msg), 'Invocation error passes along error message')
     t.equal(res.statusCode, 502, 'Responded with: 502')
@@ -91,83 +91,83 @@ test('Unknown invocation error', t => {
   teardown()
 })
 
-test('Architect v6 dependency-free responses (HTTP API mode)', t => {
+test('Architect v7 dependency-free responses (HTTP API mode)', t => {
   t.plan(46)
-  let params = { verb: 'GET', route: '/', apiType: 'http' }
+  let params = { method: 'GET', route: '/', apiType: 'http' }
   let run = getInvoker.bind({}, params)
   let mock
 
-  mock = arc6.http.noReturn
+  mock = arc7.noReturn
   run(mock, res => {
     t.equal(res.body, 'null', `Returned string: 'null'`)
     t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
     t.equal(res.statusCode, 200, 'Responded with: 200')
   })
 
-  mock = arc6.http.emptyReturn
+  mock = arc7.emptyReturn
   run(mock, res => {
     t.equal(res.body, mock, `Returned empty string: ${mock}`)
     t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
     t.equal(res.statusCode, 200, 'Responded with: 200')
   })
 
-  mock = arc6.http.string
+  mock = arc7.string
   run(mock, res => {
     t.equal(res.body, mock, `Returned string: ${mock}`)
     t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
     t.equal(res.statusCode, 200, 'Responded with: 200')
   })
 
-  mock = arc6.http.object
+  mock = arc7.object
   run(mock, res => {
     t.equal(res.body, str(mock), `Returned JSON-serialized object: ${str(mock)}`)
     t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
     t.equal(res.statusCode, 200, 'Responded with: 200')
   })
 
-  mock = arc6.http.array
+  mock = arc7.array
   run(mock, res => {
     t.equal(res.body, str(mock), `Returned JSON-serialized array: ${str(mock)}`)
     t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
     t.equal(res.statusCode, 200, 'Responded with: 200')
   })
 
-  mock = arc6.http.buffer
+  mock = arc7.buffer
   run(mock, res => {
     t.equal(res.body, str(mock), `Returned JSON-serialized buffer: ${str(mock)}`)
     t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
     t.equal(res.statusCode, 200, 'Responded with: 200')
   })
 
-  mock = arc6.http.number
+  mock = arc7.number
   run(mock, res => {
     t.equal(res.body, str(mock), `Returned string: ${str(mock)}`)
     t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
     t.equal(res.statusCode, 200, 'Responded with: 200')
   })
 
-  mock = arc6.http.bodyOnly
+  mock = arc7.bodyOnly
   run(mock, res => {
     t.equal(res.body, str(mock), `Returned string: ${str(mock)}`)
     t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
     t.equal(res.statusCode, 200, 'Responded with: 200')
   })
 
-  mock = arc6.http.bodyWithStatus
+  mock = arc7.bodyWithStatus
   run(mock, res => {
     t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
     t.equal(res.headers['content-type'], textUtf8, `Returned correct content-type: ${textUtf8}`)
     t.equal(res.statusCode, 200, 'Responded with: 200')
   })
 
-  mock = arc6.http.bodyWithStatusAndContentType
+  mock = arc7.bodyWithStatusAndContentType
   run(mock, res => {
     t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
     t.equal(res.headers['content-type'], json, `Returned correct content-type: ${json}`)
     t.equal(res.statusCode, 200, 'Responded with: 200')
   })
 
-  mock = arc6.http.encodedWithBinaryType
+  mock = arc7.encodedWithBinaryType
   run(mock, res => {
     t.ok(res.body instanceof Buffer, 'Body is a buffer')
     t.equal(b64enc(res.body), mock.body, 'Passed back same buffer')
@@ -176,14 +176,14 @@ test('Architect v6 dependency-free responses (HTTP API mode)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.http.cookies
+  mock = arc7.cookies
   run(mock, res => {
     t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
     t.equal(res.headers['set-cookie'], mock.cookies.join('; '), `Returned correct cookies: ${res.headers['set-cookie']}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.http.secureCookies
+  mock = arc7.secureCookies
   run(mock, res => {
     let cookies = `${localCookie}; ${localCookie}`
     t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
@@ -191,14 +191,14 @@ test('Architect v6 dependency-free responses (HTTP API mode)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.http.secureCookieHeader
+  mock = arc7.secureCookieHeader
   run(mock, res => {
     t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
     t.equal(res.headers['set-cookie'], localCookie, `Returned correct cookies: ${localCookie}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.http.invalid
+  mock = arc7.invalid
   run(mock, res => {
     t.ok(res.body.includes('Invalid response type'), 'Invalid statusCode causes error')
     t.equal(res.statusCode, 502, 'Responded with 502')
@@ -207,13 +207,13 @@ test('Architect v6 dependency-free responses (HTTP API mode)', t => {
   teardown()
 })
 
-test('Architect v6 dependency-free responses (HTTP API + Lambda v1.0)', t => {
+test('Architect v7 dependency-free responses (HTTP API + Lambda v1.0)', t => {
   t.plan(32)
-  let params = { verb: 'GET', route: '/', apiType: 'httpv1' }
+  let params = { method: 'GET', route: '/', apiType: 'httpv1' }
   let run = getInvoker.bind({}, params)
   let mock
 
-  mock = arc6.rest.body
+  mock = arc6.body
   run(mock, res => {
     t.equal(res.body, mock.body, match('res.body', res.body))
     t.equal(res.headers['content-type'], jsonUtf8, `Returned correct content-type: ${jsonUtf8}`)
@@ -221,7 +221,7 @@ test('Architect v6 dependency-free responses (HTTP API + Lambda v1.0)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.rest.isBase64Encoded
+  mock = arc6.isBase64Encoded
   run(mock, res => {
     t.equal(b64dec(mock.body), b64dec(res.body), match('res.body', res.body))
     t.equal(res.headers['content-type'], jsonUtf8, `Returned correct content-type: ${jsonUtf8}`)
@@ -229,14 +229,14 @@ test('Architect v6 dependency-free responses (HTTP API + Lambda v1.0)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.rest.buffer
+  mock = arc6.buffer
   run(mock, res => {
     t.ok(res.body.includes('Cannot respond with a raw buffer'), 'Raw buffer response causes error')
     t.equal(res.headers['content-type'], htmlUtf8, `Returned correct content-type: ${htmlUtf8}`)
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
 
-  mock = arc6.rest.encodedWithBinaryTypeBad
+  mock = arc6.encodedWithBinaryTypeBad
   run(mock, res => {
     t.ok(typeof res.body === 'string', 'Body is (likely) base64 encoded')
     t.equal(b64dec(res.body), 'hi there\n', 'Body still base64 encoded')
@@ -245,7 +245,7 @@ test('Architect v6 dependency-free responses (HTTP API + Lambda v1.0)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.rest.encodedWithBinaryTypeGood
+  mock = arc6.encodedWithBinaryTypeGood
   run(mock, res => {
     t.ok(res.body instanceof Buffer, 'Body is a buffer')
     t.equal(b64enc(res.body), mock.body, 'Passed back same buffer')
@@ -254,13 +254,13 @@ test('Architect v6 dependency-free responses (HTTP API + Lambda v1.0)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.rest.secureCookieHeader
+  mock = arc6.secureCookieHeader
   run(mock, res => {
     t.equal(res.headers['set-cookie'], localCookie, `Cookie SSL replaced with local path modification: ${localCookie}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.rest.secureCookieMultiValueHeader
+  mock = arc6.secureCookieMultiValueHeader
   run(mock, res => {
     t.equal(res.headers['set-cookie'][0], localCookie, `Cookie 1 SSL replaced with local path modification: ${localCookie}`)
     t.equal(res.headers['set-cookie'][1], localCookie, `Cookie 2 SSL replaced with local path modification: ${localCookie}`)
@@ -273,13 +273,13 @@ test('Architect v6 dependency-free responses (HTTP API + Lambda v1.0)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.rest.multiValueHeaders
+  mock = arc6.multiValueHeaders
   run(mock, res => {
     t.deepEqual(res.headers['set-cookie'], [ 'Foo', 'Bar', 'Baz' ], 'Header values set')
     t.equal(res.headers['content-type'], 'text/plain', 'Content-Type favors multiValueHeaders')
   })
 
-  mock = arc6.rest.invalidMultiValueHeaders
+  mock = arc6.invalidMultiValueHeaders
   run(mock, res => {
     t.ok(res.body.includes('Invalid response type'), 'Invalid multiValueHeaders causes error')
     t.equal(res.statusCode, 502, 'Responded with 502')
@@ -290,11 +290,11 @@ test('Architect v6 dependency-free responses (HTTP API + Lambda v1.0)', t => {
 
 test('Architect v6 dependency-free responses (REST API mode)', t => {
   t.plan(32)
-  let params = { verb: 'GET', route: '/', apiType: 'rest' }
+  let params = { method: 'GET', route: '/', apiType: 'rest' }
   let run = getInvoker.bind({}, params)
   let mock
 
-  mock = arc6.rest.body
+  mock = arc6.body
   run(mock, res => {
     t.equal(res.body, mock.body, match('res.body', res.body))
     t.equal(res.headers['content-type'], jsonUtf8, `Returned correct content-type: ${jsonUtf8}`)
@@ -302,7 +302,7 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.rest.isBase64Encoded
+  mock = arc6.isBase64Encoded
   run(mock, res => {
     t.equal(b64dec(mock.body), b64dec(res.body), match('res.body', res.body))
     t.equal(res.headers['content-type'], jsonUtf8, `Returned correct content-type: ${jsonUtf8}`)
@@ -310,14 +310,14 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.rest.buffer
+  mock = arc6.buffer
   run(mock, res => {
     t.ok(res.body.includes('Cannot respond with a raw buffer'), 'Raw buffer response causes error')
     t.equal(res.headers['content-type'], htmlUtf8, `Returned correct content-type: ${htmlUtf8}`)
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
 
-  mock = arc6.rest.encodedWithBinaryTypeBad
+  mock = arc6.encodedWithBinaryTypeBad
   run(mock, res => {
     t.ok(typeof res.body === 'string', 'Body is (likely) base64 encoded')
     t.equal(b64dec(res.body), 'hi there\n', 'Body still base64 encoded')
@@ -326,7 +326,7 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.rest.encodedWithBinaryTypeGood
+  mock = arc6.encodedWithBinaryTypeGood
   run(mock, res => {
     t.ok(res.body instanceof Buffer, 'Body is a buffer')
     t.equal(b64enc(res.body), mock.body, 'Passed back same buffer')
@@ -335,13 +335,13 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.rest.secureCookieHeader
+  mock = arc6.secureCookieHeader
   run(mock, res => {
     t.equal(res.headers['set-cookie'], localCookie, `Cookie SSL replaced with local path modification: ${localCookie}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc6.rest.secureCookieMultiValueHeader
+  mock = arc6.secureCookieMultiValueHeader
   run(mock, res => {
     t.equal(res.headers['set-cookie'][0], localCookie, `Cookie 1 SSL replaced with local path modification: ${localCookie}`)
     t.equal(res.headers['set-cookie'][1], localCookie, `Cookie 2 SSL replaced with local path modification: ${localCookie}`)
@@ -354,13 +354,13 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
 
-  mock = arc6.rest.multiValueHeaders
+  mock = arc6.multiValueHeaders
   run(mock, res => {
     t.deepEqual(res.headers['set-cookie'], [ 'Foo', 'Bar', 'Baz' ], 'Header values set')
     t.equal(res.headers['content-type'], 'text/plain', 'Content-Type favors multiValueHeaders')
   })
 
-  mock = arc6.rest.invalidMultiValueHeaders
+  mock = arc6.invalidMultiValueHeaders
   run(mock, res => {
     t.ok(res.body.includes('Invalid response type'), 'Invalid multiValueHeaders causes error')
     t.equal(res.statusCode, 502, 'Responded with 502')
@@ -372,7 +372,7 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
 test('Architect v5 (REST API mode) & Architect Functions', t => {
   t.plan(35)
   process.env.DEPRECATED = true
-  let params = { verb: 'GET', route: '/', apiType: 'rest' }
+  let params = { method: 'GET', route: '/', apiType: 'rest' }
   let run = getInvoker.bind({}, params)
   let mock
   let cacheControl = 'max-age=86400'
@@ -485,7 +485,7 @@ test('Architect v5 (REST API mode) & Architect Functions', t => {
 test('Architect <6 (REST API mode) & Architect Functions', t => {
   t.plan(4)
   process.env.DEPRECATED = true
-  let params = { verb: 'GET', route: '/', apiType: 'rest' }
+  let params = { method: 'GET', route: '/', apiType: 'rest' }
   let run = getInvoker.bind({}, params)
   let mock
 

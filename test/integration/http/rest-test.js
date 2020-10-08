@@ -6,6 +6,7 @@ let { url, shutdown } = require('./_utils')
 
 let cwd = process.cwd()
 let b64dec = i => Buffer.from(i, 'base64').toString()
+let data = { hi: 'there' }
 
 test('Set up env', t => {
   t.plan(1)
@@ -194,7 +195,6 @@ test('[REST mode] get /no-return (noop)', t => {
 
 test('[REST mode] post /post', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.post({
     url: url + '/post',
     data,
@@ -214,7 +214,6 @@ test('[REST mode] post /post', t => {
 
 test('[REST mode] put /put', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.put({
     url: url + '/put',
     data,
@@ -233,7 +232,6 @@ test('[REST mode] put /put', t => {
 
 test('[REST mode] patch /patch', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.patch({
     url: url + '/patch',
     data,
@@ -252,7 +250,6 @@ test('[REST mode] patch /patch', t => {
 
 test('[REST mode] delete /delete', t => {
   t.plan(5)
-  let data = { hi: 'there' }
   tiny.del({
     url: url + '/delete',
     data,
@@ -269,9 +266,36 @@ test('[REST mode] delete /delete', t => {
   })
 })
 
-test('[REST mode] post / - non-get calls to root should fail when route is not explicitly defined', t => {
+test('[HTTP v1.0 (REST) mode] get /path/* – route should fail when explicitly defined because catchalls are not supported in this mode', t => {
   t.plan(2)
-  let data = { hi: 'there' }
+  tiny.get({
+    url: url + '/path/hello/there'
+  }, function _got (err, result) {
+    if (err) {
+      let message = '@http get /path/hello/there'
+      t.equal(err.statusCode, 403, 'Errors with 403')
+      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
+    }
+    else t.fail(result)
+  })
+})
+
+test(`[HTTP v1.0 (REST) mode] get /any – route should fail when explicitly defined because 'any' is not supported in this mode`, t => {
+  t.plan(2)
+  tiny.get({
+    url: url + '/any'
+  }, function _got (err, result) {
+    if (err) {
+      let message = '@http get /any'
+      t.equal(err.statusCode, 403, 'Errors with 403')
+      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
+    }
+    else t.fail(result)
+  })
+})
+
+test('[REST mode] post / - route should fail when not explicitly defined', t => {
+  t.plan(2)
   tiny.post({
     url,
     data,

@@ -7,17 +7,18 @@ let b64enc = i => Buffer.from(i).toString('base64')
  * If you make changes to either, reflect it in the other(s)!
  */
 
+// Basic obj
+let data = { hi: 'there' }
+
 // Content examples
 let css = '.hi:before {content: "there";}'
 let html = '<span>hi there</span>'
 let js = `console.log('hi there')`
-let json = { hi: 'there' }
+let json = data
 let text = 'hi there'
 let xml = '<hi>there</hi>'
 
-let arc6 = {}
-
-arc6.http = {
+let arc7 = {
   // Not returning is valid, and returns a 'null' string as JSON (lol)
   noReturn: undefined,
 
@@ -82,7 +83,7 @@ arc6.http = {
   }
 }
 
-arc6.rest = {
+let arc6 = {
   /**
    * New params introduced with Arc 6+ APG-proxy-Lambda
    */
@@ -279,11 +280,12 @@ let arc = {
 
   // Set session
   session: {
-    session: { hi: 'there' }
+    session: data
   }
 }
 
 module.exports = {
+  arc7,
   arc6,
   arc5,
   arc4,

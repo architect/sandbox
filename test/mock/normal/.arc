@@ -18,6 +18,7 @@ get /python3.7
 get /python3.6
 get /ruby2.5
 get /deno
+get /path/*     # runs default
 get /env        # runs default
 get /no-return  # runs default
 get /times-out  # runs default
@@ -25,6 +26,11 @@ post /post
 put /put
 patch /patch
 delete /delete
+head /head
+options /options
+any /any
+any /any-c/*
+any /any-p/:param
 
 @tables
 accounts
