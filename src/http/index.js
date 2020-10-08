@@ -102,7 +102,7 @@ module.exports = function createHttpServer () {
           // Bind WebSocket app to HTTP server
           if (arc.ws) {
             let routes = arc.ws
-            websocketServer = registerWS({ app, httpServer, routes })
+            websocketServer = registerWS({ app, server: httpServer, routes })
           }
 
           callback()
