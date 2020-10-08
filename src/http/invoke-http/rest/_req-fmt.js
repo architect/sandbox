@@ -38,6 +38,14 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
         : part)
       .join('/')
   }
+  // Handle catchalls
+  if (httpApi && route && route.includes('*')) {
+    resource = route.split('/')
+      .map(part => part === '*'
+        ? `{proxy+}`
+        : part)
+      .join('/')
+  }
 
   // Pass through resource param, importantly: '/' or '/{proxy+}'
   if (req.resource) resource = req.resource
@@ -67,6 +75,13 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
     httpMethod,
     path,
     resourcePath: resource
+  }
+
+  // Path parameters
+  if (httpApi && params && Object.keys(params).length) {
+    request.pathParameters = route && route.endsWith('/*')
+      ? { proxy: params['0'] }
+      : params
   }
 
   return request

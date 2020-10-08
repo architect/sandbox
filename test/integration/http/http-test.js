@@ -180,16 +180,21 @@ test('[HTTP mode] get /deno', t => {
 })
 
 test('[HTTP mode] get /path/*', t => {
-  t.plan(3)
+  t.plan(8)
   tiny.get({
     url: url + '/path/hello/there'
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'got /path/*')
-      let { message, version } = result.body
+      let { message, version, routeKey, rawPath, pathParameters, requestContext } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(message, 'Hello from get /path/* running the default runtime')
+      t.equal(routeKey, 'GET /path/{proxy+}', 'Got correct routeKey')
+      t.equal(rawPath, '/path/hello/there', 'Got correct rawPath')
+      t.equal(pathParameters.proxy, 'hello/there', 'Got correct pathParameters.proxy')
+      t.equal(requestContext.http.path, '/path/hello/there', 'Got correct requestContext.http.path param')
+      t.equal(requestContext.routeKey, 'GET /path/{proxy+}', 'Got correct requestContext.routeKey param')
     }
   })
 })
@@ -466,18 +471,22 @@ test('[HTTP mode] options /any', t => {
 })
 
 test('[HTTP mode] get /any-c/*', t => {
-  t.plan(5)
+  t.plan(9)
   tiny.get({
     url: url + '/any-c/hello/there',
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'got /any-c/hello/there')
-      let { message, version, routeKey, requestContext } = result.body
+      let { message, version, routeKey, rawPath, pathParameters, requestContext } = result.body
       t.equal(version, '2.0', 'Got Lambda v2.0 payload')
       t.equal(routeKey, 'ANY /any-c/{proxy+}', 'Got correct routeKey')
-      t.equal(requestContext.http.method, 'GET', 'Got correct method')
       t.equal(message, 'Hello from any /any-c/*', 'Got correct handler response')
+      t.equal(rawPath, '/any-c/hello/there', 'Got correct rawPath')
+      t.equal(pathParameters.proxy, 'hello/there', 'Got correct pathParameters.proxy')
+      t.equal(requestContext.http.method, 'GET', 'Got correct method')
+      t.equal(requestContext.http.path, '/any-c/hello/there', 'Got correct requestContext.http.path param')
+      t.equal(requestContext.routeKey, 'ANY /any-c/{proxy+}', 'Got correct requestContext.routeKey param')
     }
   })
 })
