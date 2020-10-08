@@ -39,8 +39,13 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
       .join('/')
   }
 
+  // Pass through resource param, importantly: '/' or '/{proxy+}'
+  if (req.resource) resource = req.resource
+
+  let httpMethod = req.method || method.toUpperCase()
+
   let request = {
-    httpMethod: req.method || method.toUpperCase(),
+    httpMethod,
     path,
     resource,
     body: nullify(body),
@@ -54,14 +59,15 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
   // Base64 encoding status set by binary handler middleware
   request.isBase64Encoded = !!(req.isBase64Encoded)
 
-  // Pass through resource param, importantly: '/' or '/{proxy+}'
-  if (req.resource) request.resource = req.resource
-
   // HTTP API + Lambda v1.0 payload
   if (httpApi) request.version = '1.0'
 
-  // TODO mock this
-  request.requestContext = {}
+  // Context
+  request.requestContext = {
+    httpMethod,
+    path,
+    resourcePath: resource
+  }
 
   return request
 }

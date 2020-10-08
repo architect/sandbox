@@ -310,6 +310,11 @@ let arc6 = {
     pathParameters: null,
     body: null,
     isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/',
+      resourcePath: '/',
+    },
   },
 
   // get /?whats=up
@@ -324,6 +329,11 @@ let arc6 = {
     pathParameters: null,
     body: null,
     isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/',
+      resourcePath: '/',
+    },
   },
 
   // get /?whats=up&whats=there
@@ -338,6 +348,11 @@ let arc6 = {
     pathParameters: null,
     body: null,
     isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/',
+      resourcePath: '/',
+    },
   },
 
   // get /nature/hiking
@@ -352,6 +367,11 @@ let arc6 = {
     pathParameters: { activities: 'hiking' },
     body: null,
     isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/nature/hiking',
+      resourcePath: '/nature/{activities}',
+    },
   },
 
   // get /{proxy+}
@@ -366,6 +386,11 @@ let arc6 = {
     pathParameters: { proxy: '/nature/hiking' },
     body: null,
     isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/nature/hiking',
+      resourcePath: '/{proxy+}',
+    },
   },
 
   // get /path/* (/path/hi/there)
@@ -380,6 +405,11 @@ let arc6 = {
     pathParameters: { proxy: 'hi/there' },
     body: null,
     isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/path/hi/there',
+      resourcePath: '/path/{proxy+}',
+    },
   },
 
   // post /form (JSON)
@@ -393,7 +423,12 @@ let arc6 = {
     multiValueQueryStringParameters: null,
     pathParameters: null,
     body: b64enc(JSON.stringify(data)),
-    isBase64Encoded: true
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'POST',
+      path: '/form',
+      resourcePath: '/form',
+    },
   },
 
   // post /form (form URL encoded)
@@ -407,7 +442,12 @@ let arc6 = {
     multiValueQueryStringParameters: null,
     pathParameters: null,
     body: b64enc('hi=there'),
-    isBase64Encoded: true
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'POST',
+      path: '/form',
+      resourcePath: '/form',
+    },
   },
 
   // post /form (multipart form data)
@@ -421,7 +461,12 @@ let arc6 = {
     multiValueQueryStringParameters: null,
     pathParameters: null,
     body: b64enc('hi there'), // not a valid multipart form data payload but that's for userland validation
-    isBase64Encoded: true
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'POST',
+      path: '/form',
+      resourcePath: '/form',
+    },
   },
 
   // post /form (octet stream)
@@ -435,7 +480,12 @@ let arc6 = {
     multiValueQueryStringParameters: null,
     pathParameters: null,
     body: b64enc('hi there\n'),
-    isBase64Encoded: true
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'POST',
+      path: '/form',
+      resourcePath: '/form',
+    },
   },
 
   // put /form (JSON)
@@ -449,7 +499,12 @@ let arc6 = {
     multiValueQueryStringParameters: null,
     pathParameters: null,
     body: b64enc(JSON.stringify(data)),
-    isBase64Encoded: true
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'PUT',
+      path: '/form',
+      resourcePath: '/form',
+    },
   },
 
   // patch /form (JSON)
@@ -463,7 +518,12 @@ let arc6 = {
     multiValueQueryStringParameters: null,
     pathParameters: null,
     body: b64enc(JSON.stringify(data)),
-    isBase64Encoded: true
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'PATCH',
+      path: '/form',
+      resourcePath: '/form',
+    },
   },
 
   // delete /form (JSON)
@@ -477,7 +537,12 @@ let arc6 = {
     multiValueQueryStringParameters: null,
     pathParameters: null,
     body: b64enc(JSON.stringify(data)),
-    isBase64Encoded: true
+    isBase64Encoded: true,
+    requestContext: {
+      httpMethod: 'DELETE',
+      path: '/form',
+      resourcePath: '/form',
+    },
   }
 }
 
