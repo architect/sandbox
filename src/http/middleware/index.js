@@ -14,8 +14,7 @@ module.exports = function loadMiddleware (app) {
   let isWSsend = req => req.url === '/__arc'
   let limit = '6mb'
   let parseJson = req => jsonTypes.test(req.headers['content-type']) &&
-                         (!req.isBase64Encoded || isWSsend(req)) &&
-                         process.env.ARC_API_TYPE !== 'http'
+                         (isWSsend(req) || (!req.isBase64Encoded && process.env.ARC_API_TYPE !== 'http'))
   let parseUrlE = req => formURLenc.test(req.headers['content-type']) &&
                          (!req.isBase64Encoded || isWSsend(req))
   app.use(body.json({ limit, type: parseJson }))
