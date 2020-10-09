@@ -3,12 +3,12 @@ let upgrade = require('./upgrade')
 let connection = require('./connection')
 let sends = require('./send')
 
-module.exports = function registerWebSocket ({ app, server }) {
+module.exports = function registerWebSocket ({ app, httpServer }) {
 
   let wss = new WebSocket.Server({ noServer: true })
 
   // listens for HTTP 101 request
-  server.on('upgrade', upgrade(wss))
+  httpServer.on('upgrade', upgrade(wss))
 
   // listen for the initial web socket connection
   wss.on('connection', connection)

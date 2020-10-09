@@ -2,7 +2,7 @@
 
 ---
 
-## [3.0.0 - 3.0.1] 2020-10-08
+## [3.0.0 - 3.0.2] 2020-10-08
 
 ### Added
 
@@ -17,6 +17,19 @@
 - Breaking change: with the addition of `@http` `any` and `*`, default `get /` greedy catchall is now deprecated
   - To restore that behavior, either move your `get /` route to `any /*`, or just define a new `any /*` route
 - Updated dependencies
+
+
+### Fixed
+
+- Merged in patch from `2.0.4` to fix projects with `@ws`
+
+---
+
+## [2.0.4] 2020-10-08
+
+### Fixed
+
+- Fixed issue where projects with `@ws` fail to start up, thanks @grncdr!
 
 ---
 
