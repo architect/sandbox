@@ -288,7 +288,7 @@ test('[REST mode] post / - route should fail when not explicitly defined, but on
 test('[REST mode] get /foobar – route should fall through to greedy root', t => {
   t.plan(3)
   tiny.get({
-    url: url + '/foobar'
+    url: url + '/foobar',
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
