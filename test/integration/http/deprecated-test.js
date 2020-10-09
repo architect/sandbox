@@ -281,6 +281,20 @@ test('[REST mode / deprecated] post / - route should fail when not explicitly de
   })
 })
 
+test('[REST mode / deprecated] get /foobar - route should fail when not explicitly defined', t => {
+  t.plan(2)
+  tiny.get({
+    url: url + '/foobar',
+  }, function _got (err, result) {
+    if (err) {
+      let message = '@http get /foobar'
+      t.equal(err.statusCode, 403, 'Errors with 403')
+      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
+    }
+    else t.fail(result)
+  })
+})
+
 test('[REST mode / deprecated] Shut down Sandbox', t => {
   t.plan(1)
   shutdown(t)
