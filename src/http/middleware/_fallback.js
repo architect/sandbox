@@ -89,10 +89,13 @@ module.exports = function fallback (req, res, next) {
     return isRootMethod && isRootPath
   }
   let hasRoot = arc.http && arc.http.some(findRoot)
-  let hasASAP = !hasRoot && !arc.proxy
+  let hasASAP = !hasRoot && !arc.proxy && !deprecated
 
   // Bail on exact, param, or catchall matches
   let match = exactMatch || anyMethodMatch || paramMatch || catchallMatch
+
+  // Backwards compatibility with Arc 6+ REST's greedy `get /` (deprecated in Arc 8)
+  let restGreedyRoot = apiType === 'rest' && !deprecated && hasRoot && pathname !== '/'
 
   // Matches
   if (match) {
@@ -105,8 +108,8 @@ module.exports = function fallback (req, res, next) {
       if (err) res.end(err.message)
     })
   }
-  // ASAP (not supported by Arc <6)
-  else if (hasASAP && !deprecated) {
+  // ASAP – not supported by Arc <6, supported by Arc 6+
+  else if (hasASAP) {
     // Sandbox running as a dependency (most common use case)
     let pathToFunction = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
     // Sandbox running as a global install
@@ -115,8 +118,23 @@ module.exports = function fallback (req, res, next) {
     let local = join(__dirname, '..', '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
     if (exists(global)) pathToFunction = global
     else if (exists(local)) pathToFunction = local
+    invokeProxy(pathToFunction)
+  }
+  // Arc 6 greedy `get /{proxy+}`
+  else if (restGreedyRoot) {
+    let pathToFunction = join(process.cwd(), 'src', 'http', `get-index`)
+    invokeProxy(pathToFunction)
+  }
+  // Failure
+  else {
+    res.statusCode = 403
+    res.setHeader('content-type', 'text/html; charset=utf-8;')
+    let message = `Endpoint does not exist for ${method} ${pathname}<br>Add <code>@http ${method} ${pathname}</code> to your Architect project manifest (and create a corresponding handler)`
+    res.end(message)
+  }
 
-    // Invoke with a proxy / $default payload
+  // Invoke with a proxy payload
+  function invokeProxy (pathToFunction) {
     let exec = invoker({
       method,
       pathToFunction,
@@ -125,12 +143,5 @@ module.exports = function fallback (req, res, next) {
     req.resource = '/{proxy+}'
     req.params = { proxy: pathname }
     exec(req, res)
-  }
-  // Failure
-  else {
-    res.statusCode = 403
-    res.setHeader('content-type', 'text/html; charset=utf-8;')
-    let message = `Endpoint does not exist for ${method} ${pathname}<br>Add <code>@http ${method} ${pathname}</code> to your Architect project manifest (and create a corresponding handler)`
-    res.end(message)
   }
 }

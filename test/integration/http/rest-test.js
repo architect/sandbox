@@ -266,35 +266,11 @@ test('[REST mode] delete /delete', t => {
   })
 })
 
-test('[HTTP v1.0 (REST) mode] get /path/* – route should fail when explicitly defined because catchalls are not supported in this mode', t => {
-  t.plan(2)
-  tiny.get({
-    url: url + '/path/hello/there'
-  }, function _got (err, result) {
-    if (err) {
-      let message = '@http get /path/hello/there'
-      t.equal(err.statusCode, 403, 'Errors with 403')
-      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
-    }
-    else t.fail(result)
-  })
-})
 
-test(`[HTTP v1.0 (REST) mode] get /any – route should fail when explicitly defined because 'any' is not supported in this mode`, t => {
-  t.plan(2)
-  tiny.get({
-    url: url + '/any'
-  }, function _got (err, result) {
-    if (err) {
-      let message = '@http get /any'
-      t.equal(err.statusCode, 403, 'Errors with 403')
-      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
-    }
-    else t.fail(result)
-  })
-})
-
-test('[REST mode] post / - route should fail when not explicitly defined', t => {
+/**
+ * Arc v6: greedy root (`any /{proxy+}`) fallthrough
+ */
+test('[REST mode] post / - route should fail when not explicitly defined, but only because `any /{proxy+}` does not cover requests to root', t => {
   t.plan(2)
   tiny.post({
     url,
@@ -306,6 +282,51 @@ test('[REST mode] post / - route should fail when not explicitly defined', t => 
       t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
     }
     else t.fail(result)
+  })
+})
+
+test('[REST mode] get /foobar – route should fall through to greedy root', t => {
+  t.plan(3)
+  tiny.get({
+    url: url + '/foobar'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'got /')
+      let { message, version } = result.body
+      t.notOk(version, 'No Lambda payload version specified')
+      t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
+    }
+  })
+})
+
+test('[REST mode] get /path/* – route should fall through to greedy root because catchalls are not supported in this mode', t => {
+  t.plan(3)
+  tiny.get({
+    url: url + '/path/hello/there'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'got /')
+      let { message, version } = result.body
+      t.notOk(version, 'No Lambda payload version specified')
+      t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
+    }
+  })
+})
+
+test(`[REST mode] get /any – route should fall through to greedy root because 'any' is not supported in this mode`, t => {
+  t.plan(3)
+  tiny.get({
+    url: url + '/any'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'got /')
+      let { message, version } = result.body
+      t.notOk(version, 'No Lambda payload version specified')
+      t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
+    }
   })
 })
 
