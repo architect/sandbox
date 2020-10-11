@@ -70,13 +70,16 @@ module.exports = function createTables () {
     }
 
     tables.end = function end (callback) {
-      dynamo.close(function _closed (err) {
-        if (err) callback(err)
-        else {
-          let msg = 'DynamoDB successfully shut down'
-          callback(null, msg)
-        }
-      })
+      if (hasExternalDb) callback()
+      else {
+        dynamo.close(function _closed (err) {
+          if (err) callback(err)
+          else {
+            let msg = 'DynamoDB successfully shut down'
+            callback(null, msg)
+          }
+        })
+      }
     }
 
     return tables
