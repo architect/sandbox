@@ -478,6 +478,9 @@ test('[HTTP v1.0 (REST) mode] get /any-p/:param', t => {
   })
 })
 
+/**
+ * Arc v8+: routes are now literal, no more greedy root (`any /{proxy+}`) fallthrough
+ */
 test('[HTTP v1.0 (REST) mode] post / - route should fail when not explicitly defined', t => {
   t.plan(2)
   tiny.post({

@@ -7,7 +7,7 @@ let verifyShutdown = (t, err) => {
   t.equal(err.code, 'ECONNREFUSED', 'Sandbox succssfully shut down')
 }
 
-let shutdown = (t) => {
+let shutdown = t => {
   sandbox.end((err, result) => {
     if (err) t.fail(err)
     if (result !== 'Sandbox successfully shut down') {
@@ -22,4 +22,18 @@ let shutdown = (t) => {
   })
 }
 
-module.exports = { url, verifyShutdown, shutdown }
+let shutdownAsync = async t => {
+  let result = await sandbox.end()
+  if (result !== 'Sandbox successfully shut down') {
+    t.fail('Did not get back Sandbox shutdown message')
+  }
+  try {
+    await tiny.get({ url })
+    t.fail('Sandbox did not shut down')
+  }
+  catch (err) {
+    verifyShutdown(t, err)
+  }
+}
+
+module.exports = { url, verifyShutdown, shutdown, shutdownAsync }

@@ -7,8 +7,8 @@ let headerFormatter = require('../rest/_req-header-fmt')
  */
 module.exports = function requestFormatterDeprecated ({ method, req }) {
   let { body, headers, params, url } = req
-  let path = URL.parse(url).pathname
-  let query = URL.parse(url, true).query
+  let { pathname: path } = URL.parse(url)
+  let { query } = URL.parse(url, true)
 
   let { headers: normalizedHeaders } = headerFormatter(headers)
   // Early API Gateway x Lambda integrations coerce 'Cookie' from 'cookie', but not >6.x

@@ -286,46 +286,61 @@ test('[REST mode] post / - route should fail when not explicitly defined, but on
 })
 
 test('[REST mode] get /foobar – route should fall through to greedy root', t => {
-  t.plan(3)
+  t.plan(8)
   tiny.get({
     url: url + '/foobar',
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'got /')
-      let { message, version } = result.body
+      let { message, version, resource, path, pathParameters, requestContext } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
+      t.equal(resource, '/{proxy+}', 'Got correct resource param')
+      t.equal(path, '/foobar', 'Got correct path param')
+      t.equal(pathParameters.proxy, 'foobar', 'Got correct pathParameters.proxy')
+      t.equal(requestContext.path, '/foobar', 'Got correct requestContext.path param')
+      t.equal(requestContext.resourcePath, '/{proxy+}', 'Got correct requestContext.resourcePath param')
     }
   })
 })
 
 test('[REST mode] get /path/* – route should fall through to greedy root because catchalls are not supported in this mode', t => {
-  t.plan(3)
+  t.plan(8)
   tiny.get({
     url: url + '/path/hello/there'
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'got /')
-      let { message, version } = result.body
+      let { message, version, resource, path, pathParameters, requestContext } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
+      t.equal(resource, '/{proxy+}', 'Got correct resource param')
+      t.equal(path, '/path/hello/there', 'Got correct path param')
+      t.equal(pathParameters.proxy, 'path/hello/there', 'Got correct pathParameters.proxy')
+      t.equal(requestContext.path, '/path/hello/there', 'Got correct requestContext.path param')
+      t.equal(requestContext.resourcePath, '/{proxy+}', 'Got correct requestContext.resourcePath param')
     }
   })
 })
 
 test(`[REST mode] get /any – route should fall through to greedy root because 'any' is not supported in this mode`, t => {
-  t.plan(3)
+  t.plan(8)
   tiny.get({
     url: url + '/any'
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       t.ok(result, 'got /')
-      let { message, version } = result.body
+      let { message, version, resource, path, pathParameters, requestContext } = result.body
       t.notOk(version, 'No Lambda payload version specified')
       t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
+      t.equal(resource, '/{proxy+}', 'Got correct resource param')
+      t.equal(path, '/any', 'Got correct path param')
+      t.equal(pathParameters.proxy, 'any', 'Got correct pathParameters.proxy')
+      t.equal(requestContext.path, '/any', 'Got correct requestContext.path param')
+      t.equal(requestContext.resourcePath, '/{proxy+}', 'Got correct requestContext.resourcePath param')
     }
   })
 })

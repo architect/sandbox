@@ -7,11 +7,31 @@ let headerFormatter = require('./_req-header-fmt')
  * - HTTP APIs can emulate these REST API request payloads with the Lambda 1.0 payload, but AWS didn't make it an exact match because reasons
  */
 module.exports = function requestFormatter ({ method, route, req }, httpApi) {
-  let { body, params, url } = req
-  let path = URL.parse(url).pathname
+  let { body, params, resource, url } = req
+  let { pathname: path } = URL.parse(url)
+
+  // Maybe de-interpolate path into resource
+  resource = resource || route
+  if (route && route.includes('/:')) {
+    resource = route.split('/')
+      .map(part => part.startsWith(':')
+        ? `{${part.replace(':', '')}}`
+        : part)
+      .join('/')
+  }
+  // Handle catchalls (HTTP + Lambda v1.0 only)
+  if (httpApi && route && route.includes('*')) {
+    resource = route.split('/')
+      .map(part => part === '*'
+        ? `{proxy+}`
+        : part)
+      .join('/')
+  }
+
+  // Query string things
   let query = {}
   let multiValueQueryStringParameters = {}
-  let queryData = URL.parse(url, true).query
+  let { query: queryData } = URL.parse(url, true)
   // API Gateway places Array-type query strings into multiValueQueryStringParameters
   for (let param of Object.keys(queryData)) {
     if (Array.isArray(queryData[param])) {
@@ -29,29 +49,10 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
   // API Gateway sends a null literal instead of an empty object because reasons
   let nullify = i => Object.getOwnPropertyNames(i).length ? i : null
 
-  // Maybe de-interpolate path into resource
-  let resource = path
-  if (route && route.includes(':')) {
-    resource = route.split('/')
-      .map(part => part.startsWith(':')
-        ? `{${part.replace(':', '')}}`
-        : part)
-      .join('/')
-  }
-  // Handle catchalls
-  if (httpApi && route && route.includes('*')) {
-    resource = route.split('/')
-      .map(part => part === '*'
-        ? `{proxy+}`
-        : part)
-      .join('/')
-  }
-
-  // Pass through resource param, importantly: '/' or '/{proxy+}'
-  if (req.resource) resource = req.resource
-
+  // Method stuff
   let httpMethod = req.method || method.toUpperCase()
 
+  // Here we go!
   let request = {
     httpMethod,
     path,
@@ -62,6 +63,11 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
     pathParameters: nullify(params),
     queryStringParameters: nullify(query),
     multiValueQueryStringParameters: nullify(multiValueQueryStringParameters),
+    requestContext: {
+      httpMethod,
+      path,
+      resourcePath: resource
+    }
   }
 
   // Base64 encoding status set by binary handler middleware
@@ -69,13 +75,6 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
 
   // HTTP API + Lambda v1.0 payload
   if (httpApi) request.version = '1.0'
-
-  // Context
-  request.requestContext = {
-    httpMethod,
-    path,
-    resourcePath: resource
-  }
 
   // Path parameters
   if (httpApi && params && Object.keys(params).length) {
