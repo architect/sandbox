@@ -5,7 +5,7 @@ let sandbox = require('../../../src')
 let { url, shutdownAsync } = require('./_utils')
 
 let cwd = process.cwd()
-let indexHTML = 'Hello from public/index.html!\n'
+let indexHTML = 'Hello from public/index.html!'
 
 test('Set up env', t => {
   t.plan(1)
@@ -37,7 +37,7 @@ test('[HTTP mode] get /hi/there - root param at /:param/there', async t => {
 
   let result
   result = await tiny.get({ url })
-  t.equal(result.body, indexHTML, 'Got static index.html')
+  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
 
   result = await tiny.get({ url: url + '/hi/there' })
   t.ok(result, 'got /hi/there')
@@ -61,7 +61,7 @@ test('[HTTP v1.0 (REST) mode] get /hi/there - root param at /:param/there', asyn
 
   let result
   result = await tiny.get({ url })
-  t.equal(result.body, indexHTML, 'Got static index.html')
+  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
 
   result = await tiny.get({ url: url + '/hi/there' })
   t.ok(result, 'got /hi/there')
@@ -78,7 +78,7 @@ test('[HTTP v1.0 (REST) mode] get /hi/there - root param at /:param/there', asyn
   teardown(t)
 })
 
-// TODO fix this test
+// TODO fix this test, see: arc#982
 // This shouldn't be possible, as /:param/whatever can't coexist with /{proxy+} ASAP in REST
 /*
 test('[REST mode] get /hi/there - root param at /:param/there', async t => {
@@ -166,7 +166,7 @@ test('[HTTP mode] get / - ASAP', async t => {
   await setup(t, 'http', 'asap')
 
   let result = await tiny.get({ url })
-  t.equal(result.body, indexHTML, 'Got static index.html')
+  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
 
   await shutdownAsync(t)
   teardown(t)
@@ -177,7 +177,7 @@ test('[HTTP v1.0 (REST) mode] get / - ASAP', async t => {
   await setup(t, 'httpv1', 'asap')
 
   let result = await tiny.get({ url })
-  t.equal(result.body, indexHTML, 'Got static index.html')
+  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
 
   await shutdownAsync(t)
   teardown(t)
@@ -188,7 +188,7 @@ test('[REST mode] get / - ASAP', async t => {
   await setup(t, 'rest', 'asap')
 
   let result = await tiny.get({ url })
-  t.equal(result.body, indexHTML, 'Got static index.html')
+  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
 
   await shutdownAsync(t)
   teardown(t)

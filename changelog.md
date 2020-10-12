@@ -6,6 +6,8 @@
 
 ### Fixed
 
+- Sandbox now respond to requests to root with only `/:param` defined in `HTTP` APIs
+- Improved root handling + ASAP fallthrough behavior
 - Fixed obscure false negative for adding Arc Static Asset Proxy when `@http` contains a route that looks like `get /:hey/there`
 
 ---
