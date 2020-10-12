@@ -2,6 +2,14 @@
 
 ---
 
+## [3.0.4] 2020-10-12
+
+### Fixed
+
+- Fixed obscure false negative for adding Arc Static Asset Proxy when `@http` contains a route that looks like `get /:hey/there`
+
+---
+
 ## [3.0.0 - 3.0.3] 2020-10-08
 
 ### Added

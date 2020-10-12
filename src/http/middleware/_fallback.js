@@ -78,7 +78,7 @@ module.exports = function fallback (req, res, next) {
   let findRoot = r => {
     let method = r[0].toLowerCase()
     let path = r[1]
-    let rootParam = path.startsWith('/:') && path.split('/:').length === 2
+    let rootParam = path.startsWith('/:') && path.split('/').length === 2
     let isRootMethod = httpAPI
       ? method === 'get' || method === 'any'
       : method === 'get'
