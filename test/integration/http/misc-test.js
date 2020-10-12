@@ -1,10 +1,12 @@
-let path = require('path')
+let { join } = require('path')
 let tiny = require('tiny-json-http')
 let test = require('tape')
-let sandbox = require('../../../src')
+let sut = join(process.cwd(), 'src')
+let sandbox = require(sut)
 let { url, shutdown } = require('./_utils')
 
 let cwd = process.cwd()
+let mock = join(__dirname, '..', '..', 'mock')
 
 test('Set up env', t => {
   t.plan(1)
@@ -13,7 +15,7 @@ test('Set up env', t => {
 
 test('[Misc] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
+  process.chdir(join(mock, 'normal'))
   sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else {

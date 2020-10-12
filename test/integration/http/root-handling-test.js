@@ -5,6 +5,7 @@ let sandbox = require('../../../src')
 let { url, shutdownAsync } = require('./_utils')
 
 let cwd = process.cwd()
+let mock = join(__dirname, '..', '..', 'mock')
 let indexHTML = 'Hello from public/index.html!'
 
 test('Set up env', t => {
@@ -14,7 +15,7 @@ test('Set up env', t => {
 
 async function setup (t, type, dir) {
   process.env.ARC_API_TYPE = type
-  process.chdir(join(__dirname, '..', '..', 'mock', 'root-handling', dir))
+  process.chdir(join(mock, 'root-handling', dir))
   let start = await sandbox.start({ quiet: true })
   t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
   t.equal(process.env.ARC_API_TYPE, type, `API type set to ${type}`)

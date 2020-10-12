@@ -1,7 +1,7 @@
 let hydrate = require('@architect/hydrate')
 let path = require('path')
 let fs = require('fs')
-let pkgVer = require('../../package.json').version
+let { version: pkgVer } = require('../../package.json')
 let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
 let { fingerprint, pathToUnix, updater } = require('@architect/utils')

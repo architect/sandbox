@@ -1,6 +1,7 @@
 let cli = require('../../src/cli')
-let join = require('path').join
+let { join } = require('path')
 let test = require('tape')
+let mock = join(__dirname, '..', 'mock')
 
 /**
  * May take a few seconds to close all related threads
@@ -9,7 +10,7 @@ let test = require('tape')
 test('Set up env', t => {
   t.plan(1)
   // Assumes previous tests may have already set working dir to `mock`
-  process.chdir(join(__dirname, '..', 'mock', 'normal'))
+  process.chdir(join(mock, 'normal'))
   t.ok(cli, 'CLI is present')
 })
 

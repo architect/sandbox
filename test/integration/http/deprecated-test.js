@@ -1,10 +1,12 @@
-let path = require('path')
+let { join } = require('path')
 let tiny = require('tiny-json-http')
 let test = require('tape')
-let sandbox = require('../../../src')
+let sut = join(process.cwd(), 'src')
+let sandbox = require(sut)
 let { url, shutdown } = require('./_utils')
 
 let cwd = process.cwd()
+let mock = join(__dirname, '..', '..', 'mock')
 let data = { hi: 'there' }
 
 test('Set up env', t => {
@@ -15,7 +17,7 @@ test('Set up env', t => {
 
 test('[REST mode / deprecated] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
+  process.chdir(join(mock, 'normal'))
   sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else {
@@ -305,7 +307,7 @@ test('[REST mode / deprecated] Shut down Sandbox', t => {
  */
 test('[REST mode / deprecated] Start Sandbox', t => {
   t.plan(3)
-  process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-index-fail'))
+  process.chdir(join(mock, 'no-index-fail'))
   sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else {
@@ -336,7 +338,7 @@ test('[REST mode / deprecated] Shut down Sandbox', t => {
  */
 test('[REST mode / deprecated] Start Sandbox', t => {
   t.plan(3)
-  process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-index-pass'))
+  process.chdir(join(mock, 'no-index-pass'))
   sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else {
@@ -367,7 +369,7 @@ test('[REST mode / deprecated] Shut down Sandbox', t => {
  */
 test('[REST mode / deprecated] Start Sandbox', t => {
   t.plan(1)
-  process.chdir(path.join(__dirname, '..', '..', 'mock', 'no-http'))
+  process.chdir(join(mock, 'no-http'))
   sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'Sandbox successfully started', 'Sandbox started')

@@ -1,9 +1,11 @@
-let path = require('path')
+let { join } = require('path')
 let tiny = require('tiny-json-http')
 let test = require('tape')
-let { http } = require('../../../src')
+let sut = join(process.cwd(), 'src')
+let { http } = require(sut)
 let { url, verifyShutdown } = require('./_utils')
 let cwd = process.cwd()
+let mock = join(__dirname, '..', '..', 'mock')
 
 test('Set up env', t => {
   t.plan(1)
@@ -17,7 +19,7 @@ test('Set up env', t => {
  */
 test('Sync http.start', t => {
   t.plan(3)
-  process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
+  process.chdir(join(mock, 'normal'))
   http.start({}, function (err, result) {
     if (err) t.fail(err)
     t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
@@ -70,7 +72,7 @@ test('Sync http.end', t => {
 
 test('Async http.start', async t => {
   t.plan(3)
-  process.chdir(path.join(__dirname, '..', '..', 'mock', 'normal'))
+  process.chdir(join(mock, 'normal'))
   try {
     let result = await http.start({})
     t.equal(result, 'HTTP successfully started', 'Sandbox started')

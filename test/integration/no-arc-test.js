@@ -1,9 +1,11 @@
-let path = require('path')
+let { join } = require('path')
 let tiny = require('tiny-json-http')
 let test = require('tape')
-let sandbox = require('../../src')
+let sut = join(process.cwd(), 'src')
+let sandbox = require(sut)
 let getDBClient = require('../../src/tables/_get-db-client')
 let cwd = process.cwd()
+let mock = join(__dirname, '..', 'mock')
 let url = `http://localhost:${process.env.PORT || 3333}`
 
 // Verify sandbox shut down
@@ -14,7 +16,7 @@ let shutdown = (t, err) => {
 test('Set up env', t => {
   t.plan(1)
   t.ok(sandbox, 'Sandbox is present')
-  process.chdir(path.join(__dirname, '..', 'mock', 'no-arc'))
+  process.chdir(join(mock, 'no-arc'))
 })
 
 /**

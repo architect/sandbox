@@ -1,8 +1,9 @@
-let path = require('path')
+let { join } = require('path')
 let proxyquire = require('proxyquire')
 let sinon = require('sinon')
 let test = require('tape')
 let cwd = process.cwd()
+let mock = join(__dirname, '..', '..', '..', 'mock')
 
 // let spy = sinon.spy()
 let nodeFake = sinon.fake((options, request, timeout, callback) => callback(null, { options, request, timeout }))
@@ -18,7 +19,7 @@ let invoke = proxyquire('../../../../src/invoke-lambda', {
 
 test('Set up env', t => {
   t.plan(1)
-  process.chdir(path.join(__dirname, '..', '..', '..', 'mock', 'normal'))
+  process.chdir(join(mock, 'normal'))
   t.ok(invoke, 'Got invoke')
 })
 

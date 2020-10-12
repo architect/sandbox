@@ -1,5 +1,5 @@
-let exists = require('fs').existsSync
-let join = require('path').join
+let { existsSync: exists } = require('fs')
+let { join } = require('path')
 let { parse } = require('url')
 let invoker = require('../invoke-http')
 let { readArc } = require('../../helpers')

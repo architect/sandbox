@@ -6,11 +6,12 @@ let dynamo
 let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
 let cwd = process.cwd()
+let mock = join(__dirname, '..', 'mock')
 
 test('Set up env', t => {
   t.plan(1)
   t.ok(tables, 'Tables module is present')
-  process.chdir(join(__dirname, '..', 'mock', 'normal'))
+  process.chdir(join(mock, 'normal'))
 })
 
 test('Async tables.start', async t => {
