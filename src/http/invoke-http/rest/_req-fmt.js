@@ -10,7 +10,8 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
   let { body, params, resource, url } = req
   let { pathname: path } = URL.parse(url)
 
-  // Maybe de-interpolate path into resource
+  // Resource may be manually supplied via ASAP or greedy root
+  // Otherwise rely on route, as defined in arc.http
   resource = resource || route
   if (route && route.includes('/:')) {
     resource = route.split('/')

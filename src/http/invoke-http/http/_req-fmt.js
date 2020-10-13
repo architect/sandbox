@@ -15,8 +15,10 @@ module.exports = function requestFormatter ({ method, route, req }) {
     version: '2.0'
   }
 
-  // Maybe de-interpolate path into resource
+  // Resource may be manually supplied via ASAP
+  // Otherwise rely on route, as defined in arc.http
   resource = resource || route
+
   // Handle route params
   if (route && route.includes(':')) {
     resource = route.split('/')
