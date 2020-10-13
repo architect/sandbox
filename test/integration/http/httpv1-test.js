@@ -53,8 +53,53 @@ test('[HTTP v1.0 (REST) mode] get /', t => {
   })
 })
 
-// TODO write some query string checks
-// TODO write some cookie checks
+test('[HTTP v1.0 (REST) mode] get /?whats=up', t => {
+  t.plan(16)
+  tiny.get({
+    url: url + '/?whats=up'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get / running the default runtime',
+        resource: '/',
+        path: '/',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: { whats: 'up' },
+        multiValueQueryStringParameters: { whats: [ 'up' ] },
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
+    }
+  })
+})
+
+test('[HTTP v1.0 (REST) mode] get /?whats=up&whats=there', t => {
+  t.plan(16)
+  tiny.get({
+    url: url + '/?whats=up&whats=there'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get / running the default runtime',
+        resource: '/',
+        path: '/',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: { whats: 'there' },
+        multiValueQueryStringParameters: { whats: [ 'up', 'there' ] },
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
+    }
+  })
+})
 
 test('[HTTP v1.0 (REST) mode] get /binary', t => {
   t.plan(17)

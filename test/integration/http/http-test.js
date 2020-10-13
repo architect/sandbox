@@ -52,8 +52,78 @@ test('[HTTP mode] get /', t => {
   })
 })
 
-// TODO write some query string checks
-// TODO write some cookie checks
+test('[HTTP mode] get /?whats=up', t => {
+  t.plan(15)
+  let rawQueryString = 'whats=up'
+  tiny.get({
+    url: url + '/?' + rawQueryString
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get / running the default runtime',
+        routeKey: 'GET /',
+        rawPath: '/',
+        pathParameters: undefined,
+        cookies: undefined,
+        queryStringParameters: { whats: 'up' },
+        rawQueryString,
+        headers: '🤷🏽‍♀️',
+        isBase64Encoded: false,
+        body: undefined,
+      })
+    }
+  })
+})
+
+test('[HTTP mode] get /?whats=up&whats=there', t => {
+  t.plan(15)
+  let rawQueryString = 'whats=up&whats=there'
+  tiny.get({
+    url: url + '/?' + rawQueryString
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get / running the default runtime',
+        routeKey: 'GET /',
+        rawPath: '/',
+        pathParameters: undefined,
+        cookies: undefined,
+        queryStringParameters: { whats: 'up,there' },
+        rawQueryString,
+        headers: '🤷🏽‍♀️',
+        isBase64Encoded: false,
+        body: undefined,
+      })
+    }
+  })
+})
+
+test('[HTTP mode] get / + cookie', t => {
+  t.plan(15)
+  let cookie = 'a=cookie'
+  tiny.get({
+    url,
+    headers: { cookie }
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get / running the default runtime',
+        routeKey: 'GET /',
+        rawPath: '/',
+        pathParameters: undefined,
+        cookies: [ cookie ],
+        queryStringParameters: undefined,
+        rawQueryString: '',
+        headers: '🤷🏽‍♀️',
+        isBase64Encoded: false,
+        body: undefined,
+      })
+    }
+  })
+})
 
 test('[HTTP mode] get /binary', t => {
   t.plan(15)

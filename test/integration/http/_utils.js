@@ -48,7 +48,7 @@ let msgs = {
 
 function checkHttpResult (t, result, checks) {
   t.ok(result, 'Got result!')
-  let { version, body, pathParameters, routeKey, rawPath, requestContext } = result
+  let { version, body, routeKey, rawPath, requestContext } = result
   if (has(result, 'version')) {
     t.equal(version, '2.0', 'Got Lambda v2.0 payload')
   }
@@ -61,9 +61,11 @@ function checkHttpResult (t, result, checks) {
     else if (value === undefined) {
       t.ok(!has(result, param), `${msgs.notReturned}: ${param}`)
     }
-    else if (param === 'pathParameters') {
+    else if (param === 'pathParameters' ||
+             param === 'queryStringParameters' ||
+             param === 'cookies') {
       let val = JSON.stringify(value)
-      t.equal(JSON.stringify(pathParameters), val, `${msgs.correct} ${param}: ${val}`)
+      t.equal(JSON.stringify(result[param]), val, `${msgs.correct} ${param}: ${val}`)
     }
     else if (value === '🤷🏽‍♀️') {
       t.ok(has(result, param), `${msgs.returned} ${param}`)
@@ -95,9 +97,11 @@ function checkRestResult (t, result, checks) {
     else if (value === undefined) {
       t.ok(!has(result, param), `${msgs.notReturned}: ${param}`)
     }
-    else if (param === 'pathParameters') {
+    else if (param === 'pathParameters' ||
+             param === 'queryStringParameters' ||
+             param === 'multiValueQueryStringParameters') {
       let val = JSON.stringify(value)
-      t.equal(JSON.stringify(pathParameters), val, `${msgs.correct} ${param}: ${val}`)
+      t.equal(JSON.stringify(result[param]), val, `${msgs.correct} ${param}: ${val}`)
     }
     else if (value === '🤷🏽‍♀️') {
       t.ok(has(result, param), `${msgs.returned} ${param}`)
