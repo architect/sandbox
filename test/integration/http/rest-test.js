@@ -54,7 +54,7 @@ test('[REST mode] get /binary', t => {
     else {
       const img = Buffer.from(result.body).toString('base64')
       t.ok(result, 'got /binary')
-      let { version } = result.headers
+      let { version } = JSON.parse(result.headers.body)
       t.notOk(version, 'No Lambda payload version specified')
       t.ok(img.includes('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
     }

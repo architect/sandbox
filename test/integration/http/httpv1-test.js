@@ -54,7 +54,7 @@ test('[HTTP v1.0 (REST) mode] get /binary', t => {
     else {
       const img = Buffer.from(result.body).toString('base64')
       t.ok(result, 'got /binary')
-      let { version } = result.headers
+      let { version } = JSON.parse(result.headers.body)
       t.equal(version, '1.0', 'Got Lambda v1.0 payload')
       t.ok(img.includes('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
     }
