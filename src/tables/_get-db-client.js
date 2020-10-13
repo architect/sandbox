@@ -23,7 +23,7 @@ module.exports = function initDynamoClient (callback) {
 
   let tablesPort = process.env.ARC_TABLES_PORT || 5000
   let endpoint = new aws.Endpoint(`http://localhost:${tablesPort}`)
-  let region = 'us-west-2'
+  let region = process.env.AWS_REGION || 'us-west-2'
   let dynamo = new aws.DynamoDB({ endpoint, region })
   callback(null, dynamo)
 }
