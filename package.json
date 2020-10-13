@@ -28,7 +28,7 @@
     "@architect/http-proxy": "~3.12.3",
     "@architect/hydrate": "~1.5.1",
     "@architect/parser": "~2.3.0",
-    "@architect/utils": "~1.5.12",
+    "@architect/utils": "~1.5.13",
     "@begin/hashid": "~1.0.0",
     "aws-sdk": "~2.644.0",
     "body-parser": "~1.19.0",
@@ -49,7 +49,7 @@
     "ws": "~7.3.1"
   },
   "devDependencies": {
-    "@architect/eslint-config": "^0.0.1",
+    "@architect/eslint-config": "^1.0.0",
     "@architect/functions": "^3.13.3",
     "codecov": "^3.8.0",
     "cross-env": "^7.0.2",
