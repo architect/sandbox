@@ -22,7 +22,7 @@ test('Set up env', t => {
 test('Async sandbox.start', async t => {
   t.plan(1)
   try {
-    await sandbox.start()
+    await sandbox.start({ quiet: true })
     t.pass('Sandbox started (async)')
   }
   catch (err) {
@@ -43,7 +43,7 @@ test('Async sandbox.end', async t => {
 
 test('Sync sandbox.start', t => {
   t.plan(1)
-  sandbox.start({}, function (err) {
+  sandbox.start({ quiet: true }, function (err) {
     if (err) t.fail('Sandbox failed (sync)')
     else t.pass('Sandbox started (sync)')
   })

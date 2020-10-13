@@ -14,7 +14,7 @@ test('Set up env', t => {
 test('Async events.start', async t => {
   t.plan(1)
   try {
-    let result = await events.start({})
+    let result = await events.start({ quiet: true })
     t.equal(result, 'Event bus successfully started', 'Events started (async)')
   }
   catch (err) {
@@ -50,7 +50,7 @@ test('Async events.end', async t => {
 
 test('Sync events.start', t => {
   t.plan(1)
-  events.start({}, function (err, result) {
+  events.start({ quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'Event bus successfully started', 'Events started (sync)')
   })

@@ -20,7 +20,7 @@ test('Set up env', t => {
 test('Sync http.start', t => {
   t.plan(3)
   process.chdir(join(mock, 'normal'))
-  http.start({}, function (err, result) {
+  http.start({ quiet: true }, function (err, result) {
     if (err) t.fail(err)
     t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
     t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -74,7 +74,7 @@ test('Async http.start', async t => {
   t.plan(3)
   process.chdir(join(mock, 'normal'))
   try {
-    let result = await http.start({})
+    let result = await http.start({ quiet: true })
     t.equal(result, 'HTTP successfully started', 'Sandbox started')
     t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
     t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')

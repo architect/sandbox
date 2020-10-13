@@ -19,7 +19,7 @@ test('Set up env', t => {
 test('[HTTP v1.0 (REST) mode] Start Sandbox', t => {
   t.plan(4)
   process.chdir(join(mock, 'normal'))
-  sandbox.start({}, function (err, result) {
+  sandbox.start({ quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -523,7 +523,7 @@ test('[HTTP v1.0 (REST) mode] Shut down Sandbox', t => {
 test('[HTTP v1.0 (REST) mode] Start Sandbox', t => {
   t.plan(3)
   process.chdir(join(mock, 'no-index-fail'))
-  sandbox.start({}, function (err, result) {
+  sandbox.start({ quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -554,7 +554,7 @@ test('[HTTP v1.0 (REST) mode] Shut down Sandbox', t => {
 test('[HTTP v1.0 (REST) mode] Start Sandbox', t => {
   t.plan(3)
   process.chdir(join(mock, 'no-index-pass'))
-  sandbox.start({}, function (err, result) {
+  sandbox.start({ quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -589,7 +589,7 @@ test('[HTTP v1.0 (REST) mode] Shut down Sandbox', t => {
 test('[HTTP v1.0 (REST) mode] Start Sandbox', t => {
   t.plan(1)
   process.chdir(join(mock, 'no-http'))
-  sandbox.start({}, function (err, result) {
+  sandbox.start({ quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })

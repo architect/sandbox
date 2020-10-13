@@ -24,7 +24,7 @@ test('Set up env', t => {
  */
 test('Start Sandbox without an Architect project manifest', t => {
   t.plan(1)
-  sandbox.start({}, function (err) {
+  sandbox.start({ quiet: true }, function (err) {
     if (err) t.fail('Sandbox failed (sync)')
     else t.pass('Sandbox started (sync)')
   })
@@ -60,7 +60,7 @@ test('Can list tables', t => {
   })
 })
 
-test('default tables present', t => {
+test('Default tables present', t => {
   t.plan(5)
   let defaultTables = [
     'app-default-production-arc-sessions',
@@ -79,7 +79,7 @@ test('default tables present', t => {
   })
 })
 
-test('shut down sandbox', t => {
+test('Shut down sandbox', t => {
   t.plan(2)
   sandbox.end(() => {
     tiny.get({ url }, err => {

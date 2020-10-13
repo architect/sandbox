@@ -19,11 +19,11 @@ test('Set up env', t => {
   t.ok(sandbox.end, 'Found sandbox.end')
 })
 
-test('sandbox returns a Promise', async t => {
+test('Sandbox returns a Promise', async t => {
   t.plan(8)
   process.chdir(join(mock, 'no-functions'))
   try {
-    await sandbox.start()
+    await sandbox.start({ quiet: true })
     t.pass('sandbox.start returned Promise (without params)')
   }
   catch (err) {
@@ -197,7 +197,7 @@ test('Sandbox has correct env vars populated', async t => {
   }
 })
 
-test('sandbox (Architect v5) has correct env vars populated', async t => {
+test('Sandbox (Architect v5) has correct env vars populated', async t => {
   let roundsOfTesting = 3
   let tests = (roundsOfTesting * envVars.length) + (roundsOfTesting * 2)
   t.plan(tests)
