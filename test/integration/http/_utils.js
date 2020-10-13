@@ -39,7 +39,9 @@ let shutdownAsync = async t => {
   }
 }
 
-// Ok, I know this is a bit ridiculous, but I really don't want to have to manually check every param, so let's automate as many checks possible
+/**
+ * Ok, I know this is a bit ridiculous, but I really don't want to have to manually check every param, so let's automate as many checks possible
+ */
 let msgs = {
   correct: 'Returned correct param',
   returned: 'Returned unverified param',
