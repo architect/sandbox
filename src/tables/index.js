@@ -61,6 +61,9 @@ module.exports = function createTables () {
       function _started (err) {
         if (err) callback(err)
         else {
+          if (hasExternalDb) {
+            update.done('@tables using external local database')
+          }
           update.done('@tables created in local database')
           let msg = 'DynamoDB successfully started'
           callback(null, msg)
@@ -70,13 +73,14 @@ module.exports = function createTables () {
     }
 
     tables.end = function end (callback) {
-      dynamo.close(function _closed (err) {
-        if (err) callback(err)
-        else {
-          let msg = 'DynamoDB successfully shut down'
-          callback(null, msg)
-        }
-      })
+      let msg = 'DynamoDB successfully shut down'
+      if (hasExternalDb) callback(null, msg)
+      else {
+        dynamo.close(function _closed (err) {
+          if (err) callback(err)
+          else callback(null, msg)
+        })
+      }
     }
 
     return tables

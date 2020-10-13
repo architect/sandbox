@@ -4,3 +4,4 @@ coverage/
 node_modules/
 package-lock.json
 test/mock/*/src/*/*/vendor/
+test/mock/*/.db
