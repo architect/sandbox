@@ -2,7 +2,7 @@ let { join } = require('path')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sandbox = require('../../../src')
-let { url, shutdownAsync } = require('./_utils')
+let { url, shutdownAsync, checkHttpResult, checkRestResult } = require('./_utils')
 
 let cwd = process.cwd()
 let mock = join(__dirname, '..', '..', 'mock')
@@ -33,47 +33,55 @@ function teardown (t) {
  * Root param with nested exact match: /:param/there
  */
 test('[HTTP mode] get /hi/there - root param at /:param/there', async t => {
-  t.plan(17)
+  t.plan(23)
   await setup(t, 'http', 'param-exact')
 
   let result
   result = await tiny.get({ url })
   t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
 
-  result = await tiny.get({ url: url + '/hi/there' })
-  t.ok(result, 'got /hi/there')
-  let { message, version, routeKey, rawPath, pathParameters, requestContext } = result.body
-  t.equal(version, '2.0', 'Got Lambda v2.0 payload')
-  t.equal(routeKey, 'GET /{param}/there', 'Got correct routeKey')
-  t.equal(message, 'Hello from get /:param/there running the default runtime', 'Got correct handler response')
-  t.equal(rawPath, '/hi/there', 'Got correct rawPath')
-  t.equal(pathParameters.param, 'hi', 'Got correct pathParameters.param')
-  t.equal(requestContext.http.method, 'GET', 'Got correct method')
-  t.equal(requestContext.http.path, '/hi/there', 'Got correct requestContext.http.path param')
-  t.equal(requestContext.routeKey, 'GET /{param}/there', 'Got correct requestContext.routeKey param')
+  let rawPath = '/hi/there'
+  result = await tiny.get({ url: url + rawPath })
+  checkHttpResult(t, result.body, {
+    message: 'Hello from get /:param/there running the default runtime',
+    routeKey: 'GET /{param}/there',
+    rawPath,
+    pathParameters: { param: 'hi' },
+    cookies: undefined,
+    queryStringParameters: undefined,
+    rawQueryString: '',
+    headers: '🤷🏽‍♀️',
+    isBase64Encoded: false,
+    body: undefined,
+  })
 
   await shutdownAsync(t)
   teardown(t)
 })
 
 test('[HTTP v1.0 (REST) mode] get /hi/there - root param at /:param/there', async t => {
-  t.plan(16)
+  t.plan(24)
   await setup(t, 'httpv1', 'param-exact')
 
   let result
   result = await tiny.get({ url })
   t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
 
-  result = await tiny.get({ url: url + '/hi/there' })
-  t.ok(result, 'got /hi/there')
-  let { message, version, resource, path, pathParameters, requestContext } = result.body
-  t.equal(version, '1.0', 'Got Lambda v2.0 payload')
-  t.equal(message, 'Hello from get /:param/there running the default runtime', 'Got correct handler response')
-  t.equal(resource, '/{param}/there', 'Got correct resource param')
-  t.equal(path, '/hi/there', 'Got correct path param')
-  t.equal(pathParameters.param, 'hi', 'Got correct pathParameters.proxy')
-  t.equal(requestContext.path, '/hi/there', 'Got correct requestContext.path param')
-  t.equal(requestContext.resourcePath, '/{param}/there', 'Got correct requestContext.resourcePath param')
+  let path = '/hi/there'
+  result = await tiny.get({ url: url + path })
+  checkRestResult(t, result.body, {
+    message: 'Hello from get /:param/there running the default runtime',
+    resource: '/{param}/there',
+    path,
+    httpMethod: 'GET',
+    headers: '🤷🏽‍♀️',
+    multiValueHeaders: '🤷🏽‍♀️',
+    queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: { param: 'hi' },
+    body: null,
+    isBase64Encoded: false,
+  })
 
   await shutdownAsync(t)
   teardown(t)
@@ -103,40 +111,45 @@ test('[REST mode] get /hi/there - root param at /:param/there', async t => {
  * Root param only: /:param
  */
 test('[HTTP mode] get / - root param at /:param', async t => {
-  t.plan(17)
+  t.plan(22)
   await setup(t, 'http', 'root-param')
 
   let result = await tiny.get({ url })
-  t.ok(result, 'got /')
-  let { message, version, routeKey, rawPath, pathParameters, requestContext } = result.body
-  t.equal(version, '2.0', 'Got Lambda v2.0 payload')
-  t.equal(routeKey, 'GET /{param}', 'Got correct routeKey')
-  t.equal(message, 'Hello from get /:param running the default runtime', 'Got correct handler response')
-  t.equal(requestContext.http.method, 'GET', 'Got correct method')
-  t.equal(rawPath, '/', 'Got correct rawPath')
-  t.equal(pathParameters.param, '', 'Got correct pathParameters.param')
-  t.equal(requestContext.http.method, 'GET', 'Got correct method')
-  t.equal(requestContext.http.path, '/', 'Got correct requestContext.http.path param')
-  t.equal(requestContext.routeKey, 'GET /{param}', 'Got correct requestContext.routeKey param')
+  checkHttpResult(t, result.body, {
+    message: 'Hello from get /:param running the default runtime',
+    routeKey: 'GET /{param}',
+    rawPath: '/',
+    pathParameters: { param: '' },
+    cookies: undefined,
+    queryStringParameters: undefined,
+    rawQueryString: '',
+    headers: '🤷🏽‍♀️',
+    isBase64Encoded: false,
+    body: undefined,
+  })
 
   await shutdownAsync(t)
   teardown(t)
 })
 
 test('[HTTP v1.0 (REST) mode] get / - root param at /:param', async t => {
-  t.plan(15)
+  t.plan(23)
   await setup(t, 'httpv1', 'root-param')
 
   let result = await tiny.get({ url })
-  t.ok(result, 'got /')
-  let { message, version, resource, path, pathParameters, requestContext } = result.body
-  t.equal(version, '1.0', 'Got Lambda v2.0 payload')
-  t.equal(message, 'Hello from get /:param running the default runtime', 'Got correct handler response')
-  t.equal(resource, '/{param}', 'Got correct resource param')
-  t.equal(path, '/', 'Got correct path param')
-  t.equal(pathParameters.param, '', 'Got correct pathParameters.proxy')
-  t.equal(requestContext.path, '/', 'Got correct requestContext.path param')
-  t.equal(requestContext.resourcePath, '/{param}', 'Got correct requestContext.resourcePath param')
+  checkRestResult(t, result.body, {
+    message: 'Hello from get /:param running the default runtime',
+    resource: '/{param}',
+    path: '/',
+    httpMethod: 'GET',
+    headers: '🤷🏽‍♀️',
+    multiValueHeaders: '🤷🏽‍♀️',
+    queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: { param: '' },
+    body: null,
+    isBase64Encoded: false,
+  })
 
   await shutdownAsync(t)
   teardown(t)
@@ -231,19 +244,24 @@ test('[HTTP v1.0 (REST) mode] get / - greedy index', async t => {
 })
 
 test('[REST mode] get / - greedy index', async t => {
-  t.plan(15)
+  t.plan(23)
   await setup(t, 'rest', 'greedy-get-index')
 
-  let result = await tiny.get({ url: url + '/hi/there' })
-  t.ok(result, 'got /')
-  let { message, version, resource, path, pathParameters, requestContext } = result.body
-  t.notOk(version, 'No Lambda payload version specified')
-  t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
-  t.equal(resource, '/{proxy+}', 'Got correct resource param')
-  t.equal(path, '/hi/there', 'Got correct path param')
-  t.equal(pathParameters.proxy, 'hi/there', 'Got null pathParameters.proxy')
-  t.equal(requestContext.path, '/hi/there', 'Got correct requestContext.path param')
-  t.equal(requestContext.resourcePath, '/{proxy+}', 'Got correct requestContext.resourcePath param')
+  let path = '/hi/there'
+  let result = await tiny.get({ url: url + path })
+  checkRestResult(t, result.body, {
+    message: 'Hello from get / running the default runtime',
+    resource: '/{proxy+}',
+    path,
+    httpMethod: 'GET',
+    headers: '🤷🏽‍♀️',
+    multiValueHeaders: '🤷🏽‍♀️',
+    queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: { proxy: 'hi/there' },
+    body: null,
+    isBase64Encoded: false,
+  })
 
   await shutdownAsync(t)
   teardown(t)

@@ -148,4 +148,13 @@ function checkDeprecatedResult (t, result, checks) {
   })
 }
 
-module.exports = { url, data, verifyShutdown, shutdown, shutdownAsync, checkHttpResult, checkRestResult, checkDeprecatedResult }
+module.exports = {
+  url,
+  data,
+  verifyShutdown,
+  shutdown,
+  shutdownAsync,
+  checkHttpResult,
+  checkRestResult,
+  checkDeprecatedResult
+}
