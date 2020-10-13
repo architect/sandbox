@@ -1,9 +1,10 @@
-let exists = require('fs').existsSync
-let join = require('path').join
+let { existsSync: exists } = require('fs')
+let { join } = require('path')
 let { parse } = require('url')
 let invoker = require('../invoke-http')
 let { readArc } = require('../../helpers')
 let httpProxy = require('http-proxy')
+let { getLambdaName: name } = require('@architect/utils')
 
 /**
  * Handle request fallthrough to @proxy + Arc Static Asset Proxy (ASAP)
@@ -48,8 +49,9 @@ module.exports = function fallback (req, res, next) {
 
   // Look for any route parameter matches
   let params = tokens.filter(t => t.some(v => v.startsWith(':')))
-  let paramMatch = params.filter(t => t.length === current.length).some(p => {
-    // Make a copy because we may mutate
+  let paramsFound = params.filter(t => t.length === current.length)
+  let paramsMatch = paramsFound.some(p => {
+    // Make copies because we may mutate
     let t = [ ...p ]
     // Capture 'any' routes (but only in HTTP APIs)
     if (t[0] === 'any' && httpAPI) t[0] = method
@@ -57,6 +59,14 @@ module.exports = function fallback (req, res, next) {
     let exp = t.map(p => p.startsWith(':') ? '(\\S+)' : p).join('/')
     let reg = new RegExp(exp)
     return reg.test(current.join('/'))
+  })
+
+  // Case for HTTP APIs: params at root (`/:param`) handle root requests
+  let rootParamFound = params.filter(t => t.length === 2 && current.length === 1)
+  let rootParam = rootParamFound.find(p => {
+    // Capture 'any' routes
+    if (p[0] === 'any' && httpAPI) p[0] = method
+    return p[0] === current[0]
   })
 
   // Look for a catchall matches
@@ -78,7 +88,7 @@ module.exports = function fallback (req, res, next) {
   let findRoot = r => {
     let method = r[0].toLowerCase()
     let path = r[1]
-    let rootParam = path.startsWith('/:') && path.split('/:').length === 2
+    let rootParam = path.startsWith('/:') && path.split('/').length === 2
     let isRootMethod = httpAPI
       ? method === 'get' || method === 'any'
       : method === 'get'
@@ -89,10 +99,10 @@ module.exports = function fallback (req, res, next) {
     return isRootMethod && isRootPath
   }
   let hasRoot = arc.http && arc.http.some(findRoot)
-  let hasASAP = !hasRoot && !arc.proxy && !deprecated
+  let hasASAP = !hasRoot && !arc.proxy && !rootParam && !deprecated
 
   // Bail on exact, param, or catchall matches
-  let match = exactMatch || anyMethodMatch || paramMatch || catchallMatch
+  let match = exactMatch || anyMethodMatch || paramsMatch || catchallMatch
 
   // Backwards compatibility with Arc 6+ REST's greedy `get /` (deprecated in Arc 8)
   let restGreedyRoot = apiType === 'rest' && !deprecated && hasRoot && pathname !== '/'
@@ -120,6 +130,18 @@ module.exports = function fallback (req, res, next) {
     else if (exists(local)) pathToFunction = local
     invokeProxy(pathToFunction)
   }
+  // HTTP APIs can fall back to /:param (REST APIs cannot)
+  else if (rootParam && httpAPI) {
+    let pathToFunction = join(process.cwd(), 'src', 'http', `${rootParam[0]}-${name(rootParam[1])}`)
+    let exec = invoker({
+      method,
+      route: `/${rootParam[1]}`,
+      pathToFunction,
+      apiType
+    })
+    req.params = { [rootParam[1].substr(1)]: '' }
+    exec(req, res)
+  }
   // Arc 6 greedy `get /{proxy+}`
   else if (restGreedyRoot) {
     let pathToFunction = join(process.cwd(), 'src', 'http', `get-index`)
@@ -133,15 +155,16 @@ module.exports = function fallback (req, res, next) {
     res.end(message)
   }
 
-  // Invoke with a proxy payload
+  // Invoke a root proxy payload
   function invokeProxy (pathToFunction) {
     let exec = invoker({
       method,
       pathToFunction,
       apiType
     })
+    let proxy = pathname.startsWith('/') ? pathname.substr(1) : pathname
+    req.params = { proxy }
     req.resource = '/{proxy+}'
-    req.params = { proxy: pathname }
     exec(req, res)
   }
 }

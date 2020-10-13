@@ -1,6 +1,6 @@
 let test = require('tape')
 let fs = require('fs')
-let path = require('path')
+let { join } = require('path')
 let sinon = require('sinon')
 let proxyquire = require('proxyquire')
 let sendStub = sinon.stub().returns({
@@ -9,7 +9,7 @@ let sendStub = sinon.stub().returns({
 })
 let origEnv = process.env.ARC_SANDBOX_PATH_TO_STATIC
 let origCwd = process.cwd()
-let mock = path.join(__dirname, '..', '..', '..', '..', 'mock', 'normal')
+let mock = join(__dirname, '..', '..', '..', '..', 'mock', 'normal')
 
 // Assigned in test
 let existsStub
@@ -27,7 +27,7 @@ test('Set up env', t => {
 test('_static test setup', t => {
   t.plan(1)
   process.chdir(mock)
-  process.env.ARC_SANDBOX_PATH_TO_STATIC = path.join(mock, 'public')
+  process.env.ARC_SANDBOX_PATH_TO_STATIC = join(mock, 'public')
   t.equals(process.cwd(), mock)
 })
 
@@ -51,7 +51,7 @@ test('_static should invoke send() with file location if url starts with _static
   existsStub.resetHistory()
   let statStub = sinon.stub(fs, 'statSync').returns({ isFile: sinon.fake.returns(true) })
   let req = { url: '/_static/my.css' }
-  let correct = path.join(mock, 'public', 'my.css')
+  let correct = join(mock, 'public', 'my.css')
   pub(req, null, sinon.fake())
   t.equals(existsStub.lastCall.args[0], correct, 'correct file checked for existence')
   t.equals(statStub.lastCall.args[0], correct, 'correct file stated')

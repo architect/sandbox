@@ -1,8 +1,10 @@
-let path = require('path')
+let { join } = require('path')
 let test = require('tape')
 let tiny = require('tiny-json-http')
-let sandbox = require('../../src')
+let sut = join(process.cwd(), 'src')
+let sandbox = require(sut)
 let cwd = process.cwd()
+let mock = join(__dirname, '..', 'mock')
 let url = `http://localhost:${process.env.PORT || 3333}`
 
 // Verify sandbox shut down
@@ -14,13 +16,13 @@ test('Set up env', t => {
   t.plan(2)
   t.ok(sandbox, 'Sandbox is present')
   t.ok(sandbox.start, 'sandbox.start module is present')
-  process.chdir(path.join(__dirname, '..', 'mock', 'normal'))
+  process.chdir(join(mock, 'normal'))
 })
 
 test('Async sandbox.start', async t => {
   t.plan(1)
   try {
-    await sandbox.start()
+    await sandbox.start({ quiet: true })
     t.pass('Sandbox started (async)')
   }
   catch (err) {
@@ -41,7 +43,7 @@ test('Async sandbox.end', async t => {
 
 test('Sync sandbox.start', t => {
   t.plan(1)
-  sandbox.start({}, function (err) {
+  sandbox.start({ quiet: true }, function (err) {
     if (err) t.fail('Sandbox failed (sync)')
     else t.pass('Sandbox started (sync)')
   })

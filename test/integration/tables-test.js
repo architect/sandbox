@@ -6,17 +6,18 @@ let dynamo
 let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
 let cwd = process.cwd()
+let mock = join(__dirname, '..', 'mock')
 
 test('Set up env', t => {
   t.plan(1)
   t.ok(tables, 'Tables module is present')
-  process.chdir(join(__dirname, '..', 'mock', 'normal'))
+  process.chdir(join(mock, 'normal'))
 })
 
 test('Async tables.start', async t => {
   t.plan(1)
   try {
-    let result = await tables.start({})
+    let result = await tables.start({ quiet: true })
     t.equal(result, 'DynamoDB successfully started', 'Tables started (async)')
   }
   catch (err) {
@@ -57,7 +58,7 @@ test('Async tables.end', async t => {
 
 test('Sync tables.start', t => {
   t.plan(1)
-  tables.start({}, function (err, result) {
+  tables.start({ quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
   })
@@ -177,7 +178,7 @@ test('Sync tables.end', t => {
 test('Sync tables.start (deprecated)', t => {
   t.plan(1)
   process.env.DEPRECATED = true
-  tables.start({}, function (err, result) {
+  tables.start({ quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
   })

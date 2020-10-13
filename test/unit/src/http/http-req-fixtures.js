@@ -125,6 +125,25 @@ let arc7 = {
     isBase64Encoded: false
   },
 
+  // get /{proxy+}
+  getProxyPlus: {
+    version: '2.0',
+    routeKey: 'GET /{proxy+}',
+    rawPath: '/nature/hiking',
+    rawQueryString: '',
+    cookies,
+    headers,
+    requestContext: {
+      http: {
+        method: 'GET',
+        path: '/nature/hiking',
+      },
+      routeKey: 'GET /{proxy+}',
+    },
+    pathParameters: { proxy: 'nature/hiking' },
+    isBase64Encoded: false
+  },
+
   // get /$default
   // Deprecated in Arc 8, but possibly added via Macro
   get$default: {
@@ -383,7 +402,7 @@ let arc6 = {
     multiValueHeaders,
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
-    pathParameters: { proxy: '/nature/hiking' },
+    pathParameters: { proxy: 'nature/hiking' },
     body: null,
     isBase64Encoded: false,
     requestContext: {

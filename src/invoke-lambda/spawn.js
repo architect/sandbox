@@ -1,5 +1,5 @@
 let { updater } = require('@architect/utils')
-let spawn = require('child_process').spawn
+let { spawn } = require('child_process')
 let kill = require('tree-kill')
 
 module.exports = function spawnChild (command, args, options, request, timeout, callback) {

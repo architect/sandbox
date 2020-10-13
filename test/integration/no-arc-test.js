@@ -1,9 +1,11 @@
-let path = require('path')
+let { join } = require('path')
 let tiny = require('tiny-json-http')
 let test = require('tape')
-let sandbox = require('../../src')
+let sut = join(process.cwd(), 'src')
+let sandbox = require(sut)
 let getDBClient = require('../../src/tables/_get-db-client')
 let cwd = process.cwd()
+let mock = join(__dirname, '..', 'mock')
 let url = `http://localhost:${process.env.PORT || 3333}`
 
 // Verify sandbox shut down
@@ -14,7 +16,7 @@ let shutdown = (t, err) => {
 test('Set up env', t => {
   t.plan(1)
   t.ok(sandbox, 'Sandbox is present')
-  process.chdir(path.join(__dirname, '..', 'mock', 'no-arc'))
+  process.chdir(join(mock, 'no-arc'))
 })
 
 /**
@@ -22,7 +24,7 @@ test('Set up env', t => {
  */
 test('Start Sandbox without an Architect project manifest', t => {
   t.plan(1)
-  sandbox.start({}, function (err) {
+  sandbox.start({ quiet: true }, function (err) {
     if (err) t.fail('Sandbox failed (sync)')
     else t.pass('Sandbox started (sync)')
   })
@@ -58,7 +60,7 @@ test('Can list tables', t => {
   })
 })
 
-test('default tables present', t => {
+test('Default tables present', t => {
   t.plan(5)
   let defaultTables = [
     'app-default-production-arc-sessions',
@@ -77,7 +79,7 @@ test('default tables present', t => {
   })
 })
 
-test('shut down sandbox', t => {
+test('Shut down sandbox', t => {
   t.plan(2)
   sandbox.end(() => {
     tiny.get({ url }, err => {

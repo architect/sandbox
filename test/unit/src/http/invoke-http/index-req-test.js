@@ -114,7 +114,6 @@ test('Architect v7 (HTTP API mode): get /?whats=up', t => {
     params: {}
   }
   handler(input, response)
-  // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
   checkArcV7HttpResult(mock, req, t)
 })
@@ -133,7 +132,6 @@ test('Architect v7 (HTTP API mode): get /?whats=up&whats=there', t => {
     params: {}
   }
   handler(input, response)
-  // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
   checkArcV7HttpResult(mock, req, t)
 })
@@ -152,7 +150,24 @@ test('Architect v7 (HTTP API mode): get /nature/hiking', t => {
     params: mock.pathParameters
   }
   handler(input, response)
-  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV7HttpResult(mock, req, t)
+})
+
+test('Architect v7 (HTTP API mode): get /{proxy+}', t => {
+  let mock = arc7.getProxyPlus
+  t.plan(httpParams.length)
+  let method = 'GET'
+  let route = '/*'
+  let apiType = 'http'
+  let handler = invoke({ method, route, apiType })
+  let input = {
+    url: url('/nature/hiking'),
+    body: {},
+    headers,
+    params: { '0': mock.pathParameters.proxy }
+  }
+  handler(input, response)
   let req = lambdaStub.args[0][1]
   checkArcV7HttpResult(mock, req, t)
 })
@@ -171,7 +186,6 @@ test('Architect v7 (HTTP API mode): get /path/* (/path/hi/there)', t => {
     params: { '0': mock.pathParameters.proxy }
   }
   handler(input, response)
-  // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
   checkArcV7HttpResult(mock, req, t)
 })
@@ -191,7 +205,25 @@ test('Architect v7 (HTTP API mode): post /form (JSON)', t => {
     isBase64Encoded: false // Assumes flag is set in binary handler
   }
   handler(input, response)
-  // Compare handler-generated request to mock
+  let req = lambdaStub.args[0][1]
+  checkArcV7HttpResult(mock, req, t)
+})
+
+test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', t => {
+  let mock = arc7.postFormURL
+  t.plan(httpParams.length)
+  let method = 'POST'
+  let route = '/form'
+  let apiType = 'http'
+  let handler = invoke({ method, route, apiType })
+  let input = {
+    url: url('/form'),
+    body: mock.body,
+    headers: mock.headers,
+    params: {},
+    isBase64Encoded: true
+  }
+  handler(input, response)
   let req = lambdaStub.args[0][1]
   checkArcV7HttpResult(mock, req, t)
 })
@@ -211,7 +243,6 @@ test('Architect v7 (HTTP API mode): post /form (multipart form data)', t => {
     isBase64Encoded: true // Assumes flag is set in binary handler
   }
   handler(input, response)
-  // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
   checkArcV7HttpResult(mock, req, t)
 })
@@ -231,7 +262,6 @@ test('Architect v7 (HTTP API mode): post /form (octet stream)', t => {
     isBase64Encoded: true // Assumes flag is set in binary handler
   }
   handler(input, response)
-  // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
   checkArcV7HttpResult(mock, req, t)
 })
@@ -251,7 +281,6 @@ test('Architect v7 (HTTP API mode): put /form (JSON)', t => {
     isBase64Encoded: false // Assumes flag is set in binary handler
   }
   handler(input, response)
-  // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
   checkArcV7HttpResult(mock, req, t)
 })
@@ -271,7 +300,6 @@ test('Architect v7 (HTTP API mode): patch /form (JSON)', t => {
     isBase64Encoded: false // Assumes flag is set in binary handler
   }
   handler(input, response)
-  // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
   checkArcV7HttpResult(mock, req, t)
 })
@@ -291,7 +319,6 @@ test('Architect v7 (HTTP API mode): delete /form (JSON)', t => {
     isBase64Encoded: false // Assumes flag is set in binary handler
   }
   handler(input, response)
-  // Compare handler-generated request to mock
   let req = lambdaStub.args[0][1]
   checkArcV7HttpResult(mock, req, t)
 })
@@ -429,15 +456,14 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /{proxy+}', t => {
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let method = 'GET'
-  let route = '/'
+  let route = '/*'
   let apiType = 'httpv1'
   let handler = invoke({ method, route, apiType })
   let input = {
     url: url('/nature/hiking'),
-    resource: '/{proxy+}',
     body: {},
     headers,
-    params: mock.pathParameters
+    params: { '0': mock.pathParameters.proxy }
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
@@ -449,15 +475,14 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /path/* (/path/hi/there)', t
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let method = 'GET'
-  let route = '/'
+  let route = '/path/*'
   let apiType = 'httpv1'
   let handler = invoke({ method, route, apiType })
   let input = {
     url: url('/path/hi/there'),
-    resource: '/path/{proxy+}',
     body: {},
     headers,
-    params: mock.pathParameters
+    params: { '0': mock.pathParameters.proxy }
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
@@ -502,7 +527,6 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', 
   handler(input, response)
   let req = lambdaStub.args[0][1]
   checkArcV6RestResult(params, mock, req, t)
-  teardown()
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (multipart form data)', t => {
@@ -687,19 +711,20 @@ test('Architect v6 (REST API mode): get /nature/hiking', t => {
 })
 
 test('Architect v6 (REST API mode): get /{proxy+}', t => {
+  // Not normally how we'd do this test but get /{proxy+} in REST-land is only possible via greedy root, so resource, params, etc. are passed in via middleware
   let mock = arc6.getProxyPlus
   let params = Object.keys(mock)
   t.plan(params.length + 2)
   let method = 'GET'
-  let route = '/'
+  let route = '/' // Would normally be /*
   let apiType = 'rest'
   let handler = invoke({ method, route, apiType })
   let input = {
     url: url('/nature/hiking'),
-    resource: '/{proxy+}',
+    resource: '/{proxy+}', // The only time we should be using this
     body: {},
     headers,
-    params: mock.pathParameters
+    params: mock.pathParameters // Would normally be { '0': ... }
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
@@ -744,7 +769,6 @@ test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
   handler(input, response)
   let req = lambdaStub.args[0][1]
   checkArcV6RestResult(params, mock, req, t)
-  teardown()
 })
 
 test('Architect v6 (REST API mode): post /form (multipart form data)', t => {

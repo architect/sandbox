@@ -1,4 +1,4 @@
-let join = require('path').join
+let { join } = require('path')
 
 module.exports = function getPath (name) {
   let wsName = name => process.env.DEPRECATED ? `ws-${name}` : name

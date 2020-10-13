@@ -4,6 +4,7 @@ let sandbox = require('../../../src')
 let { join } = require('path')
 let series = require('run-series')
 let origCwd = process.cwd()
+let mock = join(__dirname, '..', '..', 'mock')
 let url = `http://localhost:${process.env.PORT || 3333}`
 
 // Verify sandbox shut down
@@ -18,11 +19,11 @@ test('Set up env', t => {
   t.ok(sandbox.end, 'Found sandbox.end')
 })
 
-test('sandbox returns a Promise', async t => {
+test('Sandbox returns a Promise', async t => {
   t.plan(8)
-  process.chdir(join(__dirname, '..', '..', 'mock', 'no-functions'))
+  process.chdir(join(mock, 'no-functions'))
   try {
-    await sandbox.start()
+    await sandbox.start({ quiet: true })
     t.pass('sandbox.start returned Promise (without params)')
   }
   catch (err) {
@@ -131,7 +132,7 @@ test('Sandbox has correct env vars populated', async t => {
   let roundsOfTesting = 3
   let tests = (roundsOfTesting * envVars.length) + (roundsOfTesting * 2)
   t.plan(tests)
-  process.chdir(join(__dirname, '..', '..', 'mock', 'normal'))
+  process.chdir(join(mock, 'normal'))
 
   // Architect 6+ (local)
   try {
@@ -196,11 +197,11 @@ test('Sandbox has correct env vars populated', async t => {
   }
 })
 
-test('sandbox (Architect v5) has correct env vars populated', async t => {
+test('Sandbox (Architect v5) has correct env vars populated', async t => {
   let roundsOfTesting = 3
   let tests = (roundsOfTesting * envVars.length) + (roundsOfTesting * 2)
   t.plan(tests)
-  process.chdir(join(__dirname, '..', '..', 'mock', 'normal'))
+  process.chdir(join(mock, 'normal'))
 
   // Architect 5 (local)
   try {

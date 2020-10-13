@@ -1,6 +1,6 @@
 let chalk = require('chalk')
 let depStatus = require('depstatus')
-let exists = require('fs').existsSync
+let { existsSync: exists } = require('fs')
 let glob = require('glob')
 let { join } = require('path')
 let hydrate = require('@architect/hydrate')
