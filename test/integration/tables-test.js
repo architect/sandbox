@@ -6,6 +6,7 @@ let getDBClient = require('../../src/tables/_get-db-client')
 let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
 let mock = join(__dirname, '..', 'mock')
+let str = s => JSON.stringify(s, null, 2)
 let cwd = process.cwd()
 let dynamo
 let dbPort = 4567
@@ -104,7 +105,7 @@ test('Can insert a row', t => {
   },
   function _put (err, result) {
     if (err) t.fail(err)
-    else t.ok(result, `Got result: ${result}`)
+    else t.ok(result, `Got result: ${str(result)}`)
   })
 })
 
@@ -145,7 +146,7 @@ test('Can read the row', t => {
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else t.ok(result, `Got result: ${result}`)
+    else t.ok(result, `Got result: ${str(result)}`)
   })
 })
 
@@ -163,7 +164,7 @@ test('Can query the index', t => {
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else t.ok(result, `Got result: ${result}`)
+    else t.ok(result, `Got result: ${str(result)}`)
   })
 })
 
@@ -306,7 +307,7 @@ test('Can insert a row', t => {
   },
   function _put (err, result) {
     if (err) t.fail(err)
-    else t.ok(result, `Got result: ${result}`)
+    else t.ok(result, `Got result: ${str(result)}`)
   })
 })
 
@@ -347,7 +348,7 @@ test('Can read the row', t => {
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else t.ok(result, `Got result: ${result}`)
+    else t.ok(result, `Got result: ${str(result)}`)
   })
 })
 
@@ -365,7 +366,7 @@ test('Can query the index', t => {
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else t.ok(result, `Got result: ${result}`)
+    else t.ok(result, `Got result: ${str(result)}`)
   })
 })
 

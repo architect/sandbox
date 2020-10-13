@@ -61,6 +61,9 @@ module.exports = function createTables () {
       function _started (err) {
         if (err) callback(err)
         else {
+          if (hasExternalDb) {
+            update.done('@tables using external local database')
+          }
           update.done('@tables created in local database')
           let msg = 'DynamoDB successfully started'
           callback(null, msg)
