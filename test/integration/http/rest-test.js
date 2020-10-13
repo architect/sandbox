@@ -3,12 +3,11 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { url, shutdown } = require('./_utils')
+let { url, data, shutdown, checkRestResult: checkResult } = require('./_utils')
 
 let cwd = process.cwd()
 let mock = join(__dirname, '..', '..', 'mock')
 let b64dec = i => Buffer.from(i, 'base64').toString()
-let data = { hi: 'there' }
 
 test('Set up env', t => {
   t.plan(1)
@@ -31,152 +30,255 @@ test('[REST mode] Start Sandbox', t => {
 })
 
 test('[REST mode] get /', t => {
-  t.plan(3)
+  t.plan(16)
   tiny.get({
     url
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get / running the default runtime',
+        resource: '/',
+        path: '/',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
     }
   })
 })
 
+// TODO write some query string checks
+// TODO write some cookie checks
+
 test('[REST mode] get /binary', t => {
-  t.plan(3)
+  t.plan(17)
+  let path = '/binary'
   tiny.get({
-    url: url + '/binary'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
+      checkResult(t, JSON.parse(result.headers.body), {
+        message: 'Hello from get /binary',
+        resource: path,
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
       const img = Buffer.from(result.body).toString('base64')
-      t.ok(result, 'got /binary')
-      let { version } = JSON.parse(result.headers.body)
-      t.notOk(version, 'No Lambda payload version specified')
       t.ok(img.includes('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
     }
   })
 })
 
 test('[REST mode] get /nodejs12.x', t => {
-  t.plan(3)
+  t.plan(16)
+  let path = '/nodejs12.x'
   tiny.get({
-    url: url + '/nodejs12.x'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /nodejs12.x')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get /nodejs12.x (running nodejs12.x)', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get /nodejs12.x (running nodejs12.x)',
+        resource: path,
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
     }
   })
 })
 
 test('[REST mode] get /nodejs10.x', t => {
-  t.plan(3)
+  t.plan(16)
+  let path = '/nodejs10.x'
   tiny.get({
-    url: url + '/nodejs10.x'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /nodejs10.x')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get /nodejs10.x (running nodejs10.x)', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get /nodejs10.x (running nodejs10.x)',
+        resource: path,
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
     }
   })
 })
 
 test('[REST mode] get /nodejs8.10', t => {
-  t.plan(3)
+  t.plan(16)
+  let path = '/nodejs8.10'
   tiny.get({
-    url: url + '/nodejs8.10'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /nodejs8.10')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get /nodejs8.10 (running nodejs8.10)', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get /nodejs8.10 (running nodejs8.10)',
+        resource: path,
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
     }
   })
 })
 
 test('[REST mode] get /python3.8', t => {
-  t.plan(3)
+  t.plan(16)
+  let path = '/python3.8'
   tiny.get({
-    url: url + '/python3.8'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /python3.8')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get /python3.8 (running python3.8)', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get /python3.8 (running python3.8)',
+        resource: path,
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
     }
   })
 })
 
 test('[REST mode] get /python3.7', t => {
-  t.plan(3)
+  t.plan(16)
+  let path = '/python3.7'
   tiny.get({
-    url: url + '/python3.7'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /python3.7')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get /python3.7 (running python3.7)', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get /python3.7 (running python3.7)',
+        resource: path,
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
     }
   })
 })
 
 test('[REST mode] get /python3.6', t => {
-  t.plan(3)
+  t.plan(16)
+  let path = '/python3.6'
   tiny.get({
-    url: url + '/python3.6'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /python3.6')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get /python3.6 (running python3.6)', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get /python3.6 (running python3.6)',
+        resource: path,
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
     }
   })
 })
 
 test('[REST mode] get /ruby2.5', t => {
-  t.plan(3)
+  t.plan(16)
+  let path = '/ruby2.5'
   tiny.get({
-    url: url + '/ruby2.5'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /ruby2.5')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from Architect Sandbox running ruby2.5!', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from Architect Sandbox running ruby2.5!',
+        resource: path,
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
     }
   })
 })
 
 test('[REST mode] get /deno', t => {
-  t.plan(3)
+  t.plan(16)
+  let path = '/deno'
   tiny.get({
-    url: url + '/deno'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /deno')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from Architect Sandbox running deno!', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from Architect Sandbox running deno!',
+        resource: path,
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
     }
   })
 })
@@ -196,74 +298,107 @@ test('[REST mode] get /no-return (noop)', t => {
 })
 
 test('[REST mode] post /post', t => {
-  t.plan(5)
+  t.plan(16)
+  let path = '/post'
   tiny.post({
-    url: url + '/post',
+    url: url + path,
     data,
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'posted /post')
-      let { body, message, isBase64Encoded, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from post /post', 'Got correct handler response')
-      t.equal(b64dec(body), 'hi=there', 'Got base64-encoded form URL-encoded body payload')
-      t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
+      checkResult(t, result.body, {
+        message: 'Hello from post /post',
+        resource: path,
+        path,
+        httpMethod: 'POST',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        // body: true,
+        isBase64Encoded: true,
+      })
+      t.equal(b64dec(result.body.body), 'hi=there', 'Got base64-encoded form URL-encoded body payload')
     }
   })
 })
 
 test('[REST mode] put /put', t => {
-  t.plan(5)
+  t.plan(16)
+  let path = '/put'
   tiny.put({
-    url: url + '/put',
+    url: url + path,
     data,
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'put /put')
-      let { body, message, isBase64Encoded, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from put /put', 'Got correct handler response')
-      t.equal(b64dec(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
-      t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
+      checkResult(t, result.body, {
+        message: 'Hello from put /put',
+        resource: path,
+        path,
+        httpMethod: 'PUT',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: true,
+        isBase64Encoded: true,
+      })
     }
   })
 })
 
 test('[REST mode] patch /patch', t => {
-  t.plan(5)
+  t.plan(16)
+  let path = '/patch'
   tiny.patch({
-    url: url + '/patch',
+    url: url + path,
     data,
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'patched /patch')
-      let { body, message, isBase64Encoded, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from patch /patch', 'Got correct handler response')
-      t.equal(b64dec(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
-      t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
+      checkResult(t, result.body, {
+        message: 'Hello from patch /patch',
+        resource: path,
+        path,
+        httpMethod: 'PATCH',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: true,
+        isBase64Encoded: true,
+      })
     }
   })
 })
 
 test('[REST mode] delete /delete', t => {
-  t.plan(5)
+  t.plan(16)
+  let path = '/delete'
   tiny.del({
-    url: url + '/delete',
+    url: url + path,
     data,
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'deleted /delete')
-      let { body, message, isBase64Encoded, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from delete /delete', 'Got correct handler response')
-      t.equal(b64dec(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
-      t.ok(isBase64Encoded, 'Got isBase64Encoded flag')
+      checkResult(t, result.body, {
+        message: 'Hello from delete /delete',
+        resource: path,
+        path,
+        httpMethod: 'DELETE',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: true,
+        isBase64Encoded: true,
+      })
     }
   })
 })
@@ -288,61 +423,76 @@ test('[REST mode] post / - route should fail when not explicitly defined, but on
 })
 
 test('[REST mode] get /foobar – route should fall through to greedy root', t => {
-  t.plan(8)
+  t.plan(16)
+  let path = '/foobar'
   tiny.get({
-    url: url + '/foobar',
+    url: url + path,
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /')
-      let { message, version, resource, path, pathParameters, requestContext } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
-      t.equal(resource, '/{proxy+}', 'Got correct resource param')
-      t.equal(path, '/foobar', 'Got correct path param')
-      t.equal(pathParameters.proxy, 'foobar', 'Got correct pathParameters.proxy')
-      t.equal(requestContext.path, '/foobar', 'Got correct requestContext.path param')
-      t.equal(requestContext.resourcePath, '/{proxy+}', 'Got correct requestContext.resourcePath param')
+      checkResult(t, result.body, {
+        message: 'Hello from get / running the default runtime',
+        resource: '/{proxy+}',
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: { proxy: 'foobar' },
+        body: null,
+        isBase64Encoded: false,
+      })
     }
   })
 })
 
 test('[REST mode] get /path/* – route should fall through to greedy root because catchalls are not supported in this mode', t => {
-  t.plan(8)
+  t.plan(16)
+  let path = '/path/hello/there'
   tiny.get({
-    url: url + '/path/hello/there'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /')
-      let { message, version, resource, path, pathParameters, requestContext } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
-      t.equal(resource, '/{proxy+}', 'Got correct resource param')
-      t.equal(path, '/path/hello/there', 'Got correct path param')
-      t.equal(pathParameters.proxy, 'path/hello/there', 'Got correct pathParameters.proxy')
-      t.equal(requestContext.path, '/path/hello/there', 'Got correct requestContext.path param')
-      t.equal(requestContext.resourcePath, '/{proxy+}', 'Got correct requestContext.resourcePath param')
+      checkResult(t, result.body, {
+        message: 'Hello from get / running the default runtime',
+        resource: '/{proxy+}',
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: { proxy: 'path/hello/there' },
+        body: null,
+        isBase64Encoded: false,
+      })
     }
   })
 })
 
 test(`[REST mode] get /any – route should fall through to greedy root because 'any' is not supported in this mode`, t => {
-  t.plan(8)
+  t.plan(16)
+  let path = '/any'
   tiny.get({
-    url: url + '/any'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /')
-      let { message, version, resource, path, pathParameters, requestContext } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
-      t.equal(resource, '/{proxy+}', 'Got correct resource param')
-      t.equal(path, '/any', 'Got correct path param')
-      t.equal(pathParameters.proxy, 'any', 'Got correct pathParameters.proxy')
-      t.equal(requestContext.path, '/any', 'Got correct requestContext.path param')
-      t.equal(requestContext.resourcePath, '/{proxy+}', 'Got correct requestContext.resourcePath param')
+      checkResult(t, result.body, {
+        message: 'Hello from get / running the default runtime',
+        resource: '/{proxy+}',
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: { proxy: 'any' },
+        body: null,
+        isBase64Encoded: false,
+      })
     }
   })
 })
