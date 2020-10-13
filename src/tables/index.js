@@ -70,14 +70,12 @@ module.exports = function createTables () {
     }
 
     tables.end = function end (callback) {
-      if (hasExternalDb) callback()
+      let msg = 'DynamoDB successfully shut down'
+      if (hasExternalDb) callback(null, msg)
       else {
         dynamo.close(function _closed (err) {
           if (err) callback(err)
-          else {
-            let msg = 'DynamoDB successfully shut down'
-            callback(null, msg)
-          }
+          else callback(null, msg)
         })
       }
     }
