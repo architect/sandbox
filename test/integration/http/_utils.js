@@ -82,7 +82,7 @@ function checkHttpResult (t, result, checks) {
 
 function checkRestResult (t, result, checks) {
   t.ok(result, 'Got result!')
-  let { version, body, path, pathParameters, httpMethod, resource, requestContext } = result
+  let { version, body, path, httpMethod, resource, requestContext } = result
   if (has(result, 'version')) {
     t.equal(version, '1.0', 'Got Lambda v1.0 payload')
   }
