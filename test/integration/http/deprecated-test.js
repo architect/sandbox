@@ -3,11 +3,10 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { url, shutdown } = require('./_utils')
+let { url, data, shutdown, checkDeprecatedResult: checkResult } = require('./_utils')
 
 let cwd = process.cwd()
 let mock = join(__dirname, '..', '..', 'mock')
-let data = { hi: 'there' }
 
 test('Set up env', t => {
   t.plan(1)
@@ -30,160 +29,296 @@ test('[REST mode / deprecated] Start Sandbox', t => {
 })
 
 test('[REST mode / deprecated] get /', t => {
-  t.plan(3)
+  t.plan(12)
   tiny.get({
     url
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get / running the default runtime', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get / running the default runtime',
+        path: '/',
+        method: 'GET',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: {},
+        isBase64Encoded: undefined,
+      })
+    }
+  })
+})
+
+test('[REST mode / deprecated] get /?whats=up', t => {
+  t.plan(12)
+  tiny.get({
+    url: url + '/?whats=up'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get / running the default runtime',
+        path: '/',
+        method: 'GET',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        query: { whats: 'up' },
+        queryStringParameters: { whats: 'up' },
+        params: {},
+        body: {},
+        isBase64Encoded: undefined,
+      })
+    }
+  })
+})
+
+test('[REST mode / deprecated] get /?whats=up&whats=there', t => {
+  t.plan(12)
+  tiny.get({
+    url: url + '/?whats=up&whats=there'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get / running the default runtime',
+        path: '/',
+        method: 'GET',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        query: { whats: 'there' },
+        queryStringParameters: { whats: 'there' },
+        params: {},
+        body: {},
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
 
 test('[REST mode / deprecated] get /binary', t => {
-  t.plan(3)
+  t.plan(12)
+  let path = '/binary'
   tiny.get({
-    url: url + '/binary'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
+      checkResult(t, JSON.parse(result.headers.body), {
+        message: 'Hello from get /binary',
+        path,
+        method: 'GET',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        isBase64Encoded: undefined,
+      })
       const img = Buffer.from(result.body).toString('base64')
-      t.ok(result, 'got /binary')
-      let { version } = result.headers
-      t.notOk(version, 'No Lambda payload version specified')
       t.ok(img.includes('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
     }
   })
 })
 
 test('[REST mode / deprecated] get /nodejs12.x', t => {
-  t.plan(3)
+  t.plan(12)
+  let path = '/nodejs12.x'
   tiny.get({
-    url: url + '/nodejs12.x'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /nodejs12.x')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get /nodejs12.x (running nodejs12.x)', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get /nodejs12.x (running nodejs12.x)',
+        path,
+        method: 'GET',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: {},
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
 
 test('[REST mode / deprecated] get /nodejs10.x', t => {
-  t.plan(3)
+  t.plan(12)
+  let path = '/nodejs10.x'
   tiny.get({
-    url: url + '/nodejs10.x'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /nodejs10.x')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get /nodejs10.x (running nodejs10.x)', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get /nodejs10.x (running nodejs10.x)',
+        path,
+        method: 'GET',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: {},
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
 
 test('[REST mode / deprecated] get /nodejs8.10', t => {
-  t.plan(3)
+  t.plan(12)
+  let path = '/nodejs8.10'
   tiny.get({
-    url: url + '/nodejs8.10'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /nodejs8.10')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get /nodejs8.10 (running nodejs8.10)', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get /nodejs8.10 (running nodejs8.10)',
+        path,
+        method: 'GET',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: {},
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
 
 test('[REST mode / deprecated] get /python3.8', t => {
-  t.plan(3)
+  t.plan(12)
+  let path = '/python3.8'
   tiny.get({
-    url: url + '/python3.8'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /python3.8')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get /python3.8 (running python3.8)', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get /python3.8 (running python3.8)',
+        path,
+        method: 'GET',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: {},
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
 
 test('[REST mode / deprecated] get /python3.7', t => {
-  t.plan(3)
+  t.plan(12)
+  let path = '/python3.7'
   tiny.get({
-    url: url + '/python3.7'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /python3.7')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get /python3.7 (running python3.7)', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get /python3.7 (running python3.7)',
+        path,
+        method: 'GET',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: {},
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
 
 test('[REST mode / deprecated] get /python3.6', t => {
-  t.plan(3)
+  t.plan(12)
+  let path = '/python3.6'
   tiny.get({
-    url: url + '/python3.6'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /python3.6')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from get /python3.6 (running python3.6)', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from get /python3.6 (running python3.6)',
+        path,
+        method: 'GET',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: {},
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
 
 test('[REST mode / deprecated] get /ruby2.5', t => {
-  t.plan(3)
+  t.plan(12)
+  let path = '/ruby2.5'
   tiny.get({
-    url: url + '/ruby2.5'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /ruby2.5')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from Architect Sandbox running ruby2.5!', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from Architect Sandbox running ruby2.5!',
+        path,
+        method: 'GET',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: {},
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
 
 test('[REST mode / deprecated] get /deno', t => {
-  t.plan(3)
+  t.plan(12)
+  let path = '/deno'
   tiny.get({
-    url: url + '/deno'
+    url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'got /deno')
-      let { message, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from Architect Sandbox running deno!', 'Got correct handler response')
+      checkResult(t, result.body, {
+        message: 'Hello from Architect Sandbox running deno!',
+        path,
+        method: 'GET',
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: {},
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
 
 test('[REST mode / deprecated] get /no-return (noop)', t => {
   t.plan(2)
+  let path = '/no-return'
   tiny.get({
-    url: url + '/no-return'
+    url: url + path
   }, function _got (err, result) {
     if (err) {
       let message = 'Async error'
@@ -195,75 +330,102 @@ test('[REST mode / deprecated] get /no-return (noop)', t => {
 })
 
 test('[REST mode / deprecated] post /post', t => {
-  t.plan(5)
+  t.plan(12)
+  let path = '/post'
   tiny.post({
-    url: url + '/post',
+    url: url + path,
     data,
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'posted /post')
-      let { body, message, isBase64Encoded, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from post /post', 'Got correct handler response')
-      // t.equal(b64dec(body), 'hi=there', 'Got base64-encoded form URL-encoded body payload')
-      t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded form URL-encoded body payload')
-      t.notOk(isBase64Encoded, 'No isBase64Encoded flag')
+      checkResult(t, result.body, {
+        message: 'Hello from post /post',
+        path,
+        method: 'POST',
+        httpMethod: 'POST',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: data,
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
 
 test('[REST mode / deprecated] put /put', t => {
-  t.plan(5)
+  t.plan(12)
+  let path = '/put'
   tiny.put({
-    url: url + '/put',
+    url: url + path,
     data,
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'put /put')
-      let { body, message, isBase64Encoded, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from put /put', 'Got correct handler response')
-      t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded JSON-serialized body payload')
-      t.notOk(isBase64Encoded, 'No isBase64Encoded flag')
+      checkResult(t, result.body, {
+        message: 'Hello from put /put',
+        path,
+        method: 'PUT',
+        httpMethod: 'PUT',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: data,
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
 
 test('[REST mode / deprecated] patch /patch', t => {
-  t.plan(5)
+  t.plan(12)
+  let path = '/patch'
   tiny.patch({
-    url: url + '/patch',
+    url: url + path,
     data,
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'patched /patch')
-      let { body, message, isBase64Encoded, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from patch /patch', 'Got correct handler response')
-      t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded JSON-serialized body payload')
-      t.notOk(isBase64Encoded, 'No isBase64Encoded flag')
+      checkResult(t, result.body, {
+        message: 'Hello from patch /patch',
+        path,
+        method: 'PATCH',
+        httpMethod: 'PATCH',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: data,
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
 
 test('[REST mode / deprecated] delete /delete', t => {
-  t.plan(5)
+  t.plan(12)
+  let path = '/delete'
   tiny.del({
-    url: url + '/delete',
+    url: url + path,
     data,
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
-      t.ok(result, 'deleted /delete')
-      let { body, message, isBase64Encoded, version } = result.body
-      t.notOk(version, 'No Lambda payload version specified')
-      t.equal(message, 'Hello from delete /delete', 'Got correct handler response')
-      t.equal(JSON.stringify(body), JSON.stringify(data), 'Got base64-encoded JSON-serialized body payload')
-      t.notOk(isBase64Encoded, 'No isBase64Encoded flag')
+      checkResult(t, result.body, {
+        message: 'Hello from delete /delete',
+        path,
+        method: 'DELETE',
+        httpMethod: 'DELETE',
+        headers: '🤷🏽‍♀️',
+        query: {},
+        queryStringParameters: {},
+        params: {},
+        body: data,
+        isBase64Encoded: undefined,
+      })
     }
   })
 })
@@ -286,7 +448,7 @@ test('[REST mode / deprecated] post / - route should fail when not explicitly de
 test('[REST mode / deprecated] get /foobar - route should fail when not explicitly defined', t => {
   t.plan(2)
   tiny.get({
-    url: url + '/foobar',
+    url: url + '/foobar'
   }, function _got (err, result) {
     if (err) {
       let message = '@http get /foobar'
