@@ -3,48 +3,11 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { url, shutdown } = require('./_utils')
+let { url, data, shutdown, checkHttpResult: checkResult } = require('./_utils')
 
 let cwd = process.cwd()
 let mock = join(__dirname, '..', '..', 'mock')
 let b64dec = i => Buffer.from(i, 'base64').toString()
-let data = { hi: 'there' }
-let has = (r, p) => Object.hasOwnProperty.call(r, p)
-
-// Ok, I know this is a bit ridiculous, but I really don't want to have to manually check every param, so let's automate as many checks possible
-function checkResult (t, result, checks) {
-  t.ok(result, 'Got result!')
-  let msgs = {
-    correct: 'Returned correct param',
-    returned: 'Returned unverified param',
-    notReturned: 'Did not return'
-  }
-  let { version, body, pathParameters, routeKey, rawPath, requestContext } = result
-  Object.entries(checks).forEach(([ param, value ]) => {
-    if (param.startsWith('_')) { /* noop */ }
-    else if (param === 'version') t.equal(version, '2.0', 'Got Lambda v2.0 payload')
-    else if (param === 'body' && value) {
-      t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
-    }
-    else if (value === undefined) {
-      t.ok(!has(result, param), `${msgs.notReturned}: ${param}`)
-    }
-    else if (param === 'pathParameters') {
-      let val = JSON.stringify(value)
-      t.equal(JSON.stringify(pathParameters), val, `${msgs.correct} ${param}: ${val}`)
-    }
-    else if (value === '🤷🏽‍♀️') {
-      t.ok(has(result, param), `${msgs.returned} ${param}`)
-    }
-    else {
-      t.equal(result[param], value, `${msgs.correct} ${param}: ${value}`)
-    }
-  })
-  let method = checks._method || routeKey.split(' ')[0]
-  t.equal(requestContext.http.method, method, `Got correct requestContext.http.method param: ${method}`)
-  t.equal(requestContext.http.path, rawPath, `Got correct requestContext.http.path param: ${rawPath}`)
-  t.equal(requestContext.routeKey, routeKey, `Got correct requestContext.routeKey param: ${routeKey}`)
-}
 
 test('Set up env', t => {
   t.plan(1)
