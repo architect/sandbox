@@ -49,9 +49,12 @@ let msgs = {
 function checkHttpResult (t, result, checks) {
   t.ok(result, 'Got result!')
   let { version, body, pathParameters, routeKey, rawPath, requestContext } = result
+  if (has(result, 'version')) {
+    t.equal(version, '2.0', 'Got Lambda v2.0 payload')
+  }
+  else t.fail('No Lambda payload version specified')
   Object.entries(checks).forEach(([ param, value ]) => {
     if (param.startsWith('_')) { /* noop */ }
-    else if (param === 'version') t.equal(version, '2.0', 'Got Lambda v2.0 payload')
     else if (param === 'body' && value) {
       t.equal(body, JSON.stringify(data), 'Got JSON-serialized body payload')
     }
@@ -78,10 +81,14 @@ function checkHttpResult (t, result, checks) {
 function checkRestResult (t, result, checks) {
   t.ok(result, 'Got result!')
   let { version, body, path, pathParameters, httpMethod, resource, requestContext } = result
-  // let { version, body, pathParameters, routeKey, rawPath, requestContext } = result
+  if (has(result, 'version')) {
+    t.equal(version, '1.0', 'Got Lambda v1.0 payload')
+  }
+  else {
+    t.notOk(version, 'No Lambda payload version specified')
+  }
   Object.entries(checks).forEach(([ param, value ]) => {
     if (param.startsWith('_')) { /* noop */ }
-    else if (param === 'version') t.equal(version, '1.0', 'Got Lambda v1.0 payload')
     else if (param === 'body' && value) {
       t.equal(b64dec(body), JSON.stringify(data), 'Got JSON-serialized body payload')
     }

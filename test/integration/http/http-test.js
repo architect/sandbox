@@ -30,7 +30,7 @@ test('[HTTP mode] Start Sandbox', t => {
 })
 
 test('[HTTP mode] get /', t => {
-  t.plan(14)
+  t.plan(15)
   tiny.get({
     url
   }, function _got (err, result) {
@@ -56,7 +56,7 @@ test('[HTTP mode] get /', t => {
 // TODO write some cookie checks
 
 test('[HTTP mode] get /binary', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/binary'
   tiny.get({
     url: url + rawPath
@@ -81,7 +81,7 @@ test('[HTTP mode] get /binary', t => {
 })
 
 test('[HTTP mode] get /nodejs12.x', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/nodejs12.x'
   tiny.get({
     url: url + rawPath
@@ -105,7 +105,7 @@ test('[HTTP mode] get /nodejs12.x', t => {
 })
 
 test('[HTTP mode] get /nodejs10.x', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/nodejs10.x'
   tiny.get({
     url: url + rawPath
@@ -129,7 +129,7 @@ test('[HTTP mode] get /nodejs10.x', t => {
 })
 
 test('[HTTP mode] get /nodejs8.10', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/nodejs8.10'
   tiny.get({
     url: url + rawPath
@@ -153,7 +153,7 @@ test('[HTTP mode] get /nodejs8.10', t => {
 })
 
 test('[HTTP mode] get /python3.8', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/python3.8'
   tiny.get({
     url: url + rawPath
@@ -177,7 +177,7 @@ test('[HTTP mode] get /python3.8', t => {
 })
 
 test('[HTTP mode] get /python3.7', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/python3.7'
   tiny.get({
     url: url + rawPath
@@ -201,7 +201,7 @@ test('[HTTP mode] get /python3.7', t => {
 })
 
 test('[HTTP mode] get /python3.6', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/python3.6'
   tiny.get({
     url: url + rawPath
@@ -225,7 +225,7 @@ test('[HTTP mode] get /python3.6', t => {
 })
 
 test('[HTTP mode] get /ruby2.5', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/ruby2.5'
   tiny.get({
     url: url + rawPath
@@ -249,7 +249,7 @@ test('[HTTP mode] get /ruby2.5', t => {
 })
 
 test('[HTTP mode] get /deno', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/deno'
   tiny.get({
     url: url + rawPath
@@ -273,7 +273,7 @@ test('[HTTP mode] get /deno', t => {
 })
 
 test('[HTTP mode] get /path/*', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/path/hello/there'
   tiny.get({
     url: url + rawPath
@@ -315,7 +315,7 @@ test('[HTTP mode] get /no-return (noop)', t => {
 
 // Write (POST, PUT, etc.) tests exercise HTTP API mode's implicit JSON passthrough
 test('[HTTP mode] post /post (plain JSON)', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/post'
   tiny.post({
     url: url + rawPath,
@@ -340,7 +340,7 @@ test('[HTTP mode] post /post (plain JSON)', t => {
 })
 
 test('[HTTP mode] post /post (flavored JSON)', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/post'
   tiny.post({
     url: url + rawPath,
@@ -366,7 +366,7 @@ test('[HTTP mode] post /post (flavored JSON)', t => {
 })
 
 test('[HTTP mode] put /put', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/put'
   tiny.put({
     url: url + rawPath,
@@ -392,7 +392,7 @@ test('[HTTP mode] put /put', t => {
 })
 
 test('[HTTP mode] patch /patch', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/patch'
   tiny.patch({
     url: url + rawPath,
@@ -417,7 +417,7 @@ test('[HTTP mode] patch /patch', t => {
 })
 
 test('[HTTP mode] delete /delete', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/delete'
   tiny.del({
     url: url + rawPath,
@@ -442,7 +442,7 @@ test('[HTTP mode] delete /delete', t => {
 })
 
 test('[HTTP mode] head /head', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/head'
   tiny.head({
     url: url + rawPath
@@ -466,7 +466,7 @@ test('[HTTP mode] head /head', t => {
 })
 
 test('[HTTP mode] options /options', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/options'
   tiny.options({
     url: url + rawPath
@@ -490,7 +490,7 @@ test('[HTTP mode] options /options', t => {
 })
 
 test('[HTTP mode] get /any', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/any'
   tiny.get({
     url: url + rawPath,
@@ -515,7 +515,7 @@ test('[HTTP mode] get /any', t => {
 })
 
 test('[HTTP mode] post /any', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/any'
   tiny.post({
     url: url + rawPath,
@@ -542,7 +542,7 @@ test('[HTTP mode] post /any', t => {
 })
 
 test('[HTTP mode] put /any', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/any'
   tiny.put({
     url: url + rawPath,
@@ -568,7 +568,7 @@ test('[HTTP mode] put /any', t => {
 })
 
 test('[HTTP mode] patch /any', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/any'
   tiny.patch({
     url: url + rawPath,
@@ -594,7 +594,7 @@ test('[HTTP mode] patch /any', t => {
 })
 
 test('[HTTP mode] delete /any', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/any'
   tiny.del({
     url: url + rawPath,
@@ -620,7 +620,7 @@ test('[HTTP mode] delete /any', t => {
 })
 
 test('[HTTP mode] head /any', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/any'
   tiny.head({
     url: url + rawPath,
@@ -645,7 +645,7 @@ test('[HTTP mode] head /any', t => {
 })
 
 test('[HTTP mode] options /any', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/any'
   tiny.options({
     url: url + rawPath,
@@ -670,7 +670,7 @@ test('[HTTP mode] options /any', t => {
 })
 
 test('[HTTP mode] get /any-c/*', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/any-c/hello/there'
   tiny.get({
     url: url + rawPath,
@@ -695,7 +695,7 @@ test('[HTTP mode] get /any-c/*', t => {
 })
 
 test('[HTTP mode] get /any-p/:param', t => {
-  t.plan(14)
+  t.plan(15)
   let rawPath = '/any-p/hello'
   tiny.get({
     url: url + rawPath,
