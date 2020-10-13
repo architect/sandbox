@@ -15,7 +15,8 @@
 - Improved root handling + ASAP fallthrough behavior
 - Fixed obscure false negative for adding Arc Static Asset Proxy when `@http` contains a route that looks like `get /:hey/there`
 - Fixed parsing of duplicate query string params in deprecated (Arc v5) mode
-- Fixed shutdown errors when using an external DB, thanks @herschel666!
+- Fixed shutdown errors when using an external local DB, thanks @herschel666!
+- Fixed issue where default region may prevent connections to external local DB, thanks @exalted!
 
 ---
 
