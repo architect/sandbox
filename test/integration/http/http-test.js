@@ -303,7 +303,7 @@ test('[HTTP mode] get /ruby2.5', t => {
     if (err) t.fail(err)
     else {
       checkResult(t, result.body, {
-        message: 'Hello from Architect Sandbox running ruby2.5!',
+        message: 'Hello from get /ruby2.5 (running ruby2.5)',
         routeKey: 'GET /ruby2.5',
         rawPath,
         pathParameters: undefined,
@@ -327,7 +327,7 @@ test('[HTTP mode] get /deno', t => {
     if (err) t.fail(err)
     else {
       checkResult(t, result.body, {
-        message: 'Hello from Architect Sandbox running deno!',
+        message: 'Hello from get /deno (running deno)',
         routeKey: 'GET /deno',
         rawPath,
         pathParameters: undefined,
@@ -351,7 +351,7 @@ test('[HTTP mode] get /get-c/*', t => {
     if (err) t.fail(err)
     else {
       checkResult(t, result.body, {
-        message: 'Hello from get /get-c/* running the default runtime',
+        message: 'Hello from get /get-c/*',
         routeKey: 'GET /get-c/{proxy+}',
         rawPath,
         cookies: undefined,

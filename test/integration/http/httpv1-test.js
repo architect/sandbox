@@ -287,7 +287,7 @@ test('[HTTP v1.0 (REST) mode] get /ruby2.5', t => {
     if (err) t.fail(err)
     else {
       checkResult(t, result.body, {
-        message: 'Hello from Architect Sandbox running ruby2.5!',
+        message: 'Hello from get /ruby2.5 (running ruby2.5)',
         resource: path,
         path,
         httpMethod: 'GET',
@@ -312,7 +312,7 @@ test('[HTTP v1.0 (REST) mode] get /deno', t => {
     if (err) t.fail(err)
     else {
       checkResult(t, result.body, {
-        message: 'Hello from Architect Sandbox running deno!',
+        message: 'Hello from get /deno (running deno)',
         resource: path,
         path,
         httpMethod: 'GET',
@@ -337,7 +337,7 @@ test('[HTTP v1.0 (REST) mode] get /get-c/*', t => {
     if (err) t.fail(err)
     else {
       checkResult(t, result.body, {
-        message: 'Hello from get /get-c/* running the default runtime',
+        message: 'Hello from get /get-c/*',
         resource: '/get-c/{proxy+}',
         path,
         httpMethod: 'GET',

@@ -4,7 +4,7 @@ require 'json'
 
 def handler(event, context)
     body = event
-    body[:message] = 'Hello from Architect Sandbox running ruby2.5!'
+    body[:message] = 'Hello from get /ruby2.5 (running ruby2.5)'
     {
         statusCode: 200,
         headers: { 'content-type': 'application/json' },

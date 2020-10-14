@@ -53,7 +53,7 @@ test('[Catchall] get /get-c (matches at root of catchall with trailing slash)', 
       let { message, pathParameters, rawPath } = result.body
       t.equal(rawPath, path, `got ${rawPath}`)
       t.equal(pathParameters.proxy, '', 'Got correct proxy pathParameters')
-      t.equal(message, 'Hello from get /get-c/* running the default runtime', 'Got correct handler response')
+      t.equal(message, 'Hello from get /get-c/*', 'Got correct handler response')
     }
   })
 })
@@ -69,7 +69,7 @@ test('[Catchall] get /get-c (matches with one child path part)', t => {
       let { message, pathParameters, rawPath } = result.body
       t.equal(rawPath, path, `got ${rawPath}`)
       t.equal(pathParameters.proxy, 'hi', 'Got correct proxy pathParameters')
-      t.equal(message, 'Hello from get /get-c/* running the default runtime', 'Got correct handler response')
+      t.equal(message, 'Hello from get /get-c/*', 'Got correct handler response')
     }
   })
 })
@@ -85,7 +85,7 @@ test('[Catchall] get /get-c (matches with one child path part, trailing slash)',
       let { message, pathParameters, rawPath } = result.body
       t.equal(rawPath, path, `got ${rawPath}`)
       t.equal(pathParameters.proxy, 'hi/', 'Got correct proxy pathParameters')
-      t.equal(message, 'Hello from get /get-c/* running the default runtime', 'Got correct handler response')
+      t.equal(message, 'Hello from get /get-c/*', 'Got correct handler response')
     }
   })
 })
@@ -101,7 +101,7 @@ test('[Catchall] get /get-c (matches with multiple child path parts)', t => {
       let { message, pathParameters, rawPath } = result.body
       t.equal(rawPath, path, `got ${rawPath}`)
       t.equal(pathParameters.proxy, 'hi/there/wonderful/person', 'Got correct proxy pathParameters')
-      t.equal(message, 'Hello from get /get-c/* running the default runtime', 'Got correct handler response')
+      t.equal(message, 'Hello from get /get-c/*', 'Got correct handler response')
     }
   })
 })

@@ -275,7 +275,7 @@ test('[REST mode / deprecated] get /ruby2.5', t => {
     if (err) t.fail(err)
     else {
       checkResult(t, result.body, {
-        message: 'Hello from Architect Sandbox running ruby2.5!',
+        message: 'Hello from get /ruby2.5 (running ruby2.5)',
         path,
         method: 'GET',
         httpMethod: 'GET',
@@ -299,7 +299,7 @@ test('[REST mode / deprecated] get /deno', t => {
     if (err) t.fail(err)
     else {
       checkResult(t, result.body, {
-        message: 'Hello from Architect Sandbox running deno!',
+        message: 'Hello from get /deno (running deno)',
         path,
         method: 'GET',
         httpMethod: 'GET',

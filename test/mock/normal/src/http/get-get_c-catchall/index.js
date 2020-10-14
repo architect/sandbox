@@ -1,6 +1,6 @@
 exports.handler = async (event) => {
   const body = event
-  body.message = 'Hello from get /get-c/* running the default runtime'
+  body.message = 'Hello from get /get-c/*'
   return {
     statusCode: 200,
     headers: { 'content-type': 'application/json' },

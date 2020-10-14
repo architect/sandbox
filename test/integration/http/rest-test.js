@@ -287,7 +287,7 @@ test('[REST mode] get /ruby2.5', t => {
     if (err) t.fail(err)
     else {
       checkResult(t, result.body, {
-        message: 'Hello from Architect Sandbox running ruby2.5!',
+        message: 'Hello from get /ruby2.5 (running ruby2.5)',
         resource: path,
         path,
         httpMethod: 'GET',
@@ -312,7 +312,7 @@ test('[REST mode] get /deno', t => {
     if (err) t.fail(err)
     else {
       checkResult(t, result.body, {
-        message: 'Hello from Architect Sandbox running deno!',
+        message: 'Hello from get /deno (running deno)',
         resource: path,
         path,
         httpMethod: 'GET',
