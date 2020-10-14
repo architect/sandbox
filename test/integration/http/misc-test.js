@@ -42,9 +42,9 @@ test('[Catchall] get /path - calls without trailing /* should fall through (and 
   })
 })
 
-test('[Catchall] get /path (matches at root of catchall with trailing slash)', t => {
+test('[Catchall] get /get-c (matches at root of catchall with trailing slash)', t => {
   t.plan(3)
-  let path = '/path/'
+  let path = '/get-c/'
   tiny.get({
     url: url + path
   }, function _got (err, result) {
@@ -53,14 +53,14 @@ test('[Catchall] get /path (matches at root of catchall with trailing slash)', t
       let { message, pathParameters, rawPath } = result.body
       t.equal(rawPath, path, `got ${rawPath}`)
       t.equal(pathParameters.proxy, '', 'Got correct proxy pathParameters')
-      t.equal(message, 'Hello from get /path/* running the default runtime', 'Got correct handler response')
+      t.equal(message, 'Hello from get /get-c/* running the default runtime', 'Got correct handler response')
     }
   })
 })
 
-test('[Catchall] get /path (matches with one child path part)', t => {
+test('[Catchall] get /get-c (matches with one child path part)', t => {
   t.plan(3)
-  let path = '/path/hi'
+  let path = '/get-c/hi'
   tiny.get({
     url: url + path
   }, function _got (err, result) {
@@ -69,14 +69,14 @@ test('[Catchall] get /path (matches with one child path part)', t => {
       let { message, pathParameters, rawPath } = result.body
       t.equal(rawPath, path, `got ${rawPath}`)
       t.equal(pathParameters.proxy, 'hi', 'Got correct proxy pathParameters')
-      t.equal(message, 'Hello from get /path/* running the default runtime', 'Got correct handler response')
+      t.equal(message, 'Hello from get /get-c/* running the default runtime', 'Got correct handler response')
     }
   })
 })
 
-test('[Catchall] get /path (matches with one child path part, trailing slash)', t => {
+test('[Catchall] get /get-c (matches with one child path part, trailing slash)', t => {
   t.plan(3)
-  let path = '/path/hi/'
+  let path = '/get-c/hi/'
   tiny.get({
     url: url + path
   }, function _got (err, result) {
@@ -85,14 +85,14 @@ test('[Catchall] get /path (matches with one child path part, trailing slash)', 
       let { message, pathParameters, rawPath } = result.body
       t.equal(rawPath, path, `got ${rawPath}`)
       t.equal(pathParameters.proxy, 'hi/', 'Got correct proxy pathParameters')
-      t.equal(message, 'Hello from get /path/* running the default runtime', 'Got correct handler response')
+      t.equal(message, 'Hello from get /get-c/* running the default runtime', 'Got correct handler response')
     }
   })
 })
 
-test('[Catchall] get /path (matches with multiple child path parts)', t => {
+test('[Catchall] get /get-c (matches with multiple child path parts)', t => {
   t.plan(3)
-  let path = '/path/hi/there/wonderful/person'
+  let path = '/get-c/hi/there/wonderful/person'
   tiny.get({
     url: url + path
   }, function _got (err, result) {
@@ -101,7 +101,7 @@ test('[Catchall] get /path (matches with multiple child path parts)', t => {
       let { message, pathParameters, rawPath } = result.body
       t.equal(rawPath, path, `got ${rawPath}`)
       t.equal(pathParameters.proxy, 'hi/there/wonderful/person', 'Got correct proxy pathParameters')
-      t.equal(message, 'Hello from get /path/* running the default runtime', 'Got correct handler response')
+      t.equal(message, 'Hello from get /get-c/* running the default runtime', 'Got correct handler response')
     }
   })
 })

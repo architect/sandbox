@@ -13,20 +13,18 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
   // Resource may be manually supplied via ASAP or greedy root
   // Otherwise rely on route, as defined in arc.http
   resource = resource || route
-  if (route && route.includes('/:')) {
-    resource = route.split('/')
+  if (resource && resource.includes(':')) {
+    resource = resource.split('/')
       .map(part => part.startsWith(':')
         ? `{${part.replace(':', '')}}`
         : part)
       .join('/')
   }
-  // Handle catchalls (HTTP + Lambda v1.0 only)
-  if (httpApi && route && route.includes('*')) {
-    resource = route.split('/')
-      .map(part => part === '*'
-        ? `{proxy+}`
-        : part)
-      .join('/')
+  // Handle catchalls
+  let hasCatchall = false
+  if (resource && resource.endsWith('/*')) {
+    resource = resource.replace('/*', '/{proxy+}')
+    hasCatchall = true
   }
 
   // Query string things
@@ -79,9 +77,12 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
 
   // Path parameters
   if (httpApi && params && Object.keys(params).length) {
-    request.pathParameters = route && route.endsWith('/*')
-      ? { proxy: params['0'] }
-      : params
+    // Try to work around router's '0' param jic someone actually used that
+    if (hasCatchall) {
+      request.pathParameters = { ...params, proxy: params['0'] }
+      delete request.pathParameters['0']
+    }
+    else request.pathParameters = params
   }
 
   return request

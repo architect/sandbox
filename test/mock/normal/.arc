@@ -8,29 +8,30 @@ ping
 pong
 
 @http
-get /           # runs default
-get /binary     # runs default
-get /nodejs12.x
-get /nodejs10.x
-get /nodejs8.10
-get /python3.8
-get /python3.7
-get /python3.6
-get /ruby2.5
-get /deno
-get /path/*     # runs default
-get /env        # runs default
-get /no-return  # runs default
-get /times-out  # runs default
-post /post
-put /put
-patch /patch
-delete /delete
-head /head
+get     /           # runs default
+get     /binary
+get     /nodejs12.x
+get     /nodejs10.x
+get     /nodejs8.10
+get     /python3.8
+get     /python3.7
+get     /python3.6
+get     /ruby2.5
+get     /deno
+get     /get-p-c/:param/*
+get     /get-c/*
+get     /env
+get     /no-return
+get     /times-out
+post    /post
+put     /put
+patch   /patch
+delete  /delete
+head    /head
 options /options
-any /any
-any /any-c/*
-any /any-p/:param
+any     /any
+any     /any-c/*
+any     /any-p/:param
 
 @tables
 accounts

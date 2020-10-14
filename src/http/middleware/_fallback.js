@@ -69,14 +69,18 @@ module.exports = function fallback (req, res, next) {
     return p[0] === current[0]
   })
 
-  // Look for a catchall matches
+  // Look for a catchall matches (which may also contain params)
   let catchall = tokens.filter(t => t.some(v => v === '*'))
   let catchallFound = catchall.some(p => {
     // Make a copy because we may mutate
     let t = [ ...p ]
     // Capture 'any' routes (but only in HTTP APIs)
     if (t[0] === 'any' && httpAPI) t[0] = method
-    let exp = t.map(p => p === '*' ? '.*' : p).join('/')
+    let exp = t.map(p => {
+      if (p === '*') return '.*'
+      if (p.startsWith(':')) return '(\\S+)'
+      return p
+    }).join('/')
     let reg = new RegExp(exp)
     // Ensure trailing slashes match the root of the catchall
     let path = current.join('/') + `${pathname.endsWith('/') ? '/' : ''}`

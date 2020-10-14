@@ -190,6 +190,27 @@ test('Architect v7 (HTTP API mode): get /path/* (/path/hi/there)', t => {
   checkArcV7HttpResult(mock, req, t)
 })
 
+test('Architect v7 (HTTP API mode): get /:activities/{proxy+} (/nature/hiking/wilderness)', t => {
+  let mock = arc7.getWithParamAndCatchall
+  t.plan(httpParams.length)
+  let method = 'GET'
+  let route = '/:activities/*'
+  let apiType = 'http'
+  let handler = invoke({ method, route, apiType })
+  let input = {
+    url: url('/nature/hiking/wilderness'),
+    body: {},
+    headers,
+    params: {
+      activities: 'nature',
+      '0': mock.pathParameters.proxy
+    }
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV7HttpResult(mock, req, t)
+})
+
 test('Architect v7 (HTTP API mode): post /form (JSON)', t => {
   let mock = arc7.postJson
   t.plan(httpParams.length)
@@ -483,6 +504,28 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /path/* (/path/hi/there)', t
     body: {},
     headers,
     params: { '0': mock.pathParameters.proxy }
+  }
+  handler(input, response)
+  let req = lambdaStub.args[0][1]
+  checkArcV6RestResult(params, mock, req, t)
+})
+
+test('Architect v7 (HTTP + Lambda 1.0 payload): get /:activities/{proxy+} (/nature/hiking/wilderness)', t => {
+  let mock = arc6.getWithParamAndCatchall
+  let params = Object.keys(mock)
+  t.plan(params.length + 2)
+  let method = 'GET'
+  let route = '/:activities/*'
+  let apiType = 'httpv1'
+  let handler = invoke({ method, route, apiType })
+  let input = {
+    url: url('/nature/hiking/wilderness'),
+    body: {},
+    headers,
+    params: {
+      activities: 'nature',
+      '0': mock.pathParameters.proxy
+    }
   }
   handler(input, response)
   let req = lambdaStub.args[0][1]
