@@ -8,16 +8,15 @@ module.exports = function binary (req, res, next) {
 
   function isJson () {
     let json = /^application\/.*json/
-    if (json.test(headers['content-type'])) return true
-    return false
+    return json.test(headers['content-type'])
   }
 
   function isBinary () {
     let binaryTypes = /^application\/octet-stream/
     let multipartFormData = /^multipart\/form-data/
-    if (binaryTypes.test(headers['content-type'])) return true
-    if (multipartFormData.test(headers['content-type'])) return true
-    return false
+    return binaryTypes.test(headers['content-type']) ||
+           multipartFormData.test(headers['content-type']) ||
+           false
   }
 
   let contentLength = headers && headers['content-length']
