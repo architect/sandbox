@@ -1,6 +1,6 @@
 let pool = require('./pool')
 
-module.exports = function handle (req, res) {
+module.exports = function send (req, res) {
   try {
     let ws = pool.getConnection(req.body.id)
     if (ws) {

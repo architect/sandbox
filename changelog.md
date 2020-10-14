@@ -7,6 +7,7 @@
 ### Changed
 
 - 3x expansion of integration test coverage (572 to 1784 integration tests)
+- Internal change: Refactored and better documented body parsing middleware predicates
 
 
 ### Fixed
@@ -17,6 +18,7 @@
 - Fixed parsing of duplicate query string params in deprecated (Arc v5) mode
 - Fixed shutdown errors when using an external local DB, thanks @herschel666!
 - Fixed issue where default region may prevent connections to external local DB, thanks @exalted!
+- Fixed issue where WebSocket send events may fail in `HTTP` mode, thanks @grncdr!
 
 ---
 
