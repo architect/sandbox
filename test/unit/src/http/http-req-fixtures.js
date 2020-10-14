@@ -106,7 +106,7 @@ let arc7 = {
     isBase64Encoded: false
   },
 
-  // get /nature/hiking
+  // get /nature/:activities (/nature/hiking)
   getWithParam: {
     version: '2.0',
     routeKey: 'GET /nature/{activities}',
@@ -125,7 +125,7 @@ let arc7 = {
     isBase64Encoded: false
   },
 
-  // get /{proxy+}
+  // get /{proxy+} (/nature/hiking)
   getProxyPlus: {
     version: '2.0',
     routeKey: 'GET /{proxy+}',
@@ -144,7 +144,7 @@ let arc7 = {
     isBase64Encoded: false
   },
 
-  // get /$default
+  // get /$default (/nature/hiking)
   // Deprecated in Arc 8, but possibly added via Macro
   get$default: {
     version: '2.0',
@@ -179,6 +179,28 @@ let arc7 = {
       routeKey: 'GET /path/{proxy+}'
     },
     pathParameters: { proxy: 'hi/there' },
+    isBase64Encoded: false
+  },
+
+  // get /:activities/{proxy+} (/nature/hiking/wilderness)
+  getWithParamAndCatchall: {
+    version: '2.0',
+    routeKey: 'GET /{activities}/{proxy+}',
+    rawPath: '/nature/hiking/wilderness',
+    rawQueryString: '',
+    cookies,
+    headers,
+    requestContext: {
+      http: {
+        method: 'GET',
+        path: '/nature/hiking/wilderness',
+      },
+      routeKey: 'GET /{activities}/{proxy+}',
+    },
+    pathParameters: {
+      activities: 'nature',
+      proxy: 'hiking/wilderness'
+    },
     isBase64Encoded: false
   },
 
@@ -428,6 +450,28 @@ let arc6 = {
       httpMethod: 'GET',
       path: '/path/hi/there',
       resourcePath: '/path/{proxy+}',
+    },
+  },
+
+  // get /:activities/{proxy+} (/nature/hiking/wilderness)
+  getWithParamAndCatchall: {
+    resource: '/{activities}/{proxy+}',
+    path: '/nature/hiking/wilderness',
+    httpMethod: 'GET',
+    headers,
+    multiValueHeaders,
+    queryStringParameters: null,
+    multiValueQueryStringParameters: null,
+    pathParameters: {
+      activities: 'nature',
+      proxy: 'hiking/wilderness'
+    },
+    body: null,
+    isBase64Encoded: false,
+    requestContext: {
+      httpMethod: 'GET',
+      path: '/nature/hiking/wilderness',
+      resourcePath: '/{activities}/{proxy+}',
     },
   },
 

@@ -328,17 +328,17 @@ test('[HTTP v1.0 (REST) mode] get /deno', t => {
   })
 })
 
-test('[HTTP v1.0 (REST) mode] get /path/*', t => {
+test('[HTTP v1.0 (REST) mode] get /get-c/*', t => {
   t.plan(16)
-  let path = '/path/hello/there'
+  let path = '/get-c/hello/there'
   tiny.get({
     url: url + path
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       checkResult(t, result.body, {
-        message: 'Hello from get /path/* running the default runtime',
-        resource: '/path/{proxy+}',
+        message: 'Hello from get /get-c/* running the default runtime',
+        resource: '/get-c/{proxy+}',
         path,
         httpMethod: 'GET',
         headers: '🤷🏽‍♀️',
@@ -346,6 +346,34 @@ test('[HTTP v1.0 (REST) mode] get /path/*', t => {
         queryStringParameters: null,
         multiValueQueryStringParameters: null,
         pathParameters: { proxy: 'hello/there' },
+        body: null,
+        isBase64Encoded: false,
+      })
+    }
+  })
+})
+
+test('[HTTP v1.0 (REST) mode] get /get-p-c/:param/*', t => {
+  t.plan(16)
+  let path = '/get-p-c/why/hello/there'
+  tiny.get({
+    url: url + path
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from any /get-p-c/:param/*',
+        resource: '/get-p-c/{param}/{proxy+}',
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: {
+          param: 'why',
+          proxy: 'hello/there'
+        },
         body: null,
         isBase64Encoded: false,
       })

@@ -19,6 +19,7 @@
 - Fixed shutdown errors when using an external local DB, thanks @herschel666!
 - Fixed issue where default region may prevent connections to external local DB, thanks @exalted!
 - Fixed issue where WebSocket send events may fail in `HTTP` mode, thanks @grncdr!
+- Fixed issue where paths with a param and catchall (e.g. `/:item/*`) had malformed request payloads, fixes #983
 
 ---
 

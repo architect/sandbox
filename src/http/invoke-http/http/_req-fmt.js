@@ -19,21 +19,19 @@ module.exports = function requestFormatter ({ method, route, req }) {
   // Otherwise rely on route, as defined in arc.http
   resource = resource || route
 
-  // Handle route params
-  if (route && route.includes(':')) {
-    resource = route.split('/')
+  // Handle params
+  if (resource && resource.includes(':')) {
+    resource = resource.split('/')
       .map(part => part.startsWith(':')
         ? `{${part.replace(':', '')}}`
         : part)
       .join('/')
   }
   // Handle catchalls
-  if (route && route.includes('*')) {
-    resource = route.split('/')
-      .map(part => part === '*'
-        ? `{proxy+}`
-        : part)
-      .join('/')
+  let hasCatchall = false
+  if (resource && resource.endsWith('/*')) {
+    resource = resource.replace('/*', '/{proxy+}')
+    hasCatchall = true
   }
 
   // Path things
@@ -68,9 +66,12 @@ module.exports = function requestFormatter ({ method, route, req }) {
 
   // Path parameters
   if (Object.keys(params).length) {
-    request.pathParameters = route && route.endsWith('/*')
-      ? { proxy: params['0'] }
-      : params
+    // Try to work around router's '0' param jic someone actually used that
+    if (hasCatchall) {
+      request.pathParameters = { ...params, proxy: params['0'] }
+      delete request.pathParameters['0']
+    }
+    else request.pathParameters = params
   }
 
   // Body

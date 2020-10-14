@@ -342,21 +342,48 @@ test('[HTTP mode] get /deno', t => {
   })
 })
 
-test('[HTTP mode] get /path/*', t => {
+test('[HTTP mode] get /get-c/*', t => {
   t.plan(15)
-  let rawPath = '/path/hello/there'
+  let rawPath = '/get-c/hello/there'
   tiny.get({
     url: url + rawPath
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
       checkResult(t, result.body, {
-        message: 'Hello from get /path/* running the default runtime',
-        routeKey: 'GET /path/{proxy+}',
+        message: 'Hello from get /get-c/* running the default runtime',
+        routeKey: 'GET /get-c/{proxy+}',
         rawPath,
         cookies: undefined,
         queryStringParameters: undefined,
         pathParameters: { proxy: 'hello/there' },
+        rawQueryString: '',
+        headers: '🤷🏽‍♀️',
+        isBase64Encoded: false,
+        body: undefined,
+      })
+    }
+  })
+})
+
+test('[HTTP mode] get /get-p-c/:param/*', t => {
+  t.plan(15)
+  let rawPath = '/get-p-c/why/hello/there'
+  tiny.get({
+    url: url + rawPath
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from any /get-p-c/:param/*',
+        routeKey: 'GET /get-p-c/{param}/{proxy+}',
+        rawPath,
+        cookies: undefined,
+        queryStringParameters: undefined,
+        pathParameters: {
+          param: 'why',
+          proxy: 'hello/there'
+        },
         rawQueryString: '',
         headers: '🤷🏽‍♀️',
         isBase64Encoded: false,
