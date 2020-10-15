@@ -49,6 +49,7 @@ module.exports = function invokeLambda (pathToLambda, event, callback) {
         PYTHONUNBUFFERED: true,
         PYTHONPATH: path.join(pathToLambda, 'vendor'),
         LAMBDA_TASK_ROOT: pathToLambda,
+        TZ: 'UTC',
       }
 
       let options = {
