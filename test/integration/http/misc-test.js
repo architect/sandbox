@@ -107,7 +107,7 @@ test('[Catchall] get /get-c (matches with multiple child path parts)', t => {
 })
 
 test('[Env vars] get /env', t => {
-  t.plan(5)
+  t.plan(6)
   tiny.get({
     url: url + '/env'
   }, function _got (err, result) {
@@ -118,6 +118,7 @@ test('[Env vars] get /env', t => {
       t.ok(result.body.ARC_STATIC_BUCKET, 'Got ARC_STATIC_BUCKET env var')
       t.ok(result.body.NODE_ENV, 'Got NODE_ENV env var')
       t.ok(result.body.SESSION_TABLE_NAME, 'Got SESSION_TABLE_NAME env var')
+      t.equal(result.body.TZ, 'UTC', 'Got TZ env var')
     }
   })
 })
