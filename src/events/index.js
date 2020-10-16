@@ -15,7 +15,7 @@ module.exports = function createEventBus () {
     let eventBus
 
     events.start = function start (options, callback) {
-      let { all, port, update } = options
+      let { all, port, symlink = true, update } = options
 
       // Set up ports and env vars
       let { eventsPort } = getPorts(port)
@@ -41,7 +41,7 @@ module.exports = function createEventBus () {
         // ... then hydrate Architect project files into functions
         function _hydrateShared (callback) {
           if (!all) {
-            hydrate({ install: false }, function next (err) {
+            hydrate.shared({ symlink }, function next (err) {
               if (err) callback(err)
               else {
                 update.done('Project files hydrated into functions')
