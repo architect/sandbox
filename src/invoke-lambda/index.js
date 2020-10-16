@@ -8,6 +8,7 @@ let runInPython = require('./run-in-python')
 let runInRuby = require('./run-in-ruby')
 
 let warn = require('./warn')
+let missingRuntime = require('./missing-runtime')
 
 let runtimes = {
   'nodejs12.x': runInNode,
@@ -63,6 +64,12 @@ module.exports = function invokeLambda (pathToLambda, event, callback) {
       getConfig(pathToLambda, function done (err, { runtime, timeout }) {
         if (err) callback(err)
         else {
+          if (! runtimes[runtime] ) {
+            missingRuntime(runtime, pathToLambda)
+            callback('missing runtime')
+            return
+          }
+          
           runtimes[runtime](options, request, timeout, function done (err, result) {
             if (err) callback(err)
             else {
