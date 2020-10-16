@@ -13,8 +13,7 @@ let sandbox = require('../sandbox')
 module.exports = function cli (params = {}, callback) {
   if (!params.version) params.version = ver
   let { options = [] } = params
-  let isCopy = option => [ '-c', '--copy', 'copy' ].includes(option)
-  let symlink = options.some(isCopy) ? false : true
+  let symlink = options.some(o => o === '--disable-symlinks') ? false : true
   params.symlink = symlink
 
   sandbox.start(params, function watching (err) {

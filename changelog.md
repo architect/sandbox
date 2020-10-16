@@ -7,9 +7,9 @@
 ### Added
 
 - Added support for symlinking shared code into functions (`src/shared` and `src/views`), which vastly improves Sandbox performance
-  - Large projects will see a 10-50x performance improvement on startup, and changes to shared code will now be instantly reflected in local functions
-  - To drop back into file-copying mode, invoke sandbox with `-c`, `--copy`, or `copy` (or if using it via API, pass `symlink: false` in your options object)
-  - If you are using `@static fingerprint true`, you will see a symlinked `static.json` in your `src/shared` folder – feel free to add it to your .gitignore, it isn't hurting anything, and will be dealt with in a future release
+  - Large projects utilizing shared code will see a 10-50x performance improvement on startup, and changes to shared code are now instantly reflected across all local functions
+  - To drop back into file-copying mode, invoke sandbox with `--disable-symlinks` (or if using Sandbox via API, pass `symlink: false` in your options object)
+  - If you are using `@static fingerprint true`, you will see a symlinked `static.json` in your `src/shared` folder. Feel free to add it to your .gitignore; while it isn't hurting anything, it will be dealt with in a future release
   - Legacy Windows operating systems that don't support symlinking will continue to copy shared code upon startup like some kind of hethen
   - Shout out to @joliss!
 
