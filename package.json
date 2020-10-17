@@ -21,12 +21,13 @@
   "author": "Brian LeRoux <b@brian.io>",
   "license": "Apache-2.0",
   "bin": {
-    "sandbox": "./src/cli/cli.js"
+    "sandbox": "src/cli/cli.js"
   },
   "dependencies": {
     "@architect/create": "~1.2.0",
+    "@architect/deploy": "~2.0.3",
     "@architect/http-proxy": "~3.12.3",
-    "@architect/hydrate": "~1.6.0-RC.1",
+    "@architect/hydrate": "~1.6.0",
     "@architect/parser": "~2.3.0",
     "@architect/utils": "~1.5.13",
     "@begin/hashid": "~1.0.0",
