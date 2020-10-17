@@ -39,7 +39,7 @@ module.exports = function createHttpServer () {
 
     // Start the HTTP server
     app.start = function start (options, callback) {
-      let { all, port, quiet, update } = options
+      let { all, port, quiet, symlink = true, update } = options
 
       // Set up ports and HTTP-specific env vars
       let { httpPort } = getPorts(port)
@@ -79,7 +79,7 @@ module.exports = function createHttpServer () {
         // ... then hydrate Architect project files into functions
         function _hydrateShared (callback) {
           if (!all) {
-            hydrate({ install: false }, function next (err) {
+            hydrate.shared({ symlink }, function next (err) {
               if (err) callback(err)
               else {
                 update.done('Project files hydrated into functions')

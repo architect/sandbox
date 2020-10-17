@@ -12,6 +12,10 @@ let sandbox = require('../sandbox')
 
 module.exports = function cli (params = {}, callback) {
   if (!params.version) params.version = ver
+  let { options = [] } = params
+  let symlink = options.some(o => o === '--disable-symlinks') ? false : true
+  params.symlink = symlink
+
   sandbox.start(params, function watching (err) {
     if (err) {
       // Hydration errors already reported, no need to log
@@ -60,18 +64,21 @@ module.exports = function cli (params = {}, callback) {
     let paused = false
 
     // Rehydrator
+    // Only used for file copying, otherwise we rely on symlinking, which is *way* faster
     function rehydrate ({ timer, only, msg }) {
       lastEvent = Date.now()
       clearTimeout(timer)
-      timer = setTimeout(() => {
-        ts()
-        let start = Date.now()
-        update.status(msg)
-        hydrate.shared({ only }, () => {
-          let end = Date.now()
-          update.done(`Files rehydrated into functions in ${end - start}ms`)
-        })
-      }, 50)
+      if (!symlink) {
+        timer = setTimeout(() => {
+          ts()
+          let start = Date.now()
+          if (msg) update.status(msg)
+          hydrate.shared({ only }, () => {
+            let end = Date.now()
+            update.done(`Files rehydrated into functions in ${end - start}ms`)
+          })
+        }, 50)
+      }
     }
 
     // Listen for important keystrokes
@@ -202,10 +209,10 @@ module.exports = function cli (params = {}, callback) {
             else {
               if (result) {
                 let end = Date.now()
+                update.status(`Regenerated public/static.json in ${end - start}ms`)
                 rehydrate({
                   timer: rehydrateStaticTimer,
                   only: 'staticJson',
-                  msg: `Regenerated public/static.json in ${end - start}ms`
                 })
               }
             }

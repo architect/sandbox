@@ -9,11 +9,14 @@ let { chars, inventory } = require('@architect/utils')
 
 /**
  * Checks for the existence of supported dependency manifests, and auto-hydrates each function's dependencies as necessary
+ *
  * Supported manifests:
  * - package.json
  * - requirements.txt
  * - Gemfile
  * - (more to come!)
+ *
+ * Not responsible for src/shared + views, handled elsewhere to optimize load time
  */
 module.exports = function maybeHydrate (callback) {
   let arc = inventory()
