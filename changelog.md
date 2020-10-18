@@ -2,6 +2,14 @@
 
 ---
 
+## [3.1.1] 2020-10-18
+
+### Fixed
+
+- Fix obscure false positive missing dependency warning when `src/shared` is symlinked, and something in `src/shared` requires a module that's assumed to be in the function, but not in `src/shared`. It's weird, I know, but it can happen!
+
+---
+
 ## [3.1.0] 2020-10-15
 
 ### Added

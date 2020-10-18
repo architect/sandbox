@@ -1,3 +1,4 @@
+let { join } = require('path');
 let fn = require('./index').handler;
 let context = JSON.parse(process.env.__ARC_CONTEXT__);
 
@@ -14,9 +15,13 @@ process.stdin.on('close', () => {
     let loaded = item.loaded;
     let notSubDep = item.parent && item.parent.id && !item.parent.id.includes('node_modules');
 
-    if (!item.filename.startsWith(cwd) && notSubDep && loaded) {
-      let name = item.filename.split('node_modules')[1];
-      if (!name) return;
+    let name = item.filename.split('node_modules')[1];
+    if (!name) return;
+    let loadedOutsideFunction = !item.filename.startsWith(cwd);
+    let fnPath = join(cwd, 'node_modules', name);
+    let loadedByFunction = require.cache[fnPath] && require.cache[fnPath].loaded === true;
+
+    if (loaded && notSubDep && loadedOutsideFunction && !loadedByFunction) {
       name = name.substr(1).split('/');
       name = name[0].startsWith('@') ? name.slice(0,2).join('/') : name[0];
       missing.push(name);
