@@ -1,11 +1,12 @@
 let {
   projectSrc,
-  handlerFile='./index',
-  handlerFunction='handler',
+  handlerFile,
+  handlerFunction,
 } = JSON.parse(process.env.__ARC_CONFIG__);
 let context = JSON.parse(process.env.__ARC_CONTEXT__);
 let { join } = require('path');
-let fn = require(handlerFile)[handlerFunction];
+let handler = './' + handlerFile;
+let fn = require(handler)[handlerFunction];
 
 let event = '';
 process.stdin.on('data', chunk => event += chunk);

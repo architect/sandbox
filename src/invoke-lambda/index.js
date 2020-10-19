@@ -49,7 +49,7 @@ module.exports = function invokeLambda (pathToLambda, event, callback) {
         __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
         __ARC_CONFIG__: JSON.stringify({
           projectSrc: process.cwd(),
-          // TODO add handlerFile from inventory
+          handlerFile: 'index',
           handlerFunction: 'handler',
         }),
         PYTHONUNBUFFERED: true,
