@@ -25,9 +25,8 @@
   },
   "dependencies": {
     "@architect/create": "~1.2.0",
-    "@architect/deploy": "~2.0.3",
     "@architect/http-proxy": "~3.12.3",
-    "@architect/hydrate": "~1.6.0",
+    "@architect/hydrate": "~1.6.1",
     "@architect/parser": "~2.3.0",
     "@architect/utils": "~1.5.13",
     "@begin/hashid": "~1.0.0",
