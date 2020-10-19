@@ -1,4 +1,4 @@
-let path = require('path')
+let { join } = require('path')
 let fs = require('fs')
 
 let getConfig = require('./get-config')
@@ -47,8 +47,13 @@ module.exports = function invokeLambda (pathToLambda, event, callback) {
     else {
       let defaults = {
         __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
+        __ARC_CONFIG__: JSON.stringify({
+          projectSrc: process.cwd(),
+          // TODO add handlerFile from inventory
+          handlerFunction: 'handler',
+        }),
         PYTHONUNBUFFERED: true,
-        PYTHONPATH: path.join(pathToLambda, 'vendor'),
+        PYTHONPATH: join(pathToLambda, 'vendor'),
         LAMBDA_TASK_ROOT: pathToLambda,
         TZ: 'UTC',
       }
@@ -69,7 +74,7 @@ module.exports = function invokeLambda (pathToLambda, event, callback) {
             callback('missing runtime')
             return
           }
-          
+
           runtimes[runtime](options, request, timeout, function done (err, result) {
             if (err) callback(err)
             else {

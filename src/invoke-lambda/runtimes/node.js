@@ -1,6 +1,11 @@
-let { join } = require('path');
-let fn = require('./index').handler;
+let {
+  projectSrc,
+  handlerFile='./index',
+  handlerFunction='handler',
+} = JSON.parse(process.env.__ARC_CONFIG__);
 let context = JSON.parse(process.env.__ARC_CONTEXT__);
+let { join } = require('path');
+let fn = require(handlerFile)[handlerFunction];
 
 let event = '';
 process.stdin.on('data', chunk => event += chunk);
@@ -18,10 +23,11 @@ process.stdin.on('close', () => {
     let name = item.filename.split('node_modules')[1];
     if (!name) return;
     let loadedOutsideFunction = !item.filename.startsWith(cwd);
+    let rootPath = join(projectSrc, 'node_modules', name);
+    let loadedAtRoot = require.cache[rootPath] && require.cache[rootPath].loaded === true;
     let fnPath = join(cwd, 'node_modules', name);
-    let loadedByFunction = require.cache[fnPath] && require.cache[fnPath].loaded === true;
-
-    if (loaded && notSubDep && loadedOutsideFunction && !loadedByFunction) {
+    let availableInFn = require.cache[fnPath] && require.cache[fnPath].loaded === true;
+    if (loaded && notSubDep && loadedOutsideFunction && loadedAtRoot && !availableInFn) {
       name = name.substr(1).split('/');
       name = name[0].startsWith('@') ? name.slice(0,2).join('/') : name[0];
       missing.push(name);

@@ -2,11 +2,17 @@
 
 ---
 
-## [3.1.1] 2020-10-18
+## [3.1.1 - 3.1.2] 2020-10-18
+
+### Added
+
+- Internal change: laid some groundwork in Lambda invoker for new customization coming via Inventory
+
 
 ### Fixed
 
-- Fix obscure false positive missing dependency warning when `src/shared` is symlinked, and something in `src/shared` requires a module that's assumed to be in the function, but not in `src/shared`. It's weird, I know, but it can happen!
+- Fixed obscure false positive missing dependency warning when `src/shared` is symlinked, and something in `src/shared` requires a module that's assumed to be in the function, but not in `src/shared`. It's weird, I know, but it can happen!
+- Fixed another obscure false positive missing dependency warning when `src/shared` is symlinked, and something in `src/shared` requires a module that's only found in `src/shared`, but not in the function itself. Maybe slightly less weird, but it can def happen!
 
 ---
 
