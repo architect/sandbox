@@ -4,6 +4,10 @@ let runner = require('./_runner')
 let series = require('run-series')
 let readline = require('readline')
 
+// this is a module global
+// so we can run events on key press
+let schedulerBus
+
 /**
  * Looks for Scheduled Events and runs them as if they were cloudwatch events:
  */
@@ -15,13 +19,6 @@ module.exports = function createSchedule () {
   }
 
   let scheduled = {}
-  let schedulerBus
-
-  function keypress (input) {
-    if (input === 'T') {
-      schedulerBus && schedulerBus.runEvents()
-    }
-  }
 
   scheduled.start = function start (options, callback) {
     let { all, update } = options
@@ -60,12 +57,6 @@ module.exports = function createSchedule () {
           callback(e)
         }
 
-        readline.emitKeypressEvents(process.stdin)
-        if (process.stdin.isTTY) {
-          process.stdin.setRawMode(true)
-        }
-        process.stdin.on('keypress', keypress)
-
         callback()
       }
     ],
@@ -92,4 +83,8 @@ module.exports = function createSchedule () {
   }
 
   return scheduled
+}
+
+module.exports.runScheduled = function () {
+  schedulerBus && schedulerBus.runEvents()
 }

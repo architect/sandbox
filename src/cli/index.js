@@ -9,6 +9,7 @@ let { readArc } = require('../helpers')
 let readline = require('readline')
 let { tmpdir } = require('os')
 let sandbox = require('../sandbox')
+let { runScheduled } = require('../scheduled')
 
 module.exports = function cli (params = {}, callback) {
   if (!params.version) params.version = ver
@@ -109,6 +110,9 @@ module.exports = function cli (params = {}, callback) {
           msg: 'Rehydrating src/views...',
           force: true
         })
+      }
+      if (input === 'T') {
+        runScheduled()
       }
       if (key.sequence === '\u0003') {
         sandbox.end(function (err) {
