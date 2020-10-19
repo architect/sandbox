@@ -2,6 +2,20 @@
 
 ---
 
+## [3.1.3] 2020-10-19
+
+### Fixed
+
+- Fixed weird side effects that can sometimes occur when toggling between symlink enabled/disabled with `@aws shared false` in a function config
+
+
+### Changed
+
+- Improved rehydration behavior in CLI when symlinking is enabled
+- Removed unnecessary dependency accidentally added in 3.1.0
+
+---
+
 ## [3.1.1 - 3.1.2] 2020-10-18
 
 ### Added

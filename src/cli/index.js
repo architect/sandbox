@@ -65,17 +65,17 @@ module.exports = function cli (params = {}, callback) {
 
     // Rehydrator
     // Only used for file copying, otherwise we rely on symlinking, which is *way* faster
-    function rehydrate ({ timer, only, msg }) {
+    function rehydrate ({ timer, only, msg, force }) {
       lastEvent = Date.now()
       clearTimeout(timer)
-      if (!symlink) {
+      if (!symlink || force) {
         timer = setTimeout(() => {
           ts()
           let start = Date.now()
           if (msg) update.status(msg)
-          hydrate.shared({ only }, () => {
+          hydrate.shared({ only, symlink }, () => {
             let end = Date.now()
-            update.done(`Files rehydrated into functions in ${end - start}ms`)
+            update.done(`${symlink ? 'Symlinks' : 'Files'} rehydrated into functions in ${end - start}ms`)
           })
         }, 50)
       }
@@ -90,7 +90,8 @@ module.exports = function cli (params = {}, callback) {
       if (input === 'H') {
         rehydrate({
           timer: arcEventTimer,
-          msg: 'Rehydrating all shared files...'
+          msg: 'Rehydrating all shared files...',
+          force: true
         })
       }
       if (input === 'S') {
@@ -98,6 +99,7 @@ module.exports = function cli (params = {}, callback) {
           timer: rehydrateSharedTimer,
           only: 'shared',
           msg: 'Rehydrating src/shared...',
+          force: true
         })
       }
       if (input === 'V') {
@@ -105,6 +107,7 @@ module.exports = function cli (params = {}, callback) {
           timer: rehydrateViewsTimer,
           only: 'views',
           msg: 'Rehydrating src/views...',
+          force: true
         })
       }
       if (key.sequence === '\u0003') {
@@ -131,6 +134,13 @@ module.exports = function cli (params = {}, callback) {
       if (paused && !fs.existsSync(pauseFile)) {
         update.status('Watcher no longer paused')
         paused = false
+        if (symlink) {
+          rehydrate({
+            timer: arcEventTimer,
+            msg: 'Restoring shared file symlinks...',
+            force: true
+          })
+        }
       }
 
       // Event criteria
