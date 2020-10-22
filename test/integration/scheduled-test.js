@@ -34,9 +34,7 @@ test('Runs scheduled events from configuration', async t => {
   t.equals(history.length, 2, 'Scheduled Expression spy was called twice in 4 minutes')
 
   const call1 = history[0][0]
-  const call2 = history[1][0]
-
-  t.notEqual(call1.time, call2.time, 'the different events are given different time')
+  t.ok(call1.time, 'calls the events with a "time" prop')
 
   const cronHistory = await cronSpy.getCalls()
 
