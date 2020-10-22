@@ -2,7 +2,6 @@ let { env, maybeHydrate, readArc } = require('../helpers')
 let hydrate = require('@architect/hydrate')
 let runner = require('./_runner')
 let series = require('run-series')
-let readline = require('readline')
 
 // this is a module global
 // so we can run events on key press
@@ -84,6 +83,6 @@ module.exports = function createSchedule () {
   return scheduled
 }
 
-module.exports.runScheduled = function () {
+module.exports.scheduledEventsRunner = function () {
   schedulerBus && schedulerBus.runEvents()
 }

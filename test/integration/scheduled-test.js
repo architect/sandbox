@@ -44,3 +44,8 @@ test('Runs scheduled events from configuration', async t => {
 
   await scheduled.end()
 })
+
+test('Scheduled events test teardown', async () => {
+  await rateSpy.resetHistory()
+  await cronSpy.resetHistory()
+})

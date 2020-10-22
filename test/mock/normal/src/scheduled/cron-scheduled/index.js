@@ -1,6 +1,6 @@
-const path = require('path')
-const { writeFile, unlink, readFile } = require('fs').promises
-const EOL = require('os')
+let path = require('path')
+let { writeFile, unlink, readFile } = require('fs').promises
+let EOL = require('os')
 
 /*
  * This test spy is a bit funny.
@@ -9,7 +9,7 @@ const EOL = require('os')
  * and then read them back in in the integration test
  * to be able to make assertions about the calls
  */
-const WRITE_FILENAME = path.join(__dirname, 'TEST_ARGUMENTS')
+let WRITE_FILENAME = path.join(__dirname, '../../../../tmp', 'CRON_ARGUMENTS')
 
 module.exports.handler = async function () {
   return writeFile(WRITE_FILENAME, EOL + JSON.stringify(arguments), { flag: 'a' })

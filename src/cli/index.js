@@ -10,7 +10,7 @@ let { readArc, readOptions } = require('../helpers')
 let readline = require('readline')
 let { tmpdir } = require('os')
 let sandbox = require('../sandbox')
-let { runScheduled } = require('../scheduled')
+let { scheduledEventsRunner } = require('../scheduled')
 
 module.exports = function cli (params = {}, callback) {
   if (!params.version) params.version = ver
@@ -114,7 +114,7 @@ module.exports = function cli (params = {}, callback) {
         })
       }
       if (input === 'T') {
-        runScheduled()
+        scheduledEventsRunner()
       }
       if (key.sequence === '\u0003') {
         sandbox.end(function (err) {
@@ -165,12 +165,12 @@ module.exports = function cli (params = {}, callback) {
 
           let quiet = process.env.ARC_QUIET
 
-          series ([
-            function _endHttp(callback) {
+          series([
+            function _endHttp (callback) {
               // Always attempt to close the http server, but only reload if necessary
               sandbox.http.end(callback)
             },
-            function _startHttp(callback) {
+            function _startHttp (callback) {
               let start = Date.now()
               process.env.ARC_QUIET = true
               sandbox.http.start({ quiet: true }, function (err, result) {
@@ -186,7 +186,7 @@ module.exports = function cli (params = {}, callback) {
                 callback(err, result)
               })
             },
-            function _maybeHydrate(callback) {
+            function _maybeHydrate (callback) {
               if (deprecated) {
                 rehydrate({
                   timer: rehydrateArcTimer,
