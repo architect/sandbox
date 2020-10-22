@@ -1,6 +1,5 @@
 let { fork } = require('child_process')
 let { join } = require('path')
-let chalk = require('chalk')
 let awsCronParser = require('aws-cron-parser')
 
 const multipliers = [
@@ -83,7 +82,7 @@ module.exports = function eventRunner (scheduledEvents, update) {
     subprocess.send(item)
     subprocess.on('message', function _message (msg) {
       if (!quiet) {
-        console.log(chalk.grey.dim(msg.text))
+        update.status(msg.text)
       }
     })
   }
