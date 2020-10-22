@@ -72,7 +72,6 @@ module.exports = function createSchedule () {
   }
 
   scheduled.end = function end (callback) {
-    process.stdin.off('keypress', keypress)
     schedulerBus.stop(function _closed (err) {
       if (err) callback(err)
       else {

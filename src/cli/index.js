@@ -1,11 +1,12 @@
 let hydrate = require('@architect/hydrate')
 let path = require('path')
 let fs = require('fs')
+let series = require('run-series')
 let { version: pkgVer } = require('../../package.json')
 let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
 let { fingerprint, pathToUnix, updater } = require('@architect/utils')
-let { readArc } = require('../helpers')
+let { readArc, readOptions } = require('../helpers')
 let readline = require('readline')
 let { tmpdir } = require('os')
 let sandbox = require('../sandbox')
@@ -30,9 +31,10 @@ module.exports = function cli (params = {}, callback) {
     // Setup
     let update = updater('Sandbox')
     let deprecated = process.env.DEPRECATED
-    let watcher = watch(process.cwd(), { recursive: true })
+    let watcher = watch(process.cwd(), { recursive: true, filter: f => !/node_modules/.test(f) })
     let workingDirectory = pathToUnix(process.cwd())
     let separator = path.posix.sep
+    let { runScheduled } = readOptions(params.options)
 
     // Arc stuff
     let { arc } = readArc()
@@ -159,20 +161,32 @@ module.exports = function cli (params = {}, callback) {
         clearTimeout(arcEventTimer)
         arcEventTimer = setTimeout(() => {
           ts()
-          // Always attempt to close the http server, but only reload if necessary
-          sandbox.http.end()
           update.status('Architect project manifest changed')
 
-          let start = Date.now()
           let quiet = process.env.ARC_QUIET
-          process.env.ARC_QUIET = true
-          sandbox.http.start({ quiet: true }, function (err, result) {
-            if (!quiet) delete process.env.ARC_QUIET
-            if (err) update.err(err)
-            // HTTP passes back success message if it actually did need to (re)start
-            if (result === 'HTTP successfully started') {
-              let end = Date.now()
-              update.done(`HTTP routes reloaded in ${end - start}ms`)
+
+          series ([
+            function _endHttp(callback) {
+              // Always attempt to close the http server, but only reload if necessary
+              sandbox.http.end(callback)
+            },
+            function _startHttp(callback) {
+              let start = Date.now()
+              process.env.ARC_QUIET = true
+              sandbox.http.start({ quiet: true }, function (err, result) {
+                if (!quiet) delete process.env.ARC_QUIET
+
+                // HTTP passes back success message if it actually did need to (re)start
+                if (result === 'HTTP successfully started') {
+                  let end = Date.now()
+                  update.done(`HTTP routes reloaded in ${end - start}ms`)
+                }
+
+                if (err) update.err(err)
+                callback(err, result)
+              })
+            },
+            function _maybeHydrate(callback) {
               if (deprecated) {
                 rehydrate({
                   timer: rehydrateArcTimer,
@@ -180,16 +194,31 @@ module.exports = function cli (params = {}, callback) {
                   msg: 'Rehydrating functions with new project manifest'
                 })
               }
-            }
-          })
 
-          // Update scheduled events listeners
-          sandbox.scheduled.end()
-          sandbox.scheduled.start({ quiet: true }, function (err) {
-            if (!quiet) delete process.env.ARC_QUIET
-            if (err) return update.err(err)
-            update.done('Scheduled events reloaded')
-          })
+              callback()
+            },
+            function _endScheduled (callback) {
+              if (!runScheduled) {
+                return callback()
+              }
+
+              sandbox.scheduled.end(callback)
+            },
+            // Update scheduled events listeners
+            function _startScheduled (callback) {
+              if (!runScheduled) {
+                return callback()
+              }
+
+              process.env.ARC_QUIET = true
+              sandbox.scheduled.start({ quiet: true }, function (err) {
+                if (!quiet) delete process.env.ARC_QUIET
+
+                if (err) return update.err(err)
+                update.done('Scheduled events reloaded')
+              })
+            }
+          ])
         }, 50)
       }
 

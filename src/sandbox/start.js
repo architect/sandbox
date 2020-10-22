@@ -5,7 +5,7 @@ let hydrate = require('@architect/hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
 let { banner, chars } = require('@architect/utils')
-let { env, maybeHydrate, readArc } = require('../helpers')
+let { env, maybeHydrate, readArc, readOptions } = require('../helpers')
 let startupScripts = require('./_startup-scripts')
 
 module.exports = function _start (params, callback) {
@@ -26,19 +26,7 @@ module.exports = function _start (params, callback) {
   // Set `all` to instruct service modules not to hydrate again, etc.
   params.all = true
 
-  // Set up verbositude
-  let verbose = false
-  let findVerbose = option => [ '-v', '--verbose', 'verbose' ].includes(option)
-  if (options && options.some(findVerbose)) {
-    verbose = true
-  }
-
-  // Set up scheduled
-  let runScheduled = false
-  let findScheduled = option => [ '-s', '--scheduled', 'scheduled' ].includes(option)
-  if (options && options.some(findScheduled)) {
-    runScheduled = true
-  }
+  let { verbose, runScheduled } = readOptions(options)
 
   let { arc, filepath } = readArc()
   let deprecated = process.env.DEPRECATED
@@ -103,9 +91,8 @@ module.exports = function _start (params, callback) {
     // Run scheduled events from arc file (@scheduled)
     // requires -s / --scheduled option
     function _scheduled (callback) {
-      if (!runScheduled) {
-        let skipMessage = chalk.grey.dim('use --scheduled option to run scheduled events')
-        console.log(`- ${skipMessage}\n`)
+      if (arc.scheduled && !runScheduled) {
+        update.status('use --scheduled option to run @scheduled events')
         return callback()
       }
       scheduled.start(params, callback)
