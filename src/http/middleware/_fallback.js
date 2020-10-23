@@ -125,22 +125,22 @@ module.exports = function fallback (req, res, next) {
   // ASAP – not supported by Arc <6, supported by Arc 6+
   else if (hasASAP) {
     // Sandbox running as a dependency (most common use case)
-    let pathToFunction = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
+    let src = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
     // Sandbox running as a global install
     let global = join(__dirname, '..', '..', '..', '..', 'http-proxy', 'dist')
     // Sandbox running from a local (symlink) context (usually testing/dev)
     let local = join(__dirname, '..', '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
-    if (exists(global)) pathToFunction = global
-    else if (exists(local)) pathToFunction = local
-    invokeProxy(pathToFunction)
+    if (exists(global)) src = global
+    else if (exists(local)) src = local
+    invokeProxy(src)
   }
   // HTTP APIs can fall back to /:param (REST APIs cannot)
   else if (rootParam && httpAPI) {
-    let pathToFunction = join(process.cwd(), 'src', 'http', `${rootParam[0]}-${name(rootParam[1])}`)
+    let src = join(process.cwd(), 'src', 'http', `${rootParam[0]}-${name(rootParam[1])}`)
     let exec = invoker({
       method,
       path: `/${rootParam[1]}`,
-      pathToFunction,
+      src,
       apiType
     })
     req.params = { [rootParam[1].substr(1)]: '' }
@@ -148,8 +148,8 @@ module.exports = function fallback (req, res, next) {
   }
   // Arc 6 greedy `get /{proxy+}`
   else if (restGreedyRoot) {
-    let pathToFunction = join(process.cwd(), 'src', 'http', `get-index`)
-    invokeProxy(pathToFunction)
+    let src = join(process.cwd(), 'src', 'http', `get-index`)
+    invokeProxy(src)
   }
   // Failure
   else {
@@ -160,10 +160,10 @@ module.exports = function fallback (req, res, next) {
   }
 
   // Invoke a root proxy payload
-  function invokeProxy (pathToFunction) {
+  function invokeProxy (src) {
     let exec = invoker({
       method,
-      pathToFunction,
+      src,
       apiType
     })
     let proxy = pathname.startsWith('/') ? pathname.substr(1) : pathname

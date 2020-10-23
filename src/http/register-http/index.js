@@ -19,7 +19,7 @@ module.exports = function reg ({ app, routes }) {
   routes.forEach(route => {
     // ASAP handled by middleware
     if (route.arcStaticAssetProxy) return
-    let { method, path, src: pathToFunction } = route
+    let { method, path, src } = route
 
     // Methods not implemented by Arc for legacy REST APIs
     if (deprecated || apiType === 'rest') {
@@ -27,18 +27,18 @@ module.exports = function reg ({ app, routes }) {
       let hasCatchall = path.includes('*')
       if (!httpOnly.some(h => h === method) && !hasCatchall) {
         // Pretty print the route reg
-        log({ method, path, pathToFunction })
+        log({ method, path, src })
         // Register the route with the Router instance
-        let exec = invoker({ method, path, pathToFunction, apiType })
+        let exec = invoker({ method, path, src, apiType })
         app[method](path, exec)
       }
     }
     else {
       // Pretty print the route reg
-      log({ method, path, pathToFunction })
+      log({ method, path, src })
 
       // Register the route with the Router instance
-      let exec = invoker({ method, path, pathToFunction, apiType })
+      let exec = invoker({ method, path, src, apiType })
       if (method !== 'any') {
         app[method](path, exec)
       }
