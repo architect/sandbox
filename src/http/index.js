@@ -27,7 +27,7 @@ module.exports = function createHttpServer (params) {
   if (inv.http) {
     let app = Router({ mergeParams: true })
 
-    app = middleware(app)
+    app = middleware(app, inv)
 
     // Keep a reference up here for fns below
     let httpServer

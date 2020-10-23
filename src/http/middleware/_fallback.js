@@ -14,7 +14,7 @@ let { getLambdaName: name } = require('@architect/utils')
  * - ASAP handling (if present)
  * - Error out
  */
-module.exports = function fallback (req, res, next) {
+module.exports = function fallback (inv, req, res, next) {
   let { arc } = readArc()
   let apiType = process.env.ARC_API_TYPE
   let httpAPI = apiType.startsWith('http')
@@ -22,14 +22,17 @@ module.exports = function fallback (req, res, next) {
   let method = req.method.toLowerCase()
 
   // Read all routes
-  let routes = arc.http || []
+  let routes = inv.http
   // Add WebSocket route if necessary
   if (arc.ws) routes.push([ 'post', '/__arc' ])
   // Establish proxy
   let proxy = httpAPI && arc.proxy && arc.proxy.find(s => s[0] === 'testing')
 
   // Tokenize all routes: [ ['get', '/'], ... ]
-  let tokens = routes.map(r => [ r[0] ].concat(r[1].split('/').filter(Boolean)))
+  let tokens = inv.http.map(route => {
+    let { method, path, arcStaticAssetProxy: asap } = route
+    if (!asap) return [ method ].concat(path.split('/').filter(Boolean))
+  }).filter(Boolean)
 
   // Tokenize the current req: [ 'get', 'foo' ]
   let { pathname } = parse(req.url)
@@ -40,11 +43,7 @@ module.exports = function fallback (req, res, next) {
   let exactMatch = exact.some(t => t.join('') === current.join(''))
 
   // Look for method type `any` on a matching route
-  let anyMethodFound = routes.some(r => {
-    let method = r[0]
-    let path = r[1]
-    return method === 'any' && path === pathname
-  })
+  let anyMethodFound = routes.some(({ method, path }) => method === 'any' && path === pathname)
   let anyMethodMatch = anyMethodFound && httpAPI // Only implemented in Arc 8 HTTP
 
   // Look for any route parameter matches
@@ -88,28 +87,15 @@ module.exports = function fallback (req, res, next) {
   })
   let catchallMatch = catchallFound && httpAPI // Only implemented in Arc 8 HTTP
 
-  // Check to see if we're using ASAP
-  let findRoot = r => {
-    let method = r[0].toLowerCase()
-    let path = r[1]
-    let rootParam = path.startsWith('/:') && path.split('/').length === 2
-    let isRootMethod = httpAPI
-      ? method === 'get' || method === 'any'
-      : method === 'get'
-    // Literal root, root catchall, or root params should cancel out ASAP
-    let isRootPath = httpAPI
-      ? path === '/' || path === '/*' || rootParam
-      : path === '/'
-    return isRootMethod && isRootPath
-  }
-  let hasRoot = arc.http && arc.http.some(findRoot)
-  let hasASAP = !hasRoot && !arc.proxy && !rootParam && !deprecated
+  // Establish root handler status
+  let rootHandler = inv._project.rootHandler
+  let hasASAP = rootHandler === 'arcStaticAssetProxy' && !deprecated
 
   // Bail on exact, param, or catchall matches
   let match = exactMatch || anyMethodMatch || paramsMatch || catchallMatch
 
-  // Backwards compatibility with Arc 6+ REST's greedy `get /` (deprecated in Arc 8)
-  let restGreedyRoot = apiType === 'rest' && !deprecated && hasRoot && pathname !== '/'
+  // Backwards compatibility with Arc 6+ `REST`'s greedy `get /` (deprecated in Arc 8 `HTTP`)
+  let restGreedyRoot = apiType === 'rest' && !deprecated && rootHandler && pathname !== '/'
 
   // Matches
   if (match) {
