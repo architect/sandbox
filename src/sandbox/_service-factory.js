@@ -26,7 +26,6 @@ module.exports = function serviceFactory (params) {
         if (err) callback(err)
         else {
           if (!server[type]) {
-
             let service = init(inventory)
             if (service) {
               options.update = update

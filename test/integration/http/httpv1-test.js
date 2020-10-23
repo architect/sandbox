@@ -395,6 +395,31 @@ test('[HTTP v1.0 (REST) mode] get /no-return (noop)', t => {
   })
 })
 
+test('[HTTP v1.0 (REST) mode] get /custom', t => {
+  t.plan(16)
+  let path = '/custom'
+  tiny.get({
+    url: url + path
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get /custom',
+        resource: path,
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
+    }
+  })
+})
+
 test('[HTTP v1.0 (REST) mode] post /post', t => {
   t.plan(16)
   let path = '/post'

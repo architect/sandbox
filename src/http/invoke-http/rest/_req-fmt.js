@@ -11,7 +11,7 @@ module.exports = function requestFormatter ({ method, path, req }, httpApi) {
   let { pathname } = URL.parse(url)
 
   // Resource may be manually supplied via ASAP or greedy root
-  // Otherwise rely on route, as defined in arc.http
+  // Otherwise rely on paths, as defined in inventory.http[route]
   resource = resource || path
   if (resource && resource.includes(':')) {
     resource = resource.split('/')

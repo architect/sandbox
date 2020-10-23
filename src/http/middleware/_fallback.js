@@ -134,7 +134,7 @@ module.exports = function fallback (inv, req, res, next) {
   }
   // Arc 6 greedy `get /{proxy+}`
   else if (restGreedyRoot) {
-    let src = join(process.cwd(), 'src', 'http', `get-index`)
+    let src = join(process.cwd(), 'src', 'http', `get-index`) // We can assume this file path bc custom didn't land until Arc 8
     invokeProxy(src)
   }
   // Failure

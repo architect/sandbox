@@ -410,6 +410,30 @@ test('[HTTP mode] get /no-return (noop)', t => {
   })
 })
 
+test('[HTTP mode] get /custom', t => {
+  t.plan(15)
+  let rawPath = '/custom'
+  tiny.get({
+    url: url + rawPath
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get /custom',
+        routeKey: 'GET /custom',
+        rawPath,
+        pathParameters: undefined,
+        cookies: undefined,
+        queryStringParameters: undefined,
+        rawQueryString: '',
+        headers: '🤷🏽‍♀️',
+        isBase64Encoded: false,
+        body: undefined,
+      })
+    }
+  })
+})
+
 // Write (POST, PUT, etc.) tests exercise HTTP API mode's implicit JSON passthrough
 test('[HTTP mode] post /post (plain JSON)', t => {
   t.plan(15)

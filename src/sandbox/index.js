@@ -3,6 +3,7 @@ let service = require('./_service-factory')
 let _start = require('./start')
 let _end = require('./end')
 
+let inv = require('@architect/inventory')
 let { updater } = require('@architect/utils')
 let update = updater('Sandbox')
 
@@ -36,13 +37,19 @@ function start (args = {}, callback) {
     })
   }
 
-  _start({
-    ...args,
-    update,
-    events,
-    http,
-    tables,
-  }, callback)
+  inv({}, function (err, inventory) {
+    if (err) callback(err)
+    else {
+      _start({
+        ...args,
+        update,
+        events,
+        http,
+        tables,
+        inventory,
+      }, callback)
+    }
+  })
 
   return promise
 }

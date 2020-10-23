@@ -16,7 +16,7 @@ module.exports = function requestFormatter ({ method, path, req }) {
   }
 
   // Resource may be manually supplied via ASAP
-  // Otherwise rely on route, as defined in arc.http
+  // Otherwise rely on paths, as defined in inventory.http[route]
   resource = resource || path
 
   // Handle params

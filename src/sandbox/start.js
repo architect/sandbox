@@ -11,6 +11,7 @@ let startupScripts = require('./_startup-scripts')
 module.exports = function _start (params, callback) {
   let start = Date.now()
   let {
+    inventory,
     // Settings
     options,
     quiet = false,
@@ -68,7 +69,7 @@ module.exports = function _start (params, callback) {
 
     // Loop through functions and see if any need dependency hydration
     function _maybeHydrate (callback) {
-      maybeHydrate(callback)
+      maybeHydrate(inventory, callback)
     },
 
     // ... then hydrate Architect project files into functions

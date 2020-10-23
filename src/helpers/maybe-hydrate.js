@@ -5,7 +5,7 @@ let glob = require('glob')
 let { join } = require('path')
 let hydrate = require('@architect/hydrate')
 let series = require('run-series')
-let { chars, inventory } = require('@architect/utils')
+let { chars } = require('@architect/utils')
 
 /**
  * Checks for the existence of supported dependency manifests, and auto-hydrates each function's dependencies as necessary
@@ -18,10 +18,10 @@ let { chars, inventory } = require('@architect/utils')
  *
  * Not responsible for src/shared + views, handled elsewhere to optimize load time
  */
-module.exports = function maybeHydrate (callback) {
-  let arc = inventory()
+module.exports = function maybeHydrate (inventory, callback) {
+  let { inventory: inv } = inventory
   let quiet = process.env.ARC_QUIET
-  if (!arc.localPaths.length) {
+  if (!inv.lambdaSrcDirs || inv.lambdaSrcDirs.length) {
     callback()
   }
   else {
@@ -31,8 +31,10 @@ module.exports = function maybeHydrate (callback) {
     let notified = false
     let shared = join('src', 'shared')
     let views = join('src', 'views')
-    arc.localPaths.push(shared, views)
-    let ops = arc.localPaths.map(path => {
+    // Make a new array, don't inventory
+    let lambdaSrcDirs = [ ...inv.lambdaSrcDirs ]
+    lambdaSrcDirs.push(shared, views)
+    let ops = lambdaSrcDirs.map(path => {
       return function (callback) {
         /**
          * Check each of our supported dependency manifests

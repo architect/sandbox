@@ -19,8 +19,8 @@ let registerWS = require('./register-websocket')
 /**
  * Creates an HTTP + WebSocket server that emulates API Gateway
  */
-module.exports = function createHttpServer (params) {
-  let { inventory: inv } = params
+module.exports = function createHttpServer (inventory) {
+  let { inventory: inv } = inventory
   let isDefaultProject = !inv._project.manifest
   let arc = inv._project.arc
 
@@ -68,7 +68,7 @@ module.exports = function createHttpServer (params) {
 
         // Loop through functions and see if any need dependency hydration
         function _maybeHydrate (callback) {
-          if (!all) maybeHydrate(callback)
+          if (!all) maybeHydrate(inventory, callback)
           else callback()
         },
 

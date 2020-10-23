@@ -23,6 +23,9 @@ get     /get-c/*
 get     /env
 get     /no-return
 get     /times-out
+/custom
+  method get
+  src src/http/custom
 post    /post
 put     /put
 patch   /patch
