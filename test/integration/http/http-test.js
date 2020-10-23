@@ -3,7 +3,7 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { url, data, shutdown, checkHttpResult: checkResult } = require('./_utils')
+let { url, data, shutdown, checkHttpResult: checkResult, rmPublic } = require('./_utils')
 
 let cwd = process.cwd()
 let mock = join(__dirname, '..', '..', 'mock')
@@ -870,7 +870,8 @@ test('[HTTP mode] Start Sandbox', t => {
 })
 
 test('[HTTP mode] get / without defining get / should fail if index.html not present', t => {
-  t.plan(1)
+  t.plan(2)
+  rmPublic(t)
   tiny.get({
     url
   }, function _got (err, result) {

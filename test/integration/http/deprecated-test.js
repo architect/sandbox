@@ -3,7 +3,7 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { url, data, shutdown, checkDeprecatedResult: checkResult } = require('./_utils')
+let { url, data, shutdown, checkDeprecatedResult: checkResult, rmPublic } = require('./_utils')
 
 let cwd = process.cwd()
 let mock = join(__dirname, '..', '..', 'mock')
@@ -481,7 +481,8 @@ test('[REST mode / deprecated] Start Sandbox', t => {
 })
 
 test('[REST mode / deprecated] get / without defining get / should fail if index.html not present', t => {
-  t.plan(1)
+  t.plan(2)
+  rmPublic(t)
   tiny.get({
     url
   }, function _got (err, result) {
