@@ -139,7 +139,7 @@ module.exports = function fallback (req, res, next) {
     let pathToFunction = join(process.cwd(), 'src', 'http', `${rootParam[0]}-${name(rootParam[1])}`)
     let exec = invoker({
       method,
-      route: `/${rootParam[1]}`,
+      path: `/${rootParam[1]}`,
       pathToFunction,
       apiType
     })

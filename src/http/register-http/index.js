@@ -1,9 +1,8 @@
-let { join } = require('path')
-let { getLambdaName: name, updater } = require('@architect/utils')
+let { updater } = require('@architect/utils')
 let log = require('./pretty-print-route')
 let invoker = require('../invoke-http')
 
-module.exports = function reg (app, api, type, routes) {
+module.exports = function reg ({ app, routes }) {
   let apiType = process.env.ARC_API_TYPE
   let deprecated = process.env.DEPRECATED
   let msgs = {
@@ -17,38 +16,37 @@ module.exports = function reg (app, api, type, routes) {
   let update = updater('Sandbox')
   update.done(`Loaded routes (${msg})`)
 
-  routes.forEach(r => {
-    let method = r[0].toLowerCase()
-    let route = r[1]
-    let path = name(route)
-    let pathToFunction = join(process.cwd(), 'src', type, `${method}${path}`)
+  routes.forEach(route => {
+    // ASAP handled by middleware
+    if (route.arcStaticAssetProxy) return
+    let { method, path, src: pathToFunction } = route
 
     // Methods not implemented by Arc for legacy REST APIs
     if (deprecated || apiType === 'rest') {
       let httpOnly = [ 'any', 'head', 'options' ]
-      let hasCatchall = route.includes('*')
+      let hasCatchall = path.includes('*')
       if (!httpOnly.some(h => h === method) && !hasCatchall) {
         // Pretty print the route reg
-        log({ method, route, path })
+        log({ method, path, pathToFunction })
         // Register the route with the Router instance
-        let exec = invoker({ method, pathToFunction, route, apiType })
-        app[method](route, exec)
+        let exec = invoker({ method, path, pathToFunction, apiType })
+        app[method](path, exec)
       }
     }
     else {
       // Pretty print the route reg
-      log({ method, route, path })
+      log({ method, path, pathToFunction })
 
       // Register the route with the Router instance
-      let exec = invoker({ method, pathToFunction, route, apiType })
+      let exec = invoker({ method, path, pathToFunction, apiType })
       if (method !== 'any') {
-        app[method](route, exec)
+        app[method](path, exec)
       }
       // In the case of `any`, register all methods
       else {
         let methods = [ 'get', 'post', 'put', 'patch', 'head', 'delete', 'options' ]
         for (let method of methods) {
-          app[method](route, exec)
+          app[method](path, exec)
         }
       }
     }

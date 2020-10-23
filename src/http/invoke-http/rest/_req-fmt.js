@@ -6,13 +6,13 @@ let headerFormatter = require('./_req-header-fmt')
  * - Mocks request object shape from API Gateway <> Lambda proxy integration
  * - HTTP APIs can emulate these REST API request payloads with the Lambda 1.0 payload, but AWS didn't make it an exact match because reasons
  */
-module.exports = function requestFormatter ({ method, route, req }, httpApi) {
+module.exports = function requestFormatter ({ method, path, req }, httpApi) {
   let { body, params, resource, url } = req
-  let { pathname: path } = URL.parse(url)
+  let { pathname } = URL.parse(url)
 
   // Resource may be manually supplied via ASAP or greedy root
   // Otherwise rely on route, as defined in arc.http
-  resource = resource || route
+  resource = resource || path
   if (resource && resource.includes(':')) {
     resource = resource.split('/')
       .map(part => part.startsWith(':')
@@ -54,7 +54,7 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
   // Here we go!
   let request = {
     httpMethod,
-    path,
+    path: pathname,
     resource,
     body: nullify(body),
     headers,
@@ -64,7 +64,7 @@ module.exports = function requestFormatter ({ method, route, req }, httpApi) {
     multiValueQueryStringParameters: nullify(multiValueQueryStringParameters),
     requestContext: {
       httpMethod,
-      path,
+      path: pathname,
       resourcePath: resource
     }
   }
