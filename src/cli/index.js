@@ -31,7 +31,7 @@ module.exports = function cli (params = {}, callback) {
     // Setup
     let update = updater('Sandbox')
     let deprecated = process.env.DEPRECATED
-    let watcher = watch(process.cwd(), { recursive: true, filter: f => !/node_modules/.test(f) })
+    let watcher = watch(process.cwd(), { recursive: true })
     let workingDirectory = pathToUnix(process.cwd())
     let separator = path.posix.sep
     let { runScheduled } = readOptions(params.options)
