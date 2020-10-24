@@ -27,7 +27,7 @@ module.exports = function createHttpServer (inventory) {
   if (inv.http) {
     let app = Router({ mergeParams: true })
 
-    app = middleware(app, inv)
+    app = middleware(app, inventory)
 
     // Keep a reference up here for fns below
     let httpServer
@@ -44,7 +44,7 @@ module.exports = function createHttpServer (inventory) {
       series([
         // Set up Arc + userland env vars
         function _env (callback) {
-          if (!all) env(options, callback)
+          if (!all) env({ ...options, inventory }, callback)
           else callback()
         },
 

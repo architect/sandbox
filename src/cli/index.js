@@ -2,17 +2,15 @@ let hydrate = require('@architect/hydrate')
 let path = require('path')
 let fs = require('fs')
 let { version: pkgVer } = require('../../package.json')
-let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
 let { fingerprint, pathToUnix, updater } = require('@architect/utils')
-let { readArc } = require('../helpers')
 let readline = require('readline')
 let { tmpdir } = require('os')
 let sandbox = require('../sandbox')
 
 module.exports = function cli (params = {}, callback) {
-  if (!params.version) params.version = ver
-  let { options = [] } = params
+  let { version, options = [], inventory } = params
+  if (!version) version = `Sandbox ${pkgVer}`
   let symlink = options.some(o => o === '--disable-symlinks') ? false : true
   params.symlink = symlink
 
@@ -34,7 +32,7 @@ module.exports = function cli (params = {}, callback) {
     let separator = path.posix.sep
 
     // Arc stuff
-    let { arc } = readArc()
+    let arc = inventory.inventory._project.arc
     let arcFile = new RegExp(`${workingDirectory}${separator}(app\\.arc|\\.arc|arc\\.yaml|arc\\.json)`)
     let folderSetting = tuple => tuple[0] === 'folder'
     let staticFolder = arc.static && arc.static.some(folderSetting) ? arc.static.find(folderSetting)[1] : 'public'

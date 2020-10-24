@@ -2,7 +2,6 @@ let { existsSync: exists } = require('fs')
 let { join } = require('path')
 let { parse } = require('url')
 let invoker = require('../invoke-http')
-let { readArc } = require('../../helpers')
 let httpProxy = require('http-proxy')
 let { getLambdaName: name } = require('@architect/utils')
 
@@ -14,8 +13,8 @@ let { getLambdaName: name } = require('@architect/utils')
  * - ASAP handling (if present)
  * - Error out
  */
-module.exports = function fallback (inv, req, res, next) {
-  let { arc } = readArc()
+module.exports = function fallback (inventory, req, res, next) {
+  let { inventory: inv, get } = inventory
   let apiType = process.env.ARC_API_TYPE
   let httpAPI = apiType.startsWith('http')
   let deprecated = process.env.DEPRECATED
@@ -23,10 +22,8 @@ module.exports = function fallback (inv, req, res, next) {
 
   // Read all routes
   let routes = inv.http
-  // Add WebSocket route if necessary
-  if (arc.ws) routes.push([ 'post', '/__arc' ])
   // Establish proxy
-  let proxy = httpAPI && arc.proxy && arc.proxy.find(s => s[0] === 'testing')
+  let proxy = httpAPI && get.proxy('testing')
 
   // Tokenize all routes: [ ['get', '/'], ... ]
   let tokens = inv.http.map(route => {

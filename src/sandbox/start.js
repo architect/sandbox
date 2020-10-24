@@ -5,7 +5,7 @@ let hydrate = require('@architect/hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
 let { banner, chars } = require('@architect/utils')
-let { env, maybeHydrate, readArc } = require('../helpers')
+let { env, maybeHydrate } = require('../helpers')
 let startupScripts = require('./_startup-scripts')
 
 module.exports = function _start (params, callback) {
@@ -22,6 +22,7 @@ module.exports = function _start (params, callback) {
     http,
     tables,
   } = params
+  let { inventory: inv } = inventory
 
   // Set `all` to instruct service modules not to hydrate again, etc.
   params.all = true
@@ -33,7 +34,6 @@ module.exports = function _start (params, callback) {
     verbose = true
   }
 
-  let { arc, filepath } = readArc()
   let deprecated = process.env.DEPRECATED
 
   series([
@@ -50,7 +50,7 @@ module.exports = function _start (params, callback) {
 
     // Read the current Architect project (or use a default project)
     function _checkArc (callback) {
-      if (!filepath) {
+      if (!inv._project.manifest) {
         update.warn('No Architect project manifest found, using default project')
       }
       else {
@@ -115,8 +115,7 @@ module.exports = function _start (params, callback) {
 
     // Run startup scripts (if present)
     function _runStartupScripts (callback) {
-      let params = { arc, update }
-      startupScripts(params, callback)
+      startupScripts({ inventory, update }, callback)
     },
 
     // Check aws-sdk installation status if installed globally

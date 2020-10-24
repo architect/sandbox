@@ -4,7 +4,7 @@ let _static = require('./_static-path')
 let _fallback = require('./_fallback')
 let cors = require('./_cors')
 
-module.exports = function loadMiddleware (app, inv) {
+module.exports = function loadMiddleware (app, inventory) {
   // Binary payload / base64 encoding handler
   app.use(binary)
 
@@ -15,7 +15,7 @@ module.exports = function loadMiddleware (app, inv) {
   app.use(_static)
 
   // Route fallthrough to @proxy + ASAP
-  let fallback = _fallback.bind({}, inv)
+  let fallback = _fallback.bind({}, inventory)
   app.use(fallback)
 
   // Special CORS handling

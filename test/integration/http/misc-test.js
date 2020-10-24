@@ -118,6 +118,7 @@ test('[Env vars] get /env', t => {
       t.ok(result.body.ARC_STATIC_BUCKET, 'Got ARC_STATIC_BUCKET env var')
       t.ok(result.body.NODE_ENV, 'Got NODE_ENV env var')
       t.ok(result.body.SESSION_TABLE_NAME, 'Got SESSION_TABLE_NAME env var')
+      // TODO add ARC_STATIC_SPA
       t.equal(result.body.TZ, 'UTC', 'Got TZ env var')
     }
   })

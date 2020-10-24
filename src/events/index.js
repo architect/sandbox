@@ -1,16 +1,16 @@
-let { env, getPorts, checkPort, maybeHydrate, readArc } = require('../helpers')
+let { env, getPorts, checkPort, maybeHydrate } = require('../helpers')
 let hydrate = require('@architect/hydrate')
-let listener = require('./_listener')
+let _listener = require('./_listener')
 let http = require('http')
 let series = require('run-series')
 
 /**
  * Creates an event bus that emulates SNS + SQS and listens for `arc.event.publish` events
  */
-module.exports = function createEventBus () {
-  let { arc } = readArc()
+module.exports = function createEventBus (inventory) {
+  let { inventory: inv } = inventory
 
-  if (arc.events || arc.queues) {
+  if (inv.events || inv.queues) {
     let events = {}
     let eventBus
 
@@ -23,7 +23,7 @@ module.exports = function createEventBus () {
       series([
         // Set up Arc + userland env vars
         function _env (callback) {
-          if (!all) env(options, callback)
+          if (!all) env({ ...options, inventory }, callback)
           else callback()
         },
 
@@ -34,7 +34,7 @@ module.exports = function createEventBus () {
 
         // Loop through functions and see if any need dependency hydration
         function _maybeHydrate (callback) {
-          if (!all) maybeHydrate(callback)
+          if (!all) maybeHydrate(inventory, callback)
           else callback()
         },
 
@@ -53,6 +53,7 @@ module.exports = function createEventBus () {
         },
 
         function _finalSetup (callback) {
+          let listener = _listener.bind({}, inventory)
           eventBus = http.createServer(listener)
           callback()
         },

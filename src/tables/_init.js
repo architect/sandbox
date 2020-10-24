@@ -1,4 +1,3 @@
-let { readArc } = require('../helpers')
 let getAttributeDefinitions = require('./create-table/_get-attribute-definitions')
 let getKeySchema = require('./create-table/_get-key-schema')
 let clean = require('./create-table/_remove-ttl-and-lambda')
@@ -6,12 +5,12 @@ let createTable = require('./create-table')
 let getDBClient = require('./_get-db-client')
 let series = require('run-series')
 
-module.exports = function init (callback) {
+module.exports = function init (inventory, callback) {
   getDBClient(function _gotDBClient (err, dynamo) {
     if (err) console.log(err) // Yes, but actually no 🏴‍☠️
-
-    let { arc } = readArc()
-    let app = arc.app[0]
+    let { inventory: inv } = inventory
+    let { arc, manifest } = inv._project
+    let app = inv.app
 
     function createSessionTable ({ attr, TableName }) {
       return function (callback) {
@@ -55,6 +54,24 @@ module.exports = function init (callback) {
       stagingSessions,
       productionSessions
     ]
+
+    if (!manifest) {
+      // Add 'data' table for possible future builtin cache
+      plans.push(function _createTable (callback) {
+        createTable({
+          app,
+          dynamo,
+          indexes: [],
+          table: {
+            data: {
+              scopeID: '*String',
+              dataID: '**String',
+              ttl: 'TTL'
+            }
+          },
+        }, callback)
+      })
+    }
 
     if (arc.tables) {
       // Kludge alert: pass all indexes in and let createTable sort 'em out

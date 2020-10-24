@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+let inventory = require('@architect/inventory')
 let cli = require('./index.js')
 let pkg = require('../../package.json')
 let update = require('update-notifier')
@@ -37,15 +38,22 @@ function port () {
 }
 
 // Hit it
-cli({
-  needsValidCreds: false,
-  options,
-  version: `Sandbox ${ver}`,
-  port: port()
-},
-function _done (err) {
+inventory({}, function (err, result) {
   if (err) {
     console.log(err)
     process.exit(1)
   }
+  cli({
+    needsValidCreds: false,
+    options,
+    version: `Sandbox ${ver}`,
+    port: port(),
+    inventory: result
+  },
+  function _done (err) {
+    if (err) {
+      console.log(err)
+      process.exit(1)
+    }
+  })
 })

@@ -1,3 +1,4 @@
+let inventory = require('@architect/inventory')
 let cli = require('./index.js')
 
 /**
@@ -5,15 +6,22 @@ let cli = require('./index.js')
  *   Same as the CLI caller, but needs to do less
  */
 module.exports = function arcCalling (options) {
-  cli({
-    disableBanner: true,
-    needsValidCreds: false,
-    options,
-  },
-  function _done (err) {
+  inventory({}, function (err, result) {
     if (err) {
       console.log(err)
       process.exit(1)
     }
+    cli({
+      disableBanner: true,
+      needsValidCreds: false,
+      options,
+      inventory: result
+    },
+    function _done (err) {
+      if (err) {
+        console.log(err)
+        process.exit(1)
+      }
+    })
   })
 }

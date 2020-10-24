@@ -5,6 +5,8 @@ let sends = require('./send')
 
 module.exports = function registerWebSocket ({ app, httpServer }) {
 
+  // routes.push([ 'post', '/__arc' ])
+
   let wss = new WebSocket.Server({ noServer: true })
 
   // listens for HTTP 101 request

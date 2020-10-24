@@ -2,10 +2,14 @@
 mockapp
 
 @events
-ping
+event-normal
+event-custom
+  src src/events/custom
 
 @queues
-pong
+queue-normal
+queue-custom
+  src src/queues/custom
 
 @http
 get     /           # runs default
