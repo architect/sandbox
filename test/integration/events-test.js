@@ -54,7 +54,7 @@ test('arc.events.publish (normal)', t => {
         let contents = readFileSync(file).toString()
         t.equal(contents, message, 'Found correct file contents')
         teardown(t)
-      }, 200)
+      }, 500)
     }
   })
 })
@@ -78,7 +78,7 @@ test('arc.events.publish (custom)', t => {
         let contents = readFileSync(file).toString()
         t.equal(contents, message, 'Found correct file contents')
         teardown(t)
-      }, 200)
+      }, 500)
     }
   })
 })
@@ -133,7 +133,7 @@ test('arc.queues.publish (normal)', t => {
         let contents = readFileSync(file).toString()
         t.equal(contents, message, 'Found correct file contents')
         teardown(t)
-      }, 200)
+      }, 500)
     }
   })
 })
@@ -157,7 +157,7 @@ test('arc.queues.publish (custom)', t => {
         let contents = readFileSync(file).toString()
         t.equal(contents, message, 'Found correct file contents')
         teardown(t)
-      }, 200)
+      }, 500)
     }
   })
 })
