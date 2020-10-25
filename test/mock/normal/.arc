@@ -40,6 +40,11 @@ any     /any
 any     /any-c/*
 any     /any-p/:param
 
+@ws
+hello
+custom
+  src src/ws/custom-path
+
 @tables
 accounts
   accountID *String

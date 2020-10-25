@@ -1,18 +1,18 @@
-let getPath = require('./get-path')
 let http = require('http')
 let invoke = require('../invoke-ws')
 let Hashid = require('@begin/hashid')
 let { updater } = require('@architect/utils')
+
 /**
  * Handle handleshake and possibly return error; note:
  * - In APIGWv2, !2xx responses hang up and return the status code
  * - However, 2xx responses initiate a socket connection (automatically responding with 101)
  */
-module.exports = function upgrade (wss) {
+module.exports = function upgrade (wss, { get }) {
   return function upgrade (req, socket, head) {
 
     // get the path to the lambda function
-    let $connect = getPath('connect')
+    let $connect = get.ws('connect').src
 
     // Create a connectionId uuid
     let h = new Hashid

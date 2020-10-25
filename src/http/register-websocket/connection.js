@@ -1,36 +1,31 @@
-let fs = require('fs')
 let invoke = require('../invoke-ws')
 let pool = require('./pool')
-let getPath = require('./get-path')
 let noop = err => err ? console.log(err) : ''
 let { updater } = require('@architect/utils')
 
-module.exports = function connection (connectionId, ws) {
-
-  // save this for send to use
+module.exports = function connection ({ get }, connectionId, ws) {
+  // Save this for send to use
   pool.register(connectionId, ws)
 
-  let $default = getPath('default')
-  let $disconnect = getPath('disconnect')
+  let $default = get.ws('default').src
+  let $disconnect = get.ws('disconnect').src
   let update = updater('Sandbox')
 
   ws.on('message', function message (msg) {
-
     let payload = JSON.parse(msg)
-    let action = payload.action || null
-    let notFound = action === null || fs.existsSync(getPath(action)) === false
-    if (notFound) {
-      update.status('ws/default: ' + connectionId)
+    let action = payload.action && get.ws(payload.action)
+    if (action) {
+      update.status(`ws/${action}: ${connectionId}`)
       invoke({
-        action: $default,
+        action: action.src,
         body: msg,
         connectionId
       }, noop)
     }
     else {
-      update.status(`ws/${action}: ${connectionId}`)
+      update.status('ws/default: ' + connectionId)
       invoke({
-        action: getPath(action),
+        action: $default,
         body: msg,
         connectionId
       }, noop)
