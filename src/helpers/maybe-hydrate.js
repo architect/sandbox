@@ -19,7 +19,7 @@ let { chars } = require('@architect/utils')
  * Not responsible for src/shared + views, handled elsewhere to optimize load time
  */
 module.exports = function maybeHydrate (inventory, callback) {
-  let { inventory: inv } = inventory
+  let { inv } = inventory
   let quiet = process.env.ARC_QUIET
   if (!inv.lambdaSrcDirs || inv.lambdaSrcDirs.length) {
     callback()

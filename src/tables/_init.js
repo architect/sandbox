@@ -6,7 +6,7 @@ module.exports = function init (inventory, callback) {
   getDBClient(function _gotDBClient (err, dynamo) {
     if (err) console.log(err) // Yes, but actually no 🏴‍☠️
 
-    let { inventory: inv } = inventory
+    let { inv } = inventory
     let { manifest } = inv._project
     let app = inv.app
 

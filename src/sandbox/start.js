@@ -22,7 +22,7 @@ module.exports = function _start (params, callback) {
     http,
     tables,
   } = params
-  let { inventory: inv } = inventory
+  let { inv } = inventory
 
   // Set `all` to instruct service modules not to hydrate again, etc.
   params.all = true

@@ -4,7 +4,7 @@ let { join } = require('path')
 
 module.exports = function startupScripts (params, callback) {
   let { inventory, update } = params
-  let arc = inventory.inventory._project.arc
+  let arc = inventory.inv._project.arc
 
   let initJS = join(process.cwd(), 'scripts', 'sandbox-startup.js')
   let initPy = join(process.cwd(), 'scripts', 'sandbox-startup.py')

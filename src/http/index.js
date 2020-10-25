@@ -20,7 +20,7 @@ let registerWS = require('./register-websocket')
  * Creates an HTTP + WebSocket server that emulates API Gateway
  */
 module.exports = function createHttpServer (inventory) {
-  let { inventory: inv } = inventory
+  let { inv } = inventory
   let isDefaultProject = !inv._project.manifest
   let arc = inv._project.arc
 

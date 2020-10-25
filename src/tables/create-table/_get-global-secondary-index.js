@@ -1,6 +1,6 @@
 module.exports = function _getGSI (params) {
   let { name, inventory, TableName } = params
-  let { inventory: inv, get } = inventory
+  let { inv, get } = inventory
 
   // Get all indexes that correspond to the table in question
   let table = get.tables(name)

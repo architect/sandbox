@@ -8,7 +8,7 @@ let series = require('run-series')
  * Creates an event bus that emulates SNS + SQS and listens for `arc.event.publish` events
  */
 module.exports = function createEventBus (inventory) {
-  let { inventory: inv } = inventory
+  let { inv } = inventory
 
   if (inv.events || inv.queues) {
     let events = {}

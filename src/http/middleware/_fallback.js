@@ -14,7 +14,7 @@ let { getLambdaName: name } = require('@architect/utils')
  * - Error out
  */
 module.exports = function fallback (inventory, req, res, next) {
-  let { inventory: inv, get } = inventory
+  let { inv, get } = inventory
   let apiType = process.env.ARC_API_TYPE
   let httpAPI = apiType.startsWith('http')
   let deprecated = process.env.DEPRECATED

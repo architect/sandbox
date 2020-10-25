@@ -10,7 +10,7 @@ let series = require('run-series')
  * - Also creates local session table(s) just in case
  */
 module.exports = function createTables (inventory) {
-  let { inventory: inv } = inventory
+  let { inv } = inventory
   let { arc, manifest } = inv._project
 
   if (arc.tables || !manifest) {

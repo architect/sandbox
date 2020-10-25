@@ -76,7 +76,7 @@ test('Get DynamoDB GSI (deprecated)', t => {
   t.ok(process.env.DEPRECATED, 'Deprecated mode enabled')
 
   let gsi
-  let tableName = n => `${inventory.inventory.app}-staging-${n}`
+  let tableName = n => `${inventory.inv.app}-staging-${n}`
 
   // Nada
   gsi = getGSI({ name: 'idk', inventory, TableName: tableName('idk') })

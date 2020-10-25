@@ -29,13 +29,11 @@ module.exports = function cli (params = {}, callback) {
     let deprecated = process.env.DEPRECATED
     let watcher = watch(process.cwd(), { recursive: true })
     let workingDirectory = pathToUnix(process.cwd())
-    let separator = path.posix.sep
 
     // Arc stuff
-    let arc = inventory.inventory._project.arc
-    let arcFile = new RegExp(`${workingDirectory}${separator}(app\\.arc|\\.arc|arc\\.yaml|arc\\.json)`)
-    let folderSetting = tuple => tuple[0] === 'folder'
-    let staticFolder = arc.static && arc.static.some(folderSetting) ? arc.static.find(folderSetting)[1] : 'public'
+    let { inv } = inventory
+    let manifest = inv._project.manifest
+    let staticFolder = inv.static && inv.static.folder
 
     // Timers
     let lastEvent
@@ -149,7 +147,7 @@ module.exports = function cli (params = {}, callback) {
       /**
        * Reload routes upon changes to Architect project manifest
        */
-      if (fileUpdate && fileName.match(arcFile) && !paused) {
+      if (fileUpdate && (fileName === manifest) && !paused) {
         clearTimeout(arcEventTimer)
         arcEventTimer = setTimeout(() => {
           ts()
@@ -206,7 +204,7 @@ module.exports = function cli (params = {}, callback) {
       /**
        * Regenerate public/static.json upon changes to public/
        */
-      if (updateOrRemove && arc.static && !paused &&
+      if (updateOrRemove && inv.static && !paused &&
           fileName.includes(`${workingDirectory}/${staticFolder}`) &&
           !fileName.includes(`${workingDirectory}/${staticFolder}/static.json`)) {
         clearTimeout(fingerprintTimer)
