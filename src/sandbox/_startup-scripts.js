@@ -7,11 +7,14 @@ module.exports = function startupScripts (params, callback) {
 
   if (prefs && prefs.sandbox && prefs.sandbox.startup) {
     let now = Date.now()
+    // let ARC_INV = JSON.stringify(inventory.inv) // TODO enable soon once Inventory settles
+    let ARC_RAW = JSON.stringify(inventory.inv._project.arc)
     update.status('Running startup scripts')
     let ops = Object.entries(prefs.sandbox.startup).map(([ cmd, args ]) => {
       return function (callback) {
         let command = `${cmd} ${args.join(' ')}`
-        exec(command, function (err, stdout, stderr) {
+        let env = { /* ARC_INV, */ ARC_RAW, ...process.env }
+        exec(command, { env }, function (err, stdout, stderr) {
           if (err) callback(err)
           else {
             stdout = stdout ? stdout.toString() : ''
