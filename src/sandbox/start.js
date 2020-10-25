@@ -23,6 +23,7 @@ module.exports = function _start (params, callback) {
     tables,
   } = params
   let { inv } = inventory
+  let { preferences: prefs } = inv._project
 
   // Set `all` to instruct service modules not to hydrate again, etc.
   params.all = true
@@ -61,7 +62,8 @@ module.exports = function _start (params, callback) {
 
     // Initialize any missing functions on startup
     function _init (callback) {
-      if (!deprecated) {
+      let skip = prefs && prefs.sandbox && prefs.sandbox.create === false
+      if (!deprecated && !skip) {
         create({}, callback)
       }
       else callback()

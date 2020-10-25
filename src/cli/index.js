@@ -16,8 +16,6 @@ module.exports = function cli (params = {}, callback) {
 
   sandbox.start(params, function watching (err) {
     if (err) {
-      // Hydration errors already reported, no need to log
-      if (err.message !== 'hydration_error') console.log(err)
       sandbox.end()
       if (callback) callback(err)
       else process.exit(1)
