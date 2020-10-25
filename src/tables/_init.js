@@ -1,6 +1,3 @@
-let getAttributeDefinitions = require('./create-table/_get-attribute-definitions')
-let getKeySchema = require('./create-table/_get-key-schema')
-let clean = require('./create-table/_remove-ttl-and-lambda')
 let createTable = require('./create-table')
 let getDBClient = require('./_get-db-client')
 let series = require('run-series')
@@ -8,88 +5,51 @@ let series = require('run-series')
 module.exports = function init (inventory, callback) {
   getDBClient(function _gotDBClient (err, dynamo) {
     if (err) console.log(err) // Yes, but actually no 🏴‍☠️
+
     let { inventory: inv } = inventory
-    let { arc, manifest } = inv._project
+    let { manifest } = inv._project
     let app = inv.app
 
-    function createSessionTable ({ attr, TableName }) {
-      return function (callback) {
-        let keys = Object.keys(clean(attr))
-        dynamo.createTable({
-          TableName,
-          AttributeDefinitions: getAttributeDefinitions(attr),
-          KeySchema: getKeySchema(attr, keys),
-          ProvisionedThroughput: {
-            ReadCapacityUnits: 5,
-            WriteCapacityUnits: 5
-          }
-        },
-        function _create () {
-          // deliberately swallow errors: it's ok if tables already exist, this is all in-memory
-          callback()
-        })
-      }
+    let plans = []
+    function addPlan (params) {
+      plans.push(function (callback) {
+        createTable({ app, dynamo, inventory, ...params }, callback)
+      })
     }
 
-    /**
-     * Session table mocks (jic)
-     */
-    // Staging and production sessions
-    let stagingSessions = createSessionTable({
-      attr: { _idx: '*String' },
-      TableName: `${app}-staging-arc-sessions`,
-    })
-    let productionSessions = createSessionTable({
-      attr: { _idx: '*String' },
-      TableName: `${app}-production-arc-sessions`,
-    })
-    // Legacy sessions table
-    let fallBackSessions = createSessionTable({
-      attr: { _idx: '*String' },
-      TableName: 'arc-sessions'
+    // Session table (jic)
+    addPlan({
+      table: {
+        name: 'arc-sessions',
+        partitionKey: '_idx',
+        partitionKeyType: 'String'
+      },
+      oob: true
     })
 
-    let plans = [
-      fallBackSessions,
-      stagingSessions,
-      productionSessions
-    ]
-
+    // Data table for possible future builtin cache
     if (!manifest) {
-      // Add 'data' table for possible future builtin cache
-      plans.push(function _createTable (callback) {
-        createTable({
-          app,
-          dynamo,
-          indexes: [],
-          table: {
-            data: {
-              scopeID: '*String',
-              dataID: '**String',
-              ttl: 'TTL'
-            }
-          },
-        }, callback)
+      addPlan({
+        table: {
+          name: 'data',
+          partitionKey: 'scopeID',
+          partitionKeyType: 'String',
+          sortKey: 'dataID',
+          sortKeyType: 'String',
+        },
+        oob: true
       })
     }
 
-    if (arc.tables) {
-      // Kludge alert: pass all indexes in and let createTable sort 'em out
-      let indexes = arc.indexes || []
-      arc.tables.forEach(table => {
-        plans.push(function _createTable (callback) {
-          createTable({
-            app,
-            dynamo,
-            indexes,
-            table,
-          }, callback)
-        })
-      })
-    }
+    // User tables (and their indexes)
+    let tables = inv.tables || []
+    tables.forEach(table => addPlan({ table }))
 
     series(plans, function (err) {
-      if (err) console.log(err)
+      if (err) {
+        console.log(err)
+        throw err
+      }
       callback()
     })
   })

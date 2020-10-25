@@ -55,7 +55,7 @@ module.exports = function createTables (inventory) {
           else callback()
         },
 
-        function _init (callback) {
+        function _initializeTables (callback) {
           init(inventory, callback)
         }
       ],

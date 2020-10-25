@@ -61,13 +61,12 @@ test('Can list tables', t => {
 })
 
 test('Default tables present', t => {
-  t.plan(5)
+  t.plan(4)
   let defaultTables = [
     'app-default-production-arc-sessions',
     'app-default-production-data',
     'app-default-staging-arc-sessions',
     'app-default-staging-data',
-    'arc-sessions'
   ]
   dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)

@@ -1,36 +1,38 @@
-module.exports = function _getGSI (name, indexes) {
-  let tableName = name.split(/staging-|production-/)[1]
-  let actual = indexes.filter(index => Object.prototype.hasOwnProperty.call(index, tableName))
-  if (actual.length >= 1) {
-    return actual.map(idx => {
-      let keys = Object.keys(idx[tableName])
-      if (keys.length > 2 || keys.length < 1) {
-        throw Error(`@indexes ${tableName} has wrong number of keys`)
+module.exports = function _getGSI (params) {
+  let { name, inventory, TableName } = params
+  let { inventory: inv, get } = inventory
+
+  // Get all indexes that correspond to the table in question
+  let table = get.tables(name)
+  let indexes = table && inv.indexes && inv.indexes.filter(({ name }) => name === table.name)
+
+  if (indexes) {
+    return indexes.map(index => {
+      let { partitionKey, partitionKeyType, sortKey } = index
+      if (!partitionKey || !partitionKeyType) {
+        throw Error(`Invalid @indexes: ${name}`)
       }
-      let hasOneKey = keys.length === 1
-      let hasTwoKeys = keys.length === 2
 
       let deprecated = process.env.DEPRECATED
-      let singleKey = deprecated
-        ? `${name}-${keys[0]}-index` // Old school index naming
-        : `${keys[0]}-index` // New school index naming
-      let multiKey = deprecated
-        ? `${name}-${keys[0]}-${keys[1]}-index`
-        : `${keys[0]}-${keys[1]}-index`
+      let s = sortKey ? `-${sortKey}` : '' // Naming extension for multi-keys
+      let IndexName = deprecated
+        ? `${TableName}-${partitionKey}${s}-index` // Old school index naming
+        : `${partitionKey}${s}-index` // New school index naming
 
-      let IndexName = hasOneKey ? singleKey : multiKey
-      // always add the HASH key (partition)
+      // Always add the partition key (HASH)
       let KeySchema = [ {
-        AttributeName: keys[0],
+        AttributeName: partitionKey,
         KeyType: 'HASH'
       } ]
-      // maybe add the RANGE key (sort)
-      if (hasTwoKeys) {
+
+      // Maybe add the sort key (RANGE)
+      if (sortKey) {
         KeySchema.push({
-          AttributeName: keys[1],
+          AttributeName: sortKey,
           KeyType: 'RANGE'
         })
       }
+
       let params = {
         IndexName,
         KeySchema,
@@ -45,7 +47,5 @@ module.exports = function _getGSI (name, indexes) {
       return params
     })
   }
-  else {
-    return false
-  }
+  else return false
 }

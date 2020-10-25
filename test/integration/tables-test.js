@@ -78,9 +78,8 @@ test('Get client', t => {
 })
 
 test('Default tables are present', t => {
-  t.plan(3)
+  t.plan(2)
   let defaultTables = [
-    'arc-sessions',
     'mockapp-production-arc-sessions',
     'mockapp-staging-arc-sessions',
   ]
@@ -280,9 +279,8 @@ test('Can list tables', t => {
 })
 
 test('Default tables are present', t => {
-  t.plan(3)
+  t.plan(2)
   let defaultTables = [
-    'arc-sessions',
     'mockapp-production-arc-sessions',
     'mockapp-staging-arc-sessions',
   ]

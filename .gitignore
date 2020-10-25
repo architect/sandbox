@@ -5,3 +5,5 @@ node_modules/
 package-lock.json
 test/mock/*/src/*/*/vendor/
 test/mock/*/.db
+test/mock/tmp
+test/mock/*/tmp

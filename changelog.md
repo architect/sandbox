@@ -2,6 +2,15 @@
 
 ---
 
+## [3.2.0]
+
+### Changed
+
+- Removed legacy (and I do mean *legacy*) auto-initialization of `arc-sessions` table from Arc <5
+  - Still initializing `{appname}-{env}-arc-sesssions` tables, though
+
+---
+
 ## [3.1.3] 2020-10-19
 
 ### Fixed
