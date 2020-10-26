@@ -16,10 +16,10 @@ module.exports = function reg ({ app, routes }) {
   let update = updater('Sandbox')
   update.done(`Loaded routes (${msg})`)
 
-  routes.forEach(route => {
+  routes.forEach(lambda => {
     // ASAP handled by middleware
-    if (route.arcStaticAssetProxy) return
-    let { method, path, src } = route
+    if (lambda.arcStaticAssetProxy) return
+    let { method, path, src } = lambda
 
     // Methods not implemented by Arc for legacy REST APIs
     if (deprecated || apiType === 'rest') {
@@ -29,7 +29,7 @@ module.exports = function reg ({ app, routes }) {
         // Pretty print the route reg
         log({ method, path, src })
         // Register the route with the Router instance
-        let exec = invoker({ method, path, src, apiType })
+        let exec = invoker({ lambda, apiType })
         app[method](path, exec)
       }
     }
@@ -38,7 +38,7 @@ module.exports = function reg ({ app, routes }) {
       log({ method, path, src })
 
       // Register the route with the Router instance
-      let exec = invoker({ method, path, src, apiType })
+      let exec = invoker({ lambda, apiType })
       if (method !== 'any') {
         app[method](path, exec)
       }

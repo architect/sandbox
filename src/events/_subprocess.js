@@ -1,8 +1,8 @@
 let invoke = require('../invoke-lambda')
 
 process.on('message', function msg (message) {
-  let { src } = message
-  invoke(src, mock(message), function snap (err) {
+  let { lambda } = message
+  invoke(lambda, mock(message), function snap (err) {
     let text
     if (err) {
       text = `@${message.arcType} ${message.name} failed with ${err.stack}`

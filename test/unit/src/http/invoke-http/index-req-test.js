@@ -86,8 +86,9 @@ test('Architect v7 (HTTP API mode): get /', t => {
   t.plan(httpParams.length)
   let method = 'GET'
   let path = '/'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -105,8 +106,9 @@ test('Architect v7 (HTTP API mode): get /?whats=up', t => {
   t.plan(httpParams.length)
   let method = 'GET'
   let path = '/'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -123,8 +125,9 @@ test('Architect v7 (HTTP API mode): get /?whats=up&whats=there', t => {
   t.plan(httpParams.length)
   let method = 'GET'
   let path = '/'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('?whats=up&whats=there'),
     body: {},
@@ -141,8 +144,9 @@ test('Architect v7 (HTTP API mode): get /nature/hiking', t => {
   t.plan(httpParams.length)
   let method = 'GET'
   let path = '/nature/:activities'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -159,8 +163,9 @@ test('Architect v7 (HTTP API mode): get /{proxy+}', t => {
   t.plan(httpParams.length)
   let method = 'GET'
   let path = '/*'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -177,8 +182,9 @@ test('Architect v7 (HTTP API mode): get /path/* (/path/hi/there)', t => {
   t.plan(httpParams.length)
   let method = 'GET'
   let path = '/path/*'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/path/hi/there'),
     body: {},
@@ -195,8 +201,9 @@ test('Architect v7 (HTTP API mode): get /:activities/{proxy+} (/nature/hiking/wi
   t.plan(httpParams.length)
   let method = 'GET'
   let path = '/:activities/*'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/nature/hiking/wilderness'),
     body: {},
@@ -216,8 +223,9 @@ test('Architect v7 (HTTP API mode): post /form (JSON)', t => {
   t.plan(httpParams.length)
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -235,8 +243,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', 
   t.plan(httpParams.length)
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -254,8 +263,9 @@ test('Architect v7 (HTTP API mode): post /form (multipart form data)', t => {
   t.plan(httpParams.length)
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -273,8 +283,9 @@ test('Architect v7 (HTTP API mode): post /form (octet stream)', t => {
   t.plan(httpParams.length)
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -292,8 +303,9 @@ test('Architect v7 (HTTP API mode): put /form (JSON)', t => {
   t.plan(httpParams.length)
   let method = 'PUT'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -311,8 +323,9 @@ test('Architect v7 (HTTP API mode): patch /form (JSON)', t => {
   t.plan(httpParams.length)
   let method = 'PATCH'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -330,8 +343,9 @@ test('Architect v7 (HTTP API mode): delete /form (JSON)', t => {
   t.plan(httpParams.length)
   let method = 'DELETE'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -401,8 +415,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /', t => {
   t.plan(params.length + 2)
   let method = 'GET'
   let path = '/'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -421,8 +436,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /?whats=up', t => {
   t.plan(params.length + 2)
   let method = 'GET'
   let path = '/'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -440,8 +456,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /?whats=up&whats=there', t =
   t.plan(params.length + 2)
   let method = 'GET'
   let path = '/'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('?whats=up&whats=there'),
     body: {},
@@ -459,8 +476,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /nature/hiking', t => {
   t.plan(params.length + 2)
   let method = 'GET'
   let path = '/nature/:activities'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -478,8 +496,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /{proxy+}', t => {
   t.plan(params.length + 2)
   let method = 'GET'
   let path = '/*'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -497,8 +516,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /path/* (/path/hi/there)', t
   t.plan(params.length + 2)
   let method = 'GET'
   let path = '/path/*'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/path/hi/there'),
     body: {},
@@ -516,8 +536,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /:activities/{proxy+} (/natu
   t.plan(params.length + 2)
   let method = 'GET'
   let path = '/:activities/*'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/nature/hiking/wilderness'),
     body: {},
@@ -538,8 +559,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (JSON)', t => {
   t.plan(params.length + 2)
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -558,8 +580,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', 
   t.plan(params.length + 2)
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -578,8 +601,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (multipart form data)
   t.plan(params.length + 2)
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -598,8 +622,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (octet stream)', t =>
   t.plan(params.length + 2)
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -618,8 +643,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): put /form (JSON)', t => {
   t.plan(params.length + 2)
   let method = 'PUT'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -638,8 +664,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): patch /form (JSON)', t => {
   t.plan(params.length + 2)
   let method = 'PATCH'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -658,8 +685,9 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): delete /form (JSON)', t => {
   t.plan(params.length + 2)
   let method = 'DELETE'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -682,8 +710,9 @@ test('Architect v6 (REST API mode): get /', t => {
   t.plan(params.length + 2)
   let method = 'GET'
   let path = '/'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -702,8 +731,9 @@ test('Architect v6 (REST API mode): get /?whats=up', t => {
   t.plan(params.length + 2)
   let method = 'GET'
   let path = '/'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -721,8 +751,9 @@ test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
   t.plan(params.length + 2)
   let method = 'GET'
   let path = '/'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('?whats=up&whats=there'),
     body: {},
@@ -740,8 +771,9 @@ test('Architect v6 (REST API mode): get /nature/hiking', t => {
   t.plan(params.length + 2)
   let method = 'GET'
   let path = '/nature/:activities'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -760,8 +792,9 @@ test('Architect v6 (REST API mode): get /{proxy+}', t => {
   t.plan(params.length + 2)
   let method = 'GET'
   let path = '/' // Would normally be /*
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/nature/hiking'),
     resource: '/{proxy+}', // The only time we should be using this
@@ -780,8 +813,9 @@ test('Architect v6 (REST API mode): post /form (JSON)', t => {
   t.plan(params.length + 2)
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -800,8 +834,9 @@ test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
   t.plan(params.length + 2)
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -820,8 +855,9 @@ test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
   t.plan(params.length + 2)
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -840,8 +876,9 @@ test('Architect v6 (REST API mode): post /form (octet stream)', t => {
   t.plan(params.length + 2)
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -860,8 +897,9 @@ test('Architect v6 (REST API mode): put /form (JSON)', t => {
   t.plan(params.length + 2)
   let method = 'PUT'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -880,8 +918,9 @@ test('Architect v6 (REST API mode): patch /form (JSON)', t => {
   t.plan(params.length + 2)
   let method = 'PATCH'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -900,8 +939,9 @@ test('Architect v6 (REST API mode): delete /form (JSON)', t => {
   t.plan(params.length + 2)
   let method = 'DELETE'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -949,8 +989,9 @@ test('Architect v5 (REST API mode): get /', t => {
   process.env.DEPRECATED = true
   let method = 'GET'
   let path = '/'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -970,8 +1011,9 @@ test('Architect v5 (REST API mode): get /?whats=up', t => {
   process.env.DEPRECATED = true
   let method = 'GET'
   let path = '/'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -990,8 +1032,9 @@ test('Architect v5 (REST API mode): get /nature/hiking', t => {
   process.env.DEPRECATED = true
   let method = 'GET'
   let path = '/nature/:activities'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -1010,8 +1053,9 @@ test('Architect v5 (REST API mode): post /form (JSON / form URL-encoded)', t => 
   process.env.DEPRECATED = true
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url(path),
     body: mock.body,
@@ -1030,8 +1074,9 @@ test('Architect v5 (REST API mode): post /form (multipart form data-encoded)', t
   process.env.DEPRECATED = true
   let method = 'POST'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url(path),
     body: mock.body,
@@ -1050,8 +1095,9 @@ test('Architect v5 (REST API mode): put /form', t => {
   process.env.DEPRECATED = true
   let method = 'PUT'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url(path),
     body: mock.body,
@@ -1070,8 +1116,9 @@ test('Architect v5 (REST API mode): patch /form', t => {
   process.env.DEPRECATED = true
   let method = 'PATCH'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url(path),
     body: mock.body,
@@ -1090,8 +1137,9 @@ test('Architect v5 (REST API mode): delete /form', t => {
   process.env.DEPRECATED = true
   let method = 'DELETE'
   let path = '/form'
+  let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ method, path, apiType })
+  let handler = invoke({ lambda, apiType })
   let input = {
     url: url(path),
     body: mock.body,

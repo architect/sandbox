@@ -3,7 +3,6 @@ let { join } = require('path')
 let { parse } = require('url')
 let invoker = require('../invoke-http')
 let httpProxy = require('http-proxy')
-let { getLambdaName: name } = require('@architect/utils')
 
 /**
  * Handle request fallthrough to @proxy + Arc Static Asset Proxy (ASAP)
@@ -122,11 +121,10 @@ module.exports = function fallback (inventory, req, res, next) {
   }
   // HTTP APIs can fall back to /:param (REST APIs cannot)
   else if (rootParam && httpAPI) {
-    let src = join(process.cwd(), 'src', 'http', `${rootParam[0]}-${name(rootParam[1])}`)
+    let name = `${rootParam[0]} /${rootParam[1]}`
+    let lambda = get.http(name)
     let exec = invoker({
-      method,
-      path: `/${rootParam[1]}`,
-      src,
+      lambda,
       apiType
     })
     req.params = { [rootParam[1].substr(1)]: '' }
@@ -148,8 +146,11 @@ module.exports = function fallback (inventory, req, res, next) {
   // Invoke a root proxy payload
   function invokeProxy (src) {
     let exec = invoker({
-      method,
-      src,
+      lambda: {
+        method,
+        src,
+        config: inv._project.defaultFunctionConfig
+      },
       apiType
     })
     let proxy = pathname.startsWith('/') ? pathname.substr(1) : pathname

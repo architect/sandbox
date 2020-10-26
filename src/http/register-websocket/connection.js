@@ -6,26 +6,24 @@ let { updater } = require('@architect/utils')
 module.exports = function connection ({ get }, connectionId, ws) {
   // Save this for send to use
   pool.register(connectionId, ws)
-
-  let $default = get.ws('default').src
-  let $disconnect = get.ws('disconnect').src
   let update = updater('Sandbox')
 
   ws.on('message', function message (msg) {
     let payload = JSON.parse(msg)
-    let action = payload.action && get.ws(payload.action)
-    if (action) {
-      update.status(`ws/${action}: ${connectionId}`)
+    let lambda = payload.action && get.ws(payload.action)
+    if (lambda) {
+      update.status(`ws/${lambda.name}: ${connectionId}`)
       invoke({
-        action: action.src,
+        lambda,
         body: msg,
         connectionId
       }, noop)
     }
     else {
+      let lambda = get.ws('default')
       update.status('ws/default: ' + connectionId)
       invoke({
-        action: $default,
+        lambda,
         body: msg,
         connectionId
       }, noop)
@@ -33,9 +31,10 @@ module.exports = function connection ({ get }, connectionId, ws) {
   })
 
   ws.on('close', function close () {
+    let lambda = get.ws('disconnect')
     update.status(`ws/disconnect: ${connectionId}`)
     invoke({
-      action: $disconnect,
+      lambda,
       connectionId,
       req: { headers: { host: `localhost:${process.env.PORT}` } }
     }, noop)

@@ -11,8 +11,8 @@ let { updater } = require('@architect/utils')
 module.exports = function upgrade (wss, { get }) {
   return function upgrade (req, socket, head) {
 
-    // get the path to the lambda function
-    let $connect = get.ws('connect').src
+    // Get the $connect Lambda
+    let lambda = get.ws('connect')
 
     // Create a connectionId uuid
     let h = new Hashid
@@ -21,7 +21,7 @@ module.exports = function upgrade (wss, { get }) {
     update.status('ws/connect: ' + connectionId)
 
     invoke({
-      action: $connect,
+      lambda,
       connectionId,
       req
     },

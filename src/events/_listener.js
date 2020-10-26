@@ -28,13 +28,13 @@ module.exports = function eventBusListener (inventory, req, res) {
     if (url === '/queues') {
       message.arcType = 'queue'
       let queue = get.queues(message.name)
-      message.src = queue && queue.src
+      message.lambda = queue
     }
     // @events
     else if (url === '/events' || url === '/') {
       message.arcType = 'event'
       let event = get.events(message.name)
-      message.src = event && event.src
+      message.lambda = event
     }
     // Who knows
     else end
@@ -44,7 +44,7 @@ module.exports = function eventBusListener (inventory, req, res) {
       console.log(chalk.grey.dim('@' + message.arcType), chalk.green.dim(cleanup))
     }
 
-    if (!message.src) {
+    if (!message.lambda) {
       end(message.name)
     }
     else {
