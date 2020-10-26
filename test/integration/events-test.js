@@ -18,6 +18,28 @@ function teardown (t) {
   t.notOk(existsSync(tmp), 'Destroyed tmp dir')
 }
 
+// Check for the event artifact up to 10 times over 1 second or fail
+function checkFile (t, file, message) {
+  let found = false
+  let now = new Date()
+  for (let i = 0; i < 10; i++) {
+    setTimeout(() => {
+      let exists = existsSync(file)
+      if (i === 9 && !found && !exists) {
+        t.fail('Failed to find file proving event ran')
+      }
+      else if (found) return
+      else if (exists) {
+        found = true
+        t.pass('Found file proving event ran')
+        let contents = readFileSync(file).toString()
+        t.equal(contents, message, `Found correct file contents in ${new Date() - now}ms`)
+        teardown(t)
+      }
+    }, i * 100)
+  }
+}
+
 test('Set up env', t => {
   t.plan(1)
   t.ok(events, 'Events module is present')
@@ -48,13 +70,8 @@ test('arc.events.publish (normal)', t => {
     if (err) t.fail(err)
     else {
       t.pass('Successfully published event')
-      setTimeout(() => {
-        let file = join(tmp, filename)
-        t.ok(existsSync(file), 'Found file proving event ran')
-        let contents = readFileSync(file).toString()
-        t.equal(contents, message, 'Found correct file contents')
-        teardown(t)
-      }, 500)
+      let file = join(tmp, filename)
+      checkFile(t, file, message)
     }
   })
 })
@@ -72,13 +89,8 @@ test('arc.events.publish (custom)', t => {
     if (err) t.fail(err)
     else {
       t.pass('Successfully published event')
-      setTimeout(() => {
-        let file = join(tmp, filename)
-        t.ok(existsSync(file), 'Found file proving event ran')
-        let contents = readFileSync(file).toString()
-        t.equal(contents, message, 'Found correct file contents')
-        teardown(t)
-      }, 500)
+      let file = join(tmp, filename)
+      checkFile(t, file, message)
     }
   })
 })
@@ -127,13 +139,8 @@ test('arc.queues.publish (normal)', t => {
     if (err) t.fail(err)
     else {
       t.pass('Successfully published queue')
-      setTimeout(() => {
-        let file = join(tmp, filename)
-        t.ok(existsSync(file), 'Found file proving queue ran')
-        let contents = readFileSync(file).toString()
-        t.equal(contents, message, 'Found correct file contents')
-        teardown(t)
-      }, 500)
+      let file = join(tmp, filename)
+      checkFile(t, file, message)
     }
   })
 })
@@ -151,13 +158,8 @@ test('arc.queues.publish (custom)', t => {
     if (err) t.fail(err)
     else {
       t.pass('Successfully published queue')
-      setTimeout(() => {
-        let file = join(tmp, filename)
-        t.ok(existsSync(file), 'Found file proving queue ran')
-        let contents = readFileSync(file).toString()
-        t.equal(contents, message, 'Found correct file contents')
-        teardown(t)
-      }, 500)
+      let file = join(tmp, filename)
+      checkFile(t, file, message)
     }
   })
 })
