@@ -2,6 +2,14 @@
 
 ---
 
+## [3.2.2]
+
+### Added
+
+- Development instructions in the README for those wanting to hack, test and iterate on sandbox locally.
+
+---
+
 ## [3.2.1] 2020-11-28
 
 ### Fixed

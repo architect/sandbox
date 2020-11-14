@@ -181,6 +181,40 @@ test('Tests go here', () => {
 })
 ```
 
+## Development
+
+### Requirements
+
+The tests in this repository require that you have the `deno` runtime installed
+on your local machine. Install `deno` by visiting
+https://deno.land/#installation.
+
+### Running Tests
+
+To work on sandbox, first make sure you have installed the dependencies:
+
+    npm install
+
+To run all tests, including the linter:
+
+    npm test
+
+To run just the linter:
+
+    npm run lint
+
+To run just the unit tests (which are located under `test/unit`):
+
+    npm run test:unit
+
+To get a code coverage report based on unit test execution:
+
+    npm run coverage
+
+To run just the integration tests (which are located under `test/integration'):
+
+    npm run test:integration
+
 
 [events]: https://arc.codes/reference/arc/events
 [http]: https://arc.codes/reference/arc/http
