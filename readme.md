@@ -35,6 +35,8 @@ npx arc sandbox
 - `-p`, `--port`, `port` - Manually specify HTTP port
   - Defaults to `3333`
 - `-v`, `--verbose`, `verbose` - Enable verbose logging
+- `--disable-symlinks` - Disable symlinking `src/shared` into all functions and
+    use file copying instead
 
 
 ### Environment variables
@@ -74,7 +76,7 @@ All methods must be passed an options object that may containing the following p
 
 ### `sandbox.start(options[, callback]) → [Promise]`
 
-Starts the Sandbox; first checks that ports are available to consume, prints a banner, loads Architect and userland environment variables, hydrates application dependencies, and starts various Sandbox services (including `events`, `tables` and `http`).
+Starts the Sandbox; first checks that ports are available to consume, prints a banner, loads Architect and userland environment variables, hydrates application dependencies, and starts various Sandbox services (including `@events`, `@queues`, `@tables`, `@indexes`, `@http`, `@static` and `@ws`).
 
 Invokes `callback` once everything is ready, or returns a `promise` if `callback` is falsy.
 
