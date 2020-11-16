@@ -20,6 +20,8 @@ startup
   npm run test
   node some/arbitrary/script.js
 ```
+- Added `.env` support; thanks @wesbos!
+
 
 ### Changed
 
@@ -28,6 +30,11 @@ startup
 - Implemented Inventory (`@architect/inventory`)
 - Removed legacy (and I do mean *legacy*) auto-initialization of `arc-sessions` table from Arc <5
   - Still initializing `{appname}-{env}-arc-sesssions` tables, though
+
+
+### Fixed
+
+- Fixed wonky env population printing order
 
 ---
 

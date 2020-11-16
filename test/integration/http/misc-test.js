@@ -106,24 +106,6 @@ test('[Catchall] get /get-c (matches with multiple child path parts)', t => {
   })
 })
 
-test('[Env vars] get /env', t => {
-  t.plan(6)
-  tiny.get({
-    url: url + '/env'
-  }, function _got (err, result) {
-    if (err) t.fail(err)
-    else {
-      t.equal(result.body.USERLAND_ENV_VAR, 'Why hello there!', 'Received userland env var')
-      t.ok(result.body.ARC_HTTP, 'Got ARC_HTTP env var')
-      t.ok(result.body.ARC_STATIC_BUCKET, 'Got ARC_STATIC_BUCKET env var')
-      t.ok(result.body.NODE_ENV, 'Got NODE_ENV env var')
-      t.ok(result.body.SESSION_TABLE_NAME, 'Got SESSION_TABLE_NAME env var')
-      // TODO add ARC_STATIC_SPA
-      t.equal(result.body.TZ, 'UTC', 'Got TZ env var')
-    }
-  })
-})
-
 test('[Timeout] get /times-out', t => {
   t.plan(3)
   tiny.get({
@@ -137,6 +119,76 @@ test('[Timeout] get /times-out', t => {
       t.ok(err.body.includes(time), `Timed out set to ${time}`)
     }
     else t.fail(result)
+  })
+})
+
+test('[Misc] Shut down Sandbox', t => {
+  t.plan(1)
+  shutdown(t)
+})
+
+test('[Env vars (.env)] Start Sandbox', t => {
+  t.plan(4)
+  process.chdir(join(mock, 'env', 'dot-env'))
+  sandbox.start({ quiet: true }, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+    }
+  })
+})
+
+test('[Env vars (.env)] get /env', t => {
+  t.plan(6)
+  tiny.get({ url }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.equal(result.body.DOTENV_USERLAND_ENV_VAR, 'Why hello there from .env!', 'Received userland env var')
+      t.ok(result.body.ARC_HTTP, 'Got ARC_HTTP env var')
+      t.ok(result.body.ARC_STATIC_BUCKET, 'Got ARC_STATIC_BUCKET env var')
+      t.ok(result.body.NODE_ENV, 'Got NODE_ENV env var')
+      t.ok(result.body.SESSION_TABLE_NAME, 'Got SESSION_TABLE_NAME env var')
+      // TODO add ARC_STATIC_SPA
+      t.equal(result.body.TZ, 'UTC', 'Got TZ env var')
+    }
+  })
+})
+
+test('[Env vars (.env)] Shut down Sandbox', t => {
+  t.plan(1)
+  shutdown(t)
+})
+
+test('[Env vars (.arc-env)] Start Sandbox', t => {
+  t.plan(4)
+  process.chdir(join(mock, 'env', 'dot-arc-env'))
+  sandbox.start({ quiet: true }, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+    }
+  })
+})
+
+test('[Env vars (.arc-env)] get /env', t => {
+  t.plan(6)
+  tiny.get({ url }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.equal(result.body.DOT_ARC_ENV_USERLAND_ENV_VAR, 'Why hello there from .arc-env!', 'Received userland env var')
+      t.ok(result.body.ARC_HTTP, 'Got ARC_HTTP env var')
+      t.ok(result.body.ARC_STATIC_BUCKET, 'Got ARC_STATIC_BUCKET env var')
+      t.ok(result.body.NODE_ENV, 'Got NODE_ENV env var')
+      t.ok(result.body.SESSION_TABLE_NAME, 'Got SESSION_TABLE_NAME env var')
+      // TODO add ARC_STATIC_SPA
+      t.equal(result.body.TZ, 'UTC', 'Got TZ env var')
+    }
   })
 })
 

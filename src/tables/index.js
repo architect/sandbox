@@ -1,4 +1,3 @@
-let { banner } = require('@architect/utils')
 let { env, getPorts, checkPort } = require('../helpers')
 let init = require('./_init')
 let dynalite = require('dynalite')
@@ -35,15 +34,6 @@ module.exports = function createTables (inventory) {
         function _checkPort (callback) {
           if (!hasExternalDb) {
             checkPort(tablesPort, callback)
-          }
-          else callback()
-        },
-
-        // Print the banner (which also loads AWS env vars / creds necessary for Dynamo)
-        function _printBanner (callback) {
-          if (!all) {
-            banner(options)
-            callback()
           }
           else callback()
         },

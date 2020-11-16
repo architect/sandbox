@@ -24,7 +24,6 @@ get     /ruby2.5
 get     /deno
 get     /get-p-c/:param/*
 get     /get-c/*
-get     /env
 get     /no-return
 get     /times-out
 /custom

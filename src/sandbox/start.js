@@ -4,7 +4,7 @@ let chalk = require('chalk')
 let hydrate = require('@architect/hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
-let { banner, chars } = require('@architect/utils')
+let { chars } = require('@architect/utils')
 let { env, maybeHydrate } = require('../helpers')
 let startupScripts = require('./_startup-scripts')
 
@@ -38,15 +38,9 @@ module.exports = function _start (params, callback) {
   let deprecated = process.env.DEPRECATED
 
   series([
-    // Set up Arc + userland env vars
+    // Set up Arc + userland env vars + print the banner
     function _env (callback) {
       env(params, callback)
-    },
-
-    // Print the banner (which also loads AWS env vars / creds necessary for Dynamo)
-    function _printBanner (callback) {
-      banner(params)
-      callback()
     },
 
     // Read the current Architect project (or use a default project)
