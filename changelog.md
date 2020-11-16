@@ -7,9 +7,9 @@
 ### Added
 
 - Added support for custom file paths in all function types
-- Added support for new local preferences (`preferences.arc` or `prefs.arc`) under `@sandbox` options
-  - `create false` disables
-  - `startup` objects (see below) run Sandbox startup scripts in order; a JSON-serialized Arc object is available as `ARC_RAW` environment variable
+- Added support for new local preferences (`preferences.arc` or `prefs.arc`) file
+  - Add Sandbox preferences with `@sandbox`
+    - `create false` disables the local filesystem creator
   - Example:
 ```arc
 @sandbox
@@ -23,8 +23,8 @@ startup
 
 ### Changed
 
-- Breaking change on startup init script beta: existing startup script have replaced by startup preferences (`@sandbox startup`)
-  - `scripts/sandbox-startup.[js|py|rb]` must now be be called from a shell via startup preferences
+- Breaking change on the Sandbox startup init script beta: existing startup scripts have replaced by startup preferences (`@sandbox startup`, see above)
+  - `scripts/sandbox-startup.[js|py|rb]` must now be executable and callable from a shell via startup preferences (e.g. `node scripts/sandbox-startup.js`)
 - Implemented Inventory (`@architect/inventory`)
 - Removed legacy (and I do mean *legacy*) auto-initialization of `arc-sessions` table from Arc <5
   - Still initializing `{appname}-{env}-arc-sesssions` tables, though
