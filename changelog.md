@@ -34,7 +34,7 @@ startup
 
 ### Fixed
 
-- Fixed wonky env population printing order
+- Fixed wonky order of env population message printing in Sandbox
 
 ---
 
