@@ -6,7 +6,7 @@ module.exports = function _getGSI (params) {
   let table = get.tables(name)
   let indexes = table && inv.indexes && inv.indexes.filter(({ name }) => name === table.name)
 
-  if (indexes) {
+  if (indexes && indexes.length) {
     return indexes.map(index => {
       let { partitionKey, partitionKeyType, sortKey } = index
       if (!partitionKey || !partitionKeyType) {
