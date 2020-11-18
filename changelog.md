@@ -34,10 +34,10 @@ testing
 - Implemented Inventory (`@architect/inventory`)
 - Removed legacy (and I do mean *legacy*) auto-initialization of `arc-sessions` table from Arc <5
   - Still initializing `{appname}-{env}-arc-sesssions` tables, though
-- Added more (hopefully) helpful init logging around environments:
+- Added more (hopefully) helpful environment-related init logging:
   - Which environment is being loaded
-  - The state of whether Sandbox found any env vars for the current environment
-  - Whether Sandbox is using any live AWS infra
+  - Whether Sandbox found any env vars for the current environment
+  - Whether Sandbox is using any live AWS infra (via prefs or `ARC_LOCAL`)
 
 
 ### Fixed
