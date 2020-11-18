@@ -1,6 +1,6 @@
 let parse = require('@architect/parser')
 let dotenv = require('dotenv')
-let { join } = require('path')
+let { join, basename } = require('path')
 let { existsSync, readFileSync } = require('fs')
 
 /**
@@ -9,18 +9,35 @@ let { existsSync, readFileSync } = require('fs')
  * - If ARC_LOCAL is present process.env is populated by @testing (so you can access remote dynamo locally)
  */
 module.exports = function populateEnv (params, callback) {
-  let { update } = params
+  let { update, inventory } = params
+  let { inv } = inventory
+  let environment = process.env.NODE_ENV
+
+  function varsNotFound (env, file) {
+    let msg = `No ${env} environment variables found` + (file ? ` in ${file}` : '')
+    update.done(msg)
+  }
+  function populatePrint (env, file) {
+    update.done(`Populating ${env} environment variables with ${file}`)
+    if (process.env.ARC_LOCAL) {
+      let live = [
+        inv.tables ? '@tables' : '',
+        inv.indexes ? '@indexes' : '',
+        inv.events ? '@events' : '',
+        inv.queues ? '@queues' : '',
+      ].filter(Boolean)
+      update.done(`Using ${env} live AWS infra: ${live.join(', ')}`)
+    }
+  }
+
   let dotEnvPath = join(process.cwd(), '.env')
   let legacyArcEnvPath = join(process.cwd(), '.arc-env')
   if (existsSync(dotEnvPath)) {
     try {
       let raw = readFileSync(dotEnvPath).toString()
       let env = dotenv.parse(raw)
-      Object.entries(env).forEach(([ n, v ]) => {
-        process.env[n] = v
-      })
-      let msg = 'Populating environment variables with .env'
-      update.done(msg)
+      populate(env)
+      populatePrint('testing', '.env')
       callback()
     }
     catch (err) {
@@ -28,22 +45,34 @@ module.exports = function populateEnv (params, callback) {
       callback(error)
     }
   }
+  else if (inv._project.preferences) {
+    let prefs = inv._project.preferences
+    let { sandbox = {} } = prefs
+
+    // Environment prefs
+    if (sandbox.env) process.env.NODE_ENV = environment = sandbox.env
+    if (sandbox.useAWS) process.env.ARC_LOCAL = true
+
+    // Populate env vars
+    let filepath = basename(inv._project.preferencesFile)
+    if (prefs.env && prefs.env[environment]) {
+      populate(prefs.env[environment])
+      populatePrint(environment, filepath)
+    }
+    else varsNotFound(environment, filepath)
+    callback()
+  }
   else if (existsSync(legacyArcEnvPath)) {
     try {
       let raw = readFileSync(legacyArcEnvPath).toString()
       let env = parse(raw)
-      let actual = process.env.ARC_LOCAL
-        ? 'testing'
-        : process.env.NODE_ENV
-      if (env[actual]) {
-        env[actual].forEach(tuple => {
+      if (env[environment]) {
+        env[environment].forEach(tuple => {
           process.env[tuple[0]] = tuple[1]
         })
-        let local = 'Populating environment variables with .arc-env @testing (ARC_LOCAL override)'
-        let not = 'Populating environment variables with .arc-env @' + process.env.NODE_ENV
-        let msg = process.env.ARC_LOCAL ? local : not
-        update.done(msg)
+        populatePrint(environment, '.arc-env')
       }
+      else varsNotFound(environment, '.arc-env')
       callback()
     }
     catch (err) {
@@ -51,5 +80,14 @@ module.exports = function populateEnv (params, callback) {
       callback(error)
     }
   }
-  else callback()
+  else {
+    varsNotFound(environment)
+    callback()
+  }
+}
+
+function populate (env) {
+  Object.entries(env).forEach(([ n, v ]) => {
+    process.env[n] = v
+  })
 }

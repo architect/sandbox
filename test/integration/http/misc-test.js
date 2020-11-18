@@ -153,11 +153,48 @@ test('[Env vars (.env)] get /env', t => {
       t.ok(result.body.SESSION_TABLE_NAME, 'Got SESSION_TABLE_NAME env var')
       // TODO add ARC_STATIC_SPA
       t.equal(result.body.TZ, 'UTC', 'Got TZ env var')
+      delete process.env.DOTENV_USERLAND_ENV_VAR
     }
   })
 })
 
 test('[Env vars (.env)] Shut down Sandbox', t => {
+  t.plan(1)
+  shutdown(t)
+})
+
+test('[Env vars (preferences.arc)] Start Sandbox', t => {
+  t.plan(4)
+  process.chdir(join(mock, 'env', 'preferences'))
+  sandbox.start({ }, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+    }
+  })
+})
+
+test('[Env vars (preferences.arc)] get /env', t => {
+  t.plan(6)
+  tiny.get({ url }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.equal(result.body.PREFERENCES_DOT_ARC_USERLAND_ENV_VAR, 'Why hello there from preferences.arc!', 'Received userland env var')
+      t.ok(result.body.ARC_HTTP, 'Got ARC_HTTP env var')
+      t.ok(result.body.ARC_STATIC_BUCKET, 'Got ARC_STATIC_BUCKET env var')
+      t.ok(result.body.NODE_ENV, 'Got NODE_ENV env var')
+      t.ok(result.body.SESSION_TABLE_NAME, 'Got SESSION_TABLE_NAME env var')
+      // TODO add ARC_STATIC_SPA
+      t.equal(result.body.TZ, 'UTC', 'Got TZ env var')
+      delete process.env.PREFERENCES_DOT_ARC_USERLAND_ENV_VAR
+    }
+  })
+})
+
+test('[Env vars (preferences.arc)] Shut down Sandbox', t => {
   t.plan(1)
   shutdown(t)
 })
@@ -188,6 +225,7 @@ test('[Env vars (.arc-env)] get /env', t => {
       t.ok(result.body.SESSION_TABLE_NAME, 'Got SESSION_TABLE_NAME env var')
       // TODO add ARC_STATIC_SPA
       t.equal(result.body.TZ, 'UTC', 'Got TZ env var')
+      delete process.env.DOT_ARC_ENV_USERLAND_ENV_VAR
     }
   })
 })
