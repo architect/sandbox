@@ -25,6 +25,7 @@ testing
   AN_ENV_VAR somethingUseful
 ```
 - Added `.env` support; thanks @wesbos!
+- Added missing Lambda handler error, and made ever so slightly nicer the error message presentation
 
 
 ### Changed
@@ -38,6 +39,11 @@ testing
   - Which environment is being loaded
   - Whether Sandbox found any env vars for the current environment
   - Whether Sandbox is using any live AWS infra (via prefs or `ARC_LOCAL`)
+- Sandbox no longer creates missing Lambda resources by default; to reenable that, add to your preferences file:
+```arc
+@create
+autocreate true
+```
 
 
 ### Fixed
