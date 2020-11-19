@@ -40,7 +40,12 @@ module.exports = function invokeHTTP (params) {
 
     // Run the Lambda sig locally
     invoke(lambda, request, function _res (err, result) {
-      if (err) {
+      if (err && err.message === 'lambda_not_found') {
+        let body = errors.notFound(lambda)
+        invalid(res, body)
+        res.end(body)
+      }
+      else if (err) {
         let body = errors.other('Unknown error', err.message)
         invalid(res, body)
         res.end(body)

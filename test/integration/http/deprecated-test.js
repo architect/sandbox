@@ -528,6 +528,40 @@ test('[REST mode / deprecated] Shut down Sandbox', t => {
 })
 
 /**
+ * Test failing to load an endpoint missing its local handler file
+ */
+test('[REST mode / deprecated] Start Sandbox', t => {
+  t.plan(3)
+  process.chdir(join(mock, 'missing-handler'))
+  sandbox.start({ quiet: true }, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(process.env.DEPRECATED, 'Arc v5 deprecated status set')
+      t.equal(process.env.ARC_HTTP, 'aws', 'aws_proxy mode not enabled')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+    }
+  })
+})
+
+test('[REST mode / deprecated] get /missing should fail if missing its handler file', t => {
+  t.plan(2)
+  tiny.get({
+    url: url + '/missing'
+  }, function _got (err, result) {
+    if (err) {
+      t.equal(err.statusCode, 502, 'Got 502 for missing file')
+      t.ok(err.body.includes('Lambda handler not found'), 'Got correct error')
+    }
+    else t.fail(result)
+  })
+})
+
+test('[REST mode / deprecated] Shut down Sandbox', t => {
+  t.plan(1)
+  shutdown(t)
+})
+
+/**
  * Test to ensure sandbox loads without defining @http
  */
 test('[REST mode / deprecated] Start Sandbox', t => {

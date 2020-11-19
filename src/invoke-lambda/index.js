@@ -1,5 +1,5 @@
 let { join } = require('path')
-let fs = require('fs')
+let { existsSync } = require('fs')
 
 let runInNode = require('./run-in-node')
 let runInDeno = require('./run-in-deno')
@@ -31,9 +31,10 @@ let runtimes = {
  * @param {function} callback - node style errback
  */
 module.exports = function invokeLambda (lambda, event, callback) {
-  let { src } = lambda
-  if (!fs.existsSync(src)) {
-    callback(Error(`Lambda not found: ${src}`))
+  let { src, handlerFile } = lambda
+  // handlerFile is defined for all non-ASAP functions; ASAP bypasses this check
+  if (handlerFile && !existsSync(handlerFile)) {
+    callback(Error('lambda_not_found'))
   }
   else {
     let maxSize = 1000 * 6000

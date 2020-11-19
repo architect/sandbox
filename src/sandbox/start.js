@@ -56,8 +56,8 @@ module.exports = function _start (params, callback) {
 
     // Initialize any missing functions on startup
     function _init (callback) {
-      let skip = prefs && prefs.sandbox && prefs.sandbox.create === false
-      if (!deprecated && !skip) {
+      let autocreateEnabled = prefs && prefs.create && prefs.create.autocreate
+      if (autocreateEnabled && !deprecated) {
         create({}, callback)
       }
       else callback()
