@@ -54,6 +54,10 @@ pets
 places
   location *String
 
+data
+  account *String
+  id **String
+
 @indexes
 accounts
   email *String
@@ -64,3 +68,10 @@ pets
 pets
   accountID *String
   petID **String
+
+data
+  id *String
+
+data
+  location *String
+  id **String
