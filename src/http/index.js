@@ -56,7 +56,7 @@ module.exports = function createHttpServer (inventory) {
         // Generate public/static.json if `@static fingerprint` is enabled
         function _maybeWriteStaticManifest (callback) {
           if (!inv.static || isDefaultProject) callback()
-          else fingerprint({}, function next (err, result) {
+          else fingerprint({ inventory }, function next (err, result) {
             if (err) callback(err)
             else {
               let msg = 'Static asset fingerpringing enabled, public/static.json generated'

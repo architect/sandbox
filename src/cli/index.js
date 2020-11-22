@@ -208,7 +208,7 @@ module.exports = function cli (params = {}, callback) {
         clearTimeout(fingerprintTimer)
         fingerprintTimer = setTimeout(() => {
           let start = Date.now()
-          fingerprint({}, function next (err, result) {
+          fingerprint({ inventory }, function next (err, result) {
             if (err) update.error(err)
             else {
               if (result) {
