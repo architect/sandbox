@@ -7,17 +7,22 @@ module.exports = function getAttributeDefinitions (params) {
   let indexes = get.indexes(name) || []
 
   let defs = []
+  function hasDef (attrName) {
+    return defs.find(d => d.AttributeName === attrName)
+  }
   theTable.concat(indexes).forEach(i => {
     let { partitionKey, partitionKeyType, sortKey, sortKeyType } = i
 
     // Always handle partition key
-    defs.push({
-      AttributeName: partitionKey,
-      AttributeType: convert(partitionKeyType)
-    })
+    if (!hasDef(partitionKey)) {
+      defs.push({
+        AttributeName: partitionKey,
+        AttributeType: convert(partitionKeyType)
+      })
+    }
 
     // Handle sort key if necessary
-    if (sortKey) {
+    if (sortKey && !hasDef(sortKey)) {
       defs.push({
         AttributeName: sortKey,
         AttributeType: convert(sortKeyType)
