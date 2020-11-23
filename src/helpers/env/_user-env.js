@@ -12,22 +12,14 @@ module.exports = function populateEnv (params, callback) {
   let { update, inventory } = params
   let { inv } = inventory
   let environment = process.env.NODE_ENV
+  let setEnv = false
 
   function varsNotFound (env, file) {
     let msg = `No ${env} environment variables found` + (file ? ` in ${file}` : '')
     update.done(msg)
   }
   function populatePrint (env, file) {
-    update.done(`Populating ${env} environment variables with ${file}`)
-    if (process.env.ARC_LOCAL) {
-      let live = [
-        inv.tables ? '@tables' : '',
-        inv.indexes ? '@indexes' : '',
-        inv.events ? '@events' : '',
-        inv.queues ? '@queues' : '',
-      ].filter(Boolean)
-      update.done(`Using ${env} live AWS infra: ${live.join(', ')}`)
-    }
+    update.done(`Found ${env} environment variables: ${file}`)
   }
 
   let dotEnvPath = join(process.cwd(), '.env')
@@ -37,53 +29,65 @@ module.exports = function populateEnv (params, callback) {
       let raw = readFileSync(dotEnvPath).toString()
       let env = dotenv.parse(raw)
       populate(env)
+      setEnv = true
       populatePrint('testing', '.env')
-      callback()
     }
     catch (err) {
       let error = `.env parse error: ${err.stack}`
       callback(error)
+      return
     }
   }
-  else if (inv._project.preferences) {
+  if (inv._project.preferences) {
     let prefs = inv._project.preferences
     let { sandbox = {} } = prefs
 
     // Environment prefs
-    if (sandbox.env) process.env.NODE_ENV = environment = sandbox.env
-    if (sandbox.useAWS) process.env.ARC_LOCAL = true
+    if (sandbox.env) process.env.ARC_ENV = process.env.NODE_ENV = environment = sandbox.env
+    if (sandbox.useAWS) {
+      process.env.ARC_LOCAL = true
+      if (process.env.NODE_ENV === 'testing') process.env.NODE_ENV = 'staging'
+    }
 
     // Populate env vars
     let filepath = basename(inv._project.preferencesFile)
-    if (prefs.env && prefs.env[environment]) {
+    if (prefs.env && prefs.env[environment] && !setEnv) {
       populate(prefs.env[environment])
       populatePrint(environment, filepath)
     }
-    else varsNotFound(environment, filepath)
-    callback()
+    else if (!setEnv) varsNotFound(environment, filepath)
   }
   else if (existsSync(legacyArcEnvPath)) {
     try {
       let raw = readFileSync(legacyArcEnvPath).toString()
       let env = parse(raw)
-      if (env[environment]) {
+      if (env[environment] && !setEnv) {
         env[environment].forEach(tuple => {
           process.env[tuple[0]] = tuple[1]
         })
         populatePrint(environment, '.arc-env')
       }
-      else varsNotFound(environment, '.arc-env')
-      callback()
+      else if (!setEnv) varsNotFound(environment, '.arc-env')
     }
     catch (err) {
       let error = `.arc-env parse error: ${err.stack}`
       callback(error)
+      return
     }
   }
-  else {
-    varsNotFound(environment)
-    callback()
+  else if (!setEnv) varsNotFound(environment)
+
+  // Wrap it up
+  if (process.env.ARC_LOCAL) {
+    let live = [
+      inv.tables ? '@tables' : '',
+      inv.indexes ? '@indexes' : '',
+      inv.events ? '@events' : '',
+      inv.queues ? '@queues' : '',
+    ].filter(Boolean)
+    update.done(`Using ${process.env.ARC_ENV} live AWS infra: ${live.join(', ')}`)
   }
+  callback()
 }
 
 function populate (env) {
