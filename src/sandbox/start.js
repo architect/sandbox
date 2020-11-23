@@ -43,17 +43,6 @@ module.exports = function _start (params, callback) {
       env(params, callback)
     },
 
-    // Read the current Architect project (or use a default project)
-    function _checkArc (callback) {
-      if (!inv._project.manifest) {
-        update.warn('No Architect project manifest found, using default project')
-      }
-      else {
-        update.done('Found Architect project manifest, starting up')
-      }
-      callback()
-    },
-
     // Initialize any missing functions on startup
     function _init (callback) {
       let autocreateEnabled = prefs && prefs.create && prefs.create.autocreate
