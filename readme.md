@@ -35,7 +35,16 @@ npx arc sandbox
 - `-p`, `--port`, `port` - Manually specify HTTP port
   - Defaults to `3333`
 - `-v`, `--verbose`, `verbose` - Enable verbose logging
+- `-s`, `--scheduled`, `scheduled` - Run scheduled events
 
+### Keyboard Commands
+
+While the Sandbox is running, you can use the following keypresses: (note, they are capital letters)
+
+- `H` - Hydrate all files
+- `S` - Hydrate shared files
+- `V` - Hydrate view files
+- `T` - Trigger all scheduled events
 
 ### Environment variables
 
@@ -133,6 +142,16 @@ Invokes `callback` once everything is ready, or returns a `promise` if `callback
 
 Shuts down anything started by `sandbox.tables.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
 
+### Scheduled (`@scheduled`)
+
+### `sandbox.scheduled.start(options[, callback]) → [Promise]`
+
+Parses the Architect project configuration and runs the [`@scheduled`][scheduled] functions.
+
+### `sandbox.scheduled.end([callback]) → [Promise]`
+
+Shuts down anything started by `sandbox.scheduled.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
+
 ---
 
 ## Example
@@ -186,4 +205,5 @@ test('Tests go here', () => {
 [http]: https://arc.codes/reference/arc/http
 [queues]: https://arc.codes/reference/arc/queues
 [tables]: https://arc.codes/reference/arc/tables
+[scheduled]: https://arc.codes/reference/arc/scheduled
 [ws]: https://arc.codes/reference/arc/ws

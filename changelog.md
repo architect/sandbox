@@ -1,5 +1,11 @@
 # Architect Sandbox changelog
 
+## [2.X.X] XXXX-XX-XX
+
+- Added support for simulating CloudWatch Scheduled Events
+  - Run with --scheduled to activate these
+  - Press `T` while the sandbox is running to trigger all events
+
 ---
 
 ## [3.1.3] 2020-10-19
