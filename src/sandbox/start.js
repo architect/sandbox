@@ -4,13 +4,14 @@ let chalk = require('chalk')
 let hydrate = require('@architect/hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
-let { banner, chars } = require('@architect/utils')
-let { env, maybeHydrate, readArc } = require('../helpers')
+let { chars } = require('@architect/utils')
+let { env, maybeHydrate } = require('../helpers')
 let startupScripts = require('./_startup-scripts')
 
 module.exports = function _start (params, callback) {
   let start = Date.now()
   let {
+    inventory,
     // Settings
     options,
     quiet = false,
@@ -21,6 +22,8 @@ module.exports = function _start (params, callback) {
     http,
     tables,
   } = params
+  let { inv } = inventory
+  let { preferences: prefs } = inv._project
 
   // Set `all` to instruct service modules not to hydrate again, etc.
   params.all = true
@@ -32,35 +35,18 @@ module.exports = function _start (params, callback) {
     verbose = true
   }
 
-  let { arc, filepath } = readArc()
   let deprecated = process.env.DEPRECATED
 
   series([
-    // Set up Arc + userland env vars
+    // Set up Arc + userland env vars + print the banner
     function _env (callback) {
       env(params, callback)
     },
 
-    // Print the banner (which also loads AWS env vars / creds necessary for Dynamo)
-    function _printBanner (callback) {
-      banner(params)
-      callback()
-    },
-
-    // Read the current Architect project (or use a default project)
-    function _checkArc (callback) {
-      if (!filepath) {
-        update.warn('No Architect project manifest found, using default project')
-      }
-      else {
-        update.done('Found Architect project manifest, starting up')
-      }
-      callback()
-    },
-
     // Initialize any missing functions on startup
     function _init (callback) {
-      if (!deprecated) {
+      let autocreateEnabled = prefs && prefs.create && prefs.create.autocreate
+      if (autocreateEnabled && !deprecated) {
         create({}, callback)
       }
       else callback()
@@ -68,7 +54,7 @@ module.exports = function _start (params, callback) {
 
     // Loop through functions and see if any need dependency hydration
     function _maybeHydrate (callback) {
-      maybeHydrate(callback)
+      maybeHydrate(inventory, callback)
     },
 
     // ... then hydrate Architect project files into functions
@@ -114,8 +100,7 @@ module.exports = function _start (params, callback) {
 
     // Run startup scripts (if present)
     function _runStartupScripts (callback) {
-      let params = { arc, update }
-      startupScripts(params, callback)
+      startupScripts({ inventory, update }, callback)
     },
 
     // Check aws-sdk installation status if installed globally

@@ -7,14 +7,34 @@ let isBuffer = body => {
   return false
 }
 
+let head = `<head>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+    code, pre {
+      font-family: monospace;
+      color: #00c26e;
+    }
+  </style>
+</head>
+`
+
 let errors = {
-  invalidType: (param, type) => `<h1>Invalid response type</h1>
+  invalidType: (param, type) => `${head}<h1>Invalid response type</h1>
 <p><code>${param}</code> parameters must be <code>${type}</code></p>`,
-  invalidParam: validParams => `<h1>Invalid response parameter</h1>
+  invalidParam: validParams => `${head}<h1>Invalid response parameter</h1>
 <p>Only the following parameters are valid in a response: ${validParams.map(p => `<code>${p}</code>`).join(', ')}</p>`,
-  isRawBuffer: `<h1>Cannot respond with a raw buffer</h1>
+  isRawBuffer: `${head}<h1>Cannot respond with a raw buffer</h1>
 <p>Please base64 encode your response and include a <code>isBase64Encoded: true</code> parameter, or run your response through <code>@architect/functions</code><p>`,
-  other: (title, body) => `<h1>${title}</h1>
+  notFound: lambda => `${head}<h1>Lambda handler not found</h1>
+  <p>Could not find Lambda handler at: <code>${lambda.handlerFile}</code><p>
+  <p>Please create a handler file, or run <code>[npx] arc init</code>, or add the following to your project preferences (<code>preferences.arc</code> or <code>prefs.arc</code>) file and restart Sandbox:
+  <pre>@create
+autocreate true
+  <pre>
+  </p>`,
+  other: (title, body) => `${head}<h1>${title}</h1>
   <p>${body}<p>`
 }
 

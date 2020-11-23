@@ -1,7 +1,6 @@
 let { join } = require('path')
-let fs = require('fs')
+let { existsSync } = require('fs')
 
-let getConfig = require('./get-config')
 let runInNode = require('./run-in-node')
 let runInDeno = require('./run-in-deno')
 let runInPython = require('./run-in-python')
@@ -27,13 +26,15 @@ let runtimes = {
 /**
  * mocks a lambda.. not much to it eh!
  *
- * @param {string} pathToLambda - path to lambda function code
+ * @param {string} function - Inventory function object
  * @param {object} event - HTTP / event payload to invoke lambda function with
  * @param {function} callback - node style errback
  */
-module.exports = function invokeLambda (pathToLambda, event, callback) {
-  if (!fs.existsSync(pathToLambda)) {
-    callback(Error(`Lambda not found: ${pathToLambda}`))
+module.exports = function invokeLambda (lambda, event, callback) {
+  let { src, handlerFile } = lambda
+  // handlerFile is defined for all non-ASAP functions; ASAP bypasses this check
+  if (handlerFile && !existsSync(handlerFile)) {
+    callback(Error('lambda_not_found'))
   }
   else {
     let maxSize = 1000 * 6000
@@ -49,44 +50,38 @@ module.exports = function invokeLambda (pathToLambda, event, callback) {
         __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
         __ARC_CONFIG__: JSON.stringify({
           projectSrc: process.cwd(),
-          // TODO add handlerFile from inventory
+          handlerFile: 'index',
           handlerFunction: 'handler',
         }),
         PYTHONUNBUFFERED: true,
-        PYTHONPATH: join(pathToLambda, 'vendor'),
-        LAMBDA_TASK_ROOT: pathToLambda,
+        PYTHONPATH: join(src, 'vendor'),
+        LAMBDA_TASK_ROOT: src,
         TZ: 'UTC',
       }
 
       let options = {
         shell: true,
-        cwd: pathToLambda,
+        cwd: src,
         env: { ...process.env, ...defaults }
       }
-
       let request = JSON.stringify(event)
+      let { runtime, timeout } = lambda.config
 
-      getConfig(pathToLambda, function done (err, { runtime, timeout }) {
+      if (!runtimes[runtime]) {
+        missingRuntime(runtime, src)
+        callback('Missing runtime')
+        return
+      }
+      runtimes[runtime](options, request, timeout * 1000, function done (err, result) {
         if (err) callback(err)
         else {
-          if (! runtimes[runtime] ) {
-            missingRuntime(runtime, pathToLambda)
-            callback('missing runtime')
-            return
+          let missing
+          if (result && result.__DEP_ISSUES__) {
+            missing = result.__DEP_ISSUES__
+            delete result.__DEP_ISSUES__
           }
-
-          runtimes[runtime](options, request, timeout, function done (err, result) {
-            if (err) callback(err)
-            else {
-              let missing
-              if (result && result.__DEP_ISSUES__) {
-                missing = result.__DEP_ISSUES__
-                delete result.__DEP_ISSUES__
-              }
-              warn(missing, pathToLambda)
-              callback(null, result)
-            }
-          })
+          warn(missing, src)
+          callback(null, result)
         }
       })
     }

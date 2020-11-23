@@ -9,7 +9,7 @@ let chalk = require('chalk')
 
 // Local
 let { fingerprint } = require('@architect/utils')
-let { env, getPorts, checkPort, maybeHydrate, readArc } = require('../helpers')
+let { env, getPorts, checkPort, maybeHydrate } = require('../helpers')
 let middleware = require('./middleware')
 let httpEnv = require('./_http-env')
 let hydrate = require('@architect/hydrate')
@@ -19,19 +19,15 @@ let registerWS = require('./register-websocket')
 /**
  * Creates an HTTP + WebSocket server that emulates API Gateway
  */
-module.exports = function createHttpServer () {
-  let { arc, isDefaultProject } = readArc()
-  let deprecated = process.env.DEPRECATED
+module.exports = function createHttpServer (inventory) {
+  let { inv } = inventory
+  let isDefaultProject = !inv._project.manifest
+  let arc = inv._project.arc
 
-  // Arc 5 only starts if it's got actual routes to load
-  let arc5 = deprecated && arc.http && arc.http.length
-  // Arc 6 may start with proxy at root, or empty `@http` pragma
-  let arc6 = !deprecated && arc.static || arc.http
-
-  if (arc5 || arc6) {
+  if (inv.http) {
     let app = Router({ mergeParams: true })
 
-    app = middleware(app)
+    app = middleware(app, inventory)
 
     // Keep a reference up here for fns below
     let httpServer
@@ -48,7 +44,7 @@ module.exports = function createHttpServer () {
       series([
         // Set up Arc + userland env vars
         function _env (callback) {
-          if (!all) env(options, callback)
+          if (!all) env({ ...options, inventory }, callback)
           else callback()
         },
 
@@ -59,8 +55,8 @@ module.exports = function createHttpServer () {
 
         // Generate public/static.json if `@static fingerprint` is enabled
         function _maybeWriteStaticManifest (callback) {
-          if (!arc.static || isDefaultProject) callback()
-          else fingerprint({}, function next (err, result) {
+          if (!inv.static || isDefaultProject) callback()
+          else fingerprint({ inventory }, function next (err, result) {
             if (err) callback(err)
             else {
               let msg = 'Static asset fingerpringing enabled, public/static.json generated'
@@ -72,7 +68,7 @@ module.exports = function createHttpServer () {
 
         // Loop through functions and see if any need dependency hydration
         function _maybeHydrate (callback) {
-          if (!all) maybeHydrate(callback)
+          if (!all) maybeHydrate(inventory, callback)
           else callback()
         },
 
@@ -92,7 +88,7 @@ module.exports = function createHttpServer () {
 
         function _finalSetup (callback) {
           // Always register HTTP routes
-          registerHTTP(app, '@http', 'http', arc.http || [])
+          registerHTTP({ app, routes: inv.http })
 
           // Create an actual server; how quaint!
           httpServer = http.createServer(function _request (req, res) {
@@ -100,9 +96,8 @@ module.exports = function createHttpServer () {
           })
 
           // Bind WebSocket app to HTTP server
-          if (arc.ws) {
-            let routes = arc.ws
-            websocketServer = registerWS({ app, httpServer, routes })
+          if (inv.ws) {
+            websocketServer = registerWS({ app, httpServer, inventory })
           }
 
           callback()

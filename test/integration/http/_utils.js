@@ -1,5 +1,8 @@
 let sandbox = require('../../../src')
 let tiny = require('tiny-json-http')
+let { sync: rm } = require('rimraf')
+let { join } = require('path')
+let { existsSync } = require('fs')
 let url = `http://localhost:${process.env.PORT || 3333}`
 let data = { hi: 'there' }
 let b64dec = i => Buffer.from(i, 'base64').toString()
@@ -150,6 +153,17 @@ function checkDeprecatedResult (t, result, checks) {
   })
 }
 
+function rmPublic (t) {
+  try {
+    let publicFolder = join(process.cwd(), 'public')
+    rm(publicFolder)
+    t.notOk(existsSync(publicFolder), 'Destroyed auto-generated ./public folder')
+  }
+  catch (err) {
+    t.fail(err)
+  }
+}
+
 module.exports = {
   url,
   data,
@@ -158,5 +172,6 @@ module.exports = {
   shutdownAsync,
   checkHttpResult,
   checkRestResult,
-  checkDeprecatedResult
+  checkDeprecatedResult,
+  rmPublic,
 }

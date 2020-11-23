@@ -1,12 +1,11 @@
 let { toLogicalID } = require('@architect/utils')
-let readArc = require('../read-arc')
 
 /**
  * Handle important Architect environment variables
  */
 module.exports = function env (params, callback) {
-  let { version, quiet } = params
-  let { arc } = readArc()
+  let { version, quiet, inventory } = params
+  let { inv } = inventory
 
   // Set up quietude
   process.env.ARC_QUIET = process.env.ARC_QUIET || process.env.QUIET || quiet || '' // For when sandbox is being run outside of @arc/arc
@@ -31,15 +30,11 @@ module.exports = function env (params, callback) {
     process.env.ARC_HTTP = 'aws_proxy'
     if (env === 'staging' || env === 'production') {
       let capEnv = env.charAt(0).toUpperCase() + env.substr(1)
-      process.env.ARC_CLOUDFORMATION = `${toLogicalID(arc.app[0])}${capEnv}`
+      process.env.ARC_CLOUDFORMATION = `${toLogicalID(inv.app)}${capEnv}`
     }
 
     // @static spa
-    let spaSetting = tuple => tuple[0] === 'spa'
-    // findIndex instead of find so we don't mix up bools
-    let spa = arc.static && arc.static.some(spaSetting) && arc.static.findIndex(spaSetting)
-    let spaIsValid = arc.static && arc.static[spa] && typeof arc.static[spa][1] === 'boolean'
-    if (spaIsValid) process.env.ARC_STATIC_SPA = arc.static[spa][1]
+    if (inv.static && inv.static.spa !== undefined) process.env.ARC_STATIC_SPA = inv.static
   }
 
   // Populate session table (if not present)

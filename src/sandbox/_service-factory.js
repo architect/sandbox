@@ -1,3 +1,4 @@
+let inv = require('@architect/inventory')
 let _events = require('../events')
 let _http = require('../http')
 let _tables = require('../tables')
@@ -21,16 +22,21 @@ module.exports = function serviceFactory (params) {
         })
       }
 
-      if (!server[type]) {
-        let service = init()
-        if (service) {
-          options.update = update
-          server[type] = service
-          server[type].start(options, callback)
+      inv({}, function (err, inventory) {
+        if (err) callback(err)
+        else {
+          if (!server[type]) {
+            let service = init(inventory)
+            if (service) {
+              options.update = update
+              server[type] = service
+              server[type].start(options, callback)
+            }
+            else callback()
+          }
+          else callback()
         }
-        else callback()
-      }
-      else callback()
+      })
 
       return promise
     },

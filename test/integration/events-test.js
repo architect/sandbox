@@ -1,9 +1,44 @@
 let arc = require('@architect/functions')
 let test = require('tape')
+let { existsSync, mkdirSync, readFileSync } = require('fs')
 let { join } = require('path')
 let { events } = require('../../src')
+let { sync: rm } = require('rimraf')
 let cwd = process.cwd()
 let mock = join(__dirname, '..', 'mock')
+let tmp = join(mock, 'tmp')
+
+function setup (t) {
+  if (existsSync(tmp)) rm(tmp)
+  mkdirSync(tmp, { recursive: true })
+  t.ok(existsSync(tmp), 'Created tmp dir')
+}
+function teardown (t) {
+  rm(tmp)
+  t.notOk(existsSync(tmp), 'Destroyed tmp dir')
+}
+
+// Check for the event artifact up to 10 times over 1 second or fail
+function checkFile (t, file, message) {
+  let found = false
+  let now = new Date()
+  for (let i = 0; i < 10; i++) {
+    setTimeout(() => {
+      let exists = existsSync(file)
+      if (i === 9 && !found && !exists) {
+        t.fail('Failed to find file proving event ran')
+      }
+      else if (found) return
+      else if (exists) {
+        found = true
+        t.pass('Found file proving event ran')
+        let contents = readFileSync(file).toString()
+        t.equal(contents, message, `Found correct file contents in ${new Date() - now}ms`)
+        teardown(t)
+      }
+    }, i * 100)
+  }
+}
 
 test('Set up env', t => {
   t.plan(1)
@@ -22,18 +57,53 @@ test('Async events.start', async t => {
   }
 })
 
-test('arc.events.publish', t => {
-  t.plan(1)
+test('arc.events.publish (normal)', t => {
+  t.plan(5)
+  setup(t)
+  let filename = 'event-file-normal'
+  let message = 'Event completed (normal)'
   arc.events.publish({
-    name: 'ping',
-    payload: {
-      yay: true,
-      yas: 'queen'
-    }
+    name: 'event-normal',
+    payload: { filename, message }
   },
   function done (err) {
     if (err) t.fail(err)
-    else t.pass('Successfully published event')
+    else {
+      t.pass('Successfully published event')
+      let file = join(tmp, filename)
+      checkFile(t, file, message)
+    }
+  })
+})
+
+test('arc.events.publish (custom)', t => {
+  t.plan(5)
+  setup(t)
+  let filename = 'event-file-custom'
+  let message = 'Event completed (custom)'
+  arc.events.publish({
+    name: 'event-custom',
+    payload: { filename, message }
+  },
+  function done (err) {
+    if (err) t.fail(err)
+    else {
+      t.pass('Successfully published event')
+      let file = join(tmp, filename)
+      checkFile(t, file, message)
+    }
+  })
+})
+
+test('arc.events.publish (failure)', t => {
+  t.plan(1)
+  arc.events.publish({
+    name: 'invalid-event',
+    payload: {}
+  },
+  function done (err) {
+    if (err) t.ok(err.message.includes('404'), 'Event not found')
+    else t.fail('Publish should have failed')
   })
 })
 
@@ -56,17 +126,53 @@ test('Sync events.start', t => {
   })
 })
 
-test('arc.queues.publish', t => {
-  t.plan(1)
+test('arc.queues.publish (normal)', t => {
+  t.plan(5)
+  setup(t)
+  let filename = 'queue-file-normal'
+  let message = 'Queue completed (normal)'
   arc.queues.publish({
-    name: 'pong',
-    payload: {
-      most: 'bes'
-    }
+    name: 'queue-normal',
+    payload: { filename, message }
   },
   function done (err) {
     if (err) t.fail(err)
-    else t.pass('Successfully published queue')
+    else {
+      t.pass('Successfully published queue')
+      let file = join(tmp, filename)
+      checkFile(t, file, message)
+    }
+  })
+})
+
+test('arc.queues.publish (custom)', t => {
+  t.plan(5)
+  setup(t)
+  let filename = 'queue-file-custom'
+  let message = 'Queue completed (custom)'
+  arc.queues.publish({
+    name: 'queue-custom',
+    payload: { filename, message }
+  },
+  function done (err) {
+    if (err) t.fail(err)
+    else {
+      t.pass('Successfully published queue')
+      let file = join(tmp, filename)
+      checkFile(t, file, message)
+    }
+  })
+})
+
+test('arc.queues.publish (failure)', t => {
+  t.plan(1)
+  arc.queues.publish({
+    name: 'invalid-queue',
+    payload: {}
+  },
+  function done (err) {
+    if (err) t.ok(err.message.includes('404'), 'Event not found')
+    else t.fail('Publish should have failed')
   })
 })
 

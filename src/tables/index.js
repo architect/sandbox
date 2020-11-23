@@ -1,5 +1,4 @@
-let { banner } = require('@architect/utils')
-let { env, getPorts, checkPort, readArc } = require('../helpers')
+let { env, getPorts, checkPort } = require('../helpers')
 let init = require('./_init')
 let dynalite = require('dynalite')
 let series = require('run-series')
@@ -9,10 +8,11 @@ let series = require('run-series')
  * - Automatically creates any tables or indexes defined by the project
  * - Also creates local session table(s) just in case
  */
-module.exports = function createTables () {
-  let { arc } = readArc()
+module.exports = function createTables (inventory) {
+  let { inv } = inventory
+  let { arc, manifest } = inv._project
 
-  if (arc.tables) {
+  if (arc.tables || !manifest) {
     let hasExternalDb = process.env.ARC_DB_EXTERNAL
     let tables = {}
     let dynamo
@@ -26,7 +26,7 @@ module.exports = function createTables () {
       series([
         // Set up Arc + userland env vars
         function _env (callback) {
-          if (!all) env(options, callback)
+          if (!all) env({ ...options, inventory }, callback)
           else callback()
         },
 
@@ -38,15 +38,6 @@ module.exports = function createTables () {
           else callback()
         },
 
-        // Print the banner (which also loads AWS env vars / creds necessary for Dynamo)
-        function _printBanner (callback) {
-          if (!all) {
-            banner(options)
-            callback()
-          }
-          else callback()
-        },
-
         function _startDynalite (callback) {
           if (!hasExternalDb) {
             dynamo = dynalite({ createTableMs: 0 }).listen(tablesPort, callback)
@@ -54,8 +45,8 @@ module.exports = function createTables () {
           else callback()
         },
 
-        function _init (callback) {
-          init(callback)
+        function _initializeTables (callback) {
+          init(inventory, callback)
         }
       ],
       function _started (err) {

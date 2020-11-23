@@ -3,7 +3,7 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { url, data, shutdown, checkRestResult: checkResult } = require('./_utils')
+let { url, data, shutdown, checkRestResult: checkResult, rmPublic } = require('./_utils')
 
 let cwd = process.cwd()
 let mock = join(__dirname, '..', '..', 'mock')
@@ -392,6 +392,31 @@ test('[HTTP v1.0 (REST) mode] get /no-return (noop)', t => {
       t.ok(err.body.includes(message), `Errors with message: '${message}'`)
     }
     else t.fail(result)
+  })
+})
+
+test('[HTTP v1.0 (REST) mode] get /custom', t => {
+  t.plan(16)
+  let path = '/custom'
+  tiny.get({
+    url: url + path
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get /custom',
+        resource: path,
+        path,
+        httpMethod: 'GET',
+        headers: '🤷🏽‍♀️',
+        multiValueHeaders: '🤷🏽‍♀️',
+        queryStringParameters: null,
+        multiValueQueryStringParameters: null,
+        pathParameters: null,
+        body: null,
+        isBase64Encoded: false,
+      })
+    }
   })
 })
 
@@ -834,7 +859,8 @@ test('[HTTP v1.0 (REST) mode] Start Sandbox', t => {
 })
 
 test('[HTTP v1.0 (REST) mode] get / without defining get / should fail if index.html not present', t => {
-  t.plan(1)
+  t.plan(2)
+  rmPublic(t)
   tiny.get({
     url
   }, function _got (err, result) {
@@ -875,6 +901,40 @@ test('[HTTP v1.0 (REST) mode] get / without defining get / should succeed if ind
       let { body } = result
       t.equal(body, 'Hello world!')
     }
+  })
+})
+
+test('[HTTP v1.0 (REST) mode] Shut down Sandbox', t => {
+  t.plan(1)
+  shutdown(t)
+})
+
+/**
+ * Arc v6: test failing to load an endpoint missing its local handler file
+ */
+test('[HTTP v1.0 (REST) mode] Start Sandbox', t => {
+  t.plan(3)
+  process.chdir(join(mock, 'missing-handler'))
+  sandbox.start({ quiet: true }, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+    }
+  })
+})
+
+test('[HTTP v1.0 (REST) mode] get /missing should fail if missing its handler file', t => {
+  t.plan(2)
+  tiny.get({
+    url: url + '/missing'
+  }, function _got (err, result) {
+    if (err) {
+      t.equal(err.statusCode, 502, 'Got 502 for missing file')
+      t.ok(err.body.includes('Lambda handler not found'), 'Got correct error')
+    }
+    else t.fail(result)
   })
 })
 

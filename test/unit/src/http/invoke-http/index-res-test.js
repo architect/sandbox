@@ -76,7 +76,8 @@ function teardown () {
 
 test('Unknown invocation error', t => {
   t.plan(2)
-  let params = { method: 'GET', route: '/', apiType: 'http' }
+  let lambda = { method: 'GET', route: '/' }
+  let params = { lambda, apiType: 'http' }
   let run = getInvoker.bind({}, params)
   let mock
   let msg = 'Some invocation error'
@@ -93,7 +94,8 @@ test('Unknown invocation error', t => {
 
 test('Architect v7 dependency-free responses (HTTP API mode)', t => {
   t.plan(46)
-  let params = { method: 'GET', route: '/', apiType: 'http' }
+  let lambda = { method: 'GET', route: '/' }
+  let params = { lambda, apiType: 'http' }
   let run = getInvoker.bind({}, params)
   let mock
 
@@ -209,7 +211,8 @@ test('Architect v7 dependency-free responses (HTTP API mode)', t => {
 
 test('Architect v7 dependency-free responses (HTTP API + Lambda v1.0)', t => {
   t.plan(32)
-  let params = { method: 'GET', route: '/', apiType: 'httpv1' }
+  let lambda = { method: 'GET', route: '/' }
+  let params = { lambda, apiType: 'httpv1' }
   let run = getInvoker.bind({}, params)
   let mock
 
@@ -290,7 +293,8 @@ test('Architect v7 dependency-free responses (HTTP API + Lambda v1.0)', t => {
 
 test('Architect v6 dependency-free responses (REST API mode)', t => {
   t.plan(32)
-  let params = { method: 'GET', route: '/', apiType: 'rest' }
+  let lambda = { method: 'GET', route: '/' }
+  let params = { lambda, apiType: 'rest' }
   let run = getInvoker.bind({}, params)
   let mock
 
@@ -372,7 +376,8 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
 test('Architect v5 (REST API mode) & Architect Functions', t => {
   t.plan(35)
   process.env.DEPRECATED = true
-  let params = { method: 'GET', route: '/', apiType: 'rest' }
+  let lambda = { method: 'GET', route: '/' }
+  let params = { lambda, apiType: 'rest' }
   let run = getInvoker.bind({}, params)
   let mock
   let cacheControl = 'max-age=86400'
@@ -485,7 +490,8 @@ test('Architect v5 (REST API mode) & Architect Functions', t => {
 test('Architect <6 (REST API mode) & Architect Functions', t => {
   t.plan(4)
   process.env.DEPRECATED = true
-  let params = { method: 'GET', route: '/', apiType: 'rest' }
+  let lambda = { method: 'GET', route: '/' }
+  let params = { lambda, apiType: 'rest' }
   let run = getInvoker.bind({}, params)
   let mock
 

@@ -18,7 +18,8 @@ let { errors, invalid } = require('./utils/validate')
  * Formats and validates HTTP request and response event objects
  */
 module.exports = function invokeHTTP (params) {
-  let { method, pathToFunction, route, apiType } = params
+  let { lambda, apiType } = params
+  let { method, path } = lambda
 
   method = method.toUpperCase()
   let deprecated = process.env.DEPRECATED
@@ -31,15 +32,20 @@ module.exports = function invokeHTTP (params) {
       request = requestFormatterDeprecated({ method, req })
     }
     else if (httpApiV1 || restApi) {
-      request = requestFormatterRest({ method, route, req }, httpApiV1)
+      request = requestFormatterRest({ method, path, req }, httpApiV1)
     }
     else {
-      request = requestFormatterHttp({ method, route, req })
+      request = requestFormatterHttp({ method, path, req })
     }
 
     // Run the Lambda sig locally
-    invoke(pathToFunction, request, function _res (err, result) {
-      if (err) {
+    invoke(lambda, request, function _res (err, result) {
+      if (err && err.message === 'lambda_not_found') {
+        let body = errors.notFound(lambda)
+        invalid(res, body)
+        res.end(body)
+      }
+      else if (err) {
         let body = errors.other('Unknown error', err.message)
         invalid(res, body)
         res.end(body)

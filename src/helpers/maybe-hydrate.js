@@ -5,7 +5,7 @@ let glob = require('glob')
 let { join } = require('path')
 let hydrate = require('@architect/hydrate')
 let series = require('run-series')
-let { chars, inventory } = require('@architect/utils')
+let { chars } = require('@architect/utils')
 
 /**
  * Checks for the existence of supported dependency manifests, and auto-hydrates each function's dependencies as necessary
@@ -18,10 +18,10 @@ let { chars, inventory } = require('@architect/utils')
  *
  * Not responsible for src/shared + views, handled elsewhere to optimize load time
  */
-module.exports = function maybeHydrate (callback) {
-  let arc = inventory()
+module.exports = function maybeHydrate (inventory, callback) {
+  let { inv } = inventory
   let quiet = process.env.ARC_QUIET
-  if (!arc.localPaths.length) {
+  if (!inv.lambdaSrcDirs || !inv.lambdaSrcDirs.length) {
     callback()
   }
   else {
@@ -29,10 +29,12 @@ module.exports = function maybeHydrate (callback) {
       if (!quiet) console.log(chalk.grey(chars.done, 'Found new functions to hydrate!'))
     }
     let notified = false
-    let shared = join('src', 'shared')
-    let views = join('src', 'views')
-    arc.localPaths.push(shared, views)
-    let ops = arc.localPaths.map(path => {
+    let shared = join(process.cwd(), 'src', 'shared') // TODO: impl inventory
+    let views = join(process.cwd(), 'src', 'views') // TODO: impl inventory
+    // Make a new array, don't inventory
+    let lambdaSrcDirs = [ ...inv.lambdaSrcDirs ]
+    lambdaSrcDirs.push(shared, views)
+    let ops = lambdaSrcDirs.map(path => {
       return function (callback) {
         /**
          * Check each of our supported dependency manifests
@@ -40,7 +42,6 @@ module.exports = function maybeHydrate (callback) {
          * - Try not to go any deeper into the filesystem than necessary (dep trees can take a long time to walk!)
          * - Assumes Architect deps will have their own deps, helping indicate hydration status
          */
-        let basepath = join(process.cwd(), path)
         function install (callback) {
           if (!notified) notify()
           notified = true
@@ -48,13 +49,13 @@ module.exports = function maybeHydrate (callback) {
           let copyShared = false
           // Disable sidecar shared/views hydration; handled project-wide elsewhere
           let hydrateShared = path === shared || path === views || false
-          hydrate.install({ basepath, copyShared, hydrateShared }, callback)
+          hydrate.install({ basepath: path, copyShared, hydrateShared }, callback)
         }
         series([
           function _packageJson (callback) {
-            let packageJson = exists(join(basepath, 'package.json'))
+            let packageJson = exists(join(path, 'package.json'))
             if (packageJson) {
-              let result = depStatus(basepath)
+              let result = depStatus(path)
               let { missing, outdated, warn } = result
               let installDeps = missing.length || outdated.length || warn.length
               if (installDeps) {
@@ -65,10 +66,10 @@ module.exports = function maybeHydrate (callback) {
             else callback()
           },
           function _requirementsTxt (callback) {
-            let requirementsTxt = exists(join(basepath, 'requirements.txt'))
+            let requirementsTxt = exists(join(path, 'requirements.txt'))
             if (requirementsTxt) {
-              let pattern = join(basepath, 'vendor', '*')
-              let arcDir = join(basepath, 'vendor', 'architect-functions')
+              let pattern = join(path, 'vendor', '*')
+              let arcDir = join(path, 'vendor', 'architect-functions')
               let hydrated = glob.sync(pattern).some(file => !file.includes(arcDir))
               if (!hydrated) {
                 install(callback)
@@ -78,10 +79,10 @@ module.exports = function maybeHydrate (callback) {
             else callback()
           },
           function _gemfile (callback) {
-            let gemfile = exists(join(basepath, 'Gemfile'))
+            let gemfile = exists(join(path, 'Gemfile'))
             if (gemfile) {
-              let pattern = join(basepath, 'vendor', 'bundle', '*')
-              let arcDir = join(basepath, 'vendor', 'bundle', 'architect-functions')
+              let pattern = join(path, 'vendor', 'bundle', '*')
+              let arcDir = join(path, 'vendor', 'bundle', 'architect-functions')
               let hydrated = glob.sync(pattern).some(file => !file.includes(arcDir))
               if (!hydrated) {
                 install(callback)

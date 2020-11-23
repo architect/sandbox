@@ -2,24 +2,20 @@ let hydrate = require('@architect/hydrate')
 let path = require('path')
 let fs = require('fs')
 let { version: pkgVer } = require('../../package.json')
-let ver = `Sandbox ${pkgVer}`
 let watch = require('node-watch')
 let { fingerprint, pathToUnix, updater } = require('@architect/utils')
-let { readArc } = require('../helpers')
 let readline = require('readline')
 let { tmpdir } = require('os')
 let sandbox = require('../sandbox')
 
 module.exports = function cli (params = {}, callback) {
-  if (!params.version) params.version = ver
-  let { options = [] } = params
+  let { version, options = [], inventory } = params
+  if (!version) version = `Sandbox ${pkgVer}`
   let symlink = options.some(o => o === '--disable-symlinks') ? false : true
   params.symlink = symlink
 
   sandbox.start(params, function watching (err) {
     if (err) {
-      // Hydration errors already reported, no need to log
-      if (err.message !== 'hydration_error') console.log(err)
       sandbox.end()
       if (callback) callback(err)
       else process.exit(1)
@@ -31,13 +27,11 @@ module.exports = function cli (params = {}, callback) {
     let deprecated = process.env.DEPRECATED
     let watcher = watch(process.cwd(), { recursive: true })
     let workingDirectory = pathToUnix(process.cwd())
-    let separator = path.posix.sep
 
     // Arc stuff
-    let { arc } = readArc()
-    let arcFile = new RegExp(`${workingDirectory}${separator}(app\\.arc|\\.arc|arc\\.yaml|arc\\.json)`)
-    let folderSetting = tuple => tuple[0] === 'folder'
-    let staticFolder = arc.static && arc.static.some(folderSetting) ? arc.static.find(folderSetting)[1] : 'public'
+    let { inv } = inventory
+    let manifest = inv._project.manifest
+    let staticFolder = inv.static && inv.static.folder
 
     // Timers
     let lastEvent
@@ -151,7 +145,7 @@ module.exports = function cli (params = {}, callback) {
       /**
        * Reload routes upon changes to Architect project manifest
        */
-      if (fileUpdate && fileName.match(arcFile) && !paused) {
+      if (fileUpdate && (fileName === manifest) && !paused) {
         clearTimeout(arcEventTimer)
         arcEventTimer = setTimeout(() => {
           ts()
@@ -208,13 +202,13 @@ module.exports = function cli (params = {}, callback) {
       /**
        * Regenerate public/static.json upon changes to public/
        */
-      if (updateOrRemove && arc.static && !paused &&
+      if (updateOrRemove && inv.static && !paused &&
           fileName.includes(`${workingDirectory}/${staticFolder}`) &&
           !fileName.includes(`${workingDirectory}/${staticFolder}/static.json`)) {
         clearTimeout(fingerprintTimer)
         fingerprintTimer = setTimeout(() => {
           let start = Date.now()
-          fingerprint({}, function next (err, result) {
+          fingerprint({ inventory }, function next (err, result) {
             if (err) update.error(err)
             else {
               if (result) {

@@ -6,9 +6,9 @@ let headerFormatter = require('./_req-header-fmt')
  * - Mocks request object shape from API Gateway <> Lambda proxy integration
  * - Unlike the REST request formatter, we build this out as we go (instead of mostly in one big lump) because params are conditionally omitted
  */
-module.exports = function requestFormatter ({ method, route, req }) {
+module.exports = function requestFormatter ({ method, path, req }) {
   let { body, params, resource, url } = req
-  let { pathname: path, query } = URL.parse(url)
+  let { pathname, query } = URL.parse(url)
 
   // Here we go!
   let request = {
@@ -16,8 +16,8 @@ module.exports = function requestFormatter ({ method, route, req }) {
   }
 
   // Resource may be manually supplied via ASAP
-  // Otherwise rely on route, as defined in arc.http
-  resource = resource || route
+  // Otherwise rely on paths, as defined in inventory.http[route]
+  resource = resource || path
 
   // Handle params
   if (resource && resource.includes(':')) {
@@ -37,7 +37,7 @@ module.exports = function requestFormatter ({ method, route, req }) {
   // Path things
   let routeKey = `${method.toUpperCase()} ${resource}`
   request.routeKey = routeKey
-  request.rawPath = path
+  request.rawPath = pathname
 
   // Query string things
   request.rawQueryString = query || ''
@@ -59,7 +59,7 @@ module.exports = function requestFormatter ({ method, route, req }) {
   request.requestContext = {
     http: {
       method: req.method || method.toUpperCase(),
-      path
+      path: pathname
     },
     routeKey
   }

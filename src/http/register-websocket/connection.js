@@ -1,36 +1,29 @@
-let fs = require('fs')
 let invoke = require('../invoke-ws')
 let pool = require('./pool')
-let getPath = require('./get-path')
 let noop = err => err ? console.log(err) : ''
 let { updater } = require('@architect/utils')
 
-module.exports = function connection (connectionId, ws) {
-
-  // save this for send to use
+module.exports = function connection ({ get }, connectionId, ws) {
+  // Save this for send to use
   pool.register(connectionId, ws)
-
-  let $default = getPath('default')
-  let $disconnect = getPath('disconnect')
   let update = updater('Sandbox')
 
   ws.on('message', function message (msg) {
-
     let payload = JSON.parse(msg)
-    let action = payload.action || null
-    let notFound = action === null || fs.existsSync(getPath(action)) === false
-    if (notFound) {
-      update.status('ws/default: ' + connectionId)
+    let lambda = payload.action && get.ws(payload.action)
+    if (lambda) {
+      update.status(`ws/${lambda.name}: ${connectionId}`)
       invoke({
-        action: $default,
+        lambda,
         body: msg,
         connectionId
       }, noop)
     }
     else {
-      update.status(`ws/${action}: ${connectionId}`)
+      let lambda = get.ws('default')
+      update.status('ws/default: ' + connectionId)
       invoke({
-        action: getPath(action),
+        lambda,
         body: msg,
         connectionId
       }, noop)
@@ -38,9 +31,10 @@ module.exports = function connection (connectionId, ws) {
   })
 
   ws.on('close', function close () {
+    let lambda = get.ws('disconnect')
     update.status(`ws/disconnect: ${connectionId}`)
     invoke({
-      action: $disconnect,
+      lambda,
       connectionId,
       req: { headers: { host: `localhost:${process.env.PORT}` } }
     }, noop)
