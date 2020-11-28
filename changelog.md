@@ -2,6 +2,14 @@
 
 ---
 
+## [3.2.1] 2020-11-28
+
+### Fixed
+
+- Gracefully fail when Sandbox startup script does not supply sufficient arguments; partially fixes #1019, thanks @filmaj!
+
+---
+
 ## [3.2.0] 2020-11-23
 
 ### Added

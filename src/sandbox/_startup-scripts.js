@@ -12,6 +12,10 @@ module.exports = function startupScripts (params, callback) {
     update.status('Running startup scripts')
     let ops = Object.entries(prefs.sandbox.startup).map(([ cmd, args ]) => {
       return function (callback) {
+        if (!Array.isArray(args)) {
+          callback(Error(`Sandbox startup scripts must have at least one argument (or comment): ${args}`))
+          return
+        }
         let command = `${cmd} ${args.join(' ')}`
         let env = { /* ARC_INV, */ ARC_RAW, ...process.env }
         exec(command, { env }, function (err, stdout, stderr) {
