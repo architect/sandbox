@@ -10,6 +10,21 @@
 
 ---
 
+## [3.3.0] 2020-12-03
+
+### Added
+
+- Added support for new `@shared` pragma with selective shared code, uh, sharing
+- Added support for custom shared + views file paths
+- Added support for global preferences lookup (`~/.preferences.arc` + `~/.prefs.arc`, etc.)
+
+
+### Changed
+
+- Updated dependencies
+
+---
+
 ## [3.2.1] 2020-11-28
 
 ### Fixed
