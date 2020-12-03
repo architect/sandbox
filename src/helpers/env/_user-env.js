@@ -1,6 +1,6 @@
 let parse = require('@architect/parser')
 let dotenv = require('dotenv')
-let { join, basename } = require('path')
+let { join, basename, sep } = require('path')
 let { existsSync, readFileSync } = require('fs')
 
 /**
@@ -50,12 +50,21 @@ module.exports = function populateEnv (params, callback) {
     }
 
     // Populate env vars
-    let filepath = basename(inv._project.preferencesFile)
     if (prefs.env && prefs.env[environment] && !setEnv) {
+      let proj = inv._project
+      let global =  proj.globalPreferences &&
+                    proj.globalPreferences.env &&
+                    proj.globalPreferences.env[environment] &&
+                    `~${sep}${basename(proj.globalPreferencesFile)}`
+      let local =   proj.localPreferences &&
+                    proj.localPreferences.env &&
+                    proj.localPreferences.env[environment] &&
+                    basename(proj.localPreferencesFile)
+      let filepath = local || global || null
       populate(prefs.env[environment])
       populatePrint(environment, filepath)
     }
-    else if (!setEnv) varsNotFound(environment, filepath)
+    else if (!setEnv) varsNotFound(environment)
   }
   else if (existsSync(legacyArcEnvPath)) {
     try {
