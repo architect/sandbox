@@ -29,6 +29,7 @@ get     /times-out
 /custom
   method get
   src src/http/custom
+get     /chonky
 post    /post
 put     /put
 patch   /patch

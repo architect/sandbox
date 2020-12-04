@@ -1,4 +1,3 @@
-let { existsSync: exists } = require('fs')
 let { join } = require('path')
 let { parse } = require('url')
 let invoker = require('../invoke-http')
@@ -109,14 +108,7 @@ module.exports = function fallback (inventory, req, res, next) {
   }
   // ASAP – not supported by Arc <6, supported by Arc 6+
   else if (hasASAP) {
-    // Sandbox running as a dependency (most common use case)
-    let src = join(process.cwd(), 'node_modules', '@architect', 'http-proxy', 'dist')
-    // Sandbox running as a global install
-    let global = join(__dirname, '..', '..', '..', '..', 'http-proxy', 'dist')
-    // Sandbox running from a local (symlink) context (usually testing/dev)
-    let local = join(__dirname, '..', '..', '..', 'node_modules', '@architect', 'http-proxy', 'dist')
-    if (exists(global)) src = global
-    else if (exists(local)) src = local
+    let { src } = get.http('get /*')
     invokeProxy(src)
   }
   // HTTP APIs can fall back to /:param (REST APIs cannot)
