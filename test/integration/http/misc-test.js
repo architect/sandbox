@@ -122,6 +122,20 @@ test('[Timeout] get /times-out', t => {
   })
 })
 
+test('[Oversized response] get /chonky', t => {
+  t.plan(2)
+  tiny.get({
+    url: url + '/chonky'
+  }, function _got (err, result) {
+    if (err) {
+      let message = 'Invalid payload size'
+      t.equal(err.statusCode, 502, 'Errors with 502')
+      t.ok(err.body.includes(message), `Errors with message: '${message}'`)
+    }
+    else t.fail(result)
+  })
+})
+
 test('[Misc] Shut down Sandbox', t => {
   t.plan(1)
   shutdown(t)

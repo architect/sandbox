@@ -17,6 +17,7 @@
 - Added support for new `@shared` pragma with selective shared code, uh, sharing
 - Added support for custom shared + views file paths
 - Added support for global preferences lookup (`~/.preferences.arc` + `~/.prefs.arc`, etc.)
+- Added response payload size validation; `@http` Lambdas with >6MB responses will now fail gracefully; thanks @andybee!
 
 
 ### Changed
