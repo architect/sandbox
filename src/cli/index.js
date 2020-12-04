@@ -8,19 +8,36 @@ let readline = require('readline')
 let { tmpdir } = require('os')
 let sandbox = require('../sandbox')
 
+// Get the base port for HTTP / WebSockets; tables + events key off this
+// CLI args > env var
+function port (options) {
+  let port = Number(process.env.PORT) || 3333
+  let findPort = option => [ '-p', '--port', 'port' ].includes(option)
+  if (options && options.some(findPort)) {
+    let thePort = i => options[options.indexOf(i) + 1]
+    if (options.includes('-p'))
+      port = thePort('-p')
+    else if (options.includes('--port'))
+      port = thePort('--port')
+    else if (options.includes('port'))
+      port = thePort('port')
+  }
+  return port
+}
+
 module.exports = function cli (params = {}, callback) {
   let { version, options = [], inventory } = params
   if (!version) version = `Sandbox ${pkgVer}`
   let symlink = options.some(o => o === '--disable-symlinks') ? false : true
   params.symlink = symlink
+  params.port = port(options)
 
   sandbox.start(params, function watching (err) {
     if (err) {
       sandbox.end()
-      if (callback) callback(err)
+      if (callback) return callback(err)
       else process.exit(1)
     }
-    else if (callback) callback()
 
     // Setup
     let update = updater('Sandbox')
@@ -110,7 +127,6 @@ module.exports = function cli (params = {}, callback) {
             update.err(err)
             process.exit(1)
           }
-          if (callback) callback()
           process.exit(0)
         })
       }
@@ -142,9 +158,7 @@ module.exports = function cli (params = {}, callback) {
       let updateOrRemove = event === 'update' || event === 'remove'
       fileName = pathToUnix(fileName)
 
-      /**
-       * Reload routes upon changes to Architect project manifest
-       */
+      // Reload routes upon changes to Architect project manifest
       if (fileUpdate && (fileName === manifest) && !paused) {
         clearTimeout(arcEventTimer)
         arcEventTimer = setTimeout(() => {
@@ -175,9 +189,7 @@ module.exports = function cli (params = {}, callback) {
         }, 50)
       }
 
-      /**
-       * Rehydrate functions with shared files upon changes to src/shared
-       */
+      // Rehydrate functions with shared files upon changes to src/shared
       let isShared = fileName.includes(`${workingDirectory}/src/shared`)
       if (updateOrRemove && isShared && !paused) {
         rehydrate({
@@ -187,9 +199,7 @@ module.exports = function cli (params = {}, callback) {
         })
       }
 
-      /**
-       * Rehydrate functions with shared files upon changes to src/views
-       */
+      // Rehydrate functions with shared files upon changes to src/views
       let isViews = fileName.includes(`${workingDirectory}/src/views`)
       if (updateOrRemove && isViews && !paused) {
         rehydrate({
@@ -199,9 +209,7 @@ module.exports = function cli (params = {}, callback) {
         })
       }
 
-      /**
-       * Regenerate public/static.json upon changes to public/
-       */
+      // Regenerate public/static.json upon changes to public/
       if (updateOrRemove && inv.static && !paused &&
           fileName.includes(`${workingDirectory}/${staticFolder}`) &&
           !fileName.includes(`${workingDirectory}/${staticFolder}/static.json`)) {
@@ -227,11 +235,21 @@ module.exports = function cli (params = {}, callback) {
       lastEvent = Date.now()
     })
 
-    /**
-     * Watch for sandbox errors
-     */
+    // Watch for sandbox errors
     watcher.on('error', function (err) {
       update.error(`Error:`, err)
+    })
+
+    watcher.on('ready', function () {
+      if (callback) callback(null, function close () {
+        watcher.on('close', function () {
+          process.stdin.pause()
+        })
+        sandbox.end(function (e) {
+          if (e) throw e
+          watcher.close()
+        })
+      })
     })
   })
 }
