@@ -56,7 +56,7 @@ module.exports = function invokeHTTP (params) {
         if (resty) {
           let { body, valid } = responseValidatorRest({ res, result }, httpApiV1)
           if (!valid) {
-            res.end(body)
+            end(res, body)
           }
           else {
             let body
@@ -66,20 +66,32 @@ module.exports = function invokeHTTP (params) {
             else {
               body = responseFormatterRest({ res, result }, httpApiV1)
             }
-            res.end(body || '')
+            end(res, body)
           }
         }
         else {
           let { body, valid } = responseValidatorHttp({ res, result })
           if (!valid) {
-            res.end(body)
+            end(res, body)
           }
           else {
             let body = responseFormatterHttp({ res, result })
-            res.end(body || '')
+            end(res, body)
           }
         }
       }
     })
   }
+}
+
+function end (res, body = '') {
+  let MB = 1000 * 1000
+  let itBeChonky = 6 * MB // Max Lambda payload size
+  if (body.length > itBeChonky) {
+    let size = `${(body.length / MB).toFixed(2).toLocaleString()}MB (${body.length.toLocaleString()}b) `
+    body = errors.chonky(size)
+    invalid(res, body)
+    res.end(body)
+  }
+  else res.end(body)
 }

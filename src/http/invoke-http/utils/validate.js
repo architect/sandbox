@@ -35,7 +35,9 @@ autocreate true
   <pre>
   </p>`,
   other: (title, body) => `${head}<h1>${title}</h1>
-  <p>${body}<p>`
+  <p>${body}<p>`,
+  chonky: size => `<h1>Invalid payload size</h1>
+<p>Responses must be 6MB or less; this response is ${size}</p>`
 }
 
 function invalid (res, body) {
