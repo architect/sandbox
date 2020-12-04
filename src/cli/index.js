@@ -240,6 +240,10 @@ module.exports = function cli (params = {}, callback) {
       update.error(`Error:`, err)
     })
 
+    // Workaround for https://github.com/yuanchuan/node-watch/issues/105
+    // wait until watcher is ready before calling back, and when we do call
+    // back, provide a function to close the sandbox server, the watcher, and
+    // the stdin reader.
     watcher.on('ready', function () {
       if (callback) callback(null, function close () {
         watcher.on('close', function () {

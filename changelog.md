@@ -2,6 +2,13 @@
 
 ---
 
+## [3.3.1]
+
+### Fixed
+
+- Fixed `@architect/architect`'s ability to specify the port to run on from the
+    command line; fixes [#1023](https://github.com/architect/architect/issues/1023)
+
 ## [3.3.0] 2020-12-03
 
 ### Added
