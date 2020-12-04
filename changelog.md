@@ -2,11 +2,27 @@
 
 ---
 
+## [3.3.0] 2020-12-03
+
+### Added
+
+- Added support for new `@shared` pragma with selective shared code, uh, sharing
+- Added support for custom shared + views file paths
+- Added support for global preferences lookup (`~/.preferences.arc` + `~/.prefs.arc`, etc.)
+- Added response payload size validation; `@http` Lambdas with >6MB responses will now fail gracefully; thanks @andybee!
+
+
+### Changed
+
+- Updated dependencies
+
+---
+
 ## [3.2.2]
 
 ### Added
 
-- Development instructions in the README for those wanting to hack, test and iterate on sandbox locally.
+- Development instructions in the readme for those wanting to hack, test, and iterate on Sandbox locally
 
 ---
 
