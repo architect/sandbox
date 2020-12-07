@@ -2,23 +2,13 @@
  * Shared response validation utils
  */
 
+let { template } = require('../../../lib')
+let { head } = template
+
 let isBuffer = body => {
   if (body && body instanceof Buffer) return true
   return false
 }
-
-let head = `<head>
-  <style>
-    body {
-      font-family: sans-serif;
-    }
-    code, pre {
-      font-family: monospace;
-      color: #00c26e;
-    }
-  </style>
-</head>
-`
 
 let errors = {
   invalidType: (param, type) => `${head}<h1>Invalid response type</h1>

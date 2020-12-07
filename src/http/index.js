@@ -9,7 +9,7 @@ let chalk = require('chalk')
 
 // Local
 let { fingerprint } = require('@architect/utils')
-let { env, getPorts, checkPort, maybeHydrate } = require('../helpers')
+let { env, getPorts, checkPort, maybeHydrate } = require('../lib')
 let middleware = require('./middleware')
 let httpEnv = require('./_http-env')
 let hydrate = require('@architect/hydrate')

@@ -1,6 +1,8 @@
 let { updater } = require('@architect/utils')
 let { spawn } = require('child_process')
 let kill = require('tree-kill')
+let { template } = require('../lib')
+let { head } = template
 
 module.exports = function spawnChild (command, args, options, request, timeout, callback) {
   let cwd = options.cwd
@@ -32,11 +34,11 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
 
   // Ensure we don't have dangling processes due to open connections, etc.
   function maybeShutdown () {
-    if (closed) {null} // noop
+    if (closed) { null } // noop
     else {
       // Wait for 50ms for a proper close, otherwise assume the process is hung
       setTimeout(() => {
-        if (closed) {null} // Check one last time for graceful shutdown
+        if (closed) { null } // Check one last time for graceful shutdown
         else {
           if (error) {
             let update = updater('Sandbox')
@@ -82,7 +84,7 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
       callback(null, {
         statusCode: 500,
         headers,
-        body: `<h1>Timeout Error</h1>
+        body: `${head}<h1>Timeout Error</h1>
         <p>Lambda <code>${cwd}</code> timed out after <b>${timeout / 1000} seconds</b></p>`
       })
     }
@@ -90,7 +92,7 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
       callback(null, {
         statusCode: 502,
         headers,
-        body: `<h1>Requested function is missing or not defined, or unknown error</h1>
+        body: `${head}<h1>Requested function is missing or not defined, or unknown error</h1>
         <p>${error}</p>
         `
       })
@@ -112,7 +114,7 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
         let parsed = JSON.parse(raw)
         // If it's an error pretty print it
         if (parsed.name && parsed.message && parsed.stack) {
-          parsed.body = `
+          parsed.body = `${head}
           <h1>${parsed.name}</h1>
           <p>${parsed.message}</p>
           <pre>${parsed.stack}</pre>
@@ -127,7 +129,7 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
         callback(null, {
           statusCode: 500,
           headers,
-          body: `<h1>Async error</h1>
+          body: `${head}<h1>Async error</h1>
 <p><strong>Lambda <code>${cwd}</code> ran without executing the completion callback or returning a value.</strong></p>
 
 <p>Dependency-free functions, or functions that use <code>@architect/functions arc.http.async()</code> must return a correctly formatted response object.</p>
@@ -140,7 +142,14 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
       }
     }
     else {
-      callback(null, { headers, body: `<pre>${code}...${stdout}</pre><pre>${stderr}</pre>` })
+      callback(null, {
+        statusCode: 500,
+        headers,
+        body: `${head}<h1>Error</h1>
+        <p>Process exited with ${code}<p>
+        <pre>${stdout}</pre>
+        <pre>${stderr}</pre>`
+      })
     }
   }
 
@@ -148,20 +157,23 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
     // always capture data piped to stdout
     // python buffers so you might get everything despite our best efforts
     stdout += data
-    if (data.includes('__ARC_END__'))
+    if (data.includes('__ARC_END__')) {
       maybeShutdown()
+    }
   })
 
   child.stderr.on('data', data => {
     stderr += data
-    if (data.includes('__ARC_END__'))
+    if (data.includes('__ARC_END__')) {
       maybeShutdown()
+    }
   })
 
   child.on('error', err => {
     error = err
-    if (err.includes('__ARC_END__'))
+    if (err.includes('__ARC_END__')) {
       maybeShutdown()
+    }
   })
 
   child.on('close', function close (code) {

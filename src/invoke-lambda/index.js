@@ -9,20 +9,6 @@ let runInRuby = require('./run-in-ruby')
 let warn = require('./warn')
 let missingRuntime = require('./missing-runtime')
 
-let runtimes = {
-  'nodejs12.x': runInNode,
-  'nodejs10.x': runInNode,
-  'nodejs8.10': runInNode, // DEPRECATED by AWS Jan/Feb 2020; will retain Node 8 until ~mid 2020
-  'deno':       runInDeno,
-  'python3.8':  runInPython,
-  'python3.6':  runInPython,
-  'python3.7':  runInPython,
-  'ruby2.5':    runInRuby,
-  // 'go1.x': runInGo,
-  // 'dotnetcore2.1': runInDotNet,
-  // 'java8': runInJava,
-}
-
 /**
  * mocks a lambda.. not much to it eh!
  *
@@ -67,12 +53,18 @@ module.exports = function invokeLambda (lambda, event, callback) {
       let request = JSON.stringify(event)
       let { runtime, timeout } = lambda.config
 
-      if (!runtimes[runtime]) {
+      let exec
+      if (runtime.startsWith('nodejs')) exec = runInNode
+      if (runtime.startsWith('deno'))   exec = runInDeno
+      if (runtime.startsWith('python')) exec = runInPython
+      if (runtime.startsWith('ruby'))   exec = runInRuby
+
+      if (!exec) {
         missingRuntime(runtime, src)
         callback('Missing runtime')
         return
       }
-      runtimes[runtime](options, request, timeout * 1000, function done (err, result) {
+      exec(options, request, timeout * 1000, function done (err, result) {
         if (err) callback(err)
         else {
           let missing
@@ -80,7 +72,7 @@ module.exports = function invokeLambda (lambda, event, callback) {
             missing = result.__DEP_ISSUES__
             delete result.__DEP_ISSUES__
           }
-          warn(missing, src)
+          warn(missing)
           callback(null, result)
         }
       })

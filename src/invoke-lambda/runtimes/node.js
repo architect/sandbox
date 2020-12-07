@@ -28,7 +28,7 @@ process.stdin.on('close', () => {
     let loadedAtRoot = require.cache[rootPath] && require.cache[rootPath].loaded === true;
     let fnPath = join(cwd, 'node_modules', name);
     let availableInFn = require.cache[fnPath] && require.cache[fnPath].loaded === true;
-    if (loaded && notSubDep && loadedOutsideFunction && loadedAtRoot && !availableInFn) {
+    if (loaded && notSubDep && loadedOutsideFunction && !loadedAtRoot && !availableInFn) {
       name = name.substr(1).split('/');
       name = name[0].startsWith('@') ? name.slice(0,2).join('/') : name[0];
       missing.push(name);
