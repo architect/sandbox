@@ -2,6 +2,21 @@
 
 ---
 
+## [3.3.1] 2020-12-06
+
+### Changed
+
+- Update (and limit) out of bounds dependency warnings to take into account Hydrate autoinstall during deploy
+- Partially style error views
+- Internal change: move `src/helpers` to `src/lib`
+
+
+### Fixed
+
+- Fix formatting in unknown `@http` userland error state for,
+
+---
+
 ## [3.3.0] 2020-12-03
 
 ### Added
