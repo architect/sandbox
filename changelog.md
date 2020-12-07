@@ -13,7 +13,8 @@
 
 ### Fixed
 
-- Fix formatting in unknown `@http` userland error state for,
+- Fixed alternative handler file checks when using Deno; fixes #1022
+- Fixed formatting in unknown `@http` userland error state
 
 ---
 

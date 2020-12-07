@@ -17,9 +17,8 @@ let missingRuntime = require('./missing-runtime')
  * @param {function} callback - node style errback
  */
 module.exports = function invokeLambda (lambda, event, callback) {
-  let { src, handlerFile } = lambda
   // handlerFile is defined for all non-ASAP functions; ASAP bypasses this check
-  if (handlerFile && !existsSync(handlerFile)) {
+  if (!hasHandler(lambda)) {
     callback(Error('lambda_not_found'))
   }
   else {
@@ -32,6 +31,9 @@ module.exports = function invokeLambda (lambda, event, callback) {
       callback(err)
     }
     else {
+      let { src, config } = lambda
+      let { runtime, timeout } = config
+
       let defaults = {
         __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
         __ARC_CONFIG__: JSON.stringify({
@@ -51,7 +53,6 @@ module.exports = function invokeLambda (lambda, event, callback) {
         env: { ...process.env, ...defaults }
       }
       let request = JSON.stringify(event)
-      let { runtime, timeout } = lambda.config
 
       let exec
       if (runtime.startsWith('nodejs')) exec = runInNode
@@ -78,4 +79,29 @@ module.exports = function invokeLambda (lambda, event, callback) {
       })
     }
   }
+}
+
+// Handle multi-handler exploration here
+function hasHandler (lambda) {
+  let { src, handlerFile, _proxy } = lambda
+  // We don't need to do a handlerFile check if it's an ASAP / Arc 6 greedy root req
+  if (_proxy) return true
+  let { runtime } = lambda.config
+  if (runtime === 'deno') {
+    let found = false
+    let paths = [
+      join(src, 'index.js'),
+      join(src, 'mod.js'),
+      join(src, 'index.ts'),
+      join(src, 'mod.ts'),
+      join(src, 'index.tsx'),
+      join(src, 'mod.tsx'),
+    ]
+    paths.forEach(p => {
+      if (found) return
+      if (existsSync(p)) found = p
+    })
+    return found
+  }
+  else return handlerFile && existsSync(handlerFile)
 }

@@ -141,7 +141,8 @@ module.exports = function fallback (inventory, req, res, next) {
       lambda: {
         method,
         src,
-        config: inv._project.defaultFunctionConfig
+        config: inv._project.defaultFunctionConfig,
+        _proxy: true
       },
       apiType
     })
