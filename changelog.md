@@ -2,6 +2,14 @@
 
 ---
 
+## [-] 2020-12-12
+
+### Fixed
+
+- Fixed middleware handling `ARC_SANDBOX_ENABLE_CORS`; thanks @neilhoff!
+
+---
+
 ## [3.3.0] 2020-12-03
 
 ### Added
