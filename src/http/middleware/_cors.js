@@ -9,6 +9,7 @@ module.exports = function handleCors (req, res, next) {
       res.end()
       return
     }
+    else next()
   }
   else next()
 }

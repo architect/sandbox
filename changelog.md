@@ -15,6 +15,7 @@
 
 - Fixed alternative handler file checks when using Deno; fixes #1022
 - Fixed formatting in unknown `@http` userland error state
+- Fixed middleware handling `ARC_SANDBOX_ENABLE_CORS`; thanks @neilhoff!
 
 ---
 
