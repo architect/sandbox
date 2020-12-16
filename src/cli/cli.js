@@ -27,12 +27,9 @@ function port () {
   let findPort = option => [ '-p', '--port', 'port' ].includes(option)
   if (options && options.some(findPort)) {
     let thePort = i => options[options.indexOf(i) + 1]
-    if (options.includes('-p'))
-      port = thePort('-p')
-    else if (options.includes('--port'))
-      port = thePort('--port')
-    else if (options.includes('port'))
-      port = thePort('port')
+    if (options.includes('-p'))           port = thePort('-p')
+    else if (options.includes('--port'))  port = thePort('--port')
+    else if (options.includes('port'))    port = thePort('port')
   }
   return port
 }

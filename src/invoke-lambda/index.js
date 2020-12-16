@@ -62,8 +62,7 @@ module.exports = function invokeLambda (lambda, event, callback) {
 
       if (!exec) {
         missingRuntime(runtime, src)
-        callback('Missing runtime')
-        return
+        return callback('Missing runtime')
       }
       exec(options, request, timeout * 1000, function done (err, result) {
         if (err) callback(err)
@@ -73,7 +72,7 @@ module.exports = function invokeLambda (lambda, event, callback) {
             missing = result.__DEP_ISSUES__
             delete result.__DEP_ISSUES__
           }
-          warn(missing)
+          warn(missing, src)
           callback(null, result)
         }
       })

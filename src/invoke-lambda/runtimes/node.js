@@ -5,33 +5,37 @@ let {
 } = JSON.parse(process.env.__ARC_CONFIG__);
 let context = JSON.parse(process.env.__ARC_CONTEXT__);
 let { join } = require('path');
+let { existsSync } = require('fs');
 let handler = './' + handlerFile;
 let fn = require(handler)[handlerFunction];
+let cwd = process.cwd();
 
 let event = '';
 process.stdin.on('data', chunk => event += chunk);
 process.stdin.on('close', () => {
   event = JSON.parse(event);
 
-  let cwd = process.cwd();
+  let lambdaHasPackage = existsSync(join(cwd, 'package.json'));
   let missing = [];
   Object.keys(require.cache).forEach(mod => {
     let item = require.cache[mod];
-
     let loaded = item.loaded;
-    let notSubDep = item.parent && item.parent.id && !item.parent.id.includes('node_modules');
-
+    let isSubDep = item.parent && item.parent.id && item.parent.id.includes('node_modules');
     let name = item.filename.split('node_modules')[1];
-    if (!name) return;
-    let loadedOutsideFunction = !item.filename.startsWith(cwd);
+    if (!name || !loaded || isSubDep) return;
+
+    let loadedInsideLambda = item.filename.startsWith(cwd);
     let rootPath = join(projectSrc, 'node_modules', name);
     let loadedAtRoot = require.cache[rootPath] && require.cache[rootPath].loaded === true;
-    let fnPath = join(cwd, 'node_modules', name);
-    let availableInFn = require.cache[fnPath] && require.cache[fnPath].loaded === true;
-    if (loaded && notSubDep && loadedOutsideFunction && !loadedAtRoot && !availableInFn) {
-      name = name.substr(1).split('/');
-      name = name[0].startsWith('@') ? name.slice(0,2).join('/') : name[0];
-      missing.push(name);
+    name = name.substr(1).split('/');
+    name = name[0].startsWith('@') ? name.slice(0,2).join('/') : name[0];
+
+    /* Dependency warnings */
+    if (!loadedInsideLambda) {
+      /* Lambda has a package.json and its dep was loaded from root */
+      if (lambdaHasPackage)   return missing.push('lambda::' + name);
+      /* Lambda does NOT have a package.json and its dep was NOT loaded from root */
+      else if (!loadedAtRoot) return missing.push('root::' + name);
     }
   });
   if (missing.length) missing = [... new Set([...missing])];
