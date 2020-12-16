@@ -54,7 +54,7 @@ test('[Dependency warnings] Lambda has its own deps', t => {
     if (err) t.fail(err)
     else {
       console.log(data)
-      t.ok(data.includes(`Please run: cd ${process.cwd()}/src/http/get-deps_in_lambda`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-deps_in_lambda')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
       t.ok(!data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
       t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
       t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
@@ -73,7 +73,7 @@ test('[Dependency warnings] Deps are in root', t => {
     if (err) t.fail(err)
     else {
       console.log(data)
-      t.ok(!data.includes(`${process.cwd()}/src/http/get-deps_in_root`), 'Got a dep warning for the root (with instructions to install into the root)')
+      t.ok(!data.includes(join(process.cwd(), 'src', 'http', 'get-deps_in_root')), 'Got a dep warning for the root (with instructions to install into the root)')
       t.ok(data.includes('Please run: npm i'), 'Got instructions to install into the root')
       t.ok(!data.includes('root-dep'), 'Got a dep warning for a root dep')
       t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')

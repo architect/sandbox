@@ -4,7 +4,7 @@ let {
   handlerFunction,
 } = JSON.parse(process.env.__ARC_CONFIG__);
 let context = JSON.parse(process.env.__ARC_CONTEXT__);
-let { join } = require('path');
+let { join, sep } = require('path');
 let { existsSync } = require('fs');
 let handler = './' + handlerFile;
 let fn = require(handler)[handlerFunction];
@@ -27,7 +27,7 @@ process.stdin.on('close', () => {
     let loadedInsideLambda = item.filename.startsWith(cwd);
     let rootPath = join(projectSrc, 'node_modules', name);
     let loadedAtRoot = require.cache[rootPath] && require.cache[rootPath].loaded === true;
-    name = name.substr(1).split('/');
+    name = name.substr(1).split(sep);
     name = name[0].startsWith('@') ? name.slice(0,2).join('/') : name[0];
 
     /* Dependency warnings */
