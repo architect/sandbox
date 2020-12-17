@@ -19,12 +19,12 @@ module.exports = function fallback (inventory, req, res, next) {
   let method = req.method.toLowerCase()
 
   // Read all routes
-  let routes = inv.http
+  let routes = inv.http || []
   // Establish proxy
   let proxy = httpAPI && get.proxy('testing')
 
   // Tokenize all routes: [ ['get', '/'], ... ]
-  let tokens = inv.http.map(route => {
+  let tokens = routes.map(route => {
     let { method, path, arcStaticAssetProxy: asap } = route
     if (!asap) return [ method ].concat(path.split('/').filter(Boolean))
   }).filter(Boolean)
@@ -108,8 +108,7 @@ module.exports = function fallback (inventory, req, res, next) {
   }
   // ASAP – not supported by Arc <6, supported by Arc 6+
   else if (hasASAP) {
-    let { src } = get.http('get /*')
-    invokeProxy(src)
+    invokeProxy(inv._project.asapSrc)
   }
   // HTTP APIs can fall back to /:param (REST APIs cannot)
   else if (rootParam && httpAPI) {

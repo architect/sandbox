@@ -24,7 +24,7 @@ module.exports = function createHttpServer (inventory) {
   let isDefaultProject = !inv._project.manifest
   let arc = inv._project.arc
 
-  if (inv.http) {
+  if (inv.http || inv.static) {
     let app = Router({ mergeParams: true })
 
     app = middleware(app, inventory)
@@ -88,7 +88,9 @@ module.exports = function createHttpServer (inventory) {
 
         function _finalSetup (callback) {
           // Always register HTTP routes
-          registerHTTP({ app, routes: inv.http })
+          if (inv.http) {
+            registerHTTP({ app, routes: inv.http })
+          }
 
           // Create an actual server; how quaint!
           httpServer = http.createServer(function _request (req, res) {
