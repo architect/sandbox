@@ -87,19 +87,19 @@ module.exports = function createHttpServer (inventory) {
         },
 
         function _finalSetup (callback) {
-          // Always register HTTP routes
-          if (inv.http) {
-            registerHTTP({ app, routes: inv.http })
-          }
-
           // Create an actual server; how quaint!
           httpServer = http.createServer(function _request (req, res) {
             app(req, res, finalhandler(req, res))
           })
 
           // Bind WebSocket app to HTTP server
+          // This must be done before @http so it isn't clobbered by greedy routes
           if (inv.ws) {
             websocketServer = registerWS({ app, httpServer, inventory })
+          }
+
+          if (inv.http) {
+            registerHTTP({ app, routes: inv.http })
           }
 
           callback()
