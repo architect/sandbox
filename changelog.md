@@ -2,7 +2,7 @@
 
 ---
 
-## [3.3.1 - 3.3.2] 2020-12-06
+## [3.3.1 - 3.3.3] 2020-12-06
 
 ### Changed
 
@@ -16,7 +16,8 @@
 - Fixed alternative handler file checks when using Deno; fixes #1022
 - Fixed formatting in unknown `@http` userland error state
 - Fixed middleware handling `ARC_SANDBOX_ENABLE_CORS`; thanks @neilhoff!
-- Fixes serving bare `@static` (i.e. S3-only with no `@http`) apps; fixes #1031, thanks @dam!
+- Fixed serving bare `@static` (i.e. S3-only with no `@http`) apps; fixes #1031, thanks @dam!
+- Fixed issue where `any /*` could clobber the ability to send `@ws` messages locally; fixes #1039, thanks @mikemaccana!
 
 ---
 
