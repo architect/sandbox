@@ -9,20 +9,6 @@ let runInRuby = require('./run-in-ruby')
 let warn = require('./warn')
 let missingRuntime = require('./missing-runtime')
 
-let runtimes = {
-  'nodejs12.x': runInNode,
-  'nodejs10.x': runInNode,
-  'nodejs8.10': runInNode, // DEPRECATED by AWS Jan/Feb 2020; will retain Node 8 until ~mid 2020
-  'deno':       runInDeno,
-  'python3.8':  runInPython,
-  'python3.6':  runInPython,
-  'python3.7':  runInPython,
-  'ruby2.5':    runInRuby,
-  // 'go1.x': runInGo,
-  // 'dotnetcore2.1': runInDotNet,
-  // 'java8': runInJava,
-}
-
 /**
  * mocks a lambda.. not much to it eh!
  *
@@ -31,9 +17,8 @@ let runtimes = {
  * @param {function} callback - node style errback
  */
 module.exports = function invokeLambda (lambda, event, callback) {
-  let { src, handlerFile } = lambda
   // handlerFile is defined for all non-ASAP functions; ASAP bypasses this check
-  if (handlerFile && !existsSync(handlerFile)) {
+  if (!hasHandler(lambda)) {
     callback(Error('lambda_not_found'))
   }
   else {
@@ -46,6 +31,9 @@ module.exports = function invokeLambda (lambda, event, callback) {
       callback(err)
     }
     else {
+      let { src, config } = lambda
+      let { runtime, timeout } = config
+
       let defaults = {
         __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
         __ARC_CONFIG__: JSON.stringify({
@@ -65,14 +53,18 @@ module.exports = function invokeLambda (lambda, event, callback) {
         env: { ...process.env, ...defaults }
       }
       let request = JSON.stringify(event)
-      let { runtime, timeout } = lambda.config
 
-      if (!runtimes[runtime]) {
+      let exec
+      if (runtime.startsWith('nodejs')) exec = runInNode
+      if (runtime.startsWith('deno'))   exec = runInDeno
+      if (runtime.startsWith('python')) exec = runInPython
+      if (runtime.startsWith('ruby'))   exec = runInRuby
+
+      if (!exec) {
         missingRuntime(runtime, src)
-        callback('Missing runtime')
-        return
+        return callback('Missing runtime')
       }
-      runtimes[runtime](options, request, timeout * 1000, function done (err, result) {
+      exec(options, request, timeout * 1000, function done (err, result) {
         if (err) callback(err)
         else {
           let missing
@@ -86,4 +78,29 @@ module.exports = function invokeLambda (lambda, event, callback) {
       })
     }
   }
+}
+
+// Handle multi-handler exploration here
+function hasHandler (lambda) {
+  let { src, handlerFile, _proxy } = lambda
+  // We don't need to do a handlerFile check if it's an ASAP / Arc 6 greedy root req
+  if (_proxy) return true
+  let { runtime } = lambda.config
+  if (runtime === 'deno') {
+    let found = false
+    let paths = [
+      join(src, 'index.js'),
+      join(src, 'mod.js'),
+      join(src, 'index.ts'),
+      join(src, 'mod.ts'),
+      join(src, 'index.tsx'),
+      join(src, 'mod.tsx'),
+    ]
+    paths.forEach(p => {
+      if (found) return
+      if (existsSync(p)) found = p
+    })
+    return found
+  }
+  else return handlerFile && existsSync(handlerFile)
 }

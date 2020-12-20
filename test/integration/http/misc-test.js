@@ -3,7 +3,7 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { url, shutdown } = require('./_utils')
+let { checkHttpResult: checkResult, url, shutdown } = require('./_utils')
 
 let cwd = process.cwd()
 let mock = join(__dirname, '..', '..', 'mock')
@@ -244,9 +244,122 @@ test('[Env vars (.arc-env)] get /env', t => {
   })
 })
 
-test('[Misc] Teardown', t => {
-  t.plan(3)
+test('[Misc] Shut down Sandbox', t => {
+  t.plan(1)
   shutdown(t)
+})
+
+test('[Multiple possible handlers] Start Sandbox', t => {
+  t.plan(4)
+  process.chdir(join(mock, 'multihandler'))
+  sandbox.start({ quiet: true }, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+    }
+  })
+})
+
+test('[Multiple possible handlers] get /deno/index.js', t => {
+  t.plan(6)
+  let rawPath = '/deno/index.js'
+  tiny.get({
+    url: url + rawPath
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get /deno/index.js'
+      })
+    }
+  })
+})
+
+test('[Multiple possible handlers] get /deno/index.ts', t => {
+  t.plan(6)
+  let rawPath = '/deno/index.ts'
+  tiny.get({
+    url: url + rawPath
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get /deno/index.ts'
+      })
+    }
+  })
+})
+
+test('[Multiple possible handlers] get /deno/index.tsx', t => {
+  t.plan(6)
+  let rawPath = '/deno/index.tsx'
+  tiny.get({
+    url: url + rawPath
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get /deno/index.tsx'
+      })
+    }
+  })
+})
+
+test('[Multiple possible handlers] get /deno/mod.js', t => {
+  t.plan(6)
+  let rawPath = '/deno/mod.js'
+  tiny.get({
+    url: url + rawPath
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get /deno/mod.js'
+      })
+    }
+  })
+})
+
+test('[Multiple possible handlers] get /deno/mod.ts', t => {
+  t.plan(6)
+  let rawPath = '/deno/mod.ts'
+  tiny.get({
+    url: url + rawPath
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get /deno/mod.ts'
+      })
+    }
+  })
+})
+
+test('[Multiple possible handlers] get /deno/mod.tsx', t => {
+  t.plan(6)
+  let rawPath = '/deno/mod.tsx'
+  tiny.get({
+    url: url + rawPath
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      checkResult(t, result.body, {
+        message: 'Hello from get /deno/mod.tsx'
+      })
+    }
+  })
+})
+
+test('[Multiple possible handlers] Shut down Sandbox', t => {
+  t.plan(1)
+  shutdown(t)
+})
+
+test('Teardown', t => {
+  t.plan(2)
   delete process.env.ARC_API_TYPE
   process.chdir(cwd)
   t.notOk(process.env.ARC_API_TYPE, 'API type NOT set')

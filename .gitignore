@@ -2,6 +2,7 @@ __pycache__
 .nyc_output/
 coverage/
 node_modules/
+!test/mock/dep-warn/**/node_modules
 package-lock.json
 test/mock/*/src/*/*/vendor/
 test/mock/*/.db

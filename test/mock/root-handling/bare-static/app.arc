@@ -1,0 +1,4 @@
+@app
+mockapp
+
+@static

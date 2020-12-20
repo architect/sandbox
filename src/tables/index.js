@@ -1,4 +1,4 @@
-let { env, getPorts, checkPort } = require('../helpers')
+let { env, getPorts, checkPort } = require('../lib')
 let init = require('./_init')
 let dynalite = require('dynalite')
 let series = require('run-series')

@@ -1,4 +1,4 @@
-let { env, getPorts, checkPort, maybeHydrate } = require('../helpers')
+let { env, getPorts, checkPort, maybeHydrate } = require('../lib')
 let hydrate = require('@architect/hydrate')
 let _listener = require('./_listener')
 let http = require('http')

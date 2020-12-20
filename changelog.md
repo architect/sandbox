@@ -2,11 +2,21 @@
 
 ---
 
-## [-] 2020-12-12
+## [3.3.1] 2020-12-06
+
+### Changed
+
+- Update (and limit) out of bounds dependency warnings to take into account Hydrate autoinstall during deploy
+- Partially style error views
+- Internal change: move `src/helpers` to `src/lib`
+
 
 ### Fixed
 
+- Fixed alternative handler file checks when using Deno; fixes #1022
+- Fixed formatting in unknown `@http` userland error state
 - Fixed middleware handling `ARC_SANDBOX_ENABLE_CORS`; thanks @neilhoff!
+- Fixes serving bare `@static` (i.e. S3-only with no `@http`) apps; fixes #1031, thanks @dam!
 
 ---
 

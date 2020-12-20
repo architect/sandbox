@@ -5,7 +5,7 @@ let hydrate = require('@architect/hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
 let { chars } = require('@architect/utils')
-let { env, maybeHydrate } = require('../helpers')
+let { env, maybeHydrate } = require('../lib')
 let startupScripts = require('./_startup-scripts')
 
 module.exports = function _start (params, callback) {
@@ -110,7 +110,7 @@ module.exports = function _start (params, callback) {
       if (!dir.startsWith(cwd)) {
         let awsDir = join(dir.split('@architect')[0], 'aws-sdk', 'package.json')
         if (!exists(awsDir)) {
-          update.warn(`Possibly found a global install of Architect without a global install of AWS-SDK, please run: npm i -g aws-sdk`)
+          update.warn(`Possible global install of Architect without a global install of AWS-SDK, please run: npm i -g aws-sdk`)
         }
       }
       callback()

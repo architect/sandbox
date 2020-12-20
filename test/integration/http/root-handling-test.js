@@ -209,6 +209,42 @@ test('[REST mode] get / - ASAP', async t => {
 })
 
 /**
+ * Nothing dynamic in root, but only a bare @static - no @http
+ */
+test('[HTTP mode] get / - ASAP (@static only)', async t => {
+  t.plan(8)
+  await setup(t, 'http', 'bare-static')
+
+  let result = await tiny.get({ url })
+  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
+
+  await shutdownAsync(t)
+  teardown(t)
+})
+
+test('[HTTP v1.0 (REST) mode] get / - ASAP (@static only)', async t => {
+  t.plan(8)
+  await setup(t, 'httpv1', 'bare-static')
+
+  let result = await tiny.get({ url })
+  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
+
+  await shutdownAsync(t)
+  teardown(t)
+})
+
+test('[REST mode] get / - ASAP (@static only)', async t => {
+  t.plan(8)
+  await setup(t, 'rest', 'bare-static')
+
+  let result = await tiny.get({ url })
+  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
+
+  await shutdownAsync(t)
+  teardown(t)
+})
+
+/**
  * Root is greedy: retired for HTTP APIs in Arc 8, still available in REST mode
  */
 test('[HTTP mode] get / - greedy index', async t => {
