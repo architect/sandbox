@@ -2,6 +2,8 @@ let {
   projectSrc,
   handlerFile,
   handlerFunction,
+  shared,
+  views,
 } = JSON.parse(process.env.__ARC_CONFIG__);
 let context = JSON.parse(process.env.__ARC_CONTEXT__);
 let { join, sep } = require('path');
@@ -17,6 +19,7 @@ process.stdin.on('close', () => {
 
   let lambdaHasPackage = existsSync(join(cwd, 'package.json'));
   let missing = [];
+  /* let debug = [ { lambdaHasPackage, shared, views } ]; */
   Object.keys(require.cache).forEach(mod => {
     let item = require.cache[mod];
     let loaded = item.loaded;
@@ -25,6 +28,8 @@ process.stdin.on('close', () => {
     if (!name || !loaded || isSubDep) return;
 
     let loadedInsideLambda = item.filename.startsWith(cwd);
+    let loadedInsideShared = shared && shared.src && item.filename.startsWith(shared.src);
+    let loadedInsideViews = views && views.src && item.filename.startsWith(views.src);
     let rootPath = join(projectSrc, 'node_modules', name);
     let loadedAtRoot = require.cache[rootPath] && require.cache[rootPath].loaded === true;
     name = name.substr(1).split(sep);
@@ -32,8 +37,18 @@ process.stdin.on('close', () => {
 
     /* Dependency warnings */
     if (!loadedInsideLambda) {
+      /* debug.push({
+        filename: item.filename,
+        loadedInsideLambda,
+        loadedInsideShared,
+        loadedInsideViews,
+        rootPath,
+        loadedAtRoot,
+      }); */
+      /* Skip over shared / views dep paths */
+      if (loadedInsideShared || loadedInsideViews) return;
       /* Lambda has a package.json and its dep was loaded from root */
-      if (lambdaHasPackage)   return missing.push('lambda::' + name);
+      if (lambdaHasPackage) return missing.push('lambda::' + name);
       /* Lambda does NOT have a package.json and its dep was NOT loaded from root */
       else if (!loadedAtRoot) return missing.push('root::' + name);
     }
@@ -46,6 +61,7 @@ process.stdin.on('close', () => {
       ? { name: err.name, message: err.message, stack: err.stack }
       : result;
     if (payload) payload.__DEP_ISSUES__ = missing;
+    /* if (payload) payload.__DEP_DEBUG__ = debug; */
     console.log('__ARC__', JSON.stringify(payload), '__ARC_END__');
   }
 

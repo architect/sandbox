@@ -99,7 +99,7 @@ module.exports = function createHttpServer (inventory) {
           }
 
           if (inv.http) {
-            registerHTTP({ app, routes: inv.http })
+            registerHTTP({ app, routes: inv.http, inventory })
           }
 
           callback()

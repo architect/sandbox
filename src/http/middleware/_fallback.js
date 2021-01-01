@@ -116,7 +116,8 @@ module.exports = function fallback (inventory, req, res, next) {
     let lambda = get.http(name)
     let exec = invoker({
       lambda,
-      apiType
+      apiType,
+      inventory,
     })
     req.params = { [rootParam[1].substr(1)]: '' }
     exec(req, res)
@@ -143,7 +144,8 @@ module.exports = function fallback (inventory, req, res, next) {
         config: inv._project.defaultFunctionConfig,
         _proxy: true
       },
-      apiType
+      apiType,
+      inventory,
     })
     let proxy = pathname.startsWith('/') ? pathname.substr(1) : pathname
     req.params = { proxy }

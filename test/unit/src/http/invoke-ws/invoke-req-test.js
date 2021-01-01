@@ -1,7 +1,7 @@
 let test = require('tape')
 let proxyquire = require('proxyquire')
-function lambdaStub (lambda, req, callback) {
-  callback(null, { lambda, req })
+function lambdaStub (params, callback) {
+  callback(null, params)
 }
 
 let invoke = proxyquire('../../../../../src/http/invoke-ws', {
@@ -20,7 +20,7 @@ test('Internal WebSocket events: no req, no body', t => {
   }
   invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
-    let { lambda, req } = result
+    let { lambda, event: req } = result
     t.deepEqual(params.lambda, lambda, match('Lambda', lambda))
     t.equal(connectionId, req.requestContext.connectionId, match('connectionId', req.requestContext.connectionId))
     t.notOk(req.isBase64Encoded, 'isBase64Encoded set to false')
@@ -41,7 +41,7 @@ test('Internal WebSocket events: body (WS message), no req', t => {
   }
   invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
-    let { lambda, req } = result
+    let { lambda, event: req } = result
     t.deepEqual(params.lambda, lambda, match('Lambda', lambda))
     t.equal(connectionId, req.requestContext.connectionId, match('connectionId', req.requestContext.connectionId))
     t.equal(body, req.body, match('body', req.body))
@@ -63,7 +63,7 @@ test('WebSocket connect / disconnect event: get /', t => {
   }
   invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
-    let { lambda, req } = result
+    let { lambda, event: req } = result
     t.deepEqual(params.lambda, lambda, match('Lambda', lambda))
     t.equal(connectionId, req.requestContext.connectionId, match('connectionId', req.requestContext.connectionId))
     t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))
@@ -83,7 +83,7 @@ test('WebSocket connect / disconnect event: get /?whats=up', t => {
   }
   invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
-    let { lambda, req } = result
+    let { lambda, event: req } = result
     t.deepEqual(params.lambda, lambda, match('Lambda', lambda))
     t.equal(connectionId, req.requestContext.connectionId, match('connectionId', req.requestContext.connectionId))
     t.equal(str(request.headers), str(req.headers), match(`req.headers`, req.headers))

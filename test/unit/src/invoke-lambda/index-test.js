@@ -2,7 +2,7 @@ let { join } = require('path')
 let proxyquire = require('proxyquire')
 let sinon = require('sinon')
 let test = require('tape')
-let inventory = require('@architect/inventory')
+let _inventory = require('@architect/inventory')
 let cwd = process.cwd()
 let mock = join(__dirname, '..', '..', '..', 'mock')
 
@@ -18,6 +18,7 @@ let invoke = proxyquire('../../../../src/invoke-lambda', {
   './run-in-deno': denoFake
 })
 let event = { something: 'happened' }
+let inventory = { inv: {} }
 let inv
 let get
 
@@ -25,7 +26,7 @@ test('Set up env', t => {
   t.plan(3)
   process.chdir(join(mock, 'normal'))
   t.ok(invoke, 'Got invoke')
-  inventory({}, function (err, result) {
+  _inventory({}, function (err, result) {
     if (err) t.fail(err)
     else {
       inv = result.inv
@@ -42,7 +43,7 @@ test('Test runtime invocations', t => {
 
   lambda = get.http('get /')
 
-  invoke(lambda, event, (err, { options, request, timeout }) => {
+  invoke({ lambda, event, inventory }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
     t.equals(options.cwd, lambda.src, 'Default runtime passed correct path')
     t.equals(timeout, 5000, 'Default runtime ran with correct timeout')
@@ -50,7 +51,7 @@ test('Test runtime invocations', t => {
   })
 
   lambda = get.http('get /nodejs12.x')
-  invoke(lambda, event, (err, { options, request, timeout }) => {
+  invoke({ lambda, event, inventory }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
     t.equals(options.cwd, lambda.src, 'nodejs12.x passed correct path')
     t.equals(timeout, 12000, 'nodejs12.x ran with correct timeout')
@@ -58,7 +59,7 @@ test('Test runtime invocations', t => {
   })
 
   lambda = get.http('get /nodejs10.x')
-  invoke(lambda, event, (err, { options, request, timeout }) => {
+  invoke({ lambda, event, inventory }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
     t.equals(options.cwd, lambda.src, 'nodejs10.x passed correct path')
     t.equals(timeout, 10000, 'nodejs10.x ran with correct timeout')
@@ -66,7 +67,7 @@ test('Test runtime invocations', t => {
   })
 
   lambda = get.http('get /nodejs8.10')
-  invoke(lambda, event, (err, { options, request, timeout }) => {
+  invoke({ lambda, event, inventory }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
     t.equals(options.cwd, lambda.src, 'nodejs8.10 passed correct path')
     t.equals(timeout, 810000, 'nodejs8.10 ran with correct timeout')
@@ -74,7 +75,7 @@ test('Test runtime invocations', t => {
   })
 
   lambda = get.http('get /python3.8')
-  invoke(lambda, event, (err, { options, request, timeout }) => {
+  invoke({ lambda, event, inventory }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
     t.equals(options.cwd, lambda.src, 'python3.8 passed correct path')
     t.equals(timeout, 38000, 'python3.8 ran with correct timeout')
@@ -82,7 +83,7 @@ test('Test runtime invocations', t => {
   })
 
   lambda = get.http('get /python3.7')
-  invoke(lambda, event, (err, { options, request, timeout }) => {
+  invoke({ lambda, event, inventory }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
     t.equals(options.cwd, lambda.src, 'python3.7 passed correct path')
     t.equals(timeout, 37000, 'python3.7 ran with correct timeout')
@@ -90,7 +91,7 @@ test('Test runtime invocations', t => {
   })
 
   lambda = get.http('get /python3.6')
-  invoke(lambda, event, (err, { options, request, timeout }) => {
+  invoke({ lambda, event, inventory }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
     t.equals(options.cwd, lambda.src, 'python3.6 passed correct path')
     t.equals(timeout, 36000, 'python3.6 ran with correct timeout')
@@ -98,7 +99,7 @@ test('Test runtime invocations', t => {
   })
 
   lambda = get.http('get /ruby2.5')
-  invoke(lambda, event, (err, { options, request, timeout }) => {
+  invoke({ lambda, event, inventory }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
     t.equals(options.cwd, lambda.src, 'ruby2.5 passed correct path')
     t.equals(timeout, 25000, 'ruby2.5 ran with correct timeout')
@@ -106,7 +107,7 @@ test('Test runtime invocations', t => {
   })
 
   lambda = get.http('get /deno')
-  invoke(lambda, event, (err, { options, request, timeout }) => {
+  invoke({ lambda, event, inventory }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
     t.equals(options.cwd, lambda.src, 'deno passed correct path')
     t.equals(timeout, 10000, 'deno ran with correct timeout')
@@ -128,22 +129,27 @@ test('Test body size limits', t => {
   let blobby = size => Array(size).fill('a').join('')
   let snsify = str => ({ Records: [ { Sns: { Message: JSON.stringify(str) } } ] })
   let lambda
+  let event
 
   lambda = get.http('post /post')
-  invoke(lambda, { body: blobby(6000001) }, (err) => {
+  event = { body: blobby(6000001) }
+  invoke({ lambda, event, inventory }, (err) => {
     t.ok(err instanceof Error, 'POST: > 6MB request bodies return an error')
     console.log(err.message)
   })
-  invoke(lambda, { body: blobby(10) }, (err) => {
+  event = { body: blobby(10) }
+  invoke({ lambda, event, inventory }, (err) => {
     t.notOk(err instanceof Error, 'POST: sub 6MB request bodies are fine')
   })
 
   lambda = get.events('event-normal')
-  invoke(lambda, snsify(blobby(6000001)), (err) => {
+  event = snsify(blobby(6000001))
+  invoke({ lambda, event, inventory }, (err) => {
     t.ok(err instanceof Error, 'Event: > 6MB request bodies return an error')
     console.log(err.message)
   })
-  invoke(lambda, snsify(blobby(10)), (err) => {
+  event = snsify(blobby(10))
+  invoke({ lambda, event, inventory }, (err) => {
     t.notOk(err instanceof Error, 'Event: sub 6MB request bodies are fine')
   })
 })

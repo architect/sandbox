@@ -2,6 +2,14 @@
 
 ---
 
+## [-] 2021-01-01
+
+### Fixed
+
+- Fixed false positive dependency warnings when Lambda treeshaking encounters a `shared` or `views` directory with its own package.json file and dependencies
+
+---
+
 ## [3.3.1 - 3.3.3] 2020-12-06
 
 ### Changed

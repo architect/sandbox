@@ -1,10 +1,11 @@
 let pool = require('./pool')
 
-module.exports = function send (req, res) {
+module.exports = function send (inventory, req, res) {
   try {
     let ws = pool.getConnection(req.body.id)
     if (ws) {
-      ws.send(JSON.stringify(req.body.payload))
+      let payload = { ...req.body.payload, inventory }
+      ws.send(JSON.stringify(payload))
     }
     else {
       let e = Error('GoneException: 410')

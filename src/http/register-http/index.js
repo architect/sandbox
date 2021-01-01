@@ -2,7 +2,7 @@ let { updater } = require('@architect/utils')
 let log = require('./pretty-print-route')
 let invoker = require('../invoke-http')
 
-module.exports = function reg ({ app, routes }) {
+module.exports = function reg ({ app, routes, inventory }) {
   let apiType = process.env.ARC_API_TYPE
   let deprecated = process.env.DEPRECATED
   let msgs = {
@@ -29,7 +29,7 @@ module.exports = function reg ({ app, routes }) {
         // Pretty print the route reg
         log({ method, path, src })
         // Register the route with the Router instance
-        let exec = invoker({ lambda, apiType })
+        let exec = invoker({ lambda, apiType, inventory })
         app[method](path, exec)
       }
     }
@@ -38,7 +38,7 @@ module.exports = function reg ({ app, routes }) {
       log({ method, path, src })
 
       // Register the route with the Router instance
-      let exec = invoker({ lambda, apiType })
+      let exec = invoker({ lambda, apiType, inventory })
       if (method !== 'any') {
         app[method](path, exec)
       }

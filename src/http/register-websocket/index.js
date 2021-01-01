@@ -15,7 +15,8 @@ module.exports = function registerWebSocket ({ app, httpServer, inventory }) {
   wss.on('connection', connection)
 
   // Listen for arc.ws.send invocations
-  app.post('/__arc', sends)
+  let send = sends.bind({}, inventory)
+  app.post('/__arc', send)
 
   return wss
 }
