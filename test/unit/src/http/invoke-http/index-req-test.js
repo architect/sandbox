@@ -9,6 +9,7 @@ let invoke = proxyquire(sut, {
 })
 let { arc7, arc6, arc5, headers } = require('../http-req-fixtures')
 
+let inventory = { inv: {} }
 lambdaStub.yields(null, {})
 
 function apiGwHeaders (headers, v5) {
@@ -88,7 +89,7 @@ test('Architect v7 (HTTP API mode): get /', t => {
   let path = '/'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -97,7 +98,7 @@ test('Architect v7 (HTTP API mode): get /', t => {
   }
   handler(input, response)
   // Compare handler-generated request to mock
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -108,7 +109,7 @@ test('Architect v7 (HTTP API mode): get /?whats=up', t => {
   let path = '/'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -116,7 +117,7 @@ test('Architect v7 (HTTP API mode): get /?whats=up', t => {
     params: {}
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -127,7 +128,7 @@ test('Architect v7 (HTTP API mode): get /?whats=up&whats=there', t => {
   let path = '/'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('?whats=up&whats=there'),
     body: {},
@@ -135,7 +136,7 @@ test('Architect v7 (HTTP API mode): get /?whats=up&whats=there', t => {
     params: {}
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -146,7 +147,7 @@ test('Architect v7 (HTTP API mode): get /nature/hiking', t => {
   let path = '/nature/:activities'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -154,7 +155,7 @@ test('Architect v7 (HTTP API mode): get /nature/hiking', t => {
     params: mock.pathParameters
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -165,7 +166,7 @@ test('Architect v7 (HTTP API mode): get /{proxy+}', t => {
   let path = '/*'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -173,7 +174,7 @@ test('Architect v7 (HTTP API mode): get /{proxy+}', t => {
     params: { '0': mock.pathParameters.proxy }
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -184,7 +185,7 @@ test('Architect v7 (HTTP API mode): get /path/* (/path/hi/there)', t => {
   let path = '/path/*'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/path/hi/there'),
     body: {},
@@ -192,7 +193,7 @@ test('Architect v7 (HTTP API mode): get /path/* (/path/hi/there)', t => {
     params: { '0': mock.pathParameters.proxy }
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -203,7 +204,7 @@ test('Architect v7 (HTTP API mode): get /:activities/{proxy+} (/nature/hiking/wi
   let path = '/:activities/*'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/nature/hiking/wilderness'),
     body: {},
@@ -214,7 +215,7 @@ test('Architect v7 (HTTP API mode): get /:activities/{proxy+} (/nature/hiking/wi
     }
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -225,7 +226,7 @@ test('Architect v7 (HTTP API mode): post /form (JSON)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -234,7 +235,7 @@ test('Architect v7 (HTTP API mode): post /form (JSON)', t => {
     isBase64Encoded: false // Assumes flag is set in binary handler
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -245,7 +246,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', 
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -254,7 +255,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', 
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -265,7 +266,7 @@ test('Architect v7 (HTTP API mode): post /form (multipart form data)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -274,7 +275,7 @@ test('Architect v7 (HTTP API mode): post /form (multipart form data)', t => {
     isBase64Encoded: true // Assumes flag is set in binary handler
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -285,7 +286,7 @@ test('Architect v7 (HTTP API mode): post /form (octet stream)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -294,7 +295,7 @@ test('Architect v7 (HTTP API mode): post /form (octet stream)', t => {
     isBase64Encoded: true // Assumes flag is set in binary handler
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -305,7 +306,7 @@ test('Architect v7 (HTTP API mode): put /form (JSON)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -314,7 +315,7 @@ test('Architect v7 (HTTP API mode): put /form (JSON)', t => {
     isBase64Encoded: false // Assumes flag is set in binary handler
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -325,7 +326,7 @@ test('Architect v7 (HTTP API mode): patch /form (JSON)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -334,7 +335,7 @@ test('Architect v7 (HTTP API mode): patch /form (JSON)', t => {
     isBase64Encoded: false // Assumes flag is set in binary handler
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -345,7 +346,7 @@ test('Architect v7 (HTTP API mode): delete /form (JSON)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'http'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -354,7 +355,7 @@ test('Architect v7 (HTTP API mode): delete /form (JSON)', t => {
     isBase64Encoded: false // Assumes flag is set in binary handler
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV7HttpResult(mock, req, t)
 })
 
@@ -417,7 +418,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /', t => {
   let path = '/'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -426,7 +427,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /', t => {
   }
   handler(input, response)
   // Compare handler-generated request to mock
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -438,7 +439,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /?whats=up', t => {
   let path = '/'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -446,7 +447,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /?whats=up', t => {
     params: {}
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -458,7 +459,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /?whats=up&whats=there', t =
   let path = '/'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('?whats=up&whats=there'),
     body: {},
@@ -466,7 +467,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /?whats=up&whats=there', t =
     params: {}
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -478,7 +479,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /nature/hiking', t => {
   let path = '/nature/:activities'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -486,7 +487,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /nature/hiking', t => {
     params: mock.pathParameters
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -498,7 +499,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /{proxy+}', t => {
   let path = '/*'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -506,7 +507,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /{proxy+}', t => {
     params: { '0': mock.pathParameters.proxy }
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -518,7 +519,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /path/* (/path/hi/there)', t
   let path = '/path/*'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/path/hi/there'),
     body: {},
@@ -526,7 +527,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /path/* (/path/hi/there)', t
     params: { '0': mock.pathParameters.proxy }
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -538,7 +539,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /:activities/{proxy+} (/natu
   let path = '/:activities/*'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/nature/hiking/wilderness'),
     body: {},
@@ -549,7 +550,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /:activities/{proxy+} (/natu
     }
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -561,7 +562,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (JSON)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -570,7 +571,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (JSON)', t => {
     isBase64Encoded: true // Assumes flag is set in binary handler
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -582,7 +583,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', 
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -591,7 +592,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', 
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -603,7 +604,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (multipart form data)
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -612,7 +613,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (multipart form data)
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -624,7 +625,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (octet stream)', t =>
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -633,7 +634,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (octet stream)', t =>
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -645,7 +646,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): put /form (JSON)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -654,7 +655,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): put /form (JSON)', t => {
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -666,7 +667,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): patch /form (JSON)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -675,7 +676,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): patch /form (JSON)', t => {
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -687,7 +688,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): delete /form (JSON)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'httpv1'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -696,7 +697,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): delete /form (JSON)', t => {
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -712,7 +713,7 @@ test('Architect v6 (REST API mode): get /', t => {
   let path = '/'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -721,7 +722,7 @@ test('Architect v6 (REST API mode): get /', t => {
   }
   handler(input, response)
   // Compare handler-generated request to mock
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -733,7 +734,7 @@ test('Architect v6 (REST API mode): get /?whats=up', t => {
   let path = '/'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -741,7 +742,7 @@ test('Architect v6 (REST API mode): get /?whats=up', t => {
     params: {}
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -753,7 +754,7 @@ test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
   let path = '/'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('?whats=up&whats=there'),
     body: {},
@@ -761,7 +762,7 @@ test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
     params: {}
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -773,7 +774,7 @@ test('Architect v6 (REST API mode): get /nature/hiking', t => {
   let path = '/nature/:activities'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -781,7 +782,7 @@ test('Architect v6 (REST API mode): get /nature/hiking', t => {
     params: mock.pathParameters
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -794,7 +795,7 @@ test('Architect v6 (REST API mode): get /{proxy+}', t => {
   let path = '/' // Would normally be /*
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/nature/hiking'),
     resource: '/{proxy+}', // The only time we should be using this
@@ -803,7 +804,7 @@ test('Architect v6 (REST API mode): get /{proxy+}', t => {
     params: mock.pathParameters // Would normally be { '0': ... }
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -815,7 +816,7 @@ test('Architect v6 (REST API mode): post /form (JSON)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -824,7 +825,7 @@ test('Architect v6 (REST API mode): post /form (JSON)', t => {
     isBase64Encoded: true // Assumes flag is set in binary handler
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -836,7 +837,7 @@ test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -845,7 +846,7 @@ test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -857,7 +858,7 @@ test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -866,7 +867,7 @@ test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -878,7 +879,7 @@ test('Architect v6 (REST API mode): post /form (octet stream)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -887,7 +888,7 @@ test('Architect v6 (REST API mode): post /form (octet stream)', t => {
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -899,7 +900,7 @@ test('Architect v6 (REST API mode): put /form (JSON)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -908,7 +909,7 @@ test('Architect v6 (REST API mode): put /form (JSON)', t => {
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -920,7 +921,7 @@ test('Architect v6 (REST API mode): patch /form (JSON)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -929,7 +930,7 @@ test('Architect v6 (REST API mode): patch /form (JSON)', t => {
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -941,7 +942,7 @@ test('Architect v6 (REST API mode): delete /form (JSON)', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/form'),
     body: mock.body,
@@ -950,7 +951,7 @@ test('Architect v6 (REST API mode): delete /form (JSON)', t => {
     isBase64Encoded: true
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV6RestResult(params, mock, req, t)
 })
 
@@ -991,7 +992,7 @@ test('Architect v5 (REST API mode): get /', t => {
   let path = '/'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url(), // Set by `router` (interpolated, API passes path param)
     body: {},   // {} set by `body-parser` (Arc 5 == {}, Arc 6 == null)
@@ -1000,7 +1001,7 @@ test('Architect v5 (REST API mode): get /', t => {
   }
   handler(input, response)
   // Compare handler-generated request to mock
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV5RestResult(params, mock, req, t)
 })
 
@@ -1013,7 +1014,7 @@ test('Architect v5 (REST API mode): get /?whats=up', t => {
   let path = '/'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('?whats=up'),
     body: {},
@@ -1021,7 +1022,7 @@ test('Architect v5 (REST API mode): get /?whats=up', t => {
     params: {}
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV5RestResult(params, mock, req, t)
 })
 
@@ -1034,7 +1035,7 @@ test('Architect v5 (REST API mode): get /nature/hiking', t => {
   let path = '/nature/:activities'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url('/nature/hiking'),
     body: {},
@@ -1042,7 +1043,7 @@ test('Architect v5 (REST API mode): get /nature/hiking', t => {
     params: mock.params
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV5RestResult(params, mock, req, t)
 })
 
@@ -1055,7 +1056,7 @@ test('Architect v5 (REST API mode): post /form (JSON / form URL-encoded)', t => 
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url(path),
     body: mock.body,
@@ -1063,7 +1064,7 @@ test('Architect v5 (REST API mode): post /form (JSON / form URL-encoded)', t => 
     params: {}
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV5RestResult(params, mock, req, t)
 })
 
@@ -1076,7 +1077,7 @@ test('Architect v5 (REST API mode): post /form (multipart form data-encoded)', t
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url(path),
     body: mock.body,
@@ -1084,7 +1085,7 @@ test('Architect v5 (REST API mode): post /form (multipart form data-encoded)', t
     params: {}
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV5RestResult(params, mock, req, t)
 })
 
@@ -1097,7 +1098,7 @@ test('Architect v5 (REST API mode): put /form', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url(path),
     body: mock.body,
@@ -1105,7 +1106,7 @@ test('Architect v5 (REST API mode): put /form', t => {
     params: {}
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV5RestResult(params, mock, req, t)
 })
 
@@ -1118,7 +1119,7 @@ test('Architect v5 (REST API mode): patch /form', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url(path),
     body: mock.body,
@@ -1126,7 +1127,7 @@ test('Architect v5 (REST API mode): patch /form', t => {
     params: {}
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV5RestResult(params, mock, req, t)
 })
 
@@ -1139,7 +1140,7 @@ test('Architect v5 (REST API mode): delete /form', t => {
   let path = '/form'
   let lambda = { method, path }
   let apiType = 'rest'
-  let handler = invoke({ lambda, apiType })
+  let handler = invoke({ lambda, apiType, inventory })
   let input = {
     url: url(path),
     body: mock.body,
@@ -1147,6 +1148,6 @@ test('Architect v5 (REST API mode): delete /form', t => {
     params: {}
   }
   handler(input, response)
-  let req = lambdaStub.args[0][1]
+  let req = lambdaStub.args[0][0].event
   checkArcV5RestResult(params, mock, req, t)
 })

@@ -23,6 +23,7 @@ module.exports = function eventBusListener (inventory, req, res) {
 
   req.on('end', () => {
     let message = JSON.parse(body)
+    message.inventory = inventory
 
     // @queues
     if (url === '/queues') {

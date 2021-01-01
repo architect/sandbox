@@ -1,8 +1,8 @@
 let invoke = require('../invoke-lambda')
 
 process.on('message', function msg (message) {
-  let { lambda } = message
-  invoke(lambda, mock(message), function snap (err) {
+  let { lambda, inventory } = message
+  invoke({ lambda, event: mock(message), inventory }, function snap (err) {
     let text
     if (err && err.message === 'lambda_not_found') {
       text = `@${message.arcType} ${message.name} missing Lambda handler file\n` +

@@ -16,7 +16,8 @@ let missingRuntime = require('./missing-runtime')
  * @param {object} event - HTTP / event payload to invoke lambda function with
  * @param {function} callback - node style errback
  */
-module.exports = function invokeLambda (lambda, event, callback) {
+module.exports = function invokeLambda (params, callback) {
+  let { lambda, event, inventory } = params
   // handlerFile is defined for all non-ASAP functions; ASAP bypasses this check
   if (!hasHandler(lambda)) {
     callback(Error('lambda_not_found'))
@@ -40,6 +41,8 @@ module.exports = function invokeLambda (lambda, event, callback) {
           projectSrc: process.cwd(),
           handlerFile: 'index',
           handlerFunction: 'handler',
+          shared: inventory.inv.shared,
+          views: inventory.inv.views,
         }),
         PYTHONUNBUFFERED: true,
         PYTHONPATH: join(src, 'vendor'),
@@ -72,6 +75,12 @@ module.exports = function invokeLambda (lambda, event, callback) {
             missing = result.__DEP_ISSUES__
             delete result.__DEP_ISSUES__
           }
+          // Dependency warning debugger - handy for introspection during Lambda execution
+          // Maybe introduce with a proper --debug flag?
+          /* if (result && result.__DEP_DEBUG__) {
+            console.log('Dependencies (debug)', result.__DEP_DEBUG__)
+            delete result.__DEP_DEBUG__
+          } */
           warn(missing, src)
           callback(null, result)
         }
