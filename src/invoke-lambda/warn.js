@@ -3,12 +3,20 @@ let { updater } = require('@architect/utils')
 /**
  * Warn the user if node has resolved a dependency outside their function's folder
  */
-module.exports = function warn (missing = [], src) {
+module.exports = function warn (params) {
+  let { missing = [], inventory, src } = params
   if (missing.length) {
-    let type
-    if (missing[0].startsWith('lambda::')) type = 'lambda'
-    if (missing[0].startsWith('root::')) type = 'root'
-    missing = missing.map(m => m.split('::')[1])
+    let dirs = {
+      lambda: src,
+      shared: inventory.inv.shared && inventory.inv.shared.src,
+      views: inventory.inv.views && inventory.inv.views.src,
+    }
+    let deps = {}
+    missing.forEach(m => {
+      let bits = m.split('::')
+      if (!deps[bits[0]]) deps[bits[0]] = [ bits[1] ]
+      else deps[bits[0]].push(bits[1])
+    })
 
     // Remove AWS-SDK, that's bundled in Lambda
     let awsSdk = missing.findIndex(dep => dep === 'aws-sdk')
@@ -20,12 +28,13 @@ module.exports = function warn (missing = [], src) {
       let update = updater('Sandbox')
       let plural = missing.length > 1
 
-      update.warn(`Your function may have ${plural ? 'dependencies' : 'a dependency'} that could be inaccessible in production`)
-      let msg
-      if (type === 'lambda') msg = `cd ${src} && npm i ${missing.join(' ')}`
-      if (type === 'root') msg = `npm i ${missing.join(' ')}`
-      let instructions = `Please run: ${msg}`
-      update.status(null, instructions)
+      update.warn(`Your may have ${plural ? 'dependencies' : 'a dependency'} that could be inaccessible in production`)
+      let run = msg => `Please run: ${msg}`
+      let instructions = Object.entries(deps).map(([ type, deps ]) => {
+        if (type === 'root') return run(`npm i ${deps.join(' ')}`)
+        else return run(`cd ${dirs[type]} && npm i ${deps.join(' ')}`)
+      })
+      update.status(null, ...instructions)
     }
   }
 }

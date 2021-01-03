@@ -78,10 +78,11 @@ module.exports = function invokeLambda (params, callback) {
           // Dependency warning debugger - handy for introspection during Lambda execution
           // Maybe introduce with a proper --debug flag?
           /* if (result && result.__DEP_DEBUG__) {
-            console.log('Dependencies (debug)', result.__DEP_DEBUG__)
+            console.log('Dependencies (debug)')
+            console.dir(result.__DEP_DEBUG__, { depth: null })
             delete result.__DEP_DEBUG__
           } */
-          warn(missing, src)
+          warn({ missing, inventory, src })
           callback(null, result)
         }
       })

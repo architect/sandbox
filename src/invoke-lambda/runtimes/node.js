@@ -1,3 +1,4 @@
+/* eslint-disable semi */
 let {
   projectSrc,
   handlerFile,
@@ -7,7 +8,7 @@ let {
 } = JSON.parse(process.env.__ARC_CONFIG__);
 let context = JSON.parse(process.env.__ARC_CONTEXT__);
 let { join, sep } = require('path');
-let { existsSync } = require('fs');
+let { existsSync: exists, readFileSync: read } = require('fs');
 let handler = './' + handlerFile;
 let fn = require(handler)[handlerFunction];
 let cwd = process.cwd();
@@ -17,45 +18,92 @@ process.stdin.on('data', chunk => event += chunk);
 process.stdin.on('close', () => {
   event = JSON.parse(event);
 
-  let lambdaHasPackage = existsSync(join(cwd, 'package.json'));
+  /* Enumerate package files */
+  let pkg = dir => exists(join(dir, 'package.json')) && JSON.parse(read(join(dir, 'package.json')));
+  let lambdaPackage = pkg(cwd);
+  let sharedPackage = shared && pkg(shared.src);
+  let viewsPackage = views && pkg(views.src);
+
   let missing = [];
-  /* let debug = [ { lambdaHasPackage, shared, views } ]; */
+  let warn = {
+    shared: name => missing.push('shared::' + name),
+    views: name => missing.push('views::' + name),
+    lambda: name => missing.push('lambda::' + name),
+    root: name => missing.push('root::' + name),
+  };
+  /* let debug = [ { cwd, lambdaPackage, shared, sharedPackage, views, viewsPackage } ]; */
+
+  /* Iterate through the require cache looking for dependency issues */
   Object.keys(require.cache).forEach(mod => {
     let item = require.cache[mod];
     let loaded = item.loaded;
-    let isSubDep = item.parent && item.parent.id && item.parent.id.includes('node_modules');
+    let parent = item.parent;
+    let isSubDep = parent && parent.id.includes('node_modules');
     let name = item.filename.split('node_modules')[1];
     if (!name || !loaded || isSubDep) return;
 
+    /* Userland package.json files exist */
+    let loadedInsideShared = shared && parent && parent.filename.startsWith(shared.src);
+    let loadedInsideViews = views && parent && parent.filename.startsWith(views.src);
     let loadedInsideLambda = item.filename.startsWith(cwd);
-    let loadedInsideShared = shared && shared.src && item.filename.startsWith(shared.src);
-    let loadedInsideViews = views && views.src && item.filename.startsWith(views.src);
     let rootPath = join(projectSrc, 'node_modules', name);
-    let loadedAtRoot = require.cache[rootPath] && require.cache[rootPath].loaded === true;
-    name = name.substr(1).split(sep);
-    name = name[0].startsWith('@') ? name.slice(0,2).join('/') : name[0];
+    let loadedInsideRoot = require.cache[rootPath] && require.cache[rootPath].loaded === true;
 
-    /* Dependency warnings */
+    /* Userland package.json files do not exist */
+    let loadedViaShared = shared && item.filename.startsWith(shared.src);
+    let loadedViaViews = views && item.filename.startsWith(views.src);
+
+    /* Final dep name */
+    name = name.substr(1).split(sep);
+    name = name[0].startsWith('@') ? name.slice(0, 2).join('/') : name[0];
+
+    /* debug.push({
+      name,
+      filename: item.filename,
+      parent: item.parent.id,
+      parentPath: item.parent.path,
+      loadedInsideShared,
+      loadedInsideViews,
+      loadedInsideLambda,
+      rootPath,
+      loadedInsideRoot,
+      loadedViaShared,
+      loadedViaViews,
+    }); */
+
+    /**
+     * Dependency warning time
+     */
+    /* Shared deps */
+    let missingSharedDep = sharedPackage && (!sharedPackage.dependencies || !sharedPackage.dependencies[name]);
+    if (loadedInsideShared && missingSharedDep) return warn.shared(name);
+
+    let missingViewsDep = viewsPackage && (!viewsPackage.dependencies || !viewsPackage.dependencies[name]);
+    if (loadedInsideViews && missingViewsDep) return warn.views(name);
+
+    if (loadedInsideShared || loadedInsideViews) {
+      if (lambdaPackage) {
+        if (lambdaPackage.dependencies[name]) return;
+        else return warn.lambda(name);
+      }
+      if (!loadedInsideRoot) {
+        return warn.root(name)
+      }
+    }
+    /* Skip false positive warnings: shared can access root if no package file is present */
+    if (loadedInsideRoot && (loadedViaShared || loadedViaViews)) return;
+
+    /* Lambda + root deps */
     if (!loadedInsideLambda) {
-      /* debug.push({
-        filename: item.filename,
-        loadedInsideLambda,
-        loadedInsideShared,
-        loadedInsideViews,
-        rootPath,
-        loadedAtRoot,
-      }); */
-      /* Skip over shared / views dep paths */
-      if (loadedInsideShared || loadedInsideViews) return;
       /* Lambda has a package.json and its dep was loaded from root */
-      if (lambdaHasPackage) return missing.push('lambda::' + name);
+      if (lambdaPackage) return warn.lambda(name);
       /* Lambda does NOT have a package.json and its dep was NOT loaded from root */
-      else if (!loadedAtRoot) return missing.push('root::' + name);
+      else if (!loadedInsideRoot) return warn.root(name);
     }
   });
-  if (missing.length) missing = [... new Set([...missing])];
+  if (missing.length) missing = [ ... new Set([ ...missing ]) ];
 
-  function callback(err, result) {
+  function callback (err, result) {
     if (err) console.log(err);
     let payload = err
       ? { name: err.name, message: err.message, stack: err.stack }
@@ -66,7 +114,7 @@ process.stdin.on('close', () => {
   }
 
   if (fn.constructor.name === 'AsyncFunction') {
-    fn(event, context, callback).then(function win(result) {
+    fn(event, context, callback).then(function win (result) {
       callback(null, result);
     }).catch(callback);
   }
