@@ -30,7 +30,7 @@ test('Set up env', t => {
   t.ok(sandbox, 'got sandbox')
 })
 
-test('[Dependency warnings] Start Sandbox', t => {
+test('[Dependency warnings (basic)] Start Sandbox', t => {
   t.plan(4)
   process.chdir(join(mock, 'basic'))
   sandbox.start({}, function (err, result) {
@@ -44,7 +44,7 @@ test('[Dependency warnings] Start Sandbox', t => {
   })
 })
 
-test('[Dependency warnings] Lambda has its own deps', t => {
+test('[Dependency warnings (basic)] Lambda has its own deps', t => {
   t.plan(4)
   setup()
   tiny.get({
@@ -63,23 +63,7 @@ test('[Dependency warnings] Lambda has its own deps', t => {
   })
 })
 
-test('[Dependency warnings] Lambda + shared have their own deps', t => {
-  t.plan(1)
-  setup()
-  tiny.get({
-    url: url + '/deps-in-shared'
-  }, function _got (err) {
-    teardown()
-    if (err) t.fail(err)
-    else {
-      console.log(data)
-      t.notOk(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-deps_in_shared')}`), 'Did not get a dep warning')
-      reset()
-    }
-  })
-})
-
-test('[Dependency warnings] Deps are in root', t => {
+test('[Dependency warnings (basic)] Deps are in root', t => {
   t.plan(4)
   setup()
   tiny.get({
@@ -98,7 +82,7 @@ test('[Dependency warnings] Deps are in root', t => {
   })
 })
 
-test('[Dependency warnings] Deps found', t => {
+test('[Dependency warnings (basic)] Deps found', t => {
   t.plan(1)
   setup()
   tiny.get({
@@ -113,13 +97,237 @@ test('[Dependency warnings] Deps found', t => {
   })
 })
 
-test('[Dependency warnings] Deps missing', t => {
+test('[Dependency warnings (basic)] Deps missing', t => {
   t.plan(1)
   tiny.get({
     url: url + '/deps-missing'
   }, function _got (err) {
     if (err) t.ok(err, 'Got a failure')
     else t.fail('Expected an error')
+  })
+})
+
+test('[Dependency warnings (basic)] Shut down Sandbox', t => {
+  t.plan(1)
+  shutdown(t)
+})
+
+test('[Dependency warnings (shared - no packages)] Start Sandbox', t => {
+  t.plan(4)
+  process.chdir(join(mock, 'no-packages'))
+  sandbox.start({}, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+    }
+  })
+})
+
+test('[Dependency warnings (shared - no packages)] Shared deps', t => {
+  t.plan(1)
+  setup()
+  tiny.get({
+    url: url + '/shared'
+  }, function _got (err) {
+    teardown()
+    if (err) t.fail(err)
+    else {
+      console.log(data)
+      t.notOk(data.includes('root-dep'), 'Did not get a dep warning')
+      reset()
+    }
+  })
+})
+
+test('[Dependency warnings (shared - no packages)] Views deps', t => {
+  t.plan(1)
+  setup()
+  tiny.get({
+    url: url + '/views'
+  }, function _got (err) {
+    teardown()
+    if (err) t.fail(err)
+    else {
+      console.log(data)
+      t.notOk(data.includes('root-dep'), 'Did not get a dep warning')
+      reset()
+    }
+  })
+})
+
+test('[Dependency warnings (shared - no packages)] Shut down Sandbox', t => {
+  t.plan(1)
+  shutdown(t)
+})
+
+test('[Dependency warnings (shared - packages in shared)] Start Sandbox', t => {
+  t.plan(4)
+  process.chdir(join(mock, 'shared-packages'))
+  sandbox.start({}, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+    }
+  })
+})
+
+test('[Dependency warnings (shared - packages in shared)] Missing shared deps loaded from root', t => {
+  t.plan(4)
+  setup()
+  tiny.get({
+    url: url + '/shared'
+  }, function _got (err) {
+    teardown()
+    if (err) t.fail(err)
+    else {
+      console.log(data)
+      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'shared')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/shared)')
+      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
+      t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
+      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      reset()
+    }
+  })
+})
+
+test('[Dependency warnings (shared - packages in shared)] Missing views deps loaded from root', t => {
+  t.plan(4)
+  setup()
+  tiny.get({
+    url: url + '/views'
+  }, function _got (err) {
+    teardown()
+    if (err) t.fail(err)
+    else {
+      console.log(data)
+      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'views')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/views)')
+      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
+      t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
+      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      reset()
+    }
+  })
+})
+
+test('[Dependency warnings (shared - packages in shared)] Shut down Sandbox', t => {
+  t.plan(1)
+  shutdown(t)
+})
+
+test('[Dependency warnings (shared - packages in Lambdas)] Start Sandbox', t => {
+  t.plan(4)
+  process.chdir(join(mock, 'lambda-packages'))
+  sandbox.start({}, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+    }
+  })
+})
+
+test('[Dependency warnings (shared - packages in Lambdas)] Missing shared deps loaded from root', t => {
+  t.plan(4)
+  setup()
+  tiny.get({
+    url: url + '/shared'
+  }, function _got (err) {
+    teardown()
+    if (err) t.fail(err)
+    else {
+      console.log(data)
+      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-shared')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
+      t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
+      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      reset()
+    }
+  })
+})
+
+test('[Dependency warnings (shared - packages in Lambdas)] Missing views deps loaded from root', t => {
+  t.plan(4)
+  setup()
+  tiny.get({
+    url: url + '/views'
+  }, function _got (err) {
+    teardown()
+    if (err) t.fail(err)
+    else {
+      console.log(data)
+      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-views')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
+      t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
+      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      reset()
+    }
+  })
+})
+
+test('[Dependency warnings (shared - packages in Lambdas)] Shut down Sandbox', t => {
+  t.plan(1)
+  shutdown(t)
+})
+
+test('[Dependency warnings (shared - packages in shared + Lambdas)] Start Sandbox', t => {
+  t.plan(4)
+  process.chdir(join(mock, 'all-packages'))
+  sandbox.start({}, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
+      t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
+      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+    }
+  })
+})
+
+test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing shared deps loaded from root', t => {
+  t.plan(5)
+  setup()
+  tiny.get({
+    url: url + '/shared'
+  }, function _got (err) {
+    teardown()
+    if (err) t.fail(err)
+    else {
+      console.log(data)
+      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-shared')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'shared')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/shared)')
+      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
+      t.ok(data.includes('another-root-dep'), 'Got a dep warning for a root dep')
+      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      reset()
+    }
+  })
+})
+
+test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing views deps loaded from root', t => {
+  t.plan(5)
+  setup()
+  tiny.get({
+    url: url + '/views'
+  }, function _got (err) {
+    teardown()
+    if (err) t.fail(err)
+    else {
+      console.log(data)
+      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-views')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'views')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/views)')
+      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
+      t.ok(data.includes('another-root-dep'), 'Got a dep warning for a root dep')
+      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      reset()
+    }
   })
 })
 
