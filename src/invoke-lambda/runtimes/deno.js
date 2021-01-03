@@ -51,7 +51,7 @@ else {
   handler(event, context, callback);
 }
 
-/** helper to check for the entry file */
+/* Helper to check for the entry file */
 async function exists(filename) {
   try {
     await Deno.stat(filename);
