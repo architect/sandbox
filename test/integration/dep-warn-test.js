@@ -6,7 +6,7 @@ let tiny = require('tiny-json-http')
 let { url, shutdown } = require('./http/_utils')
 
 let cwd = process.cwd()
-let mock = join(__dirname, '..', 'mock')
+let mock = join(__dirname, '..', 'mock', 'dep-warn')
 
 let stdout = process.stdout.write
 let data = ''
@@ -32,7 +32,7 @@ test('Set up env', t => {
 
 test('[Dependency warnings] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'dep-warn'))
+  process.chdir(join(mock, 'basic'))
   sandbox.start({}, function (err, result) {
     if (err) t.fail(err)
     else {
