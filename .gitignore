@@ -9,4 +9,4 @@ test/mock/*/src/*/*/vendor/
 test/mock/*/tmp
 test/mock/tmp
 # special case in which we're testing local shared file dependency paths
-test/mock/dep-warn/**/src/http/get-deps_in_shared/node_modules/@architect/
+test/mock/dep-warn/**/node_modules/@architect/
