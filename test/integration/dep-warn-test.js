@@ -7,6 +7,7 @@ let { url, shutdown } = require('./http/_utils')
 
 let cwd = process.cwd()
 let mock = join(__dirname, '..', 'mock', 'dep-warn')
+let instructions = str => str.match(/Please run:/g).length
 
 let stdout = process.stdout.write
 let data = ''
@@ -45,7 +46,7 @@ test('[Dependency warnings (basic)] Start Sandbox', t => {
 })
 
 test('[Dependency warnings (basic)] Lambda has its own deps', t => {
-  t.plan(4)
+  t.plan(5)
   setup()
   tiny.get({
     url: url + '/deps-in-lambda'
@@ -58,13 +59,14 @@ test('[Dependency warnings (basic)] Lambda has its own deps', t => {
       t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
       t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
       t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.equal(instructions(data), 1, 'Got correct number of dep warnings')
       reset()
     }
   })
 })
 
 test('[Dependency warnings (basic)] Deps are in root', t => {
-  t.plan(4)
+  t.plan(5)
   setup()
   tiny.get({
     url: url + '/deps-in-root'
@@ -77,6 +79,27 @@ test('[Dependency warnings (basic)] Deps are in root', t => {
       t.ok(data.includes('Please run: npm i'), 'Got instructions to install into the root')
       t.notOk(data.includes('root-dep'), 'Got a dep warning for a root dep')
       t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.equal(instructions(data), 1, 'Got correct number of dep warnings')
+      reset()
+    }
+  })
+})
+
+test('[Dependency warnings (basic)] Deps are in shared', t => {
+  t.plan(5)
+  setup()
+  tiny.get({
+    url: url + '/deps-in-shared'
+  }, function _got (err) {
+    teardown()
+    if (err) t.fail(err)
+    else {
+      console.log(data)
+      t.notOk(data.includes(join(process.cwd(), 'src', 'http', 'get-deps_in_shared')), 'Got a dep warning for the shared (with instructions to install into the shared)')
+      t.ok(data.includes('Please run: npm i'), 'Got instructions to install into the shared')
+      t.notOk(data.includes('root-dep'), 'Got a dep warning for a root dep')
+      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.equal(instructions(data), 1, 'Got correct number of dep warnings')
       reset()
     }
   })
@@ -178,7 +201,7 @@ test('[Dependency warnings (shared - packages in shared)] Start Sandbox', t => {
 })
 
 test('[Dependency warnings (shared - packages in shared)] Missing shared deps loaded from root', t => {
-  t.plan(4)
+  t.plan(5)
   setup()
   tiny.get({
     url: url + '/shared'
@@ -191,13 +214,14 @@ test('[Dependency warnings (shared - packages in shared)] Missing shared deps lo
       t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
       t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
       t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.equal(instructions(data), 2, 'Got correct number of dep warnings')
       reset()
     }
   })
 })
 
 test('[Dependency warnings (shared - packages in shared)] Missing views deps loaded from root', t => {
-  t.plan(4)
+  t.plan(5)
   setup()
   tiny.get({
     url: url + '/views'
@@ -210,6 +234,7 @@ test('[Dependency warnings (shared - packages in shared)] Missing views deps loa
       t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
       t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
       t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.equal(instructions(data), 2, 'Got correct number of dep warnings')
       reset()
     }
   })
@@ -235,7 +260,7 @@ test('[Dependency warnings (shared - packages in Lambdas)] Start Sandbox', t => 
 })
 
 test('[Dependency warnings (shared - packages in Lambdas)] Missing shared deps loaded from root', t => {
-  t.plan(4)
+  t.plan(5)
   setup()
   tiny.get({
     url: url + '/shared'
@@ -248,13 +273,14 @@ test('[Dependency warnings (shared - packages in Lambdas)] Missing shared deps l
       t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
       t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
       t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.equal(instructions(data), 1, 'Got correct number of dep warnings')
       reset()
     }
   })
 })
 
 test('[Dependency warnings (shared - packages in Lambdas)] Missing views deps loaded from root', t => {
-  t.plan(4)
+  t.plan(5)
   setup()
   tiny.get({
     url: url + '/views'
@@ -267,6 +293,7 @@ test('[Dependency warnings (shared - packages in Lambdas)] Missing views deps lo
       t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
       t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
       t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.equal(instructions(data), 1, 'Got correct number of dep warnings')
       reset()
     }
   })
@@ -292,7 +319,7 @@ test('[Dependency warnings (shared - packages in shared + Lambdas)] Start Sandbo
 })
 
 test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing shared deps loaded from root', t => {
-  t.plan(5)
+  t.plan(6)
   setup()
   tiny.get({
     url: url + '/shared'
@@ -306,13 +333,14 @@ test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing shar
       t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
       t.ok(data.includes('another-root-dep'), 'Got a dep warning for a root dep')
       t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.equal(instructions(data), 2, 'Got correct number of dep warnings')
       reset()
     }
   })
 })
 
 test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing views deps loaded from root', t => {
-  t.plan(5)
+  t.plan(6)
   setup()
   tiny.get({
     url: url + '/views'
@@ -326,6 +354,7 @@ test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing view
       t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
       t.ok(data.includes('another-root-dep'), 'Got a dep warning for a root dep')
       t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.equal(instructions(data), 2, 'Got correct number of dep warnings')
       reset()
     }
   })
