@@ -4,9 +4,19 @@
 
 ## [-] 2021-01-01
 
+### Added
+
+- Added `@sandbox-startup` preferences support, fixes #1032; thanks @rbethel!
+
+
+### Changed
+
+- Deprecated the wonky and sometimes broken `@sandbox startup` setting (in favor of the above `@sandbox-startup` pragma)
+
+
 ### Fixed
 
-- Fixed false positive dependency warnings when Lambda treeshaking encounters a `shared` or `views` directory with its own package.json file and dependencies
+- Fixed false positive dependency warnings when Lambda treeshaking encounters a `shared` or `views` directory with its own package.json file and dependencies; thanks @exalted
 
 ---
 
