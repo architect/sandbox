@@ -14,7 +14,6 @@ module.exports = function _start (params, callback) {
     inventory,
     // Settings
     options,
-    quiet = false,
     symlink = true,
     // Everything else
     update,
@@ -86,15 +85,13 @@ module.exports = function _start (params, callback) {
     // Print startup time
     function _ready (callback) {
       let finish = Date.now()
-      if (!quiet) {
-        update.done(`Started in ${finish - start}ms`)
-        let isWin = process.platform.startsWith('win')
-        let ready = isWin
-          ? chars.done
-          : chalk.green.dim('✈︎')
-        let readyMsg = chalk.white('Local environment ready!')
-        console.log(`${ready} ${readyMsg}\n`)
-      }
+      update.done(`Started in ${finish - start}ms`)
+      let isWin = process.platform.startsWith('win')
+      let ready = isWin
+        ? chars.done
+        : chalk.green.dim('❤︎')
+      let readyMsg = chalk.white('Local environment ready!')
+      update.raw(`${ready} ${readyMsg}\n`)
       callback()
     },
 
