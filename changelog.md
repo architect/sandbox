@@ -12,6 +12,7 @@
 ### Changed
 
 - Deprecated the wonky and sometimes broken `@sandbox startup` setting (in favor of the above `@sandbox-startup` pragma)
+- Make passing options object to Sandbox service methods, uh, optional
 
 
 ### Fixed
