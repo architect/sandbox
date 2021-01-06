@@ -62,7 +62,7 @@ npx arc sandbox
 
 Sandbox is designed to be integrated into your application's test suite. In most cases you'll only need to make use of `sandbox.start()` and `sandbox.end()`. However, individual Sandbox services can also be individually started and stopped. ([See below](#individual-sandbox-services).)
 
-All methods must be passed an options object that may containing the following parameters:
+Methods may be passed an options object containing the following parameters:
 - `port` - **String** - Manually specify HTTP port
   - Defaults to `3333`
 - `quiet` - **Boolean** - Disables (most) logging

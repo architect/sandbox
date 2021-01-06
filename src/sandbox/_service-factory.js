@@ -11,7 +11,7 @@ module.exports = function serviceFactory (params) {
   if (t('http'))    init = _http
   if (t('tables'))  init = _tables
   return {
-    start: function (options, callback) {
+    start: function (options = {}, callback) {
       // Set up promise if there's no callback
       let promise
       if (!callback) {
