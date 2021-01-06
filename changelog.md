@@ -19,7 +19,7 @@
 ### Fixed
 
 - Fixed false positive dependency warnings when Lambda treeshaking encounters a `shared` or `views` directory with its own package.json file and dependencies; thanks @exalted
-- Fixed optional log suppression on a couple startup prints; thanks @mikemaccana!
+- Fixed optional log suppression on a couple startup prints; fixes #1045, thanks @mikemaccana!
 
 ---
 
