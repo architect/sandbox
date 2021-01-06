@@ -35,7 +35,7 @@ module.exports = function createHttpServer (inventory) {
 
     // Start the HTTP server
     app.start = function start (options, callback) {
-      let { all, port, quiet, symlink = true, update } = options
+      let { all, port, symlink = true, update } = options
 
       // Set up ports and HTTP-specific env vars
       let { httpPort } = getPorts(port)
@@ -113,10 +113,8 @@ module.exports = function createHttpServer (inventory) {
       function _started (err) {
         if (err) callback(err)
         else {
-          if (!quiet) {
-            let link = chalk.green.bold.underline(`http://localhost:${httpPort}\n`)
-            console.log(`\n    ${link}`)
-          }
+          let link = chalk.green.bold.underline(`http://localhost:${httpPort}\n`)
+          update.raw(`\n    ${link}`)
           let msg = 'HTTP successfully started'
           callback(null, msg)
         }

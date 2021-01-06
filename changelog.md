@@ -13,11 +13,13 @@
 
 - Deprecated the wonky and sometimes broken `@sandbox startup` setting (in favor of the above `@sandbox-startup` pragma)
 - Make passing options object to Sandbox service methods, uh, optional
+- The startup icon is now a Unicode heart
 
 
 ### Fixed
 
 - Fixed false positive dependency warnings when Lambda treeshaking encounters a `shared` or `views` directory with its own package.json file and dependencies; thanks @exalted
+- Fixed optional log suppression on a couple startup prints; thanks @mikemaccana!
 
 ---
 
