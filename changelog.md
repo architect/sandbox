@@ -2,7 +2,7 @@
 
 ---
 
-## [-] 2021-01-01
+## [3.3.4] 2021-01-01
 
 ### Added
 
@@ -14,6 +14,7 @@
 - Deprecated the wonky and sometimes broken `@sandbox startup` setting (in favor of the above `@sandbox-startup` pragma)
 - Make passing options object to Sandbox service methods, uh, optional
 - The startup icon is now a Unicode heart
+- Updated dependencies
 
 
 ### Fixed
