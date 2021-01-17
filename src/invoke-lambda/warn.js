@@ -28,7 +28,7 @@ module.exports = function warn (params) {
       let update = updater('Sandbox')
       let plural = missing.length > 1
 
-      update.warn(`Your may have ${plural ? 'dependencies' : 'a dependency'} that could be inaccessible in production`)
+      update.warn(`You may have ${plural ? 'dependencies' : 'a dependency'} that could be inaccessible in production`)
       let run = msg => `Please run: ${msg}`
       let instructions = Object.entries(deps).map(([ type, deps ]) => {
         if (type === 'root') return run(`npm i ${deps.join(' ')}`)
