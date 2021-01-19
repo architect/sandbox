@@ -2,6 +2,14 @@
 
 ---
 
+## [3.3.5] 2021-01-18
+
+### Fixed
+
+- Fixed minor typo in inaccessible dependency warning; thanks @jeremyw!
+
+---
+
 ## [3.3.4] 2021-01-01
 
 ### Added
