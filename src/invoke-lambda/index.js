@@ -35,6 +35,10 @@ module.exports = function invokeLambda (params, callback) {
       let { src, config } = lambda
       let { runtime, timeout } = config
 
+      let PYTHONPATH = process.env.PYTHONPATH
+        ? `${join(src, 'vendor')}:${process.env.PYTHONPATH}`
+        : join(src, 'vendor')
+
       let defaults = {
         __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
         __ARC_CONFIG__: JSON.stringify({
@@ -45,7 +49,7 @@ module.exports = function invokeLambda (params, callback) {
           views: inventory.inv.views,
         }),
         PYTHONUNBUFFERED: true,
-        PYTHONPATH: join(src, 'vendor'),
+        PYTHONPATH,
         LAMBDA_TASK_ROOT: src,
         TZ: 'UTC',
       }
