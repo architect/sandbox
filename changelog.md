@@ -2,6 +2,14 @@
 
 ---
 
+## [3.3.6] 2021-01-27
+
+### Added
+
+- Added environment `PYTHONPATH` to local Lambda executions (if present), thanks @scoates!
+
+---
+
 ## [3.3.5] 2021-01-18
 
 ### Fixed
