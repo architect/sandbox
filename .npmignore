@@ -7,7 +7,7 @@ _mock
 .github/
 .nyc_output/
 changelog.md
-codecov.yaml
+.codecov.yaml
 contributing.md
 coverage/
 test/
