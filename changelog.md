@@ -2,6 +2,13 @@
 
 ---
 
+## [3.3.7] 2021-02-06
+
+### Added
+
+- Gracefully handle file watcher limit error
+
+---
 ## [3.3.6] 2021-01-27
 
 ### Added
