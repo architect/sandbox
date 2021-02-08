@@ -63,8 +63,11 @@ npx arc sandbox
 Sandbox is designed to be integrated into your application's test suite. In most cases you'll only need to make use of `sandbox.start()` and `sandbox.end()`. However, individual Sandbox services can also be individually started and stopped. ([See below](#individual-sandbox-services).)
 
 Methods may be passed an options object containing the following parameters:
-- `port` - **String** - Manually specify HTTP port
+- `port` - **String or Number** - Manually specify HTTP port
   - Defaults to `3333`
+- `symlink` - **Boolean** - Use symlinking to Architect shared code from within each Lambda's dependencies (e.g. `src/http/get-index/node_modules/@architect/shared` → `src/shared`)
+  - Defaults to `true`
+  - `false` copies shared code into each Lambda, which can result much slower startup and dependency rehydration speeds
 - `quiet` - **Boolean** - Disables (most) logging
 
 ---
