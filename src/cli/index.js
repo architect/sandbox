@@ -31,7 +31,7 @@ module.exports = function cli (params = {}, callback) {
       watcher = watch(process.cwd(), { recursive: true })
     }
     catch (e) {
-      update.warn('Automatic rehydration watcher failed: System limit for number of file watchers reached')
+      update.warn('Automatic rehydration watcher failed: system file watcher limit may have been reached')
     }
 
     let workingDirectory = pathToUnix(process.cwd())
