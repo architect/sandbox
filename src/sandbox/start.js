@@ -1,5 +1,6 @@
 let { existsSync: exists } = require('fs')
 let { join } = require('path')
+let { callbackify } = require('util')
 let chalk = require('chalk')
 let hydrate = require('@architect/hydrate')
 let series = require('run-series')
@@ -23,6 +24,7 @@ module.exports = function _start (params, callback) {
   } = params
   let { inv } = inventory
   let { preferences: prefs } = inv._project
+  let server = { http, events, tables }
 
   // Set `all` to instruct service modules not to hydrate again, etc.
   params.all = true
@@ -80,6 +82,29 @@ module.exports = function _start (params, callback) {
     // Start HTTP + WebSocket (@http, @ws) server
     function _http (callback) {
       http.start(params, callback)
+    },
+
+    // Kick off any plugin sandbox services
+    function _plugins (callback) {
+      if (inv.plugins) {
+        let pluginServices = Object.values(inv.plugins).
+          map(pluginModule => pluginModule.start).
+          filter(start => start).
+          map(start => {
+            // To be compatible with run-series, we can't use async functions.
+            // so if plugin author provides an async function, let's callbackify it
+            if (start.constructor.name === 'AsyncFunction') return callbackify(start)
+            return start
+          })
+        if (pluginServices.length) {
+          series(pluginServices.map(start => start.bind({}, inv._project.arc, inventory, server)), function (err) {
+            if (err) callback(err)
+            else callback()
+          })
+        }
+        else callback()
+      }
+      else callback()
     },
 
     // Print startup time
