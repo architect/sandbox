@@ -10,6 +10,17 @@
 
 ---
 
+## [3.4.0] 2021-03-02
+
+### Added
+
+- Support for `@plugins` sandbox `start` and `end` service hooks
+  - Enables plugin authors to hook into sandbox, providing a local development experience for consumers of their plugin
+- Added `invokeLambda` (via `require('@architect/sandbox/invokeLambda')`) plugin helper method
+  - Enables plugin authors to invoke Lambdas that their plugin creates during sandbox execution
+
+---
+
 ## [3.3.8] 2021-03-17
 
 ### Added
