@@ -58,7 +58,21 @@ function start (args = {}, callback) {
  * Shut everything down
  */
 function end (callback) {
-  return _end({ events, http, tables }, callback)
+  // Set up promise if there's no callback
+  let promise
+  if (!callback) {
+    promise = new Promise(function (res, rej) {
+      callback = function (err, result) {
+        err ? rej(err) : res(result)
+      }
+    })
+  }
+
+  inv({}, function (err, inventory) {
+    if (err) callback(err)
+    else _end({ events, http, inventory, tables }, callback)
+  })
+  return promise
 }
 
 module.exports = { events, http, tables, start, end }
