@@ -23,6 +23,7 @@ module.exports = function createHttpServer (inventory) {
   let { inv } = inventory
   let isDefaultProject = !inv._project.manifest
   let arc = inv._project.arc
+  let { preferences: prefs } = inv._project
 
   if (inv.http || inv.static) {
     let app = Router({ mergeParams: true })
@@ -36,6 +37,7 @@ module.exports = function createHttpServer (inventory) {
     // Start the HTTP server
     app.start = function start (options, callback) {
       let { all, port, symlink = true, noHydrate, update } = options
+      noHydrate = noHydrate || (prefs && prefs.sandbox && prefs.sandbox['no-hydrate'])
 
       // Set up ports and HTTP-specific env vars
       let { httpPort } = getPorts(port)

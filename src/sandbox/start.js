@@ -35,6 +35,8 @@ module.exports = function _start (params, callback) {
     verbose = true
   }
 
+  noHydrate = noHydrate || (prefs && prefs.sandbox && prefs.sandbox['no-hydrate'])
+
   let deprecated = process.env.DEPRECATED
 
   series([

@@ -9,7 +9,10 @@ let { tmpdir } = require('os')
 let sandbox = require('../sandbox')
 
 module.exports = function cli (params = {}, callback) {
-  let { version, options = [], inventory } = params
+  let { version, options = [], inventory = {} } = params
+  
+ 
+
   if (!version) version = `Sandbox ${pkgVer}`
   let symlink = options.some(o => o === '--disable-symlinks') ? false : true
   params.symlink = symlink
@@ -43,6 +46,8 @@ module.exports = function cli (params = {}, callback) {
     let { inv } = inventory
     let manifest = inv._project.manifest
     let staticFolder = inv.static && inv.static.folder
+    let { preferences: prefs } = inv._project
+    noHydrate = noHydrate || (prefs && prefs.sandbox && prefs.sandbox['no-hydrate'])
 
     // Timers
     let lastEvent
