@@ -15,7 +15,7 @@ module.exports = function createEventBus (inventory) {
     let eventBus
 
     events.start = function start (options, callback) {
-      let { all, port, symlink = true, update } = options
+      let { all, port, symlink = true, noHydrate, update } = options
 
       // Set up ports and env vars
       let { eventsPort } = getPorts(port)
@@ -34,7 +34,7 @@ module.exports = function createEventBus (inventory) {
 
         // Loop through functions and see if any need dependency hydration
         function _maybeHydrate (callback) {
-          if (!all) maybeHydrate(inventory, callback)
+          if (!all && !noHydrate) maybeHydrate(inventory, callback)
           else callback()
         },
 

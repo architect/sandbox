@@ -15,6 +15,7 @@ module.exports = function _start (params, callback) {
     // Settings
     options,
     symlink = true,
+    noHydrate,
     // Everything else
     update,
     events,
@@ -53,7 +54,8 @@ module.exports = function _start (params, callback) {
 
     // Loop through functions and see if any need dependency hydration
     function _maybeHydrate (callback) {
-      maybeHydrate(inventory, callback)
+      if (noHydrate) callback()
+      else maybeHydrate(inventory, callback)
     },
 
     // ... then hydrate Architect project files into functions

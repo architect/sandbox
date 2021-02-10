@@ -37,6 +37,7 @@ npx arc sandbox
 - `-v`, `--verbose`, `verbose` - Enable verbose logging
 - `--disable-symlinks` - Disable symlinking `src/shared` into all functions and
     use file copying instead
+- `--no-hydrate` - Disable hydration
 
 
 ### Environment variables
