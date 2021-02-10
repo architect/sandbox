@@ -42,7 +42,7 @@
     "http-proxy": "~1.18.1",
     "node-watch": "~0.7.1",
     "router": "~1.3.5",
-    "run-parallel": "~1.1.10",
+    "run-parallel": "~1.2.0",
     "run-series": "~1.1.9",
     "run-waterfall": "~1.1.7",
     "send": "~0.17.1",
