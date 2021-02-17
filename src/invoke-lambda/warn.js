@@ -19,10 +19,7 @@ module.exports = function warn (params) {
     })
 
     // Remove AWS-SDK, that's bundled in Lambda
-    let awsSdk = missing.findIndex(dep => dep === 'aws-sdk')
-    if (awsSdk >= 0) {
-      missing.splice(awsSdk, 1)
-    }
+    missing = missing.filter(dep => !dep.endsWith('::aws-sdk'))
     // Do we still have anything left?
     if (missing.length) {
       let update = updater('Sandbox')
