@@ -2,6 +2,15 @@
 
 ---
 
+## [3.3.8] 2021-02-10
+
+### Added
+
+- Added `-no-hydrate` cli argument
+- Support `no-hydrate` preference
+
+---
+
 ## [3.3.7] 2021-02-06
 
 ### Added

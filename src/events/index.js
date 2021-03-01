@@ -9,13 +9,16 @@ let series = require('run-series')
  */
 module.exports = function createEventBus (inventory) {
   let { inv } = inventory
+  let { preferences: prefs } = inv._project
 
   if (inv.events || inv.queues) {
     let events = {}
     let eventBus
 
     events.start = function start (options, callback) {
-      let { all, port, symlink = true, update } = options
+      let { all, port, symlink = true, noHydrate, update } = options
+
+      noHydrate = noHydrate || (prefs && prefs.sandbox && prefs.sandbox['no-hydrate'])
 
       // Set up ports and env vars
       let { eventsPort } = getPorts(port)
@@ -34,7 +37,7 @@ module.exports = function createEventBus (inventory) {
 
         // Loop through functions and see if any need dependency hydration
         function _maybeHydrate (callback) {
-          if (!all) maybeHydrate(inventory, callback)
+          if (!all && !noHydrate) maybeHydrate(inventory, callback)
           else callback()
         },
 

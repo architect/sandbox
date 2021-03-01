@@ -9,10 +9,16 @@ let { tmpdir } = require('os')
 let sandbox = require('../sandbox')
 
 module.exports = function cli (params = {}, callback) {
-  let { version, options = [], inventory } = params
+  let { version, options = [], inventory = {} } = params
+  
+ 
+
   if (!version) version = `Sandbox ${pkgVer}`
   let symlink = options.some(o => o === '--disable-symlinks') ? false : true
   params.symlink = symlink
+
+  let noHydrate = options.includes('--no-hydrate')
+  params.noHydrate = noHydrate
 
   sandbox.start(params, function watching (err) {
     if (err) {
@@ -40,6 +46,8 @@ module.exports = function cli (params = {}, callback) {
     let { inv } = inventory
     let manifest = inv._project.manifest
     let staticFolder = inv.static && inv.static.folder
+    let { preferences: prefs } = inv._project
+    noHydrate = noHydrate || (prefs && prefs.sandbox && prefs.sandbox['no-hydrate'])
 
     // Timers
     let lastEvent
@@ -70,7 +78,7 @@ module.exports = function cli (params = {}, callback) {
     function rehydrate ({ timer, only, msg, force }) {
       lastEvent = Date.now()
       clearTimeout(timer)
-      if (!symlink || force) {
+      if (!noHydrate && (!symlink || force)) {
         timer = setTimeout(() => {
           ts()
           let start = Date.now()
