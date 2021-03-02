@@ -1,5 +1,6 @@
 let arc = require('@architect/functions')
 let test = require('tape')
+let http = require('http')
 let { existsSync, mkdirSync, readFileSync } = require('fs')
 let { join } = require('path')
 let { events } = require('../../src')
@@ -105,6 +106,26 @@ test('arc.events.publish (failure)', t => {
     if (err) t.ok(err.message.includes('404'), 'Event not found')
     else t.fail('Publish should have failed')
   })
+})
+
+test('random HTTP request to event bus with malformed JSON should return an HTTP 400 error', t => {
+  t.plan(2)
+  let port = process.env.ARC_EVENTS_PORT || 3334
+  let req = http.request({
+    method: 'POST',
+    port,
+    path: '/'
+  }, function done (res) {
+    let data = ''
+    res.resume()
+    res.on('data', chunk => data += chunk.toString())
+    res.on('end', () => {
+      t.equals(res.statusCode, 400, 'HTTP responded with 400 code ')
+      t.equals(data, 'Sandbox @event bus exception parsing request body', 'HTTP responded with detailed error message')
+    })
+  })
+  req.write('hello, is it me you\'re looking for?')
+  req.end('\n')
 })
 
 test('Async events.end', async t => {
