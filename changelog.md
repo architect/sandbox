@@ -6,7 +6,11 @@
 
 ### Added
 
-- Gracefully handle file watcher limit error
+- Gracefully handle file watcher limit error; thanks @mawdesley!
+
+### Fixed
+
+- Gracefully error if malformed JSON is passed to the `@events` bus server.
 
 ---
 ## [3.3.6] 2021-01-27
