@@ -1,4 +1,4 @@
-let { fork } = require('child_process')
+let proc = require('child_process')
 let { join } = require('path')
 let chalk = require('chalk')
 
@@ -22,7 +22,17 @@ module.exports = function eventBusListener (inventory, req, res) {
   })
 
   req.on('end', () => {
-    let message = JSON.parse(body)
+    let message
+
+    try {
+      message = JSON.parse(body)
+    }
+    catch (e) {
+      res.statusCode = 400
+      res.end('Sandbox @event bus exception parsing request body')
+      return
+    }
+
     message.inventory = inventory
 
     // @queues
@@ -50,7 +60,7 @@ module.exports = function eventBusListener (inventory, req, res) {
     }
     else {
       // Spawn a fork of the Node process
-      let subprocess = fork(join(__dirname, '_subprocess.js'))
+      let subprocess = proc.fork(join(__dirname, '_subprocess.js'))
       subprocess.send(message)
       subprocess.on('message', function _message (msg) {
         if (!quiet) {
