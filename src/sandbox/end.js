@@ -34,7 +34,7 @@ module.exports = function end (server, callback) {
     function _plugins (callback) {
       if (inv.plugins) {
         let pluginServices = Object.values(inv.plugins).
-          map(pluginModule => pluginModule.end).
+          map(pluginModule => pluginModule && pluginModule.sandbox ? pluginModule.sandbox.end : null).
           filter(end => end).
           map(end => {
             // To be compatible with run-series, we can't use async functions.
