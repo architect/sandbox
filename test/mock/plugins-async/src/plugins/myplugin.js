@@ -6,12 +6,14 @@ let write = promisify(fs.writeFile)
 let rm = promisify(fs.unlink)
 
 module.exports = {
-  start: async function (arc, inventory, buildInServices) {
-    console.log('async plugin start hook writing', file)
-    await write(file, 'test', { encoding: 'utf-8' })
-  },
-  end: async function (arc, inventory, buildInServices) {
-    console.log('async plugin end hook unlinking', file)
-    await rm(file)
+  sandbox: {
+    start: async function (arc, inventory, buildInServices) {
+      console.log('async plugin start hook writing', file)
+      await write(file, 'test', { encoding: 'utf-8' })
+    },
+    end: async function (arc, inventory, buildInServices) {
+      console.log('async plugin end hook unlinking', file)
+      await rm(file)
+    }
   }
 }
