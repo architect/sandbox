@@ -1,13 +1,17 @@
-let os = require('os')
 let fs = require('fs')
 let { promisify } = require('util')
 let { join } = require('path')
+let file = join(process.cwd(), 'asyncplugin.test')
+let write = promisify(fs.writeFile)
+let rm = promisify(fs.unlink)
 
 module.exports = {
   start: async function (arc, inventory, buildInServices) {
-    await promisify(fs.writeFile(join(os.tmpdir(), 'asyncplugin.test'), 'test'))
+    console.log('async plugin start hook writing', file)
+    await write(file, 'test', { encoding: 'utf-8' })
   },
   end: async function (arc, inventory, buildInServices) {
-    await promisify(fs.unlink(join(os.tmpdir(), 'asyncplugin.test')))
+    console.log('async plugin end hook unlinking', file)
+    await rm(file)
   }
 }
