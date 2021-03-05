@@ -5,11 +5,11 @@ let file = join(process.cwd(), 'syncplugin.test')
 
 module.exports = {
   sandbox: {
-    start: function (arc, inventory, buildInServices, callback) {
+    start: function ({ arc, inventory, services }, callback) {
       fs.writeFileSync(file, 'test')
       callback()
     },
-    end: function (arc, inventory, buildInServices, callback) {
+    end: function ({ arc, inventory, services }, callback) {
       fs.unlinkSync(file, 'syncplugin.test')
       callback()
     }
