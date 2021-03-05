@@ -32,8 +32,8 @@ module.exports = function end (server, callback) {
       _arc.end(callback)
     },
     function _plugins (callback) {
-      if (inv.plugins) {
-        let pluginServices = Object.values(inv.plugins).
+      if (inv._project.plugins) {
+        let pluginServices = Object.values(inv._project.plugins).
           map(pluginModule => pluginModule && pluginModule.sandbox ? pluginModule.sandbox.end : null).
           filter(end => end).
           map(end => {
@@ -43,7 +43,7 @@ module.exports = function end (server, callback) {
             return end
           })
         if (pluginServices.length) {
-          series(pluginServices.map(end => end.bind({}, inv._project.arc, inventory, server)), function (err) {
+          series(pluginServices.map(end => end.bind({}, { arc: inv._project.arc, inventory, services: server })), function (err) {
             if (err) callback(err)
             else callback()
           })
