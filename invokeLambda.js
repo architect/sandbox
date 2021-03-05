@@ -2,7 +2,7 @@ let read = require('@architect/inventory/src/read')
 let defaultFunctionConfig = require('@architect/inventory/src/defaults/function-config')
 let invocator = require('./src/invoke-lambda')
 
-module.exports = function invokeLambda (inventory, src, payload, callback) {
+module.exports = function invokeLambda ({ inventory, src, payload }, callback) {
   let params = {
     lambda: {
       src,

@@ -86,8 +86,8 @@ module.exports = function _start (params, callback) {
 
     // Kick off any plugin sandbox services
     function _plugins (callback) {
-      if (inv.plugins) {
-        let pluginServices = Object.values(inv.plugins).
+      if (inv._project.plugins) {
+        let pluginServices = Object.values(inv._project.plugins).
           map(pluginModule => pluginModule && pluginModule.sandbox ? pluginModule.sandbox.start : null).
           filter(start => start).
           map(start => {
@@ -97,7 +97,7 @@ module.exports = function _start (params, callback) {
             return start
           })
         if (pluginServices.length) {
-          series(pluginServices.map(start => start.bind({}, inv._project.arc, inventory, server)), function (err) {
+          series(pluginServices.map(start => start.bind({}, { arc: inv._project.arc, inventory, services: server })), function (err) {
             if (err) callback(err)
             else callback()
           })
