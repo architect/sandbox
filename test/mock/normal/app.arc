@@ -13,6 +13,7 @@ queue-custom
 
 @http
 get     /           # runs default
+get     /multi-cookies-res
 get     /binary
 get     /nodejs12.x
 get     /nodejs10.x

@@ -181,22 +181,22 @@ test('Architect v7 dependency-free responses (HTTP API mode)', t => {
   mock = arc7.cookies
   run(mock, res => {
     t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
-    t.equal(res.headers['set-cookie'], mock.cookies.join('; '), `Returned correct cookies: ${res.headers['set-cookie']}`)
+    t.deepEqual(res.headers['set-cookie'], mock.cookies, `Returned correct cookies: ${JSON.stringify(res.headers['set-cookie'])}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
   mock = arc7.secureCookies
   run(mock, res => {
-    let cookies = `${localCookie}; ${localCookie}`
+    let cookies = [ localCookie, localCookie ]
     t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
-    t.equal(res.headers['set-cookie'], cookies, `Returned correct cookies: ${cookies}`)
+    t.deepEqual(res.headers['set-cookie'], cookies, `Returned correct secure cookies: ${JSON.stringify(res.headers['set-cookie'])}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
   mock = arc7.secureCookieHeader
   run(mock, res => {
     t.equal(res.body, mock.body, `Returned string: ${mock.body}`)
-    t.equal(res.headers['set-cookie'], localCookie, `Returned correct cookies: ${localCookie}`)
+    t.deepEqual(res.headers['set-cookie'], [ localCookie ], `Returned correct secure cookies from header: ${JSON.stringify(res.headers['set-cookie'])}`)
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
