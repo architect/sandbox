@@ -125,6 +125,23 @@ test('[HTTP mode] get / + cookie', t => {
   })
 })
 
+test('[HTTP mode] get /multi-cookies-res', t => {
+  t.plan(1)
+  tiny.get({
+    url: url + '/multi-cookies-res'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      console.warn(result.headers['set-cookie'])
+      t.deepEqual(
+        result.headers['set-cookie'],
+        [ 'c1=v1', 'c2=v2' ],
+        'Response contains 2 set-cookie headers'
+      )
+    }
+  })
+})
+
 test('[HTTP mode] get /binary', t => {
   t.plan(15)
   let rawPath = '/binary'

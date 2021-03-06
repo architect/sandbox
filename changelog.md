@@ -16,6 +16,7 @@
 
 - Sandbox now works with an app composed of nothing but WebSockets, fixes [#1099](https://github.com/architect/architect/issues/1099)
 - Sandbox can now handle non-JSON a bit more gracefully without blowing up, fixes [#1093](https://github.com/architect/architect/issues/1093); thanks @reconbot!
+- Handle multiple cookies according the spec, fixes [#1090](https://github.com/architect/architect/issues/1090); thanks @zaverden!
 
 ---
 

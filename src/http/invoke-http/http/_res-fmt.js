@@ -56,7 +56,7 @@ module.exports = function responseFormatter ({ res, result }) {
 
   // Cookie time
   if (cookies.length) {
-    let sheet = cookies.join('; ').replace(/; Secure/g, '; Path=/')
+    let sheet = cookies.map(c => c.replace(/; Secure/g, '; Path=/'))
     res.setHeader('set-cookie', sheet)
   }
 
