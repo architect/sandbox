@@ -1,7 +1,13 @@
 # Architect Sandbox changelog
 
 ---
+## [3.3.8] 2021-03-06
 
+### Fixed
+
+- Handle multiple cookies according the spec.
+
+---
 ## [3.3.7] 2021-03-02
 
 ### Added
