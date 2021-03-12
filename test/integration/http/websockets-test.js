@@ -95,6 +95,28 @@ test('[WebSockets] Connect, send payloads (falls back to default), disconnect', 
   ws.on('message', message.bind({}, t))
 })
 
+test('[WebSockets] Connect, send non json payload (falls back to default), disconnect', t => {
+  t.plan(9)
+  setup(t)
+  const body = 'foobar'
+  ws.on('open', () => {
+    t.pass('WebSocket connected')
+    ws.send(body)
+  })
+  ws.on('message', m => {
+    let message = JSON.parse(m)
+    t.ok(message, 'Received message payload from WS Lambda confirming send')
+    let { event, req } = message
+    t.ok(req.requestContext.connectionId, 'Got request context with connectionId')
+
+    t.equal(event, 'default', `Invoked correct WebSocket Lambda / action: ${event}`)
+    t.equal(req.body, body, 'Got body payload')
+    t.equal(req.isBase64Encoded, false, 'Got isBase64Encoded false')
+
+    close(t)
+  })
+})
+
 test('[WebSockets] Connect, send payloads (user action), disconnect', t => {
   t.plan(9)
   setup(t)
