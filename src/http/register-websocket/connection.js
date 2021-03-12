@@ -11,8 +11,14 @@ module.exports = function connection (inventory, connectionId, ws) {
   let update = updater('Sandbox')
 
   ws.on('message', function message (msg) {
-    let payload = JSON.parse(msg)
-    let lambda = payload.action && get.ws(payload.action)
+    let lambda
+    try {
+      const payload = JSON.parse(msg)
+      lambda = payload.action && get.ws(payload.action)
+    }
+    catch (e) {
+      // fallback to default
+    }
     if (lambda) {
       update.status(`ws/${lambda.name}: ${connectionId}`)
       invoke({
