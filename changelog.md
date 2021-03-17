@@ -2,6 +2,14 @@
 
 ---
 
+## [3.3.8] 2021-03-17
+
+### Added
+
+- Adds internal resource discovery end point
+
+---
+
 ## [3.3.7] 2021-03-02
 
 ### Added
