@@ -6,7 +6,7 @@
 
 ### Added
 
-- Adds internal service discovery end point
+- Adds internal service discovery endpoint
 
 ---
 

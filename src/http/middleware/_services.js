@@ -1,8 +1,8 @@
 /**
- * Architect resource discovery internal endpoint
+ * Architect service discovery internal endpoint
  */
-module.exports = function _ard ({ inv }, req, res, next) {
-  if (req.method.toLowerCase() === 'get' && req.url === '/_asdf') {
+module.exports = function _asd ({ inv }, req, res, next) {
+  if (req.method.toLowerCase() === 'get' && req.url === '/_asd') {
     let app = inv.app
     let services = {
       tables: {}

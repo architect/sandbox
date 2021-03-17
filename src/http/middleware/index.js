@@ -1,7 +1,7 @@
 let binary = require('./_binary-handler')
 let parse = require('./_parse')
 let _static = require('./_static-path')
-let _asdf = require('./_services')
+let _asd = require('./_services')
 let _fallback = require('./_fallback')
 let cors = require('./_cors')
 
@@ -16,8 +16,8 @@ module.exports = function loadMiddleware (app, inventory) {
   app.use(_static)
 
   // Resource discovery
-  let asdf = _asdf.bind({}, inventory)
-  app.use(asdf)
+  let asd = _asd.bind({}, inventory)
+  app.use(asd)
 
   // Route fallthrough to @proxy + ASAP
   let fallback = _fallback.bind({}, inventory)
