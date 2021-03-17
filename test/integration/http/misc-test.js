@@ -136,6 +136,21 @@ test('[Oversized response] get /chonky', t => {
   })
 })
 
+test('[Service discovery] get /_ard', t => {
+  t.plan(3)
+  tiny.get({
+    url: url + '/_ard'
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      let services = result.body
+      t.ok(services, 'Got back services object')
+      t.ok(services.tables, 'Got back tables')
+      t.ok(Object.keys(services.tables).length, 4, 'Got back all tables')
+    }
+  })
+})
+
 test('[Misc] Shut down Sandbox', t => {
   t.plan(1)
   shutdown(t)
