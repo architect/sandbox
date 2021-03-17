@@ -136,10 +136,10 @@ test('[Oversized response] get /chonky', t => {
   })
 })
 
-test('[Service discovery] get /_asdf', t => {
+test('[Service discovery] get /_asd', t => {
   t.plan(3)
   tiny.get({
-    url: url + '/_asdf'
+    url: url + '/_asd'
   }, function _got (err, result) {
     if (err) t.fail(err)
     else {
