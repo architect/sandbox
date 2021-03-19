@@ -1,7 +1,8 @@
 /**
  * Architect service discovery internal endpoint
  */
-module.exports = function _asd ({ inv }, req, res, next) {
+module.exports = function _asd (inventory, req, res, next) {
+  let { inv } = inventory
   if (req.method.toLowerCase() === 'get' && req.url === '/_asd') {
     let app = inv.app
     let services = {
@@ -12,6 +13,22 @@ module.exports = function _asd ({ inv }, req, res, next) {
         // 'staging' env is just for legacy local compatibility
         // See: tables/create-table
         services.tables[name] = `${app}-staging-${name}`
+      })
+    }
+    if (inv._project.plugins) {
+      let pluginNames = Object.keys(inv._project.plugins)
+      pluginNames.forEach(pluginName => {
+        let pluginModule = inv._project.plugins[pluginName]
+        if (pluginModule.variables) {
+          let vars = pluginModule.variables({ arc: inv._project.arc, inventory, stage: 'testing' })
+          let keys = Object.keys(vars)
+          if (keys && keys.length) {
+            if (!services[pluginName]) services[pluginName] = {}
+            keys.forEach(k => {
+              services[pluginName][k] = vars[k]
+            })
+          }
+        }
       })
     }
     // TODO add more services!
