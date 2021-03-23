@@ -24,7 +24,7 @@ module.exports = function createHttpServer (inventory) {
   let isDefaultProject = !inv._project.manifest
   let arc = inv._project.arc
 
-  if (inv.http || inv.static) {
+  if (inv.http || inv.static || inv.ws) {
     let app = Router({ mergeParams: true })
 
     app = middleware(app, inventory)

@@ -40,6 +40,8 @@ any     /any
 any     /any-c/*
 any     /any-p/:param
 
+@static
+
 @ws
 hello
 custom
