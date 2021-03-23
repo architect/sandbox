@@ -2,6 +2,14 @@
 
 ---
 
+## [3.4.1] 2021-03-23
+
+### Fixed
+
+- Sandbox now works with an app composed of nothing but WebSockets, fixes [#1099](https://github.com/architect/architect/issues/1099)
+
+---
+
 ## [3.4.0] 2021-03-02
 
 ### Added
