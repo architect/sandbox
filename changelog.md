@@ -49,6 +49,14 @@
 
 ---
 
+## [3.5.0] 2021-04-06
+
+### Added
+
+- Internal change: added internal Arc service, including first service endpoint: SSM mock for proper internal service discovery to `aws-sdk` calls
+
+---
+
 ## [3.4.1] 2021-03-23
 
 ### Fixed
@@ -75,7 +83,7 @@
 
 ### Added
 
-- Adds internal service discovery endpoint
+- Internal change: added internal service discovery endpoint
 
 ---
 
