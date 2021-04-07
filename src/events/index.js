@@ -52,6 +52,16 @@ module.exports = function createEventBus (inventory) {
           else callback()
         },
 
+        // Internal Arc services
+        function _internal (callback) {
+          if (!all) {
+            // eslint-disable-next-line
+            let { _arc } = require('../sandbox')
+            _arc.start(options, callback)
+          }
+          else callback()
+        },
+
         function _finalSetup (callback) {
           let listener = _listener.bind({}, inventory)
           eventBus = http.createServer(listener)

@@ -38,6 +38,16 @@ module.exports = function createTables (inventory) {
           else callback()
         },
 
+        // Internal Arc services
+        function _internal (callback) {
+          if (!all) {
+            // eslint-disable-next-line
+            let { _arc } = require('../sandbox')
+            _arc.start(options, callback)
+          }
+          else callback()
+        },
+
         function _startDynalite (callback) {
           if (!hasExternalDb) {
             dynamo = dynalite({ createTableMs: 0 }).listen(tablesPort, callback)
