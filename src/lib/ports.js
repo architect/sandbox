@@ -5,12 +5,13 @@ let net = require('net')
  * - Note: this may be run many times during a single process!
  */
 function getPorts (port) {
-  let { PORT, ARC_EVENTS_PORT, ARC_TABLES_PORT } = process.env
+  let { PORT, ARC_EVENTS_PORT, ARC_TABLES_PORT, ARC_INTERNAL } = process.env
 
   // CLI config (which are passed to this fn) > env var config
   let httpPort = port || Number(PORT) || 3333
   let eventsPort = Number(ARC_EVENTS_PORT) || httpPort + 1
   let tablesPort = Number(ARC_TABLES_PORT) || 5000
+  let _arcPort = Number(ARC_INTERNAL) || httpPort - 1
 
   // Always set main HTTP / WebSocket port env vars
   process.env.PORT = httpPort
@@ -30,16 +31,18 @@ function getPorts (port) {
 
   // Validate
   let notNum = e => e && isNaN(e)
-  if (notNum(eventsPort) ||
+  if (notNum(httpPort) ||
+      notNum(eventsPort) ||
       notNum(tablesPort) ||
-      notNum(httpPort)) {
+      notNum(_arcPort)) {
     throw ReferenceError('Ports must be numbers')
   }
 
   return {
     httpPort,
     eventsPort,
-    tablesPort
+    tablesPort,
+    _arcPort,
   }
 }
 

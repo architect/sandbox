@@ -2,7 +2,7 @@ let series = require('run-series')
 let { callbackify } = require('util')
 
 module.exports = function end (server, callback) {
-  let { events, http, inventory, tables } = server
+  let { events, http, tables, _arc, inventory } = server
   let { inv } = inventory
 
   // Set up promise if there is no callback
@@ -27,6 +27,9 @@ module.exports = function end (server, callback) {
     function _dynamo (callback) {
       if (tables) tables.end(callback)
       else callback()
+    },
+    function _internal (callback) {
+      _arc.end(callback)
     },
     function _plugins (callback) {
       if (inv._project.plugins) {
