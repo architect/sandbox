@@ -2,6 +2,7 @@ let inv = require('@architect/inventory')
 let _events = require('../events')
 let _http = require('../http')
 let _tables = require('../tables')
+let _arc = require('../arc')
 
 module.exports = function serviceFactory (params) {
   let { server, type, update } = params
@@ -10,6 +11,7 @@ module.exports = function serviceFactory (params) {
   if (t('events'))  init = _events
   if (t('http'))    init = _http
   if (t('tables'))  init = _tables
+  if (t('_arc'))    init = _arc
   return {
     start: function (options = {}, callback) {
       // Set up promise if there's no callback

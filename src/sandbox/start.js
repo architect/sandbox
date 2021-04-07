@@ -21,6 +21,7 @@ module.exports = function _start (params, callback) {
     events,
     http,
     tables,
+    _arc,
   } = params
   let { inv } = inventory
   let { preferences: prefs } = inv._project
@@ -67,6 +68,11 @@ module.exports = function _start (params, callback) {
           callback()
         }
       })
+    },
+
+    // Internal Arc services
+    function _internal (callback) {
+      _arc.start(params, callback)
     },
 
     // Start DynamoDB (@tables)

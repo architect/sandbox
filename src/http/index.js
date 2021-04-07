@@ -86,6 +86,16 @@ module.exports = function createHttpServer (inventory) {
           else callback()
         },
 
+        // Internal Arc services
+        function _internal (callback) {
+          if (!all) {
+            // eslint-disable-next-line
+            let { _arc } = require('../sandbox')
+            _arc.start(options, callback)
+          }
+          else callback()
+        },
+
         function _finalSetup (callback) {
           // Create an actual server; how quaint!
           httpServer = http.createServer(function _request (req, res) {

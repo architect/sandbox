@@ -14,6 +14,7 @@ let server = {
   events: undefined,
   http: undefined,
   tables: undefined,
+  _arc: undefined,
 }
 
 /**
@@ -22,6 +23,7 @@ let server = {
 let events = service({ server, type: 'events', update })
 let http = service({ server, type: 'http', update })
 let tables = service({ server, type: 'tables', update })
+let _arc = service({ server, type: '_arc', update })
 
 /**
  * Run startup routines and start all services
@@ -46,6 +48,7 @@ function start (args = {}, callback) {
         events,
         http,
         tables,
+        _arc,
         inventory,
       }, callback)
     }
@@ -70,9 +73,9 @@ function end (callback) {
 
   inv({}, function (err, inventory) {
     if (err) callback(err)
-    else _end({ events, http, inventory, tables }, callback)
+    else _end({ events, http, tables, _arc, inventory }, callback)
   })
   return promise
 }
 
-module.exports = { events, http, tables, start, end }
+module.exports = { events, http, tables, _arc, start, end }
