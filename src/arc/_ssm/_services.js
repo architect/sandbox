@@ -12,6 +12,16 @@ module.exports = function servicePopulator (inventory) {
         services.tables[name] = `${app}-staging-${name}`
       })
     }
+    if (inv._project.plugins) {
+      const plugins = Object.keys(inv._project.plugins)
+      plugins.forEach(pluginName => {
+        const pluginModule = inv._project.plugins[pluginName]
+        if (pluginModule && pluginModule.variables) {
+          const pluginVars = pluginModule.variables({ arc: inv._project.arc, stage: 'testing', inventory })
+          services[pluginName] = pluginVars
+        }
+      })
+    }
     inv._serviceDiscovery = services
   }
 }
