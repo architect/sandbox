@@ -1,6 +1,11 @@
 let _ssm = require('./_ssm')
 
 module.exports = function _arcListener ({ inventory }, req, res) {
+  function end () {
+    res.statusCode = 404
+    res.end()
+    return
+  }
   if (req.method.toLowerCase() === 'post') {
     let body = ''
 
@@ -13,11 +18,8 @@ module.exports = function _arcListener ({ inventory }, req, res) {
         _ssm({ inventory, body }, req, res)
         return
       }
+      else end()
     })
   }
-  else {
-    res.statusCode = 404
-    res.end()
-    return
-  }
+  else end()
 }
