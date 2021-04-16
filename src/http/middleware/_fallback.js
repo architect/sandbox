@@ -129,10 +129,13 @@ module.exports = function fallback (inventory, req, res, next) {
   }
   // Failure
   else {
+    /*
     res.statusCode = 403
     res.setHeader('content-type', 'text/html; charset=utf-8;')
     let message = `Endpoint does not exist for ${method} ${pathname}<br>Add <code>@http ${method} ${pathname}</code> to your Architect project manifest (and create a corresponding handler)`
     res.end(message)
+    */
+    next()
   }
 
   // Invoke a root proxy payload
