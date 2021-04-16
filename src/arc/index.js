@@ -1,5 +1,6 @@
 let http = require('http')
 let _listener = require('./_listener')
+let { getPorts } = require('../lib')
 
 /**
  * Internal Architect services, including:
@@ -10,9 +11,10 @@ module.exports = function _internal (inventory) {
   let _arcServices
 
   _arc.start = function start (options, callback) {
-    let { update } = options
-    let { ARC_INTERNAL, PORT } = process.env
-    ARC_INTERNAL = ARC_INTERNAL || Number(PORT) - 1 // Yeah, it's a magical number, I know
+    let { update, port } = options
+    let { httpPort } = getPorts(port)
+    let { ARC_INTERNAL } = process.env
+    ARC_INTERNAL = ARC_INTERNAL || Number(httpPort) - 1 // Yeah, it's a magical number, I know
 
     let listener = _listener.bind({}, { inventory })
     _arcServices = http.createServer(listener)
