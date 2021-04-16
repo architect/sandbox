@@ -57,6 +57,7 @@ function start (options = {}, callback) {
         tables,
         _arc,
         inventory,
+        server
       }, callback)
     }
   })
