@@ -50,6 +50,7 @@ function start (args = {}, callback) {
         tables,
         _arc,
         inventory,
+        server
       }, callback)
     }
   })

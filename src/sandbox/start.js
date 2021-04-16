@@ -22,10 +22,10 @@ module.exports = function _start (params, callback) {
     http,
     tables,
     _arc,
+    server
   } = params
   let { inv } = inventory
   let { preferences: prefs } = inv._project
-  let server = { http, events, tables }
 
   // Set `all` to instruct service modules not to hydrate again, etc.
   params.all = true
