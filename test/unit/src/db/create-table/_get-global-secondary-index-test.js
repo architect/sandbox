@@ -31,7 +31,7 @@ test('Get inventory', t => {
 })
 
 test('Get DynamoDB GSI (normal)', t => {
-  t.plan(12)
+  t.plan(15)
   let gsi
 
   // Nada
@@ -68,6 +68,19 @@ test('Get DynamoDB GSI (normal)', t => {
   )
   t.equal(gsi[1].IndexName, 'accountID-petID-index', `Got back correct index name: ${gsi[0].IndexName}`)
   checkBoilerplate(t, gsi)
+
+  // Named GSIs
+  gsi = getGSI({ name: 'places', inventory })
+  t.equal(gsi.length, 1, 'Got array with one GSI back')
+  t.deepEqual(
+    gsi[0].KeySchema,
+    [
+      { AttributeName: 'location', KeyType: 'HASH' },
+      { AttributeName: 'altitude', KeyType: 'RANGE' }
+    ],
+    'Got correct key schema'
+  )
+  t.equal(gsi[0].IndexName, 'ByAltitude', `Got back correct user-specified index name: ${gsi[0].IndexName}`)
 })
 
 test('Get DynamoDB GSI (deprecated)', t => {

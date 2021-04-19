@@ -79,3 +79,8 @@ data
 data
   location *String
   id **String
+
+places
+  name ByAltitude
+  location *String
+  altitude **Number

@@ -2,6 +2,14 @@
 
 ---
 
+## [3.4.2] 2021-04-19
+
+### Fixed
+
+- Sandbox now supports named `@indexes` (via the `name` parameter), fixes [#1122](https://github.com/architect/architect/issues/1099)
+
+---
+
 ## [3.4.1] 2021-03-23
 
 ### Fixed
