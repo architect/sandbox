@@ -2,6 +2,10 @@
 
 ---
 
+### Added
+
+- Added `-quiet` flag to `deno run` statement, so `console.log` terminal output is easier to read
+
 ## [3.4.1] 2021-03-23
 
 ### Fixed
