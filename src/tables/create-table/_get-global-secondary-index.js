@@ -15,7 +15,8 @@ module.exports = function _getGSI (params) {
 
       let deprecated = process.env.DEPRECATED
       let s = sortKey ? `-${sortKey}` : '' // Naming extension for multi-keys
-      let IndexName = deprecated
+      let IndexName = index.indexName
+      if (!IndexName) IndexName = deprecated
         ? `${TableName}-${partitionKey}${s}-index` // Old school index naming
         : `${partitionKey}${s}-index` // New school index naming
 
