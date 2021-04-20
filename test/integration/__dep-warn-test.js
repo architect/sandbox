@@ -26,6 +26,9 @@ function reset () {
   data = ''
 }
 
+/**
+ * Hello! Because this test deals in node module loading it must be run before all other tests.
+ */
 test('Set up env', t => {
   t.plan(1)
   t.ok(sandbox, 'got sandbox')
