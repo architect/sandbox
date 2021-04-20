@@ -7,11 +7,13 @@ module.exports = function _ssm (params, req, res) {
   services(inventory)
   let { _serviceDiscovery } = inventory.inv
 
-  let message, stack
+  let message, stack, serviceType
   let Parameters = []
   try {
     message = JSON.parse(body)
-    stack = message.Path.split('/').filter(Boolean)[0] // cloudformation stack name
+    let parts = message.Path.split('/').filter(Boolean)
+    stack = parts[0] // cloudformation stack name
+    serviceType = parts[1] // service type being requested
   }
   catch (e) {
     res.statusCode = 400
@@ -20,7 +22,7 @@ module.exports = function _ssm (params, req, res) {
   }
   Object.entries(_serviceDiscovery).forEach(([ type, map ]) => {
     Object.entries(map).forEach(([ key, Value ]) => {
-      Parameters.push({
+      if (!serviceType || type === serviceType) Parameters.push({
         Name: `/${stack}/${type}/${key}`,
         Type: 'String',
         Value,
