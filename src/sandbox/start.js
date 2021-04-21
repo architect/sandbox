@@ -7,6 +7,7 @@ let series = require('run-series')
 let create = require('@architect/create')
 let { chars } = require('@architect/utils')
 let { env, maybeHydrate } = require('../lib')
+let invokePluginFunction = require('../invoke-lambda/_plugin')
 let startupScripts = require('./_startup-scripts')
 
 module.exports = function _start (params, callback) {
@@ -103,7 +104,13 @@ module.exports = function _start (params, callback) {
             return start
           })
         if (pluginServices.length) {
-          series(pluginServices.map(start => start.bind({}, { arc: inv._project.arc, inventory, services: server })), function (err) {
+          let invokeFunction = invokePluginFunction.bind({}, inventory)
+          series(pluginServices.map(start => start.bind({}, {
+            arc: inv._project.arc,
+            inventory,
+            invokeFunction,
+            services: server
+          })), function (err) {
             if (err) callback(err)
             else callback()
           })
