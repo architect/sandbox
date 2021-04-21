@@ -5,6 +5,7 @@ module.exports = function servicePopulator (inventory) {
     let services = {
       tables: {}
     }
+    // TODO add @events, @queues, @static, bucket param population
     if (inv.tables) {
       inv.tables.forEach(({ name }) => {
         // 'staging' env is just for legacy local compatibility

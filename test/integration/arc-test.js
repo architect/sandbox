@@ -75,7 +75,7 @@ test('Shut down Sandbox', t => {
   shutdown(t)
 })
 
-test('[Dependency warnings] Teardown', t => {
+test('Teardown', t => {
   t.plan(3)
   shutdown(t)
   delete process.env.ARC_API_TYPE
