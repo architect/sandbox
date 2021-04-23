@@ -59,7 +59,7 @@ module.exports = function createHttpServer (inventory) {
           else fingerprint({ inventory }, function next (err, result) {
             if (err) callback(err)
             else {
-              let msg = 'Static asset fingerpringing enabled, public/static.json generated'
+              let msg = 'Static asset fingerprinting enabled, public/static.json generated'
               if (result) update.done(msg)
               callback()
             }
