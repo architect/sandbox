@@ -1,6 +1,5 @@
 let { join } = require('path')
-let arc = require('@architect/functions')
-let { existsSync, mkdirSync, readFileSync } = require('fs')
+let { existsSync, mkdirSync } = require('fs')
 let { sync: rm } = require('rimraf')
 let tiny = require('tiny-json-http')
 let test = require('tape')
@@ -14,6 +13,7 @@ let tmp = join(mock, 'tmp')
 
 test('Set up env', t => {
   t.plan(2)
+  rm(tmp)
   mkdirSync(tmp, { recursive: true })
   t.ok(sandbox, 'got sandbox')
   t.ok(existsSync(tmp), 'Created tmp dir')
@@ -125,21 +125,6 @@ test('[Timeout] get /times-out', t => {
       t.ok(err.body.includes(time), `Timed out set to ${time}`)
     }
     else t.fail(result)
-  })
-})
-
-test('[Timeout] invoke-lambda timeout should be respected and lambda process should be killed', t => {
-  t.plan(1)
-  let fileThatShouldNotBeWritten = join(tmp, 'foo')
-  arc.events.publish({
-    name: 'event-timeout',
-    payload: { path: fileThatShouldNotBeWritten }
-  },
-  function done (err) {
-    if (err) t.fail(err)
-    else setTimeout(() => {
-      t.notEquals(readFileSync(fileThatShouldNotBeWritten).toString(), 'hiya', 'file not written to by event as event timed out and process was terminated appropriately')
-    }, 2000) // 1100 is timeout of test/mock/normal/src/events/event-timeout's delay to writing file, so we pad it a bit and check after said delay
   })
 })
 

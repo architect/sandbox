@@ -2,6 +2,7 @@ let http = require('http')
 let invoke = require('../invoke-ws')
 let Hashid = require('@begin/hashid')
 let { updater } = require('@architect/utils')
+let update = updater('Sandbox')
 
 /**
  * Handle handleshake and possibly return error; note:
@@ -19,7 +20,6 @@ module.exports = function upgrade (wss, inventory) {
     // Create a connectionId uuid
     let h = new Hashid
     let connectionId = h.encode(Date.now())
-    let update = updater('Sandbox')
     update.status('ws/connect: ' + connectionId)
 
     invoke({
@@ -31,6 +31,7 @@ module.exports = function upgrade (wss, inventory) {
     function connect (err, res) {
       let statusCode = res && res.statusCode
       if (err || !statusCode || typeof statusCode !== 'number') {
+        // update.status(`Error during WS upgrade (code: ${statusCode})`, JSON.stringify(err, null, 2), JSON.stringify(res, null, 2))
         socket.write(`HTTP/1.1 502 ${http.STATUS_CODES[502]}\r\n\r\n`)
         socket.destroy()
         return
@@ -41,6 +42,7 @@ module.exports = function upgrade (wss, inventory) {
         })
       }
       else {
+        // update.status(`Unclear what the situation is with this WS upgrade! (code: ${statusCode})`, JSON.stringify(res, null, 2))
         socket.write(`HTTP/1.1 ${statusCode} ${http.STATUS_CODES[statusCode]}\r\n\r\n`)
         socket.destroy()
         return

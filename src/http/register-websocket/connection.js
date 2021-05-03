@@ -2,13 +2,13 @@ let invoke = require('../invoke-ws')
 let pool = require('./pool')
 let noop = err => err ? console.log(err) : ''
 let { updater } = require('@architect/utils')
+let update = updater('Sandbox')
 
 module.exports = function connection (inventory, connectionId, ws) {
   let { get } = inventory
 
   // Save this for send to use
   pool.register(connectionId, ws)
-  let update = updater('Sandbox')
 
   ws.on('message', function message (msg) {
     let lambda

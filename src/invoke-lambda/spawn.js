@@ -3,9 +3,12 @@ let { spawn } = require('child_process')
 let kill = require('tree-kill')
 let { template } = require('../lib')
 let { head } = template
+const SIG = 'SIGINT'
+let update = updater('Sandbox')
 
 module.exports = function spawnChild (command, args, options, request, timeout, callback) {
   let cwd = options.cwd
+  let functionPath = cwd.replace(process.cwd(), '').substr(1)
   let timedout = false
   let headers = {
     'content-type': 'text/html; charset=utf8;',
@@ -24,7 +27,8 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
   let stdout = ''
   let stderr = ''
   let error
-  let closed = false
+  let murderInProgress
+  let closed
 
   if (!isDeno) {
     child.stdin.setEncoding('utf-8')
@@ -32,41 +36,54 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
     child.stdin.end()
   }
 
+  // Check if the process with specified PID is running or not (stolen from https://github.com/nisaacson/is-running/blob/master/index.js)
+  function isRunning (pid) {
+    let isRunning
+    try {
+      isRunning = process.kill(pid, 0) // using a signal of 0 is a special node construct; see nodejs docs https://nodejs.org/docs/latest-v14.x/api/process.html#process_process_kill_pid_signal
+    }
+    catch (e) {
+      isRunning = e.code === 'EPERM'
+    }
+    return isRunning
+  }
+
   // Ensure we don't have dangling processes due to open connections, etc.
-  function maybeShutdown () {
-    if (closed) { null } // noop
+  function maybeShutdown ( /* reason */ ) {
+    // update.status(`Shutting down ${functionPath} due to ${reason}`)
+    if (isRunning(child.pid) && !murderInProgress && !closed) {
+      // update.status(`${functionPath} is running, murder in progress`)
+      murderInProgress = true
+      let code = 0
+      if (error) {
+        update.error('Caught hanging execution with an error, attempting to exit 1')
+        code = 1
+      }
+      kill(child.pid, SIG, () => {
+        murderInProgress = false
+        // update.status(`${functionPath} murder finished`)
+        if (!closed) done(code)
+      })
+    }
     else {
-      // Wait for 50ms for a proper close, otherwise assume the process is hung
-      setTimeout(() => {
-        if (closed) { null } // Check one last time for graceful shutdown
-        else {
-          if (error) {
-            let update = updater('Sandbox')
-            update.error('Caught hanging execution with an error, attempting to exit 1')
-            kill(child.pid)
-            closed = true
-            done(1)
-          }
-          else {
-            kill(child.pid)
-            closed = true
-            done(0)
-          }
-        }
-      }, 50)
+      // update.status(`${functionPath} is NOT running, murder already in progress (${murderInProgress}, or process closed ${closed}`)
     }
   }
 
   // Set an execution timeout
+  // update.status(`Setting timeout on ${functionPath} to ${timeout}`)
   let to = setTimeout(function () {
     timedout = true
-    closed = true
-    kill(child.pid)
-    done(1)
+    let duration = `${timeout / 1000}s`
+    update.warn(`${functionPath} timed out after hitting its ${duration} timeout!`)
+    maybeShutdown(`${duration} timeout`)
   }, timeout)
 
   // End execution
   function done (code) {
+    if (closed) return
+    // update.status(`${functionPath} final wrap up, exit code ${code}`)
+    closed = true
     // Output any console logging from the child process
     let tidy = stdout.toString()
       .split('\n')
@@ -77,6 +94,27 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
     }
     if (stderr) {
       console.error(stderr)
+    }
+    // Extract the __ARC__ line
+    // PSA: rarely, the invoked lambda process may exit with a non-zero code but, still have correct and complete stdout process response. for that
+    // situation, we still try to parse the process output here and use that in conjunction with process exit code to determine if the process completed
+    // successfully or not
+    let command = line => line.startsWith('__ARC__')
+    let result = stdout.split('\n').find(command)
+    let returned = result && result !== '__ARC__ undefined __ARC_END__'
+    let apiType = process.env.ARC_API_TYPE
+    let parsed
+    if (returned) {
+      let raw = result
+        .replace('__ARC__', '')
+        .replace('__ARC_END__', '')
+        .trim()
+      try {
+        parsed = JSON.parse(raw)
+      }
+      catch (e) {
+        update.status(`${functionPath} parsing JSON stdout error! Raw parsed input followed by exception: `, raw, JSON.stringify(e, null, 2))
+      }
     }
 
     clearTimeout(to) // ensure the timeout doesn't block
@@ -97,21 +135,11 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
         `
       })
     }
-    else if (code === 0) {
-      // Extract the __ARC__ line
-      let command = line => line.startsWith('__ARC__')
-      let result = stdout.split('\n').find(command)
-      let returned = result && result !== '__ARC__ undefined __ARC_END__'
-      let apiType = process.env.ARC_API_TYPE
+    else if (code === 0 || returned) {
       if (!returned && apiType === 'http') {
         callback()
       }
-      else if (returned) {
-        let raw = result
-          .replace('__ARC__', '')
-          .replace('__ARC_END__', '')
-          .trim()
-        let parsed = JSON.parse(raw)
+      else if (parsed) {
         // If it's an error pretty print it
         if (parsed.name && parsed.message && parsed.stack) {
           parsed.body = `${head}
@@ -130,7 +158,7 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
           statusCode: 500,
           headers,
           body: `${head}<h1>Async error</h1>
-<p><strong>Lambda <code>${cwd}</code> ran without executing the completion callback or returning a value.</strong></p>
+<p><strong>Lambda <code>${functionPath}</code> ran without executing the completion callback or returning a value.</strong></p>
 
 <p>Dependency-free functions, or functions that use <code>@architect/functions arc.http.async()</code> must return a correctly formatted response object.</p>
 
@@ -158,29 +186,31 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
     // python buffers so you might get everything despite our best efforts
     stdout += data
     if (data.includes('__ARC_END__')) {
-      maybeShutdown()
+      maybeShutdown('stdout data')
     }
   })
 
   child.stderr.on('data', data => {
     stderr += data
     if (data.includes('__ARC_END__')) {
-      maybeShutdown()
+      maybeShutdown('stderr data')
     }
   })
 
   child.on('error', err => {
     error = err
     if (err.includes('__ARC_END__')) {
-      maybeShutdown()
+      maybeShutdown('error event')
     }
   })
 
-  child.on('close', function close (code) {
-    if (closed) {null} // Hung process was caught and shut down
-    else {
-      closed = true
-      done(code)
-    }
+  child.on('exit', (code /* , signal */) => {
+    // update.status(`${functionPath} emited 'exit' w/ code ${code} and signal ${signal}`)
+    done(code)
+  })
+
+  child.on('close', (code /* , signal */) => {
+    // update.status(`${functionPath} emited 'close' w/ code ${code} and signal ${signal}`)
+    done(code)
   })
 }
