@@ -9,8 +9,8 @@ let cwd = process.cwd()
 let mock = join(__dirname, '..', 'mock', 'dep-warn')
 let instructions = str => str.match(/Please run:/g).length
 
-let stdout = process.stdout.write
 let data = ''
+let stdout = process.stdout.write
 
 function setup () {
   process.stdout.write = write => {
@@ -54,7 +54,7 @@ test('[Dependency warnings (basic)] Lambda has its own deps', t => {
     teardown()
     if (err) t.fail(err)
     else {
-      console.log(data)
+      // t.comment(`stdout data: ${data}`)
       t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-deps_in_lambda')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
       t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
       t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
@@ -72,9 +72,9 @@ test('[Dependency warnings (basic)] Deps are in root', t => {
     url: url + '/deps-in-root'
   }, function _got (err) {
     teardown()
+    // t.comment(`stdout data: ${data}`)
     if (err) t.fail(err)
     else {
-      console.log(data)
       t.notOk(data.includes(join(process.cwd(), 'src', 'http', 'get-deps_in_root')), 'Got a dep warning for the root (with instructions to install into the root)')
       t.ok(data.includes('Please run: npm i'), 'Got instructions to install into the root')
       t.notOk(data.includes('root-dep'), 'Got a dep warning for a root dep')

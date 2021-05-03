@@ -1,7 +1,7 @@
 let arc = require('@architect/functions')
 let test = require('tape')
 let http = require('http')
-let { existsSync, mkdirSync, readFileSync } = require('fs')
+let { existsSync, mkdirSync, readFileSync, statSync } = require('fs')
 let { join } = require('path')
 let { events } = require('../../src')
 let { sync: rm } = require('rimraf')
@@ -31,11 +31,14 @@ function checkFile (t, file, message) {
       }
       else if (found) return
       else if (exists) {
-        found = true
-        t.pass('Found file proving event ran')
-        let contents = readFileSync(file).toString()
-        t.equal(contents, message, `Found correct file contents in ${new Date() - now}ms`)
-        teardown(t)
+        let stats = statSync(file)
+        if (stats.size > 0) {
+          found = true
+          t.pass('Found file proving event ran')
+          let contents = readFileSync(file).toString()
+          t.equal(contents, message, `Found correct file contents in ${new Date() - now}ms`)
+          teardown(t)
+        }
       }
     }, i * 100)
   }
@@ -194,6 +197,36 @@ test('arc.queues.publish (failure)', t => {
   function done (err) {
     if (err) t.ok(err.message.includes('404'), 'Event not found')
     else t.fail('Publish should have failed')
+  })
+})
+
+test('invoke-lambda should respect timeout for async functions and process should be killed', t => {
+  t.plan(1)
+  let fileThatShouldNotBeWritten = join(tmp, 'foo-async')
+  arc.events.publish({
+    name: 'event-timeout-async',
+    payload: { path: fileThatShouldNotBeWritten }
+  },
+  function done (err) {
+    if (err) t.fail(err)
+    else setTimeout(() => {
+      t.notOk(existsSync(fileThatShouldNotBeWritten), 'file not created by event as event timed out and process was terminated appropriately')
+    }, 1250) // 1s is the configured timeout of test/mock/normal/src/events/event-async-timeout so we pad it a bit and check after delay
+  })
+})
+
+test('invoke-lambda should respect timeout for sync functions and process should be killed', t => {
+  t.plan(1)
+  let fileThatShouldNotBeWritten = join(tmp, 'foo-sync')
+  arc.events.publish({
+    name: 'event-timeout-sync',
+    payload: { path: fileThatShouldNotBeWritten }
+  },
+  function done (err) {
+    if (err) t.fail(err)
+    else setTimeout(() => {
+      t.notOk(existsSync(fileThatShouldNotBeWritten), 'file not created by event as event timed out and process was terminated appropriately')
+    }, 1250) // 1s is the configured timeout of test/mock/normal/src/events/event-sync-timeout so we pad it a bit and check after delay
   })
 })
 

@@ -1,10 +1,13 @@
 let pool = require('./pool')
+// let { updater } = require('@architect/utils')
+// let update = updater('Sandbox')
 
 module.exports = function send (req, res) {
   try {
     let ws = pool.getConnection(req.body.id)
     if (ws) {
       ws.send(JSON.stringify(req.body.payload))
+      // update.status(`ws/send: ${req.body.id}`)
     }
     else {
       let e = Error('GoneException: 410')
