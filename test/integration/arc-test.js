@@ -34,7 +34,7 @@ test('Set up env', t => {
   t.ok(sandbox, 'Got Sandbox')
 })
 
-test('Start Sandbox', t => {
+test('Start Sandbox ("normal" mock app)', t => {
   t.plan(1)
   process.chdir(join(mock, 'normal'))
   sandbox.start({ quiet: true }, function (err, result) {
@@ -69,6 +69,36 @@ test('Get & check params (specifying an invalid or unknown)', t => {
     else t.deepEqual(result.Parameters, [], 'No parameters returned')
   })
 })
+
+test('Shut down Sandbox', t => {
+  t.plan(1)
+  shutdown(t)
+})
+
+test('Start Sandbox ("plugins-sync" mock app)', t => {
+  t.plan(1)
+  process.chdir(join(mock, 'plugins-sync'))
+  sandbox.start({ quiet: true }, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+    }
+  })
+})
+
+test('Get & check params provided by plugin (without specifying a type)', t => {
+  t.plan(3)
+  // Should get all tables params back
+  ssm.getParametersByPath({ Path: '/plugins-sandbox' }, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.equals(result.Parameters.length, 1, 'one parameter returned')
+      t.equals(result.Parameters[0].Name, '/plugins-sandbox/myplugin/varOne', 'plugin parameter name correct')
+      t.equals(result.Parameters[0].Value, 'valueOne', 'plugin parameter value correct')
+    }
+  })
+})
+
 
 test('Shut down Sandbox', t => {
   t.plan(1)
