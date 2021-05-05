@@ -1,7 +1,7 @@
 let WebSocket = require('ws')
 let upgrade = require('./upgrade')
 let _connection = require('./connection')
-let sends = require('./send')
+let send = require('./send')
 
 module.exports = function registerWebSocket ({ app, httpServer, inventory }) {
 
@@ -15,7 +15,6 @@ module.exports = function registerWebSocket ({ app, httpServer, inventory }) {
   wss.on('connection', connection)
 
   // Listen for arc.ws.send invocations
-  let send = sends.bind({}, inventory)
   app.post('/__arc', send)
 
   return wss
