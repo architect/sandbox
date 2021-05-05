@@ -2,6 +2,14 @@
 
 ---
 
+## [-] 2021-05-05
+
+### Fixed
+
+- Undid change that unnecessarily added Inventory object to WS requests; fixes #1121, thanks @pgte!
+
+---
+
 ## [3.4.2] 2021-04-19
 
 ### Fixed
