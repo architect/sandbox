@@ -15,7 +15,7 @@ module.exports = {
       callback()
     },
     end: function ({ arc, inventory, services }, callback) {
-      fs.unlinkSync(file, 'syncplugin.test')
+      if (fs.existsSync(file)) fs.unlinkSync(file, 'syncplugin.test')
       callback()
     }
   }
