@@ -211,7 +211,22 @@ test('invoke-lambda should respect timeout for async functions and process shoul
     if (err) t.fail(err)
     else setTimeout(() => {
       t.notOk(existsSync(fileThatShouldNotBeWritten), 'file not created by event as event timed out and process was terminated appropriately')
-    }, 1250) // 1s is the configured timeout of test/mock/normal/src/events/event-async-timeout so we pad it a bit and check after delay
+    }, 1250) // 1s is the configured timeout of test/mock/normal/src/events/event-timeout-async so we pad it a bit and check after delay
+  })
+})
+
+test('invoke-lambda should respect timeout for async functions (even if they include a settimeout within them) and process should be killed', t => {
+  t.plan(1)
+  let fileThatShouldNotBeWritten = join(tmp, 'foo-async-settimeout')
+  arc.events.publish({
+    name: 'event-timeout-async-w-settimeout',
+    payload: { path: fileThatShouldNotBeWritten }
+  },
+  function done (err) {
+    if (err) t.fail(err)
+    else setTimeout(() => {
+      t.notOk(existsSync(fileThatShouldNotBeWritten), 'file not created by event as event timed out and process was terminated appropriately')
+    }, 1250) // 1s is the configured timeout of test/mock/normal/src/events/event-timeout-async-w-timeout so we pad it a bit and check after delay
   })
 })
 
@@ -226,7 +241,7 @@ test('invoke-lambda should respect timeout for sync functions and process should
     if (err) t.fail(err)
     else setTimeout(() => {
       t.notOk(existsSync(fileThatShouldNotBeWritten), 'file not created by event as event timed out and process was terminated appropriately')
-    }, 1250) // 1s is the configured timeout of test/mock/normal/src/events/event-sync-timeout so we pad it a bit and check after delay
+    }, 1250) // 1s is the configured timeout of test/mock/normal/src/events/event-timeout-sync so we pad it a bit and check after delay
   })
 })
 
