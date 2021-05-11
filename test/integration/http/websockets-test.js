@@ -142,6 +142,52 @@ test('[WebSockets] Connect, send payloads (custom filepath), disconnect', t => {
   ws.on('message', message.bind({}, t))
 })
 
+test('[WebSockets] Connect, send payloads (errors), disconnect', t => {
+  t.plan(12)
+  setup(t)
+
+  const payload = {
+    action: 'error',
+    ...data,
+    expect: 'error',
+  }
+
+  let connectionId = null
+
+  const checkForEcho = m => {
+    let message = JSON.parse(m)
+    t.ok(message, 'Received message payload from WS Lambda confirming send')
+
+    let { event, req } = message
+    t.ok(req.requestContext.connectionId, 'Got request context with connectionId')
+    connectionId = req.requestContext.connectionId
+    let body = JSON.parse(req.body)
+    t.equal(event, body.expect, `Invoked correct WebSocket Lambda / action: ${event}`)
+    t.equal(body.hi, data.hi, 'Got body payload')
+    t.equal(req.isBase64Encoded, false, 'Got isBase64Encoded false')
+  }
+
+  const checkForErrorMessage = m => {
+    const message = JSON.parse(m)
+    t.ok(message, 'Received message payload from WS Lambda confirming error')
+    t.equal(message.message, 'Internal server error', 'Got error message')
+    t.equal(message.connectionId, connectionId, 'Got error connectionId')
+    close(t)
+  }
+
+  ws.on('open', connect.bind({}, t, payload))
+  let callCount = 0
+  ws.on('message', message => {
+    if (callCount === 0) {
+      callCount++
+      checkForEcho(message)
+    }
+    else {
+      checkForErrorMessage(message)
+    }
+  })
+})
+
 test('[WebSockets] Shut down Sandbox', t => {
   t.plan(1)
   shutdown(t)

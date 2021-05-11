@@ -50,6 +50,7 @@ any     /any-p/:param
 hello
 custom
   src src/ws/custom-path
+error
 
 @tables
 accounts
