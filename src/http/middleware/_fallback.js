@@ -127,6 +127,11 @@ module.exports = function fallback (inventory, req, res, next) {
     let src = join(process.cwd(), 'src', 'http', `get-index`) // We can assume this file path bc custom didn't land until Arc 8
     invokeProxy(src)
   }
+  else if (inv._project.plugins) {
+    // in case the project has plugins, plugins may override http server behaviour in sandbox with additional routes.
+    // just to be safe, we invoke next() here in case plugins wanna do their thing (we only lose the nicely-formatted HTTP message in the next `else` below)
+    next()
+  }
   // Failure
   else {
     res.statusCode = 403
