@@ -36,11 +36,13 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
     child.stdin.end()
   }
 
-  // Check if the process with specified PID is running or not (stolen from https://github.com/nisaacson/is-running/blob/master/index.js)
+  // Check if the process with specified PID is running or not
+  // Stolen from: https://github.com/nisaacson/is-running/blob/master/index.js
   function isRunning (pid) {
     let isRunning
     try {
-      isRunning = process.kill(pid, 0) // using a signal of 0 is a special node construct; see nodejs docs https://nodejs.org/docs/latest-v14.x/api/process.html#process_process_kill_pid_signal
+      // Signal 0 is a special node construct, see: https://nodejs.org/docs/latest-v14.x/api/process.html#process_process_kill_pid_signal
+      isRunning = process.kill(pid, 0)
     }
     catch (e) {
       isRunning = e.code === 'EPERM'
@@ -95,10 +97,12 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
     if (stderr) {
       console.error(stderr)
     }
-    // Extract the __ARC__ line
-    // PSA: rarely, the invoked lambda process may exit with a non-zero code but, still have correct and complete stdout process response. for that
-    // situation, we still try to parse the process output here and use that in conjunction with process exit code to determine if the process completed
-    // successfully or not
+    /**
+     * PSA: rarely, the invoked Lambda process has been observed to exit with non-corresponding codes
+     * Example: a correct and complete stdout response has in certain circumstances been observed exit non-0 (and vice versa, see #1137)
+     * Assuming exit codes may not be reliable: try parsing output (with the exit code) to determine successful completion
+     */
+    // Ok, now extract the __ARC__ ... __ARC_END__ line
     let command = line => line.startsWith('__ARC__')
     let result = stdout.split('\n').find(command)
     let returned = result && result !== '__ARC__ undefined __ARC_END__'

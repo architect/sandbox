@@ -2,13 +2,13 @@
 
 ---
 
-## [-] 2021-05-05
+## [3.4.3] 2021-05-05
 
 ### Fixed
 
 - Undid change that unnecessarily added Inventory object to WS requests; fixes [#1121](https://github.com/architect/architect/issues/1121), thanks @pgte!
-- Fixed an issue where Sandbox wouldn't kill a running lambda if its configured timeout had expired, fixes [#1137](https://github.com/architect/architect/issues/1137)
-- Sandbox will now print a warning to the console if any running lambdas time out
+- Fixed an issue where Sandbox wouldn't kill a running Lambda if its configured timeout had expired, fixes [#1137](https://github.com/architect/architect/issues/1137), thanks @andybee!
+- Sandbox will now print a warning to the console if any running Lambdas time out
 
 ---
 
