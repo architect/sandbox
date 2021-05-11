@@ -9,7 +9,7 @@ module.exports = function runInNode (options, request, timeout, callback) {
     else {
       let minify = script => '"' + script.replace(/\n/g, '').trim() + '"'
       let script = minify(data.toString())
-      spawn('node', [ '-e', script ], options, request, timeout, callback)
+      spawn('node', [ '-e', script, '--preserve-symlinks' ], options, request, timeout, callback)
     }
   })
 }
