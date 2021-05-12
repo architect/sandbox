@@ -77,7 +77,14 @@ module.exports = function createTables (inventory) {
       let msg = 'DynamoDB successfully shut down'
       if (hasExternalDb) callback(null, msg)
       else {
-        dynamo.close(function _closed (err) {
+        series([
+          dynamo.close,
+          function _arcEnd (callback) {
+            // eslint-disable-next-line
+            let { _arc } = require('../sandbox')
+            _arc.end(callback)
+          }
+        ], function _tablesEnded (err) {
           if (err) callback(err)
           else callback(null, msg)
         })

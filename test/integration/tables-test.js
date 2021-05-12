@@ -380,3 +380,42 @@ test('Sync tables.end (deprecated)', t => {
     }
   })
 })
+
+// `all:true` option for starting and stopping
+test('Sync tables.start({ all: true })', t => {
+  t.plan(1)
+  tables.start({ quiet: true, all: true }, function (err, result) {
+    if (err) t.fail(err)
+    else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
+  })
+})
+
+test('Sync tables.end({ all: true })', t => {
+  t.plan(1)
+  tables.end(function (err, result) {
+    if (err) t.fail(err)
+    else t.equal(result, 'DynamoDB successfully shut down', 'Tables ended')
+  })
+})
+
+test('Async tables.start({ all: true })', async t => {
+  t.plan(1)
+  try {
+    let result = await tables.start({ quiet: true, all: true })
+    t.equal(result, 'DynamoDB successfully started', 'Tables started (async)')
+  }
+  catch (err) {
+    t.fail(err)
+  }
+})
+
+test('Async tables.end({ all: true })', async t => {
+  t.plan(1)
+  try {
+    let ended = await tables.end()
+    t.equal(ended, 'DynamoDB successfully shut down', 'Tables ended')
+  }
+  catch (err) {
+    t.fail(err)
+  }
+})
