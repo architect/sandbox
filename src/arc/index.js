@@ -28,7 +28,8 @@ module.exports = function _internal (inventory) {
   }
 
   _arc.end = function end (callback) {
-    _arcServices.close(callback)
+    if (_arcServices) _arcServices.close(callback)
+    else callback()
   }
 
   return _arc
