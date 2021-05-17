@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-let inventory = require('@architect/inventory')
+let _inventory = require('@architect/inventory')
 let cli = require('./index.js')
+let { getFlags } = require('../lib')
+let flags = getFlags()
 let pkg = require('../../package.json')
 let update = require('update-notifier')
 let ver = pkg.version
-let options = process.argv
 
 /**
  * Entry for Sandbox running its own CLI
@@ -20,32 +21,17 @@ update({ pkg, shouldNotifyInNpmScript: true })
     dimBorder: true
   } })
 
-// Get the base port for HTTP / WebSockets; tables + events key off this
-// CLI args > env var
-function port () {
-  let port = Number(process.env.PORT) || 3333
-  let findPort = option => [ '-p', '--port', 'port' ].includes(option)
-  if (options && options.some(findPort)) {
-    let thePort = i => options[options.indexOf(i) + 1]
-    if (options.includes('-p'))           port = thePort('-p')
-    else if (options.includes('--port'))  port = thePort('--port')
-    else if (options.includes('port'))    port = thePort('port')
-  }
-  return port
-}
-
 // Hit it
-inventory({}, function (err, result) {
+_inventory({}, function (err, inventory) {
   if (err) {
     console.log(err)
     process.exit(1)
   }
   cli({
     needsValidCreds: false,
-    options,
     version: `Sandbox ${ver}`,
-    port: port(),
-    inventory: result
+    inventory,
+    ...flags,
   },
   function _done (err) {
     if (err) {

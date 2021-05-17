@@ -4,29 +4,31 @@ let _start = require('./start')
 let _end = require('./end')
 
 let inv = require('@architect/inventory')
+let { getFlags } = require('../lib')
 let { updater } = require('@architect/utils')
-let update = updater('Sandbox')
+let { logLevel, quiet } = getFlags()
+let update = updater('Sandbox', { logLevel, quiet })
 
 /**
  * Server - contains Sandbox service singletons that can operate independently
  */
 let server = {
   events: undefined,
-  http: undefined,
+  http:   undefined,
   tables: undefined,
 }
 
 /**
  * Core Sandbox services
  */
-let events = service({ server, type: 'events', update })
-let http = service({ server, type: 'http', update })
-let tables = service({ server, type: 'tables', update })
+let events = service({ server, update, logLevel, quiet, type: 'events' })
+let http =   service({ server, update, logLevel, quiet, type: 'http' })
+let tables = service({ server, update, logLevel, quiet, type: 'tables' })
 
 /**
  * Run startup routines and start all services
  */
-function start (args = {}, callback) {
+function start (options = {}, callback) {
   // Set up promise if there's no callback
   let promise
   if (!callback) {
@@ -40,8 +42,13 @@ function start (args = {}, callback) {
   inv({}, function (err, inventory) {
     if (err) callback(err)
     else {
+      update = updater('Sandbox', {
+        logLevel: options && options.logLevel || logLevel,
+        quiet: options && options.quiet || quiet,
+      })
+
       _start({
-        ...args,
+        ...options,
         update,
         events,
         http,

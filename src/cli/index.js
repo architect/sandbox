@@ -9,10 +9,8 @@ let { tmpdir } = require('os')
 let sandbox = require('../sandbox')
 
 module.exports = function cli (params = {}, callback) {
-  let { version, options = [], inventory } = params
+  let { version, inventory, logLevel, quiet, symlink } = params
   if (!version) version = `Sandbox ${pkgVer}`
-  let symlink = options.some(o => o === '--disable-symlinks') ? false : true
-  params.symlink = symlink
 
   sandbox.start(params, function watching (err) {
     if (err) {
@@ -23,7 +21,7 @@ module.exports = function cli (params = {}, callback) {
     else if (callback) callback()
 
     // Setup
-    let update = updater('Sandbox')
+    let update = updater('Sandbox', { logLevel, quiet })
     let deprecated = process.env.DEPRECATED
 
     let watcher

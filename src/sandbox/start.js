@@ -14,7 +14,6 @@ module.exports = function _start (params, callback) {
   let {
     inventory,
     // Settings
-    options,
     symlink = true,
     // Everything else
     update,
@@ -28,13 +27,6 @@ module.exports = function _start (params, callback) {
 
   // Set `all` to instruct service modules not to hydrate again, etc.
   params.all = true
-
-  // Set up verbositude
-  let verbose = false
-  let findVerbose = option => [ '-v', '--verbose', 'verbose' ].includes(option)
-  if (options && options.some(findVerbose)) {
-    verbose = true
-  }
 
   let deprecated = process.env.DEPRECATED
 
@@ -141,8 +133,8 @@ module.exports = function _start (params, callback) {
   function _done (err) {
     if (err) callback(err)
     else {
-      if (verbose && process.env.ARC_AWS_CREDS === 'dummy') {
-        update.warn('Missing or invalid AWS credentials or credentials file, using dummy credentials (this is probably ok)')
+      if (process.env.ARC_AWS_CREDS === 'dummy') {
+        update.verbose.warn('Missing or invalid AWS credentials or credentials file, using dummy credentials (this is probably ok)')
       }
       callback(null, 'Sandbox successfully started')
     }
