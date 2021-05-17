@@ -11,7 +11,7 @@ let httpProxy = require('http-proxy')
  * - ASAP handling (if present)
  * - Error out
  */
-module.exports = function fallback (inventory, req, res, next) {
+module.exports = function fallback ({ inventory, update }, req, res, next) {
   let { inv, get } = inventory
   let apiType = process.env.ARC_API_TYPE
   let httpAPI = apiType.startsWith('http')
@@ -118,6 +118,7 @@ module.exports = function fallback (inventory, req, res, next) {
       lambda,
       apiType,
       inventory,
+      update,
     })
     req.params = { [rootParam[1].substr(1)]: '' }
     exec(req, res)
@@ -146,6 +147,7 @@ module.exports = function fallback (inventory, req, res, next) {
       },
       apiType,
       inventory,
+      update,
     })
     let proxy = pathname.startsWith('/') ? pathname.substr(1) : pathname
     req.params = { proxy }

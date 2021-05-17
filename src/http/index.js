@@ -27,8 +27,6 @@ module.exports = function createHttpServer (inventory) {
   if (inv.http || inv.static || inv.ws) {
     let app = Router({ mergeParams: true })
 
-    app = middleware(app, inventory)
-
     // Keep a reference up here for fns below
     let httpServer
     let websocketServer
@@ -36,6 +34,8 @@ module.exports = function createHttpServer (inventory) {
     // Start the HTTP server
     app.start = function start (options, callback) {
       let { all, port, symlink = true, update } = options
+
+      middleware(app, { inventory, update })
 
       // Set up ports and HTTP-specific env vars
       let { httpPort } = getPorts(port)
@@ -95,11 +95,11 @@ module.exports = function createHttpServer (inventory) {
           // Bind WebSocket app to HTTP server
           // This must be done before @http so it isn't clobbered by greedy routes
           if (inv.ws) {
-            websocketServer = registerWS({ app, httpServer, inventory })
+            websocketServer = registerWS({ app, httpServer, inventory, update })
           }
 
           if (inv.http) {
-            registerHTTP({ app, routes: inv.http, inventory })
+            registerHTTP({ app, routes: inv.http, inventory, update })
           }
 
           callback()

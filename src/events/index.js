@@ -53,7 +53,7 @@ module.exports = function createEventBus (inventory) {
         },
 
         function _finalSetup (callback) {
-          let listener = _listener.bind({}, inventory)
+          let listener = _listener.bind({}, { inventory, update })
           eventBus = http.createServer(listener)
           callback()
         },

@@ -1,10 +1,8 @@
 let invoke = require('../invoke-ws')
 let pool = require('./pool')
 let noop = err => err ? console.log(err) : ''
-let { updater } = require('@architect/utils')
-let update = updater('Sandbox')
 
-module.exports = function connection (inventory, connectionId, ws) {
+module.exports = function connection ({ inventory, update }, connectionId, ws) {
   let { get } = inventory
 
   // Save this for send to use
@@ -26,6 +24,7 @@ module.exports = function connection (inventory, connectionId, ws) {
         body: msg,
         connectionId,
         inventory,
+        update,
       }, noop)
     }
     else {
@@ -36,6 +35,7 @@ module.exports = function connection (inventory, connectionId, ws) {
         body: msg,
         connectionId,
         inventory,
+        update,
       }, noop)
     }
   })
@@ -48,6 +48,7 @@ module.exports = function connection (inventory, connectionId, ws) {
       connectionId,
       req: { headers: { host: `localhost:${process.env.PORT}` } },
       inventory,
+      update,
     }, noop)
   })
 }

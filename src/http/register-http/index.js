@@ -1,8 +1,7 @@
-let { updater } = require('@architect/utils')
 let log = require('./pretty-print-route')
 let invoker = require('../invoke-http')
 
-module.exports = function reg ({ app, routes, inventory }) {
+module.exports = function reg ({ app, routes, inventory, update }) {
   let apiType = process.env.ARC_API_TYPE
   let deprecated = process.env.DEPRECATED
   let msgs = {
@@ -13,7 +12,6 @@ module.exports = function reg ({ app, routes, inventory }) {
     httpv1: 'HTTP API mode / Lambda proxy v1.0 format',
   }
   let msg = deprecated ? msgs.deprecated : msgs[apiType]
-  let update = updater('Sandbox')
   update.done(`Loaded routes (${msg})`)
 
   routes.forEach(lambda => {
@@ -29,7 +27,7 @@ module.exports = function reg ({ app, routes, inventory }) {
         // Pretty print the route reg
         log({ method, path, src })
         // Register the route with the Router instance
-        let exec = invoker({ lambda, apiType, inventory })
+        let exec = invoker({ lambda, apiType, inventory, update })
         app[method](path, exec)
       }
     }
@@ -38,7 +36,7 @@ module.exports = function reg ({ app, routes, inventory }) {
       log({ method, path, src })
 
       // Register the route with the Router instance
-      let exec = invoker({ lambda, apiType, inventory })
+      let exec = invoker({ lambda, apiType, inventory, update })
       if (method !== 'any') {
         app[method](path, exec)
       }
