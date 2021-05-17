@@ -1,10 +1,11 @@
 let inv = require('@architect/inventory')
+let { updater } = require('@architect/utils')
 let _events = require('../events')
 let _http = require('../http')
 let _tables = require('../tables')
 
 module.exports = function serviceFactory (params) {
-  let { server, type, update } = params
+  let { server, type, update, logLevel, quiet } = params
   let t = t => type === t
   let init
   if (t('events'))  init = _events
@@ -19,6 +20,14 @@ module.exports = function serviceFactory (params) {
           callback = function (err, result) {
             err ? rej(err) : res(result)
           }
+        })
+      }
+
+      // Populate updater with passed options (if any)
+      if (options.logLevel || options.quiet) {
+        update = updater('Sandbox', {
+          logLevel: options && options.logLevel || logLevel,
+          quiet: options && options.quiet || quiet,
         })
       }
 
