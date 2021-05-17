@@ -6,13 +6,13 @@ module.exports = function runInNode (options, request, timeout, callback) {
 
   let denoGlobalConfigPath = path.join(options.cwd, 'vendor', 'views', 'deno.tsconfig.json')
   let denoFunctionConfigPath = path.join(options.cwd, 'deno.tsconfig.json')
-  let denoConfig = '';
+  let denoConfig = ''
 
-  if(fs.existsSync(denoGlobalConfigPath)) {
+  if (fs.existsSync(denoGlobalConfigPath)) {
     denoConfig = `--config ${denoGlobalConfigPath}`
   }
 
-  if(fs.existsSync(denoFunctionConfigPath)) {
+  if (fs.existsSync(denoFunctionConfigPath)) {
     denoConfig = `--config ${denoFunctionConfigPath}`
   }
 
