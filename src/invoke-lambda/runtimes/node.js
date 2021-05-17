@@ -31,7 +31,7 @@ process.stdin.on('close', () => {
     lambda: name => missing.push('lambda::' + name),
     root: name => missing.push('root::' + name),
   };
-  let debug = [ { cwd, lambdaPackage, shared, sharedPackage, views, viewsPackage } ];
+  let debug = [ { note: 'Execution metadata', cwd, lambdaPackage, shared, sharedPackage, views, viewsPackage } ];
 
   /* Iterate through the require cache looking for dependency issues */
   Object.keys(require.cache).forEach(mod => {

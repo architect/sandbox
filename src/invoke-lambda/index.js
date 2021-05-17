@@ -1,5 +1,6 @@
 let { join } = require('path')
 let { existsSync } = require('fs')
+let chalk = require('chalk')
 
 let runInNode = require('./run-in-node')
 let runInDeno = require('./run-in-deno')
@@ -9,6 +10,8 @@ let runInRuby = require('./run-in-ruby')
 let warn = require('./warn')
 let missingRuntime = require('./missing-runtime')
 
+let serialize = i => chalk.dim(JSON.stringify(i, null, 2))
+
 /**
  * mocks a lambda.. not much to it eh!
  *
@@ -17,7 +20,7 @@ let missingRuntime = require('./missing-runtime')
  * @param {function} callback - node style errback
  */
 module.exports = function invokeLambda (params, callback) {
-  let { lambda, event, inventory } = params
+  let { lambda, event, inventory, update } = params
   // handlerFile is defined for all non-ASAP functions; ASAP bypasses this check
   if (!hasHandler(lambda)) {
     callback(Error('lambda_not_found'))
@@ -34,6 +37,9 @@ module.exports = function invokeLambda (params, callback) {
     else {
       let { src, config } = lambda
       let { runtime, timeout } = config
+
+      update.debug.status('Lambda config')
+      update.debug.raw(serialize(lambda))
 
       let PYTHONPATH = process.env.PYTHONPATH
         ? `${join(src, 'vendor')}:${process.env.PYTHONPATH}`
@@ -61,6 +67,14 @@ module.exports = function invokeLambda (params, callback) {
       }
       let request = JSON.stringify(event)
 
+      let max = 10000
+      let output = serialize(event).substr(0, max)
+      let chonky = output.length === 10000
+        ? ' (truncated at 10,000 chars)'
+        : ''
+      update.verbose.status(`Lambda event payload${chonky}`)
+      update.verbose.raw(output)
+
       let exec
       if (runtime.startsWith('nodejs')) exec = runInNode
       if (runtime.startsWith('deno'))   exec = runInDeno
@@ -80,10 +94,9 @@ module.exports = function invokeLambda (params, callback) {
             delete result.__DEP_ISSUES__
           }
           // Dependency warning debugger - handy for introspection during Lambda execution
-          // Maybe introduce with a proper --debug flag? For now, just uncomment
           if (result && result.__DEP_DEBUG__) {
-            // console.log('Dependencies (debug)')
-            // console.dir(result.__DEP_DEBUG__, { depth: null })
+            update.debug.status('Lambda dependency tree')
+            update.debug.raw(serialize(result.__DEP_DEBUG__))
             delete result.__DEP_DEBUG__
           }
           warn({ missing, inventory, src })
