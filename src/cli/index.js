@@ -238,7 +238,8 @@ module.exports = function cli (params = {}, callback) {
        * Watch for sandbox errors
        */
       watcher.on('error', function (err) {
-        update.error(`Error:`, err)
+        update.error(err)
+        process.exit(1)
       })
     }
   })

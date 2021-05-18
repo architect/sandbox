@@ -9,7 +9,7 @@ let ver = pkg.version
 
 /**
  * Entry for Sandbox running its own CLI
- *   Same as the @architect/architect caller, but calls updater + sets own version
+ *   Same as the @architect/architect caller, but calls update notifier + sets own version
  */
 update({ pkg, shouldNotifyInNpmScript: true })
   .notify({ boxenOpts: {

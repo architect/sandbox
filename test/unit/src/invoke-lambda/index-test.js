@@ -7,11 +7,11 @@ let update = require('@architect/utils').updater()
 let cwd = process.cwd()
 let mock = join(__dirname, '..', '..', '..', 'mock')
 
-// let spy = sinon.spy()
-let nodeFake = sinon.fake((options, request, timeout, callback) => callback(null, { options, request, timeout }))
-let pythonFake = sinon.fake((options, request, timeout, callback) => callback(null, { options, request, timeout }))
-let rubyFake = sinon.fake((options, request, timeout, callback) => callback(null, { options, request, timeout }))
-let denoFake = sinon.fake((options, request, timeout, callback) => callback(null, { options, request, timeout }))
+let fake = (params, callback) => callback(null, params)
+let nodeFake = sinon.fake(fake)
+let pythonFake = sinon.fake(fake)
+let rubyFake = sinon.fake(fake)
+let denoFake = sinon.fake(fake)
 let invoke = proxyquire('../../../../src/invoke-lambda', {
   './run-in-node': nodeFake,
   './run-in-python': pythonFake,

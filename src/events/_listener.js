@@ -33,12 +33,12 @@ module.exports = function eventBusListener ({ inventory, update }, req, res) {
 
     // @queues
     if (url === '/queues') {
-      message.arcType = 'queue'
+      message.arcType = 'queues'
       message.lambda = get.queues(message.name)
     }
     // @events
     else if (url === '/events' || url === '/') {
-      message.arcType = 'event'
+      message.arcType = 'events'
       message.lambda = get.events(message.name)
     }
     // Who knows
@@ -52,11 +52,12 @@ module.exports = function eventBusListener ({ inventory, update }, req, res) {
     }
     else {
       function mock () {
+        let lol = JSON.stringify(payload)
         switch (arcType) {
-        case 'event':
-          return { Records: [ { Sns: { Message: JSON.stringify(payload) } } ] } // this is fine
-        case 'queue':
-          return { Records: [ { body: JSON.stringify(payload) } ] } // also fine
+        case 'events':
+          return { Records: [ { Sns: { Message: lol } } ] } // this is fine
+        case 'queues':
+          return { Records: [ { body: lol } ] } // also fine
         default:
           throw ReferenceError('Unrecognized event type ' + arcType)
         }
