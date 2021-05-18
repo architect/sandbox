@@ -1,10 +1,8 @@
-let { updater } = require('@architect/utils')
-
 /**
  * Warn the user if node has resolved a dependency outside their function's folder
  */
 module.exports = function warn (params) {
-  let { missing = [], inventory, src } = params
+  let { missing = [], inventory, src, update } = params
   if (missing.length) {
     let dirs = {
       lambda: src,
@@ -22,7 +20,6 @@ module.exports = function warn (params) {
     missing = missing.filter(dep => !dep.endsWith('::aws-sdk'))
     // Do we still have anything left?
     if (missing.length) {
-      let update = updater('Sandbox')
       let plural = missing.length > 1
 
       update.warn(`You may have ${plural ? 'dependencies' : 'a dependency'} that could be inaccessible in production`)

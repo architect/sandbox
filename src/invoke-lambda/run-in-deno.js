@@ -1,8 +1,13 @@
-let path = require('path')
+let { join } = require('path')
 let spawn = require('./spawn')
 
-module.exports = function runInNode (options, request, timeout, callback) {
-  spawn('deno', [
-    'run', '-A', '--unstable', '--reload', path.join(__dirname, 'runtimes', 'deno.js')
-  ], options, request, timeout, callback)
+module.exports = function runInNode (params, callback) {
+  let deno = join(__dirname, 'runtimes', 'deno.js')
+  spawn({
+    command: 'deno',
+    args: [
+      'run', '-A', '--unstable', '--reload', deno
+    ],
+    ...params,
+  }, callback)
 }

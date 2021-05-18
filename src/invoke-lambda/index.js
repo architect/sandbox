@@ -37,8 +37,9 @@ module.exports = function invokeLambda (params, callback) {
     else {
       let { src, config } = lambda
       let { runtime, timeout } = config
+      let lambdaPath = src.replace(process.cwd(), '').substr(1)
 
-      update.debug.status('Lambda config')
+      update.debug.status(`Lambda config: ${lambdaPath}`)
       update.debug.raw(serialize(lambda))
 
       let PYTHONPATH = process.env.PYTHONPATH
@@ -70,10 +71,9 @@ module.exports = function invokeLambda (params, callback) {
       let max = 10000
       let output = serialize(event).substr(0, max)
       let chonky = output.length === 10000
-        ? ' (truncated at 10,000 chars)'
-        : ''
-      update.verbose.status(`Lambda event payload${chonky}`)
-      update.verbose.raw(output)
+      update.verbose.status(`Lambda event payload: ${lambdaPath}`)
+      update.verbose.raw(output + '...')
+      if (chonky) update.verbose.status('Truncated event payload log at 10KB')
 
       let exec
       if (runtime.startsWith('nodejs')) exec = runInNode
@@ -82,10 +82,10 @@ module.exports = function invokeLambda (params, callback) {
       if (runtime.startsWith('ruby'))   exec = runInRuby
 
       if (!exec) {
-        missingRuntime(runtime, src)
+        missingRuntime({ runtime, src, update })
         return callback('Missing runtime')
       }
-      exec(options, request, timeout * 1000, function done (err, result) {
+      exec({ options, request, timeout: timeout * 1000, update }, function done (err, result) {
         if (err) callback(err)
         else {
           let missing
@@ -95,11 +95,11 @@ module.exports = function invokeLambda (params, callback) {
           }
           // Dependency warning debugger - handy for introspection during Lambda execution
           if (result && result.__DEP_DEBUG__) {
-            update.debug.status('Lambda dependency tree')
+            update.debug.status(`Lambda dependency tree: ${lambdaPath}`)
             update.debug.raw(serialize(result.__DEP_DEBUG__))
             delete result.__DEP_DEBUG__
           }
-          warn({ missing, inventory, src })
+          warn({ missing, inventory, src, update })
           callback(null, result)
         }
       })

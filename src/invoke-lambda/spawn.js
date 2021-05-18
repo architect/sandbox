@@ -1,12 +1,11 @@
-let { updater } = require('@architect/utils')
 let { spawn } = require('child_process')
 let kill = require('tree-kill')
 let { template } = require('../lib')
 let { head } = template
 const SIG = 'SIGINT'
-let update = updater('Sandbox')
 
-module.exports = function spawnChild (command, args, options, request, timeout, callback) {
+module.exports = function spawnChild (params, callback) {
+  let { command, args, options, request, timeout, update } = params
   let cwd = options.cwd
   let functionPath = cwd.replace(process.cwd(), '').substr(1)
   let timedout = false
@@ -24,6 +23,7 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
 
   // run the show
   let child = spawn(command, args, options)
+  let pid = child.pid
   let stdout = ''
   let stderr = ''
   let error
@@ -51,29 +51,28 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
   }
 
   // Ensure we don't have dangling processes due to open connections, etc.
-  function maybeShutdown ( /* reason */ ) {
-    // update.status(`Shutting down ${functionPath} due to ${reason}`)
-    if (isRunning(child.pid) && !murderInProgress && !closed) {
-      // update.status(`${functionPath} is running, murder in progress`)
+  function maybeShutdown (event) {
+    update.debug.status(`${functionPath} (pid ${pid}) shutting down (via ${event} event)`)
+    if (isRunning(pid) && !murderInProgress && !closed) {
+      update.debug.status(`${functionPath} (pid ${pid}) is still running, terminating now...`)
       murderInProgress = true
       let code = 0
       if (error) {
-        update.error('Caught hanging execution with an error, attempting to exit 1')
+        update.error(`${functionPath} (pid ${pid}) caught hanging execution with an error, attempting to exit 1`)
         code = 1
       }
-      kill(child.pid, SIG, () => {
+      kill(pid, SIG, () => {
         murderInProgress = false
-        // update.status(`${functionPath} murder finished`)
+        update.debug.status(`${functionPath} (pid ${pid}) successfully terminated`)
         if (!closed) done(code)
       })
     }
     else {
-      // update.status(`${functionPath} is NOT running, murder already in progress (${murderInProgress}, or process closed ${closed}`)
+      update.debug.status(`${functionPath} (pid ${pid}) is not running (termination in progress: ${murderInProgress}; process closed: ${closed}`)
     }
   }
 
   // Set an execution timeout
-  // update.status(`Setting timeout on ${functionPath} to ${timeout}`)
   let to = setTimeout(function () {
     timedout = true
     let duration = `${timeout / 1000}s`
@@ -83,8 +82,8 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
 
   // End execution
   function done (code) {
+    // Only ever run once per execution
     if (closed) return
-    // update.status(`${functionPath} final wrap up, exit code ${code}`)
     closed = true
     // Output any console logging from the child process
     let tidy = stdout.toString()
@@ -190,31 +189,31 @@ module.exports = function spawnChild (command, args, options, request, timeout, 
     // python buffers so you might get everything despite our best efforts
     stdout += data
     if (data.includes('__ARC_END__')) {
-      maybeShutdown('stdout data')
+      maybeShutdown('stdout')
     }
   })
 
   child.stderr.on('data', data => {
     stderr += data
     if (data.includes('__ARC_END__')) {
-      maybeShutdown('stderr data')
+      maybeShutdown('stderr')
     }
   })
 
   child.on('error', err => {
     error = err
     if (err.includes('__ARC_END__')) {
-      maybeShutdown('error event')
+      maybeShutdown('error')
     }
   })
 
-  child.on('exit', (code /* , signal */) => {
-    // update.status(`${functionPath} emited 'exit' w/ code ${code} and signal ${signal}`)
+  child.on('exit', (code, signal) => {
+    update.debug.status(`${functionPath} (pid ${pid}) emitted 'exit' (code '${code}', signal '${signal}')`)
     done(code)
   })
 
-  child.on('close', (code /* , signal */) => {
-    // update.status(`${functionPath} emited 'close' w/ code ${code} and signal ${signal}`)
+  child.on('close', (code, signal) => {
+    update.debug.status(`${functionPath} (pid ${pid}) emitted 'close' (code '${code}', signal '${signal}')`)
     done(code)
   })
 }

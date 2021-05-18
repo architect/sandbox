@@ -2,6 +2,27 @@
 
 ---
 
+## [3.5.0] 2021-05-17
+
+### Added
+
+- Added new CLI flags for improved logging
+  - `--quiet` (`-q`, `quiet`) - suppresses logging
+  - `--verbose` (`v`, `verbose`) - additional Sandbox data related to your userland environment and invocations
+  - `--debug` (`d`, `debug`) - debug Sandbox internals (handy for Sandbox development)
+
+
+### Changed
+
+- Cleaned up the output when triggering `@events` and `@queues` Lambdae
+
+
+### Fixed
+
+- Improved file watcher error logging and handling
+
+---
+
 ## [3.4.3] 2021-05-05
 
 ### Fixed
