@@ -72,7 +72,7 @@ module.exports = function eventBusListener ({ inventory, update }, req, res) {
           )
         }
         else if (err) {
-          update.status(`@${arcType} ${name} failed with ${err.stack}`)
+          update.err(`@${arcType} ${name} failed with ${err.stack}`)
         }
         else {
           update.status(`@${arcType} ${name} completed`)
