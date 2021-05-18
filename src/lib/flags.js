@@ -31,9 +31,6 @@ module.exports = function getFlags () {
   // Quiet stdout
   let findQuiet = option => [ '-q', '--quiet', 'quiet' ].includes(option)
   let quiet = args.some(findQuiet)
-  // TODO this is also janky af but we'll deal for now
-  if (process.env.ARC_QUIET) quiet = true
-  if (quiet) process.env.ARC_QUIET = true
 
   // Disable hydration symlinking
   let symlink = args.some(o => o === '--disable-symlinks') ? false : true

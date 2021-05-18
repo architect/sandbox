@@ -62,7 +62,7 @@ test('[WebSockets] Start Sandbox', t => {
   t.plan(4)
   process.chdir(join(mock, 'normal'))
   delete process.env.ARC_QUIET
-  sandbox.start({ /* quiet: true */ }, function (err, result) {
+  sandbox.start({ quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
