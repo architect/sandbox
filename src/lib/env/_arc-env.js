@@ -34,7 +34,7 @@ module.exports = function env (params, callback) {
     }
 
     // @static spa
-    if (inv.static && inv.static.spa !== undefined) process.env.ARC_STATIC_SPA = inv.static
+    if (inv.static && inv.static.spa !== undefined) process.env.ARC_STATIC_SPA = inv.static.spa
   }
 
   // Populate session table (if not present)

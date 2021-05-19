@@ -2,6 +2,14 @@
 
 ---
 
+## [3.5.1] 2021-05-19
+
+### Fixed
+
+- Fixed `@static spa` setting; thanks @timmak!
+
+---
+
 ## [3.5.0] 2021-05-17
 
 ### Added
