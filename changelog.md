@@ -2,6 +2,14 @@
 
 ---
 
+## [3.6.0] 2021-05-24
+
+### Added
+
+- Internal change: added internal Arc service, including first service endpoint: SSM mock for proper internal service discovery to `aws-sdk` calls
+
+---
+
 ## [3.5.1] 2021-05-19
 
 ### Fixed
@@ -46,14 +54,6 @@
 ### Fixed
 
 - Sandbox now supports named `@indexes` (via the `name` parameter), fixes [#1122](https://github.com/architect/architect/issues/1122)
-
----
-
-## [3.5.0] 2021-04-06
-
-### Added
-
-- Internal change: added internal Arc service, including first service endpoint: SSM mock for proper internal service discovery to `aws-sdk` calls
 
 ---
 
