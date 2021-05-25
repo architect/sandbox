@@ -58,7 +58,7 @@ test('Arc v6 response validity (HTTP)', t => {
   result = { statusCode: 'idk' }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('statusCode'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /statusCode/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -72,7 +72,7 @@ test('Arc v6 response validity (HTTP)', t => {
   }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('buffer'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /buffer/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
@@ -82,7 +82,7 @@ test('Arc v6 response validity (HTTP)', t => {
   }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('body'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /body/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -92,14 +92,14 @@ test('Arc v6 response validity (HTTP)', t => {
   result = { headers: 'hi' }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('headers'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /headers/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
   result = { headers: [ 'hi', 'there' ] }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('headers'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /headers/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -109,7 +109,7 @@ test('Arc v6 response validity (HTTP)', t => {
   result = { cookies: 'hi' }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('cookies'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /cookies/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -119,6 +119,6 @@ test('Arc v6 response validity (HTTP)', t => {
   result = { isBase64Encoded: 'hi' }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('isBase64Encoded'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /isBase64Encoded/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 })

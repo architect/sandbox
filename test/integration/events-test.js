@@ -106,7 +106,7 @@ test('arc.events.publish (failure)', t => {
     payload: {}
   },
   function done (err) {
-    if (err) t.ok(err.message.includes('404'), 'Event not found')
+    if (err) t.match(err.message, /404/, 'Event not found')
     else t.fail('Publish should have failed')
   })
 })
@@ -195,7 +195,7 @@ test('arc.queues.publish (failure)', t => {
     payload: {}
   },
   function done (err) {
-    if (err) t.ok(err.message.includes('404'), 'Event not found')
+    if (err) t.match(err.message, /404/, 'Event not found')
     else t.fail('Publish should have failed')
   })
 })

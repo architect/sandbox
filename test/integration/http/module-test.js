@@ -35,7 +35,7 @@ test('get /', t => {
       if (err) t.fail(err)
       else {
         t.ok(data, 'got /')
-        t.ok(data.body.message.includes('Hello from get / running the default runtime'), 'is hello world')
+        t.match(data.body.message, /Hello from get \/ running the default runtime/, 'is hello world')
       }
     })
 })
@@ -49,8 +49,8 @@ test('[Timeout] get /times-out', t => {
       let message = 'Timeout Error'
       let time = '1 second'
       t.equal(err.statusCode, 500, 'Errors with 500')
-      t.ok(err.body.includes(message), `Errors with message: '${message}'`)
-      t.ok(err.body.includes(time), `Timed out set to ${time}`)
+      t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
+      t.match(err.body, new RegExp(time), `Timed out set to ${time}`)
     }
     else t.fail(result)
   })
@@ -91,7 +91,7 @@ test('get /', t => {
       if (err) t.fail(err)
       else {
         t.ok(data, 'got /')
-        t.ok(data.body.message.includes('Hello from get / running the default runtime'), 'is hello world')
+        t.match(data.body.message, /Hello from get \/ running the default runtime/, 'is hello world')
       }
     })
 })

@@ -42,7 +42,7 @@ test('[Catchall] get /path - calls without trailing /* should fall through (and 
     if (err) {
       let message = '@http get /path'
       t.equal(err.statusCode, 403, 'Errors with 403')
-      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
+      t.match(err.body, new RegExp(message), `Errors with message instructing to add '${message}' handler`)
     }
     else t.fail(result)
   })
@@ -121,8 +121,8 @@ test('[Timeout] get /times-out', t => {
       let message = 'Timeout Error'
       let time = '1 second'
       t.equal(err.statusCode, 500, 'Errors with 500')
-      t.ok(err.body.includes(message), `Errors with message: '${message}'`)
-      t.ok(err.body.includes(time), `Timed out set to ${time}`)
+      t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
+      t.match(err.body, new RegExp(time), `Timed out set to ${time}`)
     }
     else t.fail(result)
   })
@@ -136,7 +136,7 @@ test('[Oversized response] get /chonky', t => {
     if (err) {
       let message = 'Invalid payload size'
       t.equal(err.statusCode, 502, 'Errors with 502')
-      t.ok(err.body.includes(message), `Errors with message: '${message}'`)
+      t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
     }
     else t.fail(result)
   })
@@ -152,7 +152,7 @@ test('[Service discovery] get /_asd', t => {
       let services = result.body
       t.ok(services, 'Got back services object')
       t.ok(services.tables, 'Got back tables')
-      t.ok(Object.keys(services.tables).length, 4, 'Got back all tables')
+      t.equals(Object.keys(services.tables).length, 4, 'Got back all tables')
     }
   })
 })

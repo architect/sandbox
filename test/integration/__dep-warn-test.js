@@ -58,10 +58,10 @@ test('[Dependency warnings (basic)] Lambda has its own deps', t => {
     if (err) t.fail(err)
     else {
       // t.comment(`stdout data: ${data}`)
-      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-deps_in_lambda')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
-      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
-      t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
-      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-deps_in_lambda').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
+      t.match(data, /root-dep/, 'Got a dep warning for a root dep')
+      t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
       t.equal(instructions(data), 1, 'Got correct number of dep warnings')
       reset()
     }
@@ -78,10 +78,10 @@ test('[Dependency warnings (basic)] Deps are in root', t => {
     // t.comment(`stdout data: ${data}`)
     if (err) t.fail(err)
     else {
-      t.notOk(data.includes(join(process.cwd(), 'src', 'http', 'get-deps_in_root')), 'Got a dep warning for the root (with instructions to install into the root)')
-      t.ok(data.includes('Please run: npm i'), 'Got instructions to install into the root')
-      t.notOk(data.includes('root-dep'), 'Got a dep warning for a root dep')
-      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.doesNotMatch(data, new RegExp(join(process.cwd(), 'src', 'http', 'get-deps_in_root').replace(/\\/g, '\\\\')), 'Got a dep warning for the root (with instructions to install into the root)')
+      t.match(data, /Please run: npm i/, 'Got instructions to install into the root')
+      t.doesNotMatch(data, /root-dep/, 'Got a dep warning for a root dep')
+      t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
       t.equal(instructions(data), 1, 'Got correct number of dep warnings')
       reset()
     }
@@ -97,11 +97,10 @@ test('[Dependency warnings (basic)] Deps are in shared', t => {
     teardown()
     if (err) t.fail(err)
     else {
-      console.log(data)
-      t.notOk(data.includes(join(process.cwd(), 'src', 'http', 'get-deps_in_shared')), 'Got a dep warning for the shared (with instructions to install into the shared)')
-      t.ok(data.includes('Please run: npm i'), 'Got instructions to install into the shared')
-      t.notOk(data.includes('root-dep'), 'Got a dep warning for a root dep')
-      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.doesNotMatch(data, new RegExp(join(process.cwd(), 'src', 'http', 'get-deps_in_shared').replace(/\\/g, '\\\\')), 'Got a dep warning for the shared (with instructions to install into the shared)')
+      t.match(data, /Please run: npm i/, 'Got instructions to install into the shared')
+      t.doesNotMatch(data, /root-dep/, 'Got a dep warning for a root dep')
+      t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
       t.equal(instructions(data), 1, 'Got correct number of dep warnings')
       reset()
     }
@@ -161,8 +160,7 @@ test('[Dependency warnings (shared - no packages)] Shared deps', t => {
     teardown()
     if (err) t.fail(err)
     else {
-      console.log(data)
-      t.notOk(data.includes('root-dep'), 'Did not get a dep warning')
+      t.doesNotMatch(data, /root-dep/, 'Did not get a dep warning')
       reset()
     }
   })
@@ -177,8 +175,7 @@ test('[Dependency warnings (shared - no packages)] Views deps', t => {
     teardown()
     if (err) t.fail(err)
     else {
-      console.log(data)
-      t.notOk(data.includes('root-dep'), 'Did not get a dep warning')
+      t.doesNotMatch(data, /root-dep/, 'Did not get a dep warning')
       reset()
     }
   })
@@ -212,11 +209,10 @@ test('[Dependency warnings (shared - packages in shared)] Missing shared deps lo
     teardown()
     if (err) t.fail(err)
     else {
-      console.log(data)
-      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'shared')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/shared)')
-      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
-      t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
-      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'shared').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/shared)')
+      t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
+      t.match(data, /root-dep/, 'Got a dep warning for a root dep')
+      t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
       t.equal(instructions(data), 2, 'Got correct number of dep warnings')
       reset()
     }
@@ -232,11 +228,10 @@ test('[Dependency warnings (shared - packages in shared)] Missing views deps loa
     teardown()
     if (err) t.fail(err)
     else {
-      console.log(data)
-      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'views')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/views)')
-      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
-      t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
-      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'views').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/views)')
+      t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
+      t.match(data, /root-dep/, 'Got a dep warning for a root dep')
+      t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
       t.equal(instructions(data), 2, 'Got correct number of dep warnings')
       reset()
     }
@@ -271,11 +266,10 @@ test('[Dependency warnings (shared - packages in Lambdas)] Missing shared deps l
     teardown()
     if (err) t.fail(err)
     else {
-      console.log(data)
-      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-shared')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
-      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
-      t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
-      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-shared').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
+      t.match(data, /root-dep/, 'Got a dep warning for a root dep')
+      t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
       t.equal(instructions(data), 1, 'Got correct number of dep warnings')
       reset()
     }
@@ -291,11 +285,10 @@ test('[Dependency warnings (shared - packages in Lambdas)] Missing views deps lo
     teardown()
     if (err) t.fail(err)
     else {
-      console.log(data)
-      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-views')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
-      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
-      t.ok(data.includes('root-dep'), 'Got a dep warning for a root dep')
-      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-views').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
+      t.match(data, /root-dep/, 'Got a dep warning for a root dep')
+      t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
       t.equal(instructions(data), 1, 'Got correct number of dep warnings')
       reset()
     }
@@ -330,12 +323,11 @@ test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing shar
     teardown()
     if (err) t.fail(err)
     else {
-      console.log(data)
-      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-shared')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
-      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'shared')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/shared)')
-      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
-      t.ok(data.includes('another-root-dep'), 'Got a dep warning for a root dep')
-      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-shared').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'shared').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/shared)')
+      t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
+      t.match(data, /another-root-dep/, 'Got a dep warning for a root dep')
+      t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
       t.equal(instructions(data), 2, 'Got correct number of dep warnings')
       reset()
     }
@@ -351,12 +343,11 @@ test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing view
     teardown()
     if (err) t.fail(err)
     else {
-      console.log(data)
-      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-views')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
-      t.ok(data.includes(`Please run: cd ${join(process.cwd(), 'src', 'views')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/views)')
-      t.notOk(data.includes('lambda-dep'), 'Did not get dep warning for a Lambda dep')
-      t.ok(data.includes('another-root-dep'), 'Got a dep warning for a root dep')
-      t.ok(data.includes('@architect/inventory'), 'Got a dep warning for an out of band dep')
+      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-views').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'views').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/views)')
+      t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
+      t.match(data, /another-root-dep/, 'Got a dep warning for a root dep')
+      t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
       t.equal(instructions(data), 2, 'Got correct number of dep warnings')
       reset()
     }
