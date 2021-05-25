@@ -55,7 +55,7 @@ test('Arc v6 response validity (HTTP + Lambda 1.0 payload)', t => {
   result = []
   check = responseValidator({ res, result }, true)
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('Handler must return an object'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /Handler must return an object/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -65,7 +65,7 @@ test('Arc v6 response validity (HTTP + Lambda 1.0 payload)', t => {
   result = { statusCode: 'idk' }
   check = responseValidator({ res, result }, true)
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('statusCode'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /statusCode/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -76,14 +76,14 @@ test('Arc v6 response validity (HTTP + Lambda 1.0 payload)', t => {
   result = { body: Buffer.from('hi') }
   check = responseValidator({ res, result }, true)
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('buffer'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /buffer/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
   result = { body: data }
   check = responseValidator({ res, result }, true)
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('body'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /body/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   // This body is actually valid
@@ -101,14 +101,14 @@ test('Arc v6 response validity (HTTP + Lambda 1.0 payload)', t => {
   result = { headers: 'hi' }
   check = responseValidator({ res, result }, true)
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('headers'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /headers/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
   result = { headers: [ 'hi', 'there' ] }
   check = responseValidator({ res, result }, true)
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('headers'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /headers/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -118,21 +118,21 @@ test('Arc v6 response validity (HTTP + Lambda 1.0 payload)', t => {
   result = { multiValueHeaders: 'hi' }
   check = responseValidator({ res, result }, true)
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('multiValueHeaders'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /multiValueHeaders/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
   result = { multiValueHeaders: [ 'hi', 'there' ] }
   check = responseValidator({ res, result }, true)
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('multiValueHeaders'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /multiValueHeaders/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
   result = { multiValueHeaders: { 'hi': 'there' } }
   check = responseValidator({ res, result }, true)
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('multiValueHeaders'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /multiValueHeaders/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -142,7 +142,7 @@ test('Arc v6 response validity (HTTP + Lambda 1.0 payload)', t => {
   result = { isBase64Encoded: 'hi' }
   check = responseValidator({ res, result }, true)
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('isBase64Encoded'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /isBase64Encoded/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -194,7 +194,7 @@ test('Arc v6 response validity (REST API mode)', t => {
   result = []
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('Handler must return an object'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /Handler must return an object/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -204,7 +204,7 @@ test('Arc v6 response validity (REST API mode)', t => {
   result = { statusCode: 'idk' }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('statusCode'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /statusCode/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -215,14 +215,14 @@ test('Arc v6 response validity (REST API mode)', t => {
   result = { body: Buffer.from('hi') }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('buffer'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /buffer/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
   result = { body: data }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('body'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /body/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   // This body is actually valid
@@ -239,14 +239,14 @@ test('Arc v6 response validity (REST API mode)', t => {
   result = { headers: 'hi' }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('headers'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /headers/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
   result = { headers: [ 'hi', 'there' ] }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('headers'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /headers/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -256,21 +256,21 @@ test('Arc v6 response validity (REST API mode)', t => {
   result = { multiValueHeaders: 'hi' }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('multiValueHeaders'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /multiValueHeaders/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
   result = { multiValueHeaders: [ 'hi', 'there' ] }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('multiValueHeaders'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /multiValueHeaders/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
   result = { multiValueHeaders: { 'hi': 'there' } }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('multiValueHeaders'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /multiValueHeaders/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -280,7 +280,7 @@ test('Arc v6 response validity (REST API mode)', t => {
   result = { isBase64Encoded: 'hi' }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('isBase64Encoded'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /isBase64Encoded/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -290,7 +290,7 @@ test('Arc v6 response validity (REST API mode)', t => {
   result = data
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('Invalid response parameter'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /Invalid response parameter/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   teardown()
@@ -335,7 +335,7 @@ test('Arc v5 response validity (REST API mode)', t => {
   result = []
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('Handler must return an object'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /Handler must return an object/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -345,7 +345,7 @@ test('Arc v5 response validity (REST API mode)', t => {
   result = { statusCode: 'idk' }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('statusCode'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /statusCode/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -356,7 +356,7 @@ test('Arc v5 response validity (REST API mode)', t => {
   result = { body: Buffer.from('hi') }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('buffer'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /buffer/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   // These bodies are actually valid
@@ -379,14 +379,14 @@ test('Arc v5 response validity (REST API mode)', t => {
   result = { headers: 'hi' }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('headers'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /headers/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
   result = { headers: [ 'hi', 'there' ] }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('headers'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /headers/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -396,21 +396,21 @@ test('Arc v5 response validity (REST API mode)', t => {
   result = { multiValueHeaders: 'hi' }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('multiValueHeaders'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /multiValueHeaders/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
   result = { multiValueHeaders: [ 'hi', 'there' ] }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('multiValueHeaders'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /multiValueHeaders/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   res = newRes()
   result = { multiValueHeaders: { 'hi': 'there' } }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('multiValueHeaders'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /multiValueHeaders/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**
@@ -420,7 +420,7 @@ test('Arc v5 response validity (REST API mode)', t => {
   result = { isBase64Encoded: 'hi' }
   check = responseValidator({ res, result })
   t.equal(res.statusCode, 502, `Invalid response did not set error statusCode: ${res.statusCode}`)
-  t.ok(check.body.includes('isBase64Encoded'), `Got relevant error message: ${check.body}`)
+  t.match(check.body, /isBase64Encoded/, `Got relevant error message: ${check.body}`)
   t.equal(check.valid, false, `Invalid response returned valid: ${check.valid}`)
 
   /**

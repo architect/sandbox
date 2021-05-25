@@ -85,7 +85,7 @@ test('Unknown invocation error', t => {
 
   mock = arc7.noReturn
   run(mock, res => {
-    t.ok(res.body.includes(msg), 'Invocation error passes along error message')
+    t.match(res.body, new RegExp(msg), 'Invocation error passes along error message')
     t.equal(res.statusCode, 502, 'Responded with: 502')
   })
 
@@ -202,7 +202,7 @@ test('Architect v7 dependency-free responses (HTTP API mode)', t => {
 
   mock = arc7.invalid
   run(mock, res => {
-    t.ok(res.body.includes('Invalid response type'), 'Invalid statusCode causes error')
+    t.match(res.body, /Invalid response type/, 'Invalid statusCode causes error')
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
 
@@ -234,7 +234,7 @@ test('Architect v7 dependency-free responses (HTTP API + Lambda v1.0)', t => {
 
   mock = arc6.buffer
   run(mock, res => {
-    t.ok(res.body.includes('Cannot respond with a raw buffer'), 'Raw buffer response causes error')
+    t.match(res.body, /Cannot respond with a raw buffer/, 'Raw buffer response causes error')
     t.equal(res.headers['content-type'], htmlUtf8, `Returned correct content-type: ${htmlUtf8}`)
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
@@ -272,7 +272,7 @@ test('Architect v7 dependency-free responses (HTTP API + Lambda v1.0)', t => {
 
   mock = arc5.cookie
   run(mock, res => {
-    t.notOk(res.body.includes('Invalid response parameter'), 'Arc v5 style cookie parameter is ignored')
+    t.doesNotMatch(res.body, /Invalid response parameter/, 'Arc v5 style cookie parameter is ignored')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
@@ -284,7 +284,7 @@ test('Architect v7 dependency-free responses (HTTP API + Lambda v1.0)', t => {
 
   mock = arc6.invalidMultiValueHeaders
   run(mock, res => {
-    t.ok(res.body.includes('Invalid response type'), 'Invalid multiValueHeaders causes error')
+    t.match(res.body, /Invalid response type/, 'Invalid multiValueHeaders causes error')
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
 
@@ -316,14 +316,14 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
 
   mock = arc6.buffer
   run(mock, res => {
-    t.ok(res.body.includes('Cannot respond with a raw buffer'), 'Raw buffer response causes error')
+    t.match(res.body, /Cannot respond with a raw buffer/, 'Raw buffer response causes error')
     t.equal(res.headers['content-type'], htmlUtf8, `Returned correct content-type: ${htmlUtf8}`)
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
 
   mock = arc6.encodedWithBinaryTypeBad
   run(mock, res => {
-    t.ok(typeof res.body === 'string', 'Body is (likely) base64 encoded')
+    t.equals(typeof res.body, 'string', 'Body is (likely) base64 encoded')
     t.equal(b64dec(res.body), 'hi there\n', 'Body still base64 encoded')
     t.equal(res.headers['content-type'], 'application/pdf', `Returned correct content-type: application/pdf`)
     t.notOk(res.isBase64Encoded, 'isBase64Encoded param NOT set automatically')
@@ -354,7 +354,7 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
 
   mock = arc5.cookie
   run(mock, res => {
-    t.ok(res.body.includes('Invalid response parameter'), 'Arc v5 style cookie parameter causes error')
+    t.match(res.body, /Invalid response parameter/, 'Arc v5 style cookie parameter causes error')
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
 
@@ -366,7 +366,7 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
 
   mock = arc6.invalidMultiValueHeaders
   run(mock, res => {
-    t.ok(res.body.includes('Invalid response type'), 'Invalid multiValueHeaders causes error')
+    t.match(res.body, /Invalid response type/, 'Invalid multiValueHeaders causes error')
     t.equal(res.statusCode, 502, 'Responded with 502')
   })
 
@@ -425,7 +425,7 @@ test('Architect v5 (REST API mode) & Architect Functions', t => {
 
   mock = arc5.defaultsToJson
   run(mock, res => {
-    t.ok(res.headers['Content-Type'].includes('application/json'), 'Unspecified content type defaults to JSON')
+    t.match(res.headers['Content-Type'], /application\/json/, 'Unspecified content type defaults to JSON')
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 

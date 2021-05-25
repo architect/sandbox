@@ -117,7 +117,7 @@ test('[REST mode / deprecated] get /binary', t => {
         isBase64Encoded: undefined,
       })
       const img = Buffer.from(result.body).toString('base64')
-      t.ok(img.includes('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA'), 'is binary')
+      t.match(img, /AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAA/, 'is binary')
     }
   })
 })
@@ -323,7 +323,7 @@ test('[REST mode / deprecated] get /no-return (noop)', t => {
     if (err) {
       let message = 'Async error'
       t.equal(err.statusCode, 500, 'Errors with 500')
-      t.ok(err.body.includes(message), `Errors with message: '${message}'`)
+      t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
     }
     else t.fail(result)
   })
@@ -439,7 +439,7 @@ test('[REST mode / deprecated] post / - route should fail when not explicitly de
     if (err) {
       let message = '@http post /'
       t.equal(err.statusCode, 403, 'Errors with 403')
-      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
+      t.match(err.body, new RegExp(message), `Errors with message instructing to add '${message}' handler`)
     }
     else t.fail(result)
   })
@@ -453,7 +453,7 @@ test('[REST mode / deprecated] get /foobar - route should fail when not explicit
     if (err) {
       let message = '@http get /foobar'
       t.equal(err.statusCode, 403, 'Errors with 403')
-      t.ok(err.body.includes(message), `Errors with message instructing to add '${message}' handler`)
+      t.match(err.body, new RegExp(message), `Errors with message instructing to add '${message}' handler`)
     }
     else t.fail(result)
   })
@@ -550,7 +550,7 @@ test('[REST mode / deprecated] get /missing should fail if missing its handler f
   }, function _got (err, result) {
     if (err) {
       t.equal(err.statusCode, 502, 'Got 502 for missing file')
-      t.ok(err.body.includes('Lambda handler not found'), 'Got correct error')
+      t.match(err.body, /Lambda handler not found/, 'Got correct error')
     }
     else t.fail(result)
   })
