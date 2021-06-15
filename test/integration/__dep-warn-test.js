@@ -5,8 +5,7 @@ let sandbox = require(sut)
 let tiny = require('tiny-json-http')
 let { url, shutdown } = require('./http/_utils')
 
-let cwd = process.cwd()
-let mock = join(__dirname, '..', 'mock', 'dep-warn')
+let mock = join(process.cwd(), 'test', 'mock', 'dep-warn')
 let instructions = str => str.match(/Please run:/g).length
 
 let data = ''
@@ -36,8 +35,7 @@ test('Set up env', t => {
 
 test('[Dependency warnings (basic)] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'basic'))
-  sandbox.start({}, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'basic') }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -57,8 +55,7 @@ test('[Dependency warnings (basic)] Lambda has its own deps', t => {
     teardown()
     if (err) t.fail(err)
     else {
-      // t.comment(`stdout data: ${data}`)
-      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-deps_in_lambda').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.match(data, new RegExp(`Please run: cd ${join(mock, 'basic', 'src', 'http', 'get-deps_in_lambda').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
       t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
       t.match(data, /root-dep/, 'Got a dep warning for a root dep')
       t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
@@ -78,7 +75,7 @@ test('[Dependency warnings (basic)] Deps are in root', t => {
     // t.comment(`stdout data: ${data}`)
     if (err) t.fail(err)
     else {
-      t.doesNotMatch(data, new RegExp(join(process.cwd(), 'src', 'http', 'get-deps_in_root').replace(/\\/g, '\\\\')), 'Got a dep warning for the root (with instructions to install into the root)')
+      t.doesNotMatch(data, new RegExp(join(mock, 'basic', 'src', 'http', 'get-deps_in_root').replace(/\\/g, '\\\\')), 'Got a dep warning for the root (with instructions to install into the root)')
       t.match(data, /Please run: npm i/, 'Got instructions to install into the root')
       t.doesNotMatch(data, /root-dep/, 'Got a dep warning for a root dep')
       t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
@@ -97,7 +94,7 @@ test('[Dependency warnings (basic)] Deps are in shared', t => {
     teardown()
     if (err) t.fail(err)
     else {
-      t.doesNotMatch(data, new RegExp(join(process.cwd(), 'src', 'http', 'get-deps_in_shared').replace(/\\/g, '\\\\')), 'Got a dep warning for the shared (with instructions to install into the shared)')
+      t.doesNotMatch(data, new RegExp(join(mock, 'basic', 'src', 'http', 'get-deps_in_shared').replace(/\\/g, '\\\\')), 'Got a dep warning for the shared (with instructions to install into the shared)')
       t.match(data, /Please run: npm i/, 'Got instructions to install into the shared')
       t.doesNotMatch(data, /root-dep/, 'Got a dep warning for a root dep')
       t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
@@ -139,8 +136,7 @@ test('[Dependency warnings (basic)] Shut down Sandbox', t => {
 
 test('[Dependency warnings (shared - no packages)] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'no-packages'))
-  sandbox.start({}, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'no-packages') }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -188,8 +184,7 @@ test('[Dependency warnings (shared - no packages)] Shut down Sandbox', t => {
 
 test('[Dependency warnings (shared - packages in shared)] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'shared-packages'))
-  sandbox.start({}, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'shared-packages') }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -209,7 +204,7 @@ test('[Dependency warnings (shared - packages in shared)] Missing shared deps lo
     teardown()
     if (err) t.fail(err)
     else {
-      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'shared').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/shared)')
+      t.match(data, new RegExp(`Please run: cd ${join(mock, 'shared-packages', 'src', 'shared').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/shared)')
       t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
       t.match(data, /root-dep/, 'Got a dep warning for a root dep')
       t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
@@ -228,7 +223,7 @@ test('[Dependency warnings (shared - packages in shared)] Missing views deps loa
     teardown()
     if (err) t.fail(err)
     else {
-      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'views').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/views)')
+      t.match(data, new RegExp(`Please run: cd ${join(mock, 'shared-packages', 'src', 'views').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/views)')
       t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
       t.match(data, /root-dep/, 'Got a dep warning for a root dep')
       t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
@@ -245,8 +240,7 @@ test('[Dependency warnings (shared - packages in shared)] Shut down Sandbox', t 
 
 test('[Dependency warnings (shared - packages in Lambdas)] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'lambda-packages'))
-  sandbox.start({}, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'lambda-packages') }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -266,7 +260,7 @@ test('[Dependency warnings (shared - packages in Lambdas)] Missing shared deps l
     teardown()
     if (err) t.fail(err)
     else {
-      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-shared').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.match(data, new RegExp(`Please run: cd ${join(mock, 'lambda-packages', 'src', 'http', 'get-shared').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
       t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
       t.match(data, /root-dep/, 'Got a dep warning for a root dep')
       t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
@@ -285,7 +279,7 @@ test('[Dependency warnings (shared - packages in Lambdas)] Missing views deps lo
     teardown()
     if (err) t.fail(err)
     else {
-      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-views').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.match(data, new RegExp(`Please run: cd ${join(mock, 'lambda-packages', 'src', 'http', 'get-views').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
       t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
       t.match(data, /root-dep/, 'Got a dep warning for a root dep')
       t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
@@ -302,8 +296,7 @@ test('[Dependency warnings (shared - packages in Lambdas)] Shut down Sandbox', t
 
 test('[Dependency warnings (shared - packages in shared + Lambdas)] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'all-packages'))
-  sandbox.start({}, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'all-packages') }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -323,8 +316,8 @@ test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing shar
     teardown()
     if (err) t.fail(err)
     else {
-      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-shared').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
-      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'shared').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/shared)')
+      t.match(data, new RegExp(`Please run: cd ${join(mock, 'all-packages', 'src', 'http', 'get-shared').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.match(data, new RegExp(`Please run: cd ${join(mock, 'all-packages', 'src', 'shared').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/shared)')
       t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
       t.match(data, /another-root-dep/, 'Got a dep warning for a root dep')
       t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
@@ -343,8 +336,8 @@ test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing view
     teardown()
     if (err) t.fail(err)
     else {
-      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'http', 'get-views').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
-      t.match(data, new RegExp(`Please run: cd ${join(process.cwd(), 'src', 'views').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/views)')
+      t.match(data, new RegExp(`Please run: cd ${join(mock, 'all-packages', 'src', 'http', 'get-views').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
+      t.match(data, new RegExp(`Please run: cd ${join(mock, 'all-packages', 'src', 'views').replace(/\\/g, '\\\\')}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/views)')
       t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep')
       t.match(data, /another-root-dep/, 'Got a dep warning for a root dep')
       t.match(data, new RegExp('@architect/inventory'), 'Got a dep warning for an out of band dep')
@@ -355,10 +348,8 @@ test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing view
 })
 
 test('[Dependency warnings] Teardown', t => {
-  t.plan(3)
+  t.plan(2)
   shutdown(t)
   delete process.env.ARC_API_TYPE
-  process.chdir(cwd)
   t.notOk(process.env.ARC_API_TYPE, 'API type NOT set')
-  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
 })

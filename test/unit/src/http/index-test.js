@@ -3,8 +3,7 @@ let proxyquire = require('proxyquire')
 let sinon = require('sinon')
 let test = require('tape')
 let _inventory = require('@architect/inventory')
-let cwd = process.cwd()
-let mock = join(__dirname, '..', '..', '..', 'mock')
+let mock = join(process.cwd(), 'test', 'mock')
 
 // let spy = sinon.spy()
 let routerFake = sinon.fake.returns({})
@@ -19,8 +18,7 @@ let get
 
 test('Set up env', t => {
   t.plan(2)
-  process.chdir(join(mock, 'normal'))
-  _inventory({}, function (err, result) {
+  _inventory({ cwd: join(mock, 'normal') }, function (err, result) {
     if (err) t.fail(err)
     else {
       inventory = result
@@ -63,10 +61,4 @@ test('http should return an app when only @ws is defined', t => {
   delete i.inv.http
   delete i.inv.static
   t.notEquals(http(i), undefined, 'returned something with inventory with ws')
-})
-
-test('Teardown', t => {
-  t.plan(1)
-  process.chdir(cwd)
-  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
 })

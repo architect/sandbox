@@ -15,7 +15,7 @@ module.exports = function createEventBus (inventory) {
     let eventBus
 
     events.start = function start (options, callback) {
-      let { all, port, symlink = true, update } = options
+      let { all, cwd, port, symlink = true, update } = options
 
       // Set up ports and env vars
       let { eventsPort } = getPorts(port)
@@ -63,7 +63,7 @@ module.exports = function createEventBus (inventory) {
         },
 
         function _finalSetup (callback) {
-          let listener = _listener.bind({}, { inventory, update })
+          let listener = _listener.bind({}, { cwd, inventory, update })
           eventBus = http.createServer(listener)
           callback()
         },
@@ -84,7 +84,16 @@ module.exports = function createEventBus (inventory) {
     }
 
     events.end = function end (callback) {
-      eventBus.close(function _closed (err) {
+      series([
+        function _eventsEnd (callback) {
+          eventBus.close(callback)
+        },
+        function _arcEnd (callback) {
+          // eslint-disable-next-line
+          let { _arc } = require('../sandbox')
+          _arc.end(callback)
+        }
+      ], function _eventsEnded (err) {
         if (err) callback(err)
         else {
           let msg = 'Event bus successfully shut down'

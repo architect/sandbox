@@ -9,7 +9,7 @@ let { existsSync, readFileSync } = require('fs')
  * - If ARC_LOCAL is present process.env is populated by @testing (so you can access remote dynamo locally)
  */
 module.exports = function populateEnv (params, callback) {
-  let { update, inventory } = params
+  let { cwd, update, inventory } = params
   let { inv } = inventory
   let environment = process.env.NODE_ENV
   let setEnv = false
@@ -22,8 +22,8 @@ module.exports = function populateEnv (params, callback) {
     update.done(`Found ${env} environment variables: ${file}`)
   }
 
-  let dotEnvPath = join(process.cwd(), '.env')
-  let legacyArcEnvPath = join(process.cwd(), '.arc-env')
+  let dotEnvPath = join(cwd, '.env')
+  let legacyArcEnvPath = join(cwd, '.arc-env')
   if (existsSync(dotEnvPath)) {
     try {
       let raw = readFileSync(dotEnvPath).toString()

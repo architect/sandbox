@@ -14,7 +14,10 @@ module.exports = function serviceFactory (params) {
   if (t('tables'))  init = _tables
   if (t('_arc'))    init = _arc
   return {
-    start: function (options = {}, callback) {
+    start: function (options, callback) {
+      options = options || {}
+      options.cwd = options.cwd || process.cwd()
+
       // Set up promise if there's no callback
       let promise
       if (!callback) {
@@ -33,7 +36,7 @@ module.exports = function serviceFactory (params) {
         })
       }
 
-      inv({}, function (err, inventory) {
+      inv({ cwd: options.cwd }, function (err, inventory) {
         if (err) callback(err)
         else {
           if (!server[type]) {

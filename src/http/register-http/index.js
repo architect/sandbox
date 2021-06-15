@@ -1,7 +1,8 @@
 let log = require('./pretty-print-route')
 let invoker = require('../invoke-http')
 
-module.exports = function reg ({ app, routes, inventory, update }) {
+module.exports = function reg (params) {
+  let { app, cwd, routes, inventory, update } = params
   let apiType = process.env.ARC_API_TYPE
   let deprecated = process.env.DEPRECATED
   let msgs = {
@@ -25,18 +26,18 @@ module.exports = function reg ({ app, routes, inventory, update }) {
       let hasCatchall = path.includes('*')
       if (!httpOnly.some(h => h === method) && !hasCatchall) {
         // Pretty print the route reg
-        log({ method, path, src })
+        log({ cwd, method, path, src })
         // Register the route with the Router instance
-        let exec = invoker({ lambda, apiType, inventory, update })
+        let exec = invoker({ cwd, lambda, apiType, inventory, update })
         app[method](path, exec)
       }
     }
     else {
       // Pretty print the route reg
-      log({ method, path, src })
+      log({ cwd, method, path, src })
 
       // Register the route with the Router instance
-      let exec = invoker({ lambda, apiType, inventory, update })
+      let exec = invoker({ cwd, lambda, apiType, inventory, update })
       if (method !== 'any') {
         app[method](path, exec)
       }

@@ -33,13 +33,13 @@ module.exports = function createHttpServer (inventory) {
 
     // Start the HTTP server
     app.start = function start (options, callback) {
-      let { all, port, symlink = true, update } = options
+      let { all, cwd, port, symlink = true, update } = options
 
-      middleware(app, { inventory, update })
+      middleware(app, { cwd, inventory, update })
 
       // Set up ports and HTTP-specific env vars
       let { httpPort } = getPorts(port)
-      httpEnv(arc)
+      httpEnv(arc, cwd)
 
       series([
         // Set up Arc + userland env vars
@@ -105,11 +105,11 @@ module.exports = function createHttpServer (inventory) {
           // Bind WebSocket app to HTTP server
           // This must be done before @http so it isn't clobbered by greedy routes
           if (inv.ws) {
-            websocketServer = registerWS({ app, httpServer, inventory, update })
+            websocketServer = registerWS({ app, cwd, httpServer, inventory, update })
           }
 
           if (inv.http) {
-            registerHTTP({ app, routes: inv.http, inventory, update })
+            registerHTTP({ app, cwd, routes: inv.http, inventory, update })
           }
 
           callback()
@@ -133,15 +133,20 @@ module.exports = function createHttpServer (inventory) {
 
     app.end = function end (callback) {
       series([
-        function _http (callback) {
+        function _httpEnd (callback) {
           if (httpServer) httpServer.close(callback)
           else callback()
         },
-        function _websocket (callback) {
+        function _webSocketEnd (callback) {
           if (websocketServer) websocketServer.close(callback)
           else callback()
         },
-      ], function _closed (err) {
+        function _arcEnd (callback) {
+          // eslint-disable-next-line
+          let { _arc } = require('../sandbox')
+          _arc.end(callback)
+        }
+      ], function _httpEnded (err) {
         if (err) callback(err)
         else {
           let msg = 'HTTP successfully shut down'

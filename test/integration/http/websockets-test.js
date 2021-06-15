@@ -5,7 +5,7 @@ let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let { data, shutdown } = require('./_utils')
 
-let mock = join(__dirname, '..', '..', 'mock')
+let mock = join(process.cwd(), 'test', 'mock')
 let url = `ws://localhost:${process.env.PORT || 3333}`
 let wsErr = err => { throw err }
 let ws // Reused below
@@ -60,9 +60,8 @@ test('Set up env', t => {
 
 test('[WebSockets] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'normal'))
   delete process.env.ARC_QUIET
-  sandbox.start({ quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')

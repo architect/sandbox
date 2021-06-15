@@ -29,11 +29,14 @@ module.exports = function maybeHydrate (inventory, callback) {
       if (!quiet) console.log(chalk.grey(chars.done, 'Found new functions to hydrate!'))
     }
     let notified = false
-    let shared = join(process.cwd(), 'src', 'shared') // TODO: impl inventory
-    let views = join(process.cwd(), 'src', 'views') // TODO: impl inventory
     // Make a new array, don't inventory
     let lambdaSrcDirs = [ ...inv.lambdaSrcDirs ]
-    lambdaSrcDirs.push(shared, views)
+
+    let shared = inv.shared && inv.shared.src
+    let views = inv.views && inv.views.src
+    if (shared) lambdaSrcDirs.push(shared)
+    if (views) lambdaSrcDirs.push(views)
+
     let ops = lambdaSrcDirs.map(path => {
       return function (callback) {
         /**

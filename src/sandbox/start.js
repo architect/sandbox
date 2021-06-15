@@ -16,6 +16,7 @@ module.exports = function _start (params, callback) {
     inventory,
     // Settings
     symlink = true,
+    cwd,
     // Everything else
     update,
     events,
@@ -132,7 +133,6 @@ module.exports = function _start (params, callback) {
 
     // Check aws-sdk installation status if installed globally
     function _checkAWS_SDK (callback) {
-      let cwd = process.cwd()
       let dir = __dirname
       if (!dir.startsWith(cwd)) {
         let awsDir = join(dir.split('@architect')[0], 'aws-sdk', 'package.json')

@@ -6,9 +6,8 @@ let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let { shutdown } = require('./http/_utils')
 
-let mock = join(__dirname, '..', 'mock')
+let mock = join(process.cwd(), 'test', 'mock')
 let port = process.env.PORT || 3333
-let cwd = process.cwd()
 let app = 'mockapp'
 let tables = [ 'accounts', 'pets', 'places', 'data' ]
 
@@ -36,12 +35,9 @@ test('Set up env', t => {
 
 test('Start Sandbox ("normal" mock app)', t => {
   t.plan(1)
-  process.chdir(join(mock, 'normal'))
-  sandbox.start({ quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
-    else {
-      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-    }
+    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
 })
 
@@ -77,12 +73,9 @@ test('Shut down Sandbox', t => {
 
 test('Start Sandbox ("plugins-sync" mock app)', t => {
   t.plan(1)
-  process.chdir(join(mock, 'plugins-sync'))
-  sandbox.start({ quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'plugins-sync'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
-    else {
-      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-    }
+    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
 })
 
@@ -106,10 +99,8 @@ test('Shut down Sandbox', t => {
 })
 
 test('Teardown', t => {
-  t.plan(3)
+  t.plan(2)
   shutdown(t)
   delete process.env.ARC_API_TYPE
-  process.chdir(cwd)
   t.notOk(process.env.ARC_API_TYPE, 'API type NOT set')
-  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
 })

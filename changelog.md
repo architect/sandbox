@@ -2,6 +2,25 @@
 
 ---
 
+## [3.7.0] 2021-06-14
+
+### Added
+
+- Added `cwd` API param, making it easier to run Sandbox against one or many mock project directories in tests
+
+
+### Changed
+
+- Updated dependencies
+- Purified tests, removing all `process.chdir` calls (except those essential for testing the actual inferred working directory)
+
+
+### Fixed
+
+- Fixed issue that could cause `sandbox.http.end()` and `sandbox.events.end()` to hang during tests
+
+---
+
 ## [3.6.0] 2021-05-24
 
 ### Added

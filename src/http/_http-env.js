@@ -1,6 +1,6 @@
 let { join } = require('path')
 
-module.exports = function config (arc) {
+module.exports = function config (arc, cwd) {
   // Handle API type
   let defaultApiType = process.env.DEPRECATED ? 'rest' : 'http'
   let findAPIType = s => s[0] && s[0] === 'apigateway' && s[1]
@@ -12,5 +12,5 @@ module.exports = function config (arc) {
   // Allow override of 'public' folder
   let staticFolder = tuple => tuple[0] === 'folder'
   let folder = arc.static && arc.static.some(staticFolder) ? arc.static.find(staticFolder)[1] : 'public'
-  process.env.ARC_SANDBOX_PATH_TO_STATIC = join(process.cwd(), folder)
+  process.env.ARC_SANDBOX_PATH_TO_STATIC = join(cwd, folder)
 }
