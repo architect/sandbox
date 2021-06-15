@@ -72,7 +72,6 @@ test('[Dependency warnings (basic)] Deps are in root', t => {
     url: url + '/deps-in-root'
   }, function _got (err) {
     teardown()
-    // t.comment(`stdout data: ${data}`)
     if (err) t.fail(err)
     else {
       t.doesNotMatch(data, new RegExp(join(mock, 'basic', 'src', 'http', 'get-deps_in_root').replace(/\\/g, '\\\\')), 'Got a dep warning for the root (with instructions to install into the root)')

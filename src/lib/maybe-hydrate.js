@@ -18,7 +18,7 @@ let { chars } = require('@architect/utils')
  *
  * Not responsible for src/shared + views, handled elsewhere to optimize load time
  */
-module.exports = function maybeHydrate (inventory, callback) {
+module.exports = function maybeHydrate ({ cwd, inventory }, callback) {
   let { inv } = inventory
   let quiet = process.env.ARC_QUIET
   if (!inv.lambdaSrcDirs || !inv.lambdaSrcDirs.length) {
@@ -32,8 +32,8 @@ module.exports = function maybeHydrate (inventory, callback) {
     // Make a new array, don't inventory
     let lambdaSrcDirs = [ ...inv.lambdaSrcDirs ]
 
-    let shared = inv.shared && inv.shared.src
-    let views = inv.views && inv.views.src
+    let shared = inv.shared && inv.shared.src || join(cwd, 'src', 'shared')
+    let views = inv.views && inv.views.src || join(cwd, 'src', 'views')
     if (shared) lambdaSrcDirs.push(shared)
     if (views) lambdaSrcDirs.push(views)
 
@@ -52,7 +52,7 @@ module.exports = function maybeHydrate (inventory, callback) {
           let copyShared = false
           // Disable sidecar shared/views hydration; handled project-wide elsewhere
           let hydrateShared = path === shared || path === views || false
-          hydrate.install({ basepath: path, copyShared, hydrateShared }, callback)
+          hydrate.install({ cwd, basepath: path, copyShared, hydrateShared }, callback)
         }
         series([
           function _packageJson (callback) {

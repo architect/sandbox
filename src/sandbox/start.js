@@ -50,12 +50,12 @@ module.exports = function _start (params, callback) {
 
     // Loop through functions and see if any need dependency hydration
     function _maybeHydrate (callback) {
-      maybeHydrate(inventory, callback)
+      maybeHydrate({ cwd, inventory }, callback)
     },
 
     // ... then hydrate Architect project files into functions
     function _hydrateShared (callback) {
-      hydrate.shared({ symlink }, function next (err) {
+      hydrate.shared({ cwd, symlink }, function next (err) {
         if (err) callback(err)
         else {
           update.done('Project files hydrated into functions')

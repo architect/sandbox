@@ -34,14 +34,14 @@ module.exports = function createEventBus (inventory) {
 
         // Loop through functions and see if any need dependency hydration
         function _maybeHydrate (callback) {
-          if (!all) maybeHydrate(inventory, callback)
+          if (!all) maybeHydrate({ cwd, inventory }, callback)
           else callback()
         },
 
         // ... then hydrate Architect project files into functions
         function _hydrateShared (callback) {
           if (!all) {
-            hydrate.shared({ symlink }, function next (err) {
+            hydrate.shared({ cwd, symlink }, function next (err) {
               if (err) callback(err)
               else {
                 update.done('Project files hydrated into functions')
