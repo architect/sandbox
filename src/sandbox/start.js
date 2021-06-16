@@ -43,7 +43,7 @@ module.exports = function _start (params, callback) {
     function _init (callback) {
       let autocreateEnabled = prefs && prefs.create && prefs.create.autocreate
       if (autocreateEnabled && !deprecated) {
-        create({}, callback)
+        create({ inventory }, callback)
       }
       else callback()
     },
@@ -55,7 +55,7 @@ module.exports = function _start (params, callback) {
 
     // ... then hydrate Architect project files into functions
     function _hydrateShared (callback) {
-      hydrate.shared({ cwd, symlink }, function next (err) {
+      hydrate.shared({ cwd, inventory, symlink }, function next (err) {
         if (err) callback(err)
         else {
           update.done('Project files hydrated into functions')

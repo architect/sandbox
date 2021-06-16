@@ -6,6 +6,7 @@ let Router = require('router')
 let finalhandler = require('finalhandler')
 let series = require('run-series')
 let chalk = require('chalk')
+let destroyer = require('server-destroy')
 
 // Local
 let { fingerprint } = require('@architect/utils')
@@ -75,7 +76,7 @@ module.exports = function createHttpServer (inventory) {
         // ... then hydrate Architect project files into functions
         function _hydrateShared (callback) {
           if (!all) {
-            hydrate.shared({ cwd, symlink }, function next (err) {
+            hydrate.shared({ cwd, inventory, symlink }, function next (err) {
               if (err) callback(err)
               else {
                 update.done('Project files hydrated into functions')
@@ -101,6 +102,7 @@ module.exports = function createHttpServer (inventory) {
           httpServer = http.createServer(function _request (req, res) {
             app(req, res, finalhandler(req, res))
           })
+          destroyer(httpServer)
 
           // Bind WebSocket app to HTTP server
           // This must be done before @http so it isn't clobbered by greedy routes
@@ -134,7 +136,7 @@ module.exports = function createHttpServer (inventory) {
     app.end = function end (callback) {
       series([
         function _httpEnd (callback) {
-          if (httpServer) httpServer.close(callback)
+          if (httpServer) httpServer.destroy(callback)
           else callback()
         },
         function _webSocketEnd (callback) {

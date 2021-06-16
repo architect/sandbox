@@ -71,7 +71,7 @@ test('Shut down Sandbox', t => {
   shutdown(t)
 })
 
-test('Start Sandbox ("plugins-sync" mock app)', t => {
+test(`Start Sandbox ('plugins-sync' mock app)`, t => {
   t.plan(1)
   sandbox.start({ cwd: join(mock, 'plugins-sync'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
@@ -90,12 +90,6 @@ test('Get & check params provided by plugin (without specifying a type)', t => {
       t.equals(result.Parameters[0].Value, 'valueOne', 'plugin parameter value correct')
     }
   })
-})
-
-
-test('Shut down Sandbox', t => {
-  t.plan(1)
-  shutdown(t)
 })
 
 test('Teardown', t => {
