@@ -7,13 +7,14 @@
 ### Added
 
 - Added `cwd` API param, making it easier to run Sandbox against one or many mock project directories in tests
+- Added `@ws` route printing
 
 
 ### Changed
 
-- Updated dependencies
-- Purified tests, removing all `process.chdir` calls (except those essential for testing the actual inferred working directory)
 - Stopped making unnecessary Inventory calls during Sandbox / services startup, Sandbox now starts 10-25% faster most of the time
+- Purified tests, removing all `process.chdir` calls (except those essential for testing the actual inferred working directory)
+- Updated dependencies
 
 
 ### Fixed
@@ -21,6 +22,7 @@
 - Fixed issue where CLI might take a long time to reload local routes (or not reload them at all) due to [issues related to Node.js stalling while closing its http server](https://github.com/nodejs/node/issues/2642)
 - Fixed issue that could cause `sandbox.http.end()` and `sandbox.events.end()` to hang during tests
 - Ensure plugin `invokeFunction` has all necessary params, fixes #1162
+- Fixed issue where plugin functions might not be hydrated by Sandbox
 
 ---
 

@@ -5,7 +5,6 @@ let http = require('http')
 let Router = require('router')
 let finalhandler = require('finalhandler')
 let series = require('run-series')
-let chalk = require('chalk')
 let destroyer = require('server-destroy')
 
 // Local
@@ -16,6 +15,7 @@ let httpEnv = require('./_http-env')
 let hydrate = require('@architect/hydrate')
 let registerHTTP = require('./register-http')
 let registerWS = require('./register-websocket')
+let prettyPrint = require('./_pretty-print')
 
 /**
  * Creates an HTTP + WebSocket server that emulates API Gateway
@@ -67,26 +67,6 @@ module.exports = function createHttpServer (inventory) {
           })
         },
 
-        // Loop through functions and see if any need dependency hydration
-        function _maybeHydrate (callback) {
-          if (!all) maybeHydrate({ cwd, inventory }, callback)
-          else callback()
-        },
-
-        // ... then hydrate Architect project files into functions
-        function _hydrateShared (callback) {
-          if (!all) {
-            hydrate.shared({ cwd, inventory, symlink }, function next (err) {
-              if (err) callback(err)
-              else {
-                update.done('Project files hydrated into functions')
-                callback()
-              }
-            })
-          }
-          else callback()
-        },
-
         // Internal Arc services
         function _internal (callback) {
           if (!all) {
@@ -120,13 +100,40 @@ module.exports = function createHttpServer (inventory) {
         // Let's go!
         function _startServer (callback) {
           httpServer.listen(httpPort, callback)
-        }
+        },
+
+        // Loop through functions and see if any need dependency hydration
+        function _maybeHydrate (callback) {
+          if (!all) maybeHydrate({ cwd, inventory }, callback)
+          else callback()
+        },
+
+        // ... then hydrate Architect project files into functions
+        function _hydrateShared (callback) {
+          if (!all) {
+            hydrate.shared({ cwd, inventory, symlink }, function next (err) {
+              if (err) callback(err)
+              else {
+                update.done('Project files hydrated into functions')
+                callback()
+              }
+            })
+          }
+          else callback()
+        },
+
+        // Pretty print routes
+        function _printRoutes (callback) {
+          if (!all) {
+            prettyPrint({ cwd, inventory, port, update })
+            callback()
+          }
+          else callback()
+        },
       ],
       function _started (err) {
         if (err) callback(err)
         else {
-          let link = chalk.green.bold.underline(`http://localhost:${httpPort}\n`)
-          update.raw(`\n    ${link}`)
           let msg = 'HTTP successfully started'
           callback(null, msg)
         }

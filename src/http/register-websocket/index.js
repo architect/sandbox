@@ -18,5 +18,7 @@ module.exports = function registerWebSocket (params) {
   // Listen for arc.ws.send invocations
   app.post('/__arc', send)
 
+  update.done(`@ws server started`)
+
   return wss
 }

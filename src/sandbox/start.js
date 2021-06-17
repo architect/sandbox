@@ -8,6 +8,7 @@ let create = require('@architect/create')
 let { chars } = require('@architect/utils')
 let { env, maybeHydrate } = require('../lib')
 let invokePluginFunction = require('../invoke-lambda/_plugin')
+let prettyPrint = require('../http/_pretty-print')
 let startupScripts = require('./_startup-scripts')
 
 module.exports = function _start (params, callback) {
@@ -15,8 +16,9 @@ module.exports = function _start (params, callback) {
   let {
     inventory,
     // Settings
-    symlink = true,
     cwd,
+    port,
+    symlink = true,
     // Everything else
     update,
     events,
@@ -46,22 +48,6 @@ module.exports = function _start (params, callback) {
         create({ inventory }, callback)
       }
       else callback()
-    },
-
-    // Loop through functions and see if any need dependency hydration
-    function _maybeHydrate (callback) {
-      maybeHydrate({ cwd, inventory }, callback)
-    },
-
-    // ... then hydrate Architect project files into functions
-    function _hydrateShared (callback) {
-      hydrate.shared({ cwd, inventory, symlink }, function next (err) {
-        if (err) callback(err)
-        else {
-          update.done('Project files hydrated into functions')
-          callback()
-        }
-      })
     },
 
     // Internal Arc services
@@ -111,6 +97,28 @@ module.exports = function _start (params, callback) {
         else callback()
       }
       else callback()
+    },
+
+    // Loop through functions and see if any need dependency hydration
+    function _maybeHydrate (callback) {
+      maybeHydrate({ cwd, inventory }, callback)
+    },
+
+    // ... then hydrate Architect project files into functions
+    function _hydrateShared (callback) {
+      hydrate.shared({ cwd, inventory, symlink }, function next (err) {
+        if (err) callback(err)
+        else {
+          update.done('Project files hydrated into functions')
+          callback()
+        }
+      })
+    },
+
+    // Pretty print routes
+    function _printRoutes (callback) {
+      prettyPrint({ cwd, inventory, port, update })
+      callback()
     },
 
     // Print startup time
