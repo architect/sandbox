@@ -20,6 +20,7 @@
 
 - Fixed issue where CLI might take a long time to reload local routes (or not reload them at all) due to [issues related to Node.js stalling while closing its http server](https://github.com/nodejs/node/issues/2642)
 - Fixed issue that could cause `sandbox.http.end()` and `sandbox.events.end()` to hang during tests
+- Ensure plugin `invokeFunction` has all necessary params, fixes #1162
 
 ---
 

@@ -97,7 +97,7 @@ module.exports = function _start (params, callback) {
             return start
           })
         if (pluginServices.length) {
-          let invokeFunction = invokePluginFunction.bind({}, inventory)
+          let invokeFunction = invokePluginFunction.bind({}, { inventory, update })
           series(pluginServices.map(start => start.bind({}, {
             arc: inv._project.arc,
             inventory,
