@@ -2,8 +2,9 @@ let read = require('@architect/inventory/src/read')
 let defaultFunctionConfig = require('@architect/inventory/src/defaults/function-config')
 let invocator = require('./')
 
-module.exports = function invokePluginFunction ({ inventory, update }, { src, payload }, callback) {
+module.exports = function invokePluginFunction ({ cwd, inventory, update }, { src, payload }, callback) {
   let params = {
+    cwd,
     lambda: {
       src,
       config: getFunctionConfig(src),
