@@ -5,7 +5,7 @@ let _asd = require('./_services')
 let _fallback = require('./_fallback')
 let cors = require('./_cors')
 
-module.exports = function loadMiddleware (app, { inventory, update }) {
+module.exports = function loadMiddleware (app, { cwd, inventory, update }) {
   // Binary payload / base64 encoding handler
   app.use(binary)
 
@@ -20,7 +20,7 @@ module.exports = function loadMiddleware (app, { inventory, update }) {
   app.use(asd)
 
   // Route fallthrough to @proxy + ASAP
-  let fallback = _fallback.bind({}, { inventory, update })
+  let fallback = _fallback.bind({}, { cwd, inventory, update })
   app.use(fallback)
 
   // Special CORS handling

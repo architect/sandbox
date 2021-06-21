@@ -7,9 +7,7 @@ let sendStub = sinon.stub().returns({
   on: sinon.stub().returnsThis(),
   pipe: sinon.stub().returns(true)
 })
-let origEnv = process.env.ARC_SANDBOX_PATH_TO_STATIC
-let origCwd = process.cwd()
-let mock = join(__dirname, '..', '..', '..', '..', 'mock', 'normal')
+let mock = join(process.cwd(), 'test', 'mock', 'normal')
 
 // Assigned in test
 let existsStub
@@ -21,14 +19,8 @@ test('Set up env', t => {
   pub = proxyquire('../../../../../src/http/middleware/_static-path', {
     'send': sendStub
   })
-  t.end()
-})
-
-test('_static test setup', t => {
-  t.plan(1)
-  process.chdir(mock)
   process.env.ARC_SANDBOX_PATH_TO_STATIC = join(mock, 'public')
-  t.equals(process.cwd(), mock)
+  t.end()
 })
 
 test('_static should invoke next() if url does not start with _static', t => {
@@ -60,9 +52,7 @@ test('_static should invoke send() with file location if url starts with _static
 })
 
 test('_static test teardown', t => {
-  t.plan(1)
-  process.chdir(origCwd)
-  process.env.ARC_SANDBOX_PATH_TO_STATIC = origEnv
+  delete process.env.ARC_SANDBOX_PATH_TO_STATIC
   sinon.restore()
-  t.equals(process.cwd(), origCwd)
+  t.end()
 })

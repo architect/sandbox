@@ -2,7 +2,7 @@ let invoke = require('../invoke-ws')
 let pool = require('./pool')
 let noop = err => err ? console.log(err) : ''
 
-module.exports = function connection ({ inventory, update }, connectionId, ws) {
+module.exports = function connection ({ cwd, inventory, update }, connectionId, ws) {
   let { get } = inventory
 
   // Save this for send to use
@@ -20,6 +20,7 @@ module.exports = function connection ({ inventory, update }, connectionId, ws) {
     if (lambda) {
       update.status(`ws/${lambda.name}: ${connectionId}`)
       invoke({
+        cwd,
         lambda,
         body: msg,
         connectionId,
@@ -31,6 +32,7 @@ module.exports = function connection ({ inventory, update }, connectionId, ws) {
       let lambda = get.ws('default')
       update.status('ws/default: ' + connectionId)
       invoke({
+        cwd,
         lambda,
         body: msg,
         connectionId,
@@ -44,6 +46,7 @@ module.exports = function connection ({ inventory, update }, connectionId, ws) {
     let lambda = get.ws('disconnect')
     update.status(`ws/disconnect: ${connectionId}`)
     invoke({
+      cwd,
       lambda,
       connectionId,
       req: { headers: { host: `localhost:${process.env.PORT}` } },

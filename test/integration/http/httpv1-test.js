@@ -5,8 +5,7 @@ let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let { url, data, shutdown, checkRestResult: checkResult, rmPublic } = require('./_utils')
 
-let cwd = process.cwd()
-let mock = join(__dirname, '..', '..', 'mock')
+let mock = join(process.cwd(), 'test', 'mock')
 let b64dec = i => Buffer.from(i, 'base64').toString()
 
 test('Set up env', t => {
@@ -17,8 +16,7 @@ test('Set up env', t => {
 
 test('[HTTP v1.0 (REST) mode] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'normal'))
-  sandbox.start({ quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -847,8 +845,7 @@ test('[HTTP v1.0 (REST) mode] Shut down Sandbox', t => {
  */
 test('[HTTP v1.0 (REST) mode] Start Sandbox', t => {
   t.plan(3)
-  process.chdir(join(mock, 'no-index-fail'))
-  sandbox.start({ quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'no-index-fail'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -879,8 +876,7 @@ test('[HTTP v1.0 (REST) mode] Shut down Sandbox', t => {
  */
 test('[HTTP v1.0 (REST) mode] Start Sandbox', t => {
   t.plan(3)
-  process.chdir(join(mock, 'no-index-pass'))
-  sandbox.start({ quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'no-index-pass'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -914,8 +910,7 @@ test('[HTTP v1.0 (REST) mode] Shut down Sandbox', t => {
  */
 test('[HTTP v1.0 (REST) mode] Start Sandbox', t => {
   t.plan(3)
-  process.chdir(join(mock, 'missing-handler'))
-  sandbox.start({ quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'missing-handler'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -948,8 +943,7 @@ test('[HTTP v1.0 (REST) mode] Shut down Sandbox', t => {
  */
 test('[HTTP v1.0 (REST) mode] Start Sandbox', t => {
   t.plan(1)
-  process.chdir(join(mock, 'no-http'))
-  sandbox.start({ quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'no-http'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
@@ -966,10 +960,8 @@ test('[HTTP v1.0 (REST) mode] get / without defining @http', t => {
 })
 
 test('[HTTP v1.0 (REST) mode] Teardown', t => {
-  t.plan(3)
+  t.plan(2)
   shutdown(t)
   delete process.env.ARC_API_TYPE
-  process.chdir(cwd)
   t.notOk(process.env.ARC_API_TYPE, 'API type NOT set')
-  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
 })

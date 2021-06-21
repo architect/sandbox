@@ -7,8 +7,7 @@ let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let { checkHttpResult: checkResult, url, shutdown } = require('./_utils')
 
-let cwd = process.cwd()
-let mock = join(__dirname, '..', '..', 'mock')
+let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
 
 test('Set up env', t => {
@@ -21,8 +20,7 @@ test('Set up env', t => {
 
 test('[Misc] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'normal'))
-  sandbox.start({ quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -164,8 +162,7 @@ test('[Misc] Shut down Sandbox', t => {
 
 test('[Env vars (.env)] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'env', 'dot-env'))
-  sandbox.start({ quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'env', 'dot-env'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -200,8 +197,7 @@ test('[Env vars (.env)] Shut down Sandbox', t => {
 
 test('[Env vars (preferences.arc)] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'env', 'preferences'))
-  sandbox.start({ }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'env', 'preferences'), }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -236,8 +232,7 @@ test('[Env vars (preferences.arc)] Shut down Sandbox', t => {
 
 test('[Env vars (.arc-env)] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'env', 'dot-arc-env'))
-  sandbox.start({ quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'env', 'dot-arc-env'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -272,8 +267,7 @@ test('[Misc] Shut down Sandbox', t => {
 
 test('[Multiple possible handlers] Start Sandbox', t => {
   t.plan(4)
-  process.chdir(join(mock, 'multihandler'))
-  sandbox.start({ quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'multihandler'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
       t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -380,10 +374,8 @@ test('[Multiple possible handlers] Shut down Sandbox', t => {
 })
 
 test('Teardown', t => {
-  t.plan(2)
+  t.plan(1)
   delete process.env.ARC_API_TYPE
   rm(tmp)
-  process.chdir(cwd)
   t.notOk(process.env.ARC_API_TYPE, 'API type NOT set')
-  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
 })

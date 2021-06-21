@@ -18,7 +18,7 @@ let { chars } = require('@architect/utils')
  *
  * Not responsible for src/shared + views, handled elsewhere to optimize load time
  */
-module.exports = function maybeHydrate (inventory, callback) {
+module.exports = function maybeHydrate ({ cwd, inventory }, callback) {
   let { inv } = inventory
   let quiet = process.env.ARC_QUIET
   if (!inv.lambdaSrcDirs || !inv.lambdaSrcDirs.length) {
@@ -29,11 +29,14 @@ module.exports = function maybeHydrate (inventory, callback) {
       if (!quiet) console.log(chalk.grey(chars.done, 'Found new functions to hydrate!'))
     }
     let notified = false
-    let shared = join(process.cwd(), 'src', 'shared') // TODO: impl inventory
-    let views = join(process.cwd(), 'src', 'views') // TODO: impl inventory
     // Make a new array, don't inventory
     let lambdaSrcDirs = [ ...inv.lambdaSrcDirs ]
-    lambdaSrcDirs.push(shared, views)
+
+    let shared = inv.shared && inv.shared.src || join(cwd, 'src', 'shared')
+    let views = inv.views && inv.views.src || join(cwd, 'src', 'views')
+    lambdaSrcDirs.push(shared)
+    lambdaSrcDirs.push(views)
+
     let ops = lambdaSrcDirs.map(path => {
       return function (callback) {
         /**
@@ -49,7 +52,7 @@ module.exports = function maybeHydrate (inventory, callback) {
           let copyShared = false
           // Disable sidecar shared/views hydration; handled project-wide elsewhere
           let hydrateShared = path === shared || path === views || false
-          hydrate.install({ basepath: path, copyShared, hydrateShared }, callback)
+          hydrate.install({ cwd, inventory, basepath: path, copyShared, hydrateShared }, callback)
         }
         series([
           function _packageJson (callback) {

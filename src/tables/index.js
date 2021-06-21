@@ -78,7 +78,9 @@ module.exports = function createTables (inventory) {
       if (hasExternalDb) callback(null, msg)
       else {
         series([
-          dynamo.close,
+          function _tablesEnd (callback) {
+            dynamo.close(callback)
+          },
           function _arcEnd (callback) {
             // eslint-disable-next-line
             let { _arc } = require('../sandbox')

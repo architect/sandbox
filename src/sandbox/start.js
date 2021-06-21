@@ -8,6 +8,7 @@ let create = require('@architect/create')
 let { chars } = require('@architect/utils')
 let { env, maybeHydrate } = require('../lib')
 let invokePluginFunction = require('../invoke-lambda/_plugin')
+let prettyPrint = require('../http/_pretty-print')
 let startupScripts = require('./_startup-scripts')
 
 module.exports = function _start (params, callback) {
@@ -15,6 +16,8 @@ module.exports = function _start (params, callback) {
   let {
     inventory,
     // Settings
+    cwd,
+    port,
     symlink = true,
     // Everything else
     update,
@@ -42,25 +45,9 @@ module.exports = function _start (params, callback) {
     function _init (callback) {
       let autocreateEnabled = prefs && prefs.create && prefs.create.autocreate
       if (autocreateEnabled && !deprecated) {
-        create({}, callback)
+        create({ inventory }, callback)
       }
       else callback()
-    },
-
-    // Loop through functions and see if any need dependency hydration
-    function _maybeHydrate (callback) {
-      maybeHydrate(inventory, callback)
-    },
-
-    // ... then hydrate Architect project files into functions
-    function _hydrateShared (callback) {
-      hydrate.shared({ symlink }, function next (err) {
-        if (err) callback(err)
-        else {
-          update.done('Project files hydrated into functions')
-          callback()
-        }
-      })
     },
 
     // Internal Arc services
@@ -96,7 +83,7 @@ module.exports = function _start (params, callback) {
             return start
           })
         if (pluginServices.length) {
-          let invokeFunction = invokePluginFunction.bind({}, inventory)
+          let invokeFunction = invokePluginFunction.bind({}, { cwd, inventory, update })
           series(pluginServices.map(start => start.bind({}, {
             arc: inv._project.arc,
             inventory,
@@ -110,6 +97,28 @@ module.exports = function _start (params, callback) {
         else callback()
       }
       else callback()
+    },
+
+    // Loop through functions and see if any need dependency hydration
+    function _maybeHydrate (callback) {
+      maybeHydrate({ cwd, inventory }, callback)
+    },
+
+    // ... then hydrate Architect project files into functions
+    function _hydrateShared (callback) {
+      hydrate.shared({ cwd, inventory, symlink }, function next (err) {
+        if (err) callback(err)
+        else {
+          update.done('Project files hydrated into functions')
+          callback()
+        }
+      })
+    },
+
+    // Pretty print routes
+    function _printRoutes (callback) {
+      prettyPrint({ cwd, inventory, port, update })
+      callback()
     },
 
     // Print startup time
@@ -132,7 +141,6 @@ module.exports = function _start (params, callback) {
 
     // Check aws-sdk installation status if installed globally
     function _checkAWS_SDK (callback) {
-      let cwd = process.cwd()
       let dir = __dirname
       if (!dir.startsWith(cwd)) {
         let awsDir = join(dir.split('@architect')[0], 'aws-sdk', 'package.json')

@@ -5,9 +5,8 @@ let { head } = template
 const SIG = 'SIGINT'
 
 module.exports = function spawnChild (params, callback) {
-  let { command, args, options, request, timeout, update } = params
-  let cwd = options.cwd
-  let functionPath = cwd.replace(process.cwd(), '').substr(1)
+  let { cwd, command, args, options, request, timeout, update } = params
+  let functionPath = options.cwd.replace(cwd, '').substr(1)
   let timedout = false
   let headers = {
     'content-type': 'text/html; charset=utf8;',
@@ -126,7 +125,7 @@ module.exports = function spawnChild (params, callback) {
         statusCode: 500,
         headers,
         body: `${head}<h1>Timeout Error</h1>
-        <p>Lambda <code>${cwd}</code> timed out after <b>${timeout / 1000} seconds</b></p>`
+        <p>Lambda <code>${functionPath}</code> timed out after <b>${timeout / 1000} seconds</b></p>`
       })
     }
     else if (error) {

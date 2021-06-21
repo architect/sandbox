@@ -3,9 +3,10 @@ let test = require('tape')
 let tiny = require('tiny-json-http')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
+let mock = join(process.cwd(), 'test', 'mock', 'normal')
 let cwd = process.cwd()
-let mock = join(__dirname, '..', 'mock')
 let url = `http://localhost:${process.env.PORT || 3333}`
+let msg = 'Hello from get / running the default runtime'
 
 // Verify sandbox shut down
 let shutdown = (t, err) => {
@@ -13,17 +14,19 @@ let shutdown = (t, err) => {
 }
 
 test('Set up env', t => {
-  t.plan(2)
+  t.plan(3)
   t.ok(sandbox, 'Sandbox is present')
   t.ok(sandbox.start, 'sandbox.start module is present')
-  process.chdir(join(mock, 'normal'))
+  t.ok(sandbox.end, 'sandbox.end module is present')
 })
 
-test('Async sandbox.start', async t => {
-  t.plan(1)
+test('Async sandbox.start (with cwd param)', async t => {
+  t.plan(2)
   try {
-    await sandbox.start({ quiet: true })
+    await sandbox.start({ cwd: mock, quiet: true })
     t.pass('Sandbox started (async)')
+    let result = await tiny.get({ url })
+    t.equal(msg, result.body.message, 'Got back get / handler')
   }
   catch (err) {
     t.fail(err)
@@ -41,11 +44,71 @@ test('Async sandbox.end', async t => {
   }
 })
 
-test('Sync sandbox.start', t => {
+test('Async sandbox.start (from process.cwd)', async t => {
+  t.plan(3)
+  try {
+    process.chdir(mock)
+    t.equal(process.cwd(), mock, 'Process changed to mock dir')
+    await sandbox.start({ quiet: true })
+    t.pass('Sandbox started (async)')
+    let result = await tiny.get({ url })
+    t.equal(msg, result.body.message, 'Got back get / handler')
+  }
+  catch (err) {
+    t.fail(err)
+  }
+})
+
+test('Async sandbox.end', async t => {
+  t.plan(2)
+  try {
+    let ended = await sandbox.end()
+    t.equal(ended, 'Sandbox successfully shut down', 'Sandbox ended')
+    process.chdir(cwd)
+    t.equal(process.cwd(), cwd, 'Changed back to original working dir')
+  }
+  catch (err) {
+    t.fail(err)
+  }
+})
+
+test('Sync sandbox.start (with cwd param)', t => {
+  t.plan(2)
+  sandbox.start({ cwd: mock, quiet: true }, function (err) {
+    if (err) t.fail('Sandbox failed (sync)')
+    else {
+      t.pass('Sandbox started (sync)')
+      tiny.get({ url }, function (err, result) {
+        if (err) t.fail(err)
+        else t.equal(msg, result.body.message, 'Got back get / handler')
+      })
+    }
+  })
+})
+
+test('Sync sandbox.end', t => {
   t.plan(1)
+  sandbox.end(() => {
+    tiny.get({ url }, err => {
+      if (err) shutdown(t, err)
+      else t.fail('Sandbox did not shut down')
+    })
+  })
+})
+
+test('Sync sandbox.start (from process.cwd)', t => {
+  t.plan(3)
+  process.chdir(mock)
+  t.equal(process.cwd(), mock, 'Process changed to mock dir')
   sandbox.start({ quiet: true }, function (err) {
     if (err) t.fail('Sandbox failed (sync)')
-    else t.pass('Sandbox started (sync)')
+    else {
+      t.pass('Sandbox started (sync)')
+      tiny.get({ url }, function (err, result) {
+        if (err) t.fail(err)
+        else t.equal(msg, result.body.message, 'Got back get / handler')
+      })
+    }
   })
 })
 
@@ -56,7 +119,7 @@ test('Sync sandbox.end', t => {
       if (err) {
         shutdown(t, err)
         process.chdir(cwd)
-        t.equal(process.cwd(), cwd, 'Switched back to original working dir')
+        t.equal(process.cwd(), cwd, 'Changed back to original working dir')
       }
       else t.fail('Sandbox did not shut down')
     })

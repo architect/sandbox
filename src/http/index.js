@@ -5,7 +5,7 @@ let http = require('http')
 let Router = require('router')
 let finalhandler = require('finalhandler')
 let series = require('run-series')
-let chalk = require('chalk')
+let destroyer = require('server-destroy')
 
 // Local
 let { fingerprint } = require('@architect/utils')
@@ -15,6 +15,7 @@ let httpEnv = require('./_http-env')
 let hydrate = require('@architect/hydrate')
 let registerHTTP = require('./register-http')
 let registerWS = require('./register-websocket')
+let prettyPrint = require('./_pretty-print')
 
 /**
  * Creates an HTTP + WebSocket server that emulates API Gateway
@@ -33,13 +34,13 @@ module.exports = function createHttpServer (inventory) {
 
     // Start the HTTP server
     app.start = function start (options, callback) {
-      let { all, port, symlink = true, update } = options
+      let { all, cwd, port, symlink = true, update } = options
 
-      middleware(app, { inventory, update })
+      middleware(app, { cwd, inventory, update })
 
       // Set up ports and HTTP-specific env vars
       let { httpPort } = getPorts(port)
-      httpEnv(arc)
+      httpEnv(arc, cwd)
 
       series([
         // Set up Arc + userland env vars
@@ -66,26 +67,6 @@ module.exports = function createHttpServer (inventory) {
           })
         },
 
-        // Loop through functions and see if any need dependency hydration
-        function _maybeHydrate (callback) {
-          if (!all) maybeHydrate(inventory, callback)
-          else callback()
-        },
-
-        // ... then hydrate Architect project files into functions
-        function _hydrateShared (callback) {
-          if (!all) {
-            hydrate.shared({ symlink }, function next (err) {
-              if (err) callback(err)
-              else {
-                update.done('Project files hydrated into functions')
-                callback()
-              }
-            })
-          }
-          else callback()
-        },
-
         // Internal Arc services
         function _internal (callback) {
           if (!all) {
@@ -101,15 +82,16 @@ module.exports = function createHttpServer (inventory) {
           httpServer = http.createServer(function _request (req, res) {
             app(req, res, finalhandler(req, res))
           })
+          destroyer(httpServer)
 
           // Bind WebSocket app to HTTP server
           // This must be done before @http so it isn't clobbered by greedy routes
           if (inv.ws) {
-            websocketServer = registerWS({ app, httpServer, inventory, update })
+            websocketServer = registerWS({ app, cwd, httpServer, inventory, update })
           }
 
           if (inv.http) {
-            registerHTTP({ app, routes: inv.http, inventory, update })
+            registerHTTP({ app, cwd, routes: inv.http, inventory, update })
           }
 
           callback()
@@ -118,13 +100,40 @@ module.exports = function createHttpServer (inventory) {
         // Let's go!
         function _startServer (callback) {
           httpServer.listen(httpPort, callback)
-        }
+        },
+
+        // Loop through functions and see if any need dependency hydration
+        function _maybeHydrate (callback) {
+          if (!all) maybeHydrate({ cwd, inventory }, callback)
+          else callback()
+        },
+
+        // ... then hydrate Architect project files into functions
+        function _hydrateShared (callback) {
+          if (!all) {
+            hydrate.shared({ cwd, inventory, symlink }, function next (err) {
+              if (err) callback(err)
+              else {
+                update.done('Project files hydrated into functions')
+                callback()
+              }
+            })
+          }
+          else callback()
+        },
+
+        // Pretty print routes
+        function _printRoutes (callback) {
+          if (!all) {
+            prettyPrint({ cwd, inventory, port, update })
+            callback()
+          }
+          else callback()
+        },
       ],
       function _started (err) {
         if (err) callback(err)
         else {
-          let link = chalk.green.bold.underline(`http://localhost:${httpPort}\n`)
-          update.raw(`\n    ${link}`)
           let msg = 'HTTP successfully started'
           callback(null, msg)
         }
@@ -133,15 +142,20 @@ module.exports = function createHttpServer (inventory) {
 
     app.end = function end (callback) {
       series([
-        function _http (callback) {
-          if (httpServer) httpServer.close(callback)
+        function _httpEnd (callback) {
+          if (httpServer) httpServer.destroy(callback)
           else callback()
         },
-        function _websocket (callback) {
+        function _webSocketEnd (callback) {
           if (websocketServer) websocketServer.close(callback)
           else callback()
         },
-      ], function _closed (err) {
+        function _arcEnd (callback) {
+          // eslint-disable-next-line
+          let { _arc } = require('../sandbox')
+          _arc.end(callback)
+        }
+      ], function _httpEnded (err) {
         if (err) callback(err)
         else {
           let msg = 'HTTP successfully shut down'

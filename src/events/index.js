@@ -15,7 +15,7 @@ module.exports = function createEventBus (inventory) {
     let eventBus
 
     events.start = function start (options, callback) {
-      let { all, port, symlink = true, update } = options
+      let { all, cwd, port, symlink = true, update } = options
 
       // Set up ports and env vars
       let { eventsPort } = getPorts(port)
@@ -32,26 +32,6 @@ module.exports = function createEventBus (inventory) {
           checkPort(eventsPort, callback)
         },
 
-        // Loop through functions and see if any need dependency hydration
-        function _maybeHydrate (callback) {
-          if (!all) maybeHydrate(inventory, callback)
-          else callback()
-        },
-
-        // ... then hydrate Architect project files into functions
-        function _hydrateShared (callback) {
-          if (!all) {
-            hydrate.shared({ symlink }, function next (err) {
-              if (err) callback(err)
-              else {
-                update.done('Project files hydrated into functions')
-                callback()
-              }
-            })
-          }
-          else callback()
-        },
-
         // Internal Arc services
         function _internal (callback) {
           if (!all) {
@@ -63,7 +43,7 @@ module.exports = function createEventBus (inventory) {
         },
 
         function _finalSetup (callback) {
-          let listener = _listener.bind({}, { inventory, update })
+          let listener = _listener.bind({}, { cwd, inventory, update })
           eventBus = http.createServer(listener)
           callback()
         },
@@ -71,7 +51,27 @@ module.exports = function createEventBus (inventory) {
         // Let's go!
         function _startServer (callback) {
           eventBus.listen(eventsPort, callback)
-        }
+        },
+
+        // Loop through functions and see if any need dependency hydration
+        function _maybeHydrate (callback) {
+          if (!all) maybeHydrate({ cwd, inventory }, callback)
+          else callback()
+        },
+
+        // ... then hydrate Architect project files into functions
+        function _hydrateShared (callback) {
+          if (!all) {
+            hydrate.shared({ cwd, inventory, symlink }, function next (err) {
+              if (err) callback(err)
+              else {
+                update.done('Project files hydrated into functions')
+                callback()
+              }
+            })
+          }
+          else callback()
+        },
       ],
       function _started (err) {
         if (err) callback(err)
@@ -84,7 +84,16 @@ module.exports = function createEventBus (inventory) {
     }
 
     events.end = function end (callback) {
-      eventBus.close(function _closed (err) {
+      series([
+        function _eventsEnd (callback) {
+          eventBus.close(callback)
+        },
+        function _arcEnd (callback) {
+          // eslint-disable-next-line
+          let { _arc } = require('../sandbox')
+          _arc.end(callback)
+        }
+      ], function _eventsEnded (err) {
         if (err) callback(err)
         else {
           let msg = 'Event bus successfully shut down'

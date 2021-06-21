@@ -5,8 +5,7 @@ let { existsSync, mkdirSync, readFileSync, statSync } = require('fs')
 let { join } = require('path')
 let { events } = require('../../src')
 let { sync: rm } = require('rimraf')
-let cwd = process.cwd()
-let mock = join(__dirname, '..', 'mock')
+let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
 
 function setup (t) {
@@ -47,13 +46,12 @@ function checkFile (t, file, message) {
 test('Set up env', t => {
   t.plan(1)
   t.ok(events, 'Events module is present')
-  process.chdir(join(mock, 'normal'))
 })
 
 test('Async events.start', async t => {
   t.plan(1)
   try {
-    let result = await events.start({ quiet: true })
+    let result = await events.start({ cwd: join(mock, 'normal'), quiet: true })
     t.equal(result, 'Event bus successfully started', 'Events started (async)')
   }
   catch (err) {
@@ -144,7 +142,7 @@ test('Async events.end', async t => {
 
 test('Sync events.start', t => {
   t.plan(1)
-  events.start({ quiet: true }, function (err, result) {
+  events.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'Event bus successfully started', 'Events started (sync)')
   })
@@ -246,15 +244,9 @@ test('invoke-lambda should respect timeout for sync functions and process should
 })
 
 test('Sync events.end', t => {
-  t.plan(2)
-  setTimeout(() => {
-    events.end(function (err, result) {
-      if (err) t.fail(err)
-      else {
-        t.equal(result, 'Event bus successfully shut down', 'Events ended')
-        process.chdir(cwd)
-        t.equal(process.cwd(), cwd, 'Switched back to original working dir')
-      }
-    })
-  }, 100)
+  t.plan(1)
+  events.end(function (err, result) {
+    if (err) t.fail(err)
+    else t.equal(result, 'Event bus successfully shut down', 'Events ended')
+  })
 })

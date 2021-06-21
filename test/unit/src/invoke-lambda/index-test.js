@@ -4,8 +4,7 @@ let sinon = require('sinon')
 let test = require('tape')
 let _inventory = require('@architect/inventory')
 let update = require('@architect/utils').updater()
-let cwd = process.cwd()
-let mock = join(__dirname, '..', '..', '..', 'mock')
+let mock = join(process.cwd(), 'test', 'mock')
 
 let fake = (params, callback) => callback(null, params)
 let nodeFake = sinon.fake(fake)
@@ -25,9 +24,8 @@ let get
 
 test('Set up env', t => {
   t.plan(3)
-  process.chdir(join(mock, 'normal'))
   t.ok(invoke, 'Got invoke')
-  _inventory({}, function (err, result) {
+  _inventory({ cwd: join(mock, 'normal') }, function (err, result) {
     if (err) t.fail(err)
     else {
       inv = result.inv
@@ -152,10 +150,4 @@ test('Test body size limits', t => {
   invoke({ lambda, event, inventory, update }, (err) => {
     t.notOk(err instanceof Error, 'Event: sub 6MB request bodies are fine')
   })
-})
-
-test('Teardown', t => {
-  t.plan(1)
-  process.chdir(cwd)
-  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
 })
