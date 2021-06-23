@@ -74,11 +74,14 @@ module.exports = function spawnChild (params, callback) {
         // Node process.kill() + Lambda Linux /proc/<pid>/task/<tid> is mysterious, so this may not be the best or proper approach
         try {
           let tasks = readdirSync(`/proc/${pid}/task`)
-          tasks.forEach(task => {
-            try { process.kill(task) }
-            catch (err) { /* Swallow: task may have ended naturally or been killed by killing child.pid */ }
+          tasks.forEach(tid => {
+            try { process.kill(tid) }
+            catch (err) {
+              // Task may have ended naturally or been killed by killing child.pid, I guess we don't really know
+              update.debug.status(`${functionPath} (pid ${pid}) did not kill task (tid ${tid})`)
+            }
           })
-          update.debug.status(`${functionPath} (pid ${pid}) successfully terminated inside Lambda`)
+          update.debug.status(`${functionPath} (pid ${pid}) (possibly maybe) successfully terminated inside Lambda`)
         }
         catch (err) {
           update.debug.status(`${functionPath} (pid ${pid}) failed to terminate inside Lambda: ${err.message}`)
