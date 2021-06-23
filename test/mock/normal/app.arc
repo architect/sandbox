@@ -5,9 +5,6 @@ mockapp
 event-normal
 event-custom
   src src/events/custom
-event-timeout-async
-event-timeout-async-w-settimeout
-event-timeout-sync
 
 @queues
 queue-normal

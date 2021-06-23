@@ -38,22 +38,6 @@ test('get /', t => {
     })
 })
 
-test('[Timeout] get /times-out', t => {
-  t.plan(3)
-  tiny.get({
-    url: url + '/times-out'
-  }, function _got (err, result) {
-    if (err) {
-      let message = 'Timeout Error'
-      let time = '1 second'
-      t.equal(err.statusCode, 500, 'Errors with 500')
-      t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
-      t.match(err.body, new RegExp(time), `Timed out set to ${time}`)
-    }
-    else t.fail(result)
-  })
-})
-
 test('Sync http.end', t => {
   t.plan(1)
   http.end((err, result) => {
