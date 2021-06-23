@@ -243,8 +243,29 @@ test('invoke-lambda should respect timeout for sync functions and process should
   })
 })
 
+test('invoke-lambda should respect timeout for sync functions and process should be killed (inside actual AWS Lambda)', t => {
+  let isLinux = process.platform === 'linux'
+  t.plan(1)
+  if (isLinux) {
+    process.env.AWS_LAMBDA_FUNCTION_NAME = 'yep'
+    let fileThatShouldNotBeWritten = join(tmp, 'foo-sync')
+    arc.events.publish({
+      name: 'event-timeout-sync',
+      payload: { path: fileThatShouldNotBeWritten }
+    },
+    function done (err) {
+      if (err) t.fail(err)
+      else setTimeout(() => {
+        t.notOk(existsSync(fileThatShouldNotBeWritten), 'file not created by event as event timed out and process was terminated appropriately')
+      }, 1250) // 1s is the configured timeout of test/mock/normal/src/events/event-timeout-sync so we pad it a bit and check after delay
+    })
+  }
+  else t.pass('Skipped because !Linux')
+})
+
 test('Sync events.end', t => {
   t.plan(1)
+  delete process.env.AWS_LAMBDA_FUNCTION_NAME
   events.end(function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'Event bus successfully shut down', 'Events ended')
