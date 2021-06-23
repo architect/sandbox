@@ -1,4 +1,5 @@
 let { spawn } = require('child_process')
+let { readdirSync } = require('fs')
 let kill = require('tree-kill')
 let { template } = require('../lib')
 let { head } = template
@@ -7,6 +8,7 @@ const SIG = 'SIGINT'
 module.exports = function spawnChild (params, callback) {
   let { cwd, command, args, options, request, timeout, update } = params
   let functionPath = options.cwd.replace(cwd, '').substr(1)
+  let isInLambda = process.env.AWS_LAMBDA_FUNCTION_NAME
   let timedout = false
   let headers = {
     'content-type': 'text/html; charset=utf8;',
@@ -60,11 +62,30 @@ module.exports = function spawnChild (params, callback) {
         update.error(`${functionPath} (pid ${pid}) caught hanging execution with an error, attempting to exit 1`)
         code = 1
       }
-      kill(pid, SIG, () => {
+      if (!isInLambda) {
+        kill(pid, SIG, () => {
+          murderInProgress = false
+          update.debug.status(`${functionPath} (pid ${pid}) successfully terminated`)
+          if (!closed) done(code)
+        })
+      }
+      else {
+        // tree-kill relies on *nix `ps`, which Lambda doesn't have – but it does have /proc
+        // Node process.kill() + Lambda Linux /proc/<pid>/task/<tid> is mysterious, so this may not be the best or proper approach
+        try {
+          let tasks = readdirSync(`/proc/${pid}/task`)
+          tasks.forEach(task => {
+            try { process.kill(task) }
+            catch (err) { /* Swallow: task may have ended naturally or been killed by killing child.pid */ }
+          })
+          update.debug.status(`${functionPath} (pid ${pid}) successfully terminated inside Lambda`)
+        }
+        catch (err) {
+          update.debug.status(`${functionPath} (pid ${pid}) failed to terminate inside Lambda: ${err.message}`)
+        }
         murderInProgress = false
-        update.debug.status(`${functionPath} (pid ${pid}) successfully terminated`)
         if (!closed) done(code)
-      })
+      }
     }
     else {
       update.debug.status(`${functionPath} (pid ${pid}) is not running (termination in progress: ${murderInProgress}; process closed: ${closed}`)
