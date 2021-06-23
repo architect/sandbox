@@ -38,6 +38,7 @@ test('Set up env', t => {
   })
 })
 
+// Control test: if you change lambda invocation logic, this should pass!
 test('[Lambda invocation] Should not terminate a process early', t => {
   t.plan(3)
   setup(t)
@@ -52,7 +53,7 @@ test('[Lambda invocation] Should not terminate a process early', t => {
       console.log('Files in tmp:', readdirSync(tmp))
       t.ok(existsSync(fine), 'File successfully created by event as event did not time out')
       reset(t)
-    }, 500) // 1s is the configured timeout, but we don't need that long
+    }, 1000)
   })
 })
 
