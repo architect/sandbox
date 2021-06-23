@@ -1,4 +1,4 @@
-let fs = require('fs')
+let { createWriteStream } = require('fs')
 let { join } = require('path')
 
 exports.handler = (event, context, callback) => {
@@ -10,7 +10,7 @@ exports.handler = (event, context, callback) => {
   setTimeout(() => {
     // this should never execute as timeout is set to 1 sec in config.arc
     console.log(`event-timeout-sync writing ${pathToFile}`)
-    const writeStream = fs.createWriteStream(pathToFile)
+    let writeStream = createWriteStream(pathToFile)
     writeStream.write('hiya')
     writeStream.end()
     callback()
