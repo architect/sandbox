@@ -7,6 +7,7 @@
 ### Fixed
 
 - Attempted to fix Sandbox not terminating processes properly when running in Lambda due to Lambda not having *nix `ps`
+- Hardened process termination testing
 
 ---
 

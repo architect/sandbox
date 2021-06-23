@@ -1,0 +1,2 @@
+@aws
+timeout 1
