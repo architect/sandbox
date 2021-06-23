@@ -2,6 +2,14 @@
 
 ---
 
+## [3.7.2] 2021-06-22
+
+### Fixed
+
+- Attempted to fix Sandbox not terminating processes properly when running in Lambda due to Lambda not having *nix `ps`
+
+---
+
 ## [3.7.0 - 3.7.1] 2021-06-14
 
 ### Added
