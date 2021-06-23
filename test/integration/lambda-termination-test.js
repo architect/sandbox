@@ -32,7 +32,7 @@ function check (t) {
 test('Set up env', t => {
   t.plan(2)
   t.ok(events, 'Events module is present')
-  events.start({ cwd: join(mock, 'invocation-termination'), logLevel: 'debug' }, (err, result) => {
+  events.start({ cwd: join(mock, 'lambda-termination'), logLevel: 'debug' }, (err, result) => {
     if (err) t.fail(err)
     else t.equal(result, 'Event bus successfully started', 'Events started (async)')
   })
