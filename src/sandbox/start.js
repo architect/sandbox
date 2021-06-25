@@ -136,7 +136,7 @@ module.exports = function _start (params, callback) {
 
     // Run startup scripts (if present)
     function _runStartupScripts (callback) {
-      startupScripts({ inventory, update }, callback)
+      startupScripts({ cwd, inventory, update }, callback)
     },
 
     // Check aws-sdk installation status if installed globally

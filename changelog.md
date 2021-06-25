@@ -2,6 +2,19 @@
 
 ---
 
+## [3.7.3] 2021-06-24
+
+### Added
+
+- Populate Sandbox startup commands (`prefs.arc` `@sandbox-startup`) with `ARC_INV` env var, providing access to the project's Inventory object
+
+
+### Fixed
+
+- Ensure Sandbox startup commands respect `cwd`
+
+---
+
 ## [3.7.2] 2021-06-22
 
 ### Fixed
