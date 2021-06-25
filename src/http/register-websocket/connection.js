@@ -45,8 +45,8 @@ module.exports = function connection ({ cwd, inventory, update, connectedAt }, c
       let lambda = get.ws('default')
       update.status('ws/default: ' + connectionId)
       let requestContext = {
-        routeKey: '$disconnect',
-        eventType: 'DISCONNECT',
+        routeKey: '$default',
+        eventType: 'MESSAGE',
         ...commonRequestContext,
       }
       invoke({
