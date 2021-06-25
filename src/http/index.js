@@ -87,7 +87,7 @@ module.exports = function createHttpServer (inventory) {
           // Bind WebSocket app to HTTP server
           // This must be done before @http so it isn't clobbered by greedy routes
           if (inv.ws) {
-            websocketServer = registerWS({ app, cwd, httpServer, inventory, update })
+            websocketServer = registerWS({ app, cwd, httpServer, inventory, update, httpPort })
           }
 
           if (inv.http) {

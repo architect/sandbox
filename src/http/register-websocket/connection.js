@@ -3,20 +3,23 @@ let invoke = require('../invoke-ws')
 let pool = require('./pool')
 let noop = err => err ? console.log(err) : ''
 
-module.exports = function connection ({ cwd, inventory, update, connectedAt }, connectionId, ws) {
+module.exports = function connection ({ cwd, inventory, update, connectedAt, domainName }, connectionId, ws) {
   let { get } = inventory
   // Save this for send to use
   pool.register(connectionId, ws)
 
+  const makeRequestContext = (extra) => ({
+    messageId: makeRequestId(),
+    messageDirection: 'IN',
+    connectedAt,
+    requestTimeEpoch: Date.now(),
+    requestId: makeRequestId(),
+    connectionId,
+    domainName,
+    ...extra
+  })
+
   ws.on('message', function message (msg) {
-    let commonRequestContext = {
-      messageId: makeRequestId(),
-      messageDirection: 'IN',
-      connectedAt,
-      requestTimeEpoch: Date.now(),
-      requestId: makeRequestId(),
-      connectionId,
-    }
     let lambda
     try {
       const payload = JSON.parse(msg)
@@ -27,11 +30,10 @@ module.exports = function connection ({ cwd, inventory, update, connectedAt }, c
     }
     if (lambda) {
       update.status(`ws/${lambda.name}: ${connectionId}`)
-      let requestContext = {
+      let requestContext = makeRequestContext({
         routeKey: `$${lambda.name}`,
         eventType: 'MESSAGE', // just a guess, I'm not sure
-        ...commonRequestContext,
-      }
+      })
       invoke({
         cwd,
         lambda,
@@ -44,11 +46,10 @@ module.exports = function connection ({ cwd, inventory, update, connectedAt }, c
     else {
       let lambda = get.ws('default')
       update.status('ws/default: ' + connectionId)
-      let requestContext = {
+      let requestContext = makeRequestContext({
         routeKey: '$default',
         eventType: 'MESSAGE',
-        ...commonRequestContext,
-      }
+      })
       invoke({
         cwd,
         lambda,
@@ -61,16 +62,11 @@ module.exports = function connection ({ cwd, inventory, update, connectedAt }, c
   })
 
   ws.on('close', function close () {
-    let requestContext = {
+    let requestContext = makeRequestContext({
       routeKey: '$disconnect',
       eventType: 'DISCONNECT',
-      messageDirection: 'IN',
       disconnectReason: '',
-      connectedAt,
-      requestTimeEpoch: Date.now(),
-      requestId: makeRequestId(),
-      connectionId,
-    }
+    })
 
     let lambda = get.ws('disconnect')
     update.status(`ws/disconnect: ${connectionId}`)

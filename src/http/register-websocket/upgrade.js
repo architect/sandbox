@@ -8,7 +8,7 @@ let Hashid = require('@begin/hashid')
  * - In APIGWv2, !2xx responses hang up and return the status code
  * - However, 2xx responses initiate a socket connection (automatically responding with 101)
  */
-module.exports = function upgrade (wss, { cwd, inventory, update, connectedAt }) {
+module.exports = function upgrade (wss, { cwd, inventory, update, connectedAt, domainName }) {
   let { get } = inventory
 
   return function upgrade (req, socket, head) {
@@ -29,6 +29,7 @@ module.exports = function upgrade (wss, { cwd, inventory, update, connectedAt })
       requestTimeEpoch: Date.now(),
       requestId: makeRequestId(),
       connectionId,
+      domainName,
     }
 
     invoke({

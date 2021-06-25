@@ -1,6 +1,5 @@
 let test = require('tape')
 let proxyquire = require('proxyquire')
-let { arc8 } = require('../ws-req-fixtures')
 let { arc6 } = require('../http-req-fixtures')
 
 function lambdaStub (params, callback) {
@@ -13,28 +12,22 @@ let invoke = proxyquire('../../../../../src/http/invoke-ws', {
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${str(item)}`
 
-let customizeWSRequest = (request, { connectionId }) => {
-  return {
-    ...arc8,
-    requestContext: {
-      ...arc8.requestContext,
-      connectionId
-    }
-  }
-}
-
-test('WebSocket connect Event', t => {
-  t.plan(2)
+test('Internal WebSocket events: no req, no body', t => {
+  t.plan(6)
   let connectionId = 'much-unique-uuid'
   let params = {
-    req: {},
-    requestContext: { connectionId },
-    body: undefined
+    lambda: { src: 'src/ws/default' }, // not a real action
+    connectionId
   }
   invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
-    let { event } = result
-    t.deepEqual(event, customizeWSRequest(arc8.connect, { connectionId }))
+    let { lambda, event: req } = result
+    t.deepEqual(params.lambda, lambda, match('Lambda', lambda))
+    t.equal(connectionId, req.requestContext.connectionId, match('connectionId', req.requestContext.connectionId))
+    t.notOk(req.isBase64Encoded, 'isBase64Encoded set to false')
+    t.notOk(req.body, 'req.body not present')
+    t.notOk(req.headers, 'req.headers not present')
+    t.notOk(req.query, 'req.query not present')
   })
 })
 
