@@ -1,5 +1,5 @@
 let http = require('http')
-const makeRequestId = require('../../lib/request-id')
+let makeRequestId = require('../../lib/request-id')
 let invoke = require('../invoke-ws')
 let Hashid = require('@begin/hashid')
 
@@ -21,7 +21,7 @@ module.exports = function upgrade (wss, { cwd, inventory, update, connectedAt })
     let connectionId = h.encode(Date.now())
     update.status('ws/connect: ' + connectionId)
 
-    const requestContext = {
+    let requestContext = {
       routeKey: '$connect',
       eventType: 'CONNECT',
       messageDirection: 'IN',

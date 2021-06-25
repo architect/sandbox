@@ -1,4 +1,4 @@
-const makeRequestId = require('../../lib/request-id')
+let makeRequestId = require('../../lib/request-id')
 let invoke = require('../invoke-ws')
 let pool = require('./pool')
 let noop = err => err ? console.log(err) : ''
@@ -9,7 +9,7 @@ module.exports = function connection ({ cwd, inventory, update, connectedAt }, c
   pool.register(connectionId, ws)
 
   ws.on('message', function message (msg) {
-    const commonRequestContext = {
+    let commonRequestContext = {
       messageId: makeRequestId(),
       messageDirection: 'IN',
       connectedAt,
@@ -27,7 +27,7 @@ module.exports = function connection ({ cwd, inventory, update, connectedAt }, c
     }
     if (lambda) {
       update.status(`ws/${lambda.name}: ${connectionId}`)
-      const requestContext = {
+      let requestContext = {
         routeKey: `$${lambda.name}`,
         eventType: 'MESSAGE', // just a guess, I'm not sure
         ...commonRequestContext,
@@ -44,7 +44,7 @@ module.exports = function connection ({ cwd, inventory, update, connectedAt }, c
     else {
       let lambda = get.ws('default')
       update.status('ws/default: ' + connectionId)
-      const requestContext = {
+      let requestContext = {
         routeKey: '$disconnect',
         eventType: 'DISCONNECT',
         ...commonRequestContext,
@@ -61,7 +61,7 @@ module.exports = function connection ({ cwd, inventory, update, connectedAt }, c
   })
 
   ws.on('close', function close () {
-    const requestContext = {
+    let requestContext = {
       routeKey: '$disconnect',
       eventType: 'DISCONNECT',
       messageDirection: 'IN',
