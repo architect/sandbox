@@ -1,4 +1,5 @@
 let http = require('http')
+const makeRequestId = require('../../lib/request-id')
 let invoke = require('../invoke-ws')
 let Hashid = require('@begin/hashid')
 
@@ -7,7 +8,7 @@ let Hashid = require('@begin/hashid')
  * - In APIGWv2, !2xx responses hang up and return the status code
  * - However, 2xx responses initiate a socket connection (automatically responding with 101)
  */
-module.exports = function upgrade (wss, { cwd, inventory, update }) {
+module.exports = function upgrade (wss, { cwd, inventory, update, connectedAt }) {
   let { get } = inventory
 
   return function upgrade (req, socket, head) {
@@ -16,14 +17,24 @@ module.exports = function upgrade (wss, { cwd, inventory, update }) {
     let lambda = get.ws('connect')
 
     // Create a connectionId uuid
-    let h = new Hashid
+    let h = new Hashid()
     let connectionId = h.encode(Date.now())
     update.status('ws/connect: ' + connectionId)
+
+    const requestContext = {
+      routeKey: '$connect',
+      eventType: 'CONNECT',
+      messageDirection: 'IN',
+      connectedAt,
+      requestTimeEpoch: Date.now(),
+      requestId: makeRequestId(),
+      connectionId,
+    }
 
     invoke({
       cwd,
       lambda,
-      connectionId,
+      requestContext,
       req,
       inventory,
       update,
