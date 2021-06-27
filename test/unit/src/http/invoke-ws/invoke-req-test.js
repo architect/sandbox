@@ -1,7 +1,5 @@
 let test = require('tape')
 let proxyquire = require('proxyquire')
-let { arc6 } = require('../http-req-fixtures')
-
 function lambdaStub (params, callback) {
   callback(null, params)
 }
@@ -9,6 +7,7 @@ function lambdaStub (params, callback) {
 let invoke = proxyquire('../../../../../src/http/invoke-ws', {
   '../../invoke-lambda': lambdaStub
 })
+let { arc6 } = require('../http-req-fixtures')
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${str(item)}`
 
@@ -38,7 +37,7 @@ test('Internal WebSocket events: body (WS message), no req', t => {
   let params = {
     lambda: { src: 'src/ws/default' }, // not a real action
     body,
-    requestContext: { connectionId },
+    connectionId
   }
   invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
@@ -58,8 +57,8 @@ test('WebSocket connect / disconnect event: get /', t => {
   let request = arc6.getIndex
   request.url = 'localhost'
   let params = {
-    body: undefined,
-    requestContext: { connectionId },
+    lambda: { src: 'src/ws/connect' }, // not a real action
+    connectionId,
     req: request
   }
   invoke(params, function compare (err, result) {
@@ -79,7 +78,7 @@ test('WebSocket connect / disconnect event: get /?whats=up', t => {
   request.url = 'localhost/?whats=up'
   let params = {
     lambda: { src: 'src/ws/connect' }, // not a real action
-    requestContext: { connectionId },
+    connectionId,
     req: request
   }
   invoke(params, function compare (err, result) {
