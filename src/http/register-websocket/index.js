@@ -8,12 +8,13 @@ module.exports = function registerWebSocket (params) {
 
   let wss = new WebSocket.Server({ noServer: true })
   let connectedAt = Date.now()
-  let domainName = `ws://localhost:${httpPort}`
+  let domainName = `localhost:${httpPort}`
+  let stage = 'staging'
   // Listens for HTTP 101 request
-  httpServer.on('upgrade', upgrade(wss, { cwd, inventory, update, connectedAt, domainName }))
+  httpServer.on('upgrade', upgrade(wss, { cwd, inventory, update, connectedAt, domainName, stage }))
 
   // Listen for the initial WebSocket connection
-  let connection = _connection.bind({}, { cwd, inventory, update, connectedAt, domainName })
+  let connection = _connection.bind({}, { cwd, inventory, update, connectedAt, domainName, stage })
   wss.on('connection', connection)
 
   // Listen for arc.ws.send invocations

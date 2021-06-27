@@ -36,7 +36,7 @@ let arc8 = {
       // fields from testing not supported yet
       // extendedRequestId: 'BdgbsFnMvHcFaJg=',
       // requestTime: '25/Jun/2021:03:03:25 +0000',
-      // stage: 'staging',
+      stage: 'staging',
       // identity: { sourceIp: 'xxx.xxx.xxx.xxx' },
       domainName: 'abc123unme.execute-api.us-west-2.amazonaws.com',
       // apiId: 'fdos88vuoi'
@@ -58,7 +58,7 @@ let arc8 = {
       // fields from testing not supported yet
       // extendedRequestId: 'dRm8FEWpPHcFSeQ=',
       // requestTime: '04/Apr/2021:20:16:51 +0000',
-      // stage: 'staging',
+      stage: 'staging',
       // identity: [Object],
       domainName: 'abc123unme.execute-api.us-west-2.amazonaws.com',
       // apiId: 'abc123unme'
@@ -84,7 +84,7 @@ let arc8 = {
       requestId: 'abc12345',
       connectionId: 'BdgbbbcrMvHcCddQ=',
       // requestTime: '04/Apr/2021:20:16:55 +0000',
-      // stage: 'staging',
+      stage: 'staging',
       domainName: 'abc123unme.execute-api.us-west-2.amazonaws.com',
       // identity: [ Object ],
       // disconnectStatusCode: -1,

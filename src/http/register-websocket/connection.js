@@ -3,7 +3,7 @@ let invoke = require('../invoke-ws')
 let pool = require('./pool')
 let noop = err => err ? console.log(err) : ''
 
-module.exports = function connection ({ cwd, inventory, update, connectedAt, domainName }, connectionId, ws) {
+module.exports = function connection ({ cwd, inventory, update, connectedAt, domainName, stage }, connectionId, ws) {
   let { get } = inventory
   // Save this for send to use
   pool.register(connectionId, ws)
@@ -16,6 +16,7 @@ module.exports = function connection ({ cwd, inventory, update, connectedAt, dom
     requestId: makeRequestId(),
     connectionId,
     domainName,
+    stage,
     ...extra
   })
 
