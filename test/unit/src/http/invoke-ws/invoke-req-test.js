@@ -16,7 +16,7 @@ test('Internal WebSocket events: no req, no body', t => {
   let connectionId = 'much-unique-uuid'
   let params = {
     lambda: { src: 'src/ws/default' }, // not a real action
-    connectionId
+    requestContext: { connectionId },
   }
   invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
@@ -37,7 +37,7 @@ test('Internal WebSocket events: body (WS message), no req', t => {
   let params = {
     lambda: { src: 'src/ws/default' }, // not a real action
     body,
-    connectionId
+    requestContext: { connectionId },
   }
   invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
@@ -58,7 +58,7 @@ test('WebSocket connect / disconnect event: get /', t => {
   request.url = 'localhost'
   let params = {
     lambda: { src: 'src/ws/connect' }, // not a real action
-    connectionId,
+    requestContext: { connectionId },
     req: request
   }
   invoke(params, function compare (err, result) {
@@ -78,7 +78,7 @@ test('WebSocket connect / disconnect event: get /?whats=up', t => {
   request.url = 'localhost/?whats=up'
   let params = {
     lambda: { src: 'src/ws/connect' }, // not a real action
-    connectionId,
+    requestContext: { connectionId },
     req: request
   }
   invoke(params, function compare (err, result) {
