@@ -1,3 +1,3 @@
-exports.handler = async function ws (req) {
+exports.handler = async function ws (event) {
   return { statusCode: 200 }
 }

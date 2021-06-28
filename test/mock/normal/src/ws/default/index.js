@@ -1,11 +1,11 @@
 let arc = require('@architect/functions')
 
-exports.handler = async function ws (req) {
+exports.handler = async function ws (event) {
   await arc.ws.send({
-    id: req.requestContext.connectionId,
+    id: event.requestContext.connectionId,
     payload: {
-      event: 'default',
-      req
+      functionName: 'default',
+      event,
     },
   })
   return { statusCode: 200 }
