@@ -1,6 +1,6 @@
 let { join } = require('path')
 let test = require('tape')
-let websocket = require('ws')
+let Websocket = require('ws')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let { shutdown } = require('./_utils')
@@ -13,7 +13,7 @@ let ws // Reused below
 // Lots of test fns calling other test fns in this test
 function setup (t) {
   if (ws) throw Error('Should not have found WebSocket, test is not clean')
-  ws = new websocket(url)
+  ws = new Websocket(url)
   ws.on('error', wsErr)
   t.ok(ws, 'WebSocket set up')
 }
