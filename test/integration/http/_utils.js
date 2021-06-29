@@ -1,8 +1,9 @@
-let sandbox = require('../../../src')
 let tiny = require('tiny-json-http')
 let { sync: rm } = require('rimraf')
 let { join } = require('path')
 let { existsSync } = require('fs')
+let http = require('http')
+let sandbox = require('../../../src')
 let url = `http://localhost:${process.env.PORT || 3333}`
 let data = { hi: 'there' }
 let b64dec = i => Buffer.from(i, 'base64').toString()
@@ -164,6 +165,43 @@ function rmPublic (t) {
   }
 }
 
+let makeSideChannel = async (port = 3433) => {
+  let events = []
+  console.log('starting server')
+  let httpServer = http.createServer((req, res) => {
+    console.log('on request')
+    let inputData = []
+    req.on('data', data => {
+      inputData.push(data)
+    })
+    req.on('end', () => {
+      res.writeHead(200)
+      res.end(() => {
+        const postData = Buffer.concat(inputData).toString()
+        events.push(postData)
+        console.log('pushed event')
+      })
+    })
+  })
+
+  await new Promise((resolve, reject) => httpServer.listen(port, (err) => err ? reject(err) : resolve()))
+  console.log('server started')
+  return {
+    async nextRequest () {
+      if (events.length === 0) {
+        console.log('waiting for events in sideChannel')
+        await new Promise(resolve => httpServer.once('request', (req, res) => res.once('close', resolve)))
+        console.log('got event!')
+      }
+      console.log(`returning one of ${events.length} events`)
+      return events.shift()
+    },
+    async shutdown () {
+      await new Promise((resolve, reject) => httpServer.close(err => err ? reject(err) : resolve()))
+    }
+  }
+}
+
 module.exports = {
   url,
   data,
@@ -174,4 +212,5 @@ module.exports = {
   checkRestResult,
   checkDeprecatedResult,
   rmPublic,
+  makeSideChannel,
 }

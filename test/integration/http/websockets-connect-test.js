@@ -1,55 +1,12 @@
 let { join } = require('path')
 let test = require('tape')
-let http = require('http')
 let Websocket = require('ws')
+let { makeSideChannel } = require('./_utils')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-
 let mock = join(process.cwd(), 'test', 'mock')
 let sandboxPort = Number(process.env.PORT || 3333)
 let url = `ws://localhost:${sandboxPort}`
-
-async function* sideChannel (port = 3433) {
-  let events = []
-  console.log('starting server')
-  let httpServer = http.createServer((req, res) => {
-    console.log('on request')
-    let inputData = []
-    req.on('data', data => {
-      inputData.push(data)
-    })
-    req.on('end', () => {
-      res.writeHead(200)
-      console.log('on req end')
-      res.end(() => {
-        console.log('on resp end')
-        const postData = Buffer.concat(inputData).toString()
-        events.push(postData)
-      })
-    })
-  })
-
-  await new Promise((resolve, reject) => httpServer.listen(port, (err) => err ? reject(err) : resolve()))
-  console.log('server started')
-  yield 'start'
-  while (true) {
-    if (events.length > 0) {
-      try {
-        yield* events
-      }
-      catch (e) {
-        break
-      }
-      events = []
-    }
-    else {
-      console.log('waiting for events in sideChannel')
-      await new Promise(resolve => httpServer.once('request', (req, res) => res.once('close', resolve)))
-      console.log('got event!')
-    }
-  }
-  httpServer.close()
-}
 
 let expectFunctionBasics = (t, expectedFunctionName) => websocketMessage => {
   let { functionName, event } = JSON.parse(websocketMessage)
@@ -92,8 +49,7 @@ test('[WebSockets] Start Sandbox', t => {
 
 test('[WebSockets] Connect, and Disconnect', async t => {
   t.plan(21)
-  const events = sideChannel()
-  await events.next() // starts server
+  const events = await makeSideChannel()
 
   let ws = new Websocket(url)
   const wsOpenPromise = new Promise(resolve => ws.on('open', resolve))
@@ -101,21 +57,21 @@ test('[WebSockets] Connect, and Disconnect', async t => {
   ws.on('error', err => { throw err })
 
   await wsOpenPromise
-  const { value: connectionEvent } = await events.next()
+  const connectionEvent = await events.nextRequest()
   expectFunctionBasics(t, 'connect')(connectionEvent)
   expectRequestContext(t, { eventType: 'CONNECT' })(connectionEvent)
 
   ws.send(JSON.stringify({ message: 'hi' }))
-  const { value: messageEvent } = await events.next()
+  const messageEvent = await events.nextRequest()
   expectFunctionBasics(t, 'default')(messageEvent)
   expectRequestContext(t, { eventType: 'MESSAGE' })(messageEvent)
 
   ws.close()
   await wsClosePromise
 
-  const { value: disconnectEvent } = await events.next()
+  const disconnectEvent = await events.nextRequest()
   expectFunctionBasics(t, 'disconnect')(disconnectEvent)
   expectRequestContext(t, { eventType: 'DISCONNECT' })(disconnectEvent)
-  events.throw()
+  await events.shutdown()
   await sandbox.end()
 })
