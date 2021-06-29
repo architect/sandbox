@@ -188,8 +188,9 @@ let makeSideChannel = async (port = 3433) => {
 
   await new Promise((resolve, reject) => activeSideChannel.listen(port, (err) => err ? reject(err) : resolve()))
   console.log('started side channel')
+
   return {
-    async nextRequest (t) {
+    async nextRequest () {
       if (!activeSideChannel) {
         throw new Error('sideChannel has been shutdown')
       }
@@ -198,14 +199,14 @@ let makeSideChannel = async (port = 3433) => {
         await new Promise(resolve => activeSideChannel.once('request', (req, res) => res.once('close', resolve)))
       }
       // parsing here makes the errors show a decent stacktrace
-      const event = JSON.parse(events.shift())
-      t.ok(true, 'Event Received')
-      return event
+      return JSON.parse(events.shift())
     },
-    async shutdown (t) {
+    async shutdown () {
       await new Promise((resolve, reject) => activeSideChannel.close(err => err ? reject(err) : resolve()))
       activeSideChannel = undefined
-      t.notOk(activeSideChannel, 'shutdown side channel')
+    },
+    reset () {
+      events = []
     }
   }
 }

@@ -8,6 +8,7 @@ let { makeSideChannel } = require('./_utils')
 let mock = join(process.cwd(), 'test', 'mock')
 let url = `ws://localhost:${process.env.PORT || 3333}`
 let _ws
+let _events
 
 let connectWebSocket = async () => {
   if (_ws) throw Error('Only one websocket can be connected at a time, test is not clean')
@@ -31,6 +32,17 @@ let closeWebSocket = async (t) => {
 
 let sendMessage = payload => {
   _ws.send(JSON.stringify(payload))
+}
+
+let nextEvent = async t => {
+  const request = await _events.nextRequest()
+  t.ok(true, 'got next request')
+  return request
+}
+
+let startupAndConnect = async () => {
+  _events.reset()
+  await connectWebSocket()
 }
 
 let expectFunctionBasics = (t, websocketMessage, expectedFunctionName) => {
@@ -70,9 +82,10 @@ let expectRequestContext = (t, websocketMessage, expectedContext = {}) => {
   }
 }
 
-test('Set up env', t => {
+test('Set up env', async t => {
   t.plan(1)
-  t.ok(sandbox, 'Got sandbox')
+  _events = await makeSideChannel()
+  t.ok(sandbox, 'Got sandbox, setup side channel')
 })
 
 test('[WebSockets] Start Sandbox', t => {
@@ -92,17 +105,16 @@ test('[WebSockets] Start Sandbox', t => {
 })
 
 test('[WebSockets] Connect, send payloads (default), disconnect', async t => {
-  t.plan(30)
-  let events = await makeSideChannel()
-  await connectWebSocket()
+  t.plan(29)
+  await startupAndConnect()
 
-  let connectionEvent = await events.nextRequest(t)
+  let connectionEvent = await nextEvent(t)
   expectFunctionBasics(t, connectionEvent, 'connect')
   expectRequestContext(t, connectionEvent, { eventType: 'CONNECT' })
   expectPayload(t, connectionEvent, undefined)
 
   sendMessage({ message: 'hi' })
-  let messageEvent = await events.nextRequest(t)
+  let messageEvent = await nextEvent(t)
   expectFunctionBasics(t, messageEvent, 'default')
   expectRequestContext(t, messageEvent, { eventType: 'MESSAGE' })
   t.ok(messageEvent.event.requestContext.messageId, 'Got requestContext with messageId')
@@ -110,20 +122,17 @@ test('[WebSockets] Connect, send payloads (default), disconnect', async t => {
 
   await closeWebSocket(t)
 
-  let disconnectEvent = await events.nextRequest(t)
+  let disconnectEvent = await nextEvent(t)
   expectFunctionBasics(t, disconnectEvent, 'disconnect')
   expectRequestContext(t, disconnectEvent, { eventType: 'DISCONNECT' })
   expectPayload(t, disconnectEvent, undefined)
 
-  await events.shutdown(t)
 })
 
 test('[WebSockets] Connect, send payloads (falls back to default), disconnect', async t => {
-  t.plan(10)
-  let events = await makeSideChannel()
-
-  await connectWebSocket()
-  await events.nextRequest(t) // ignore connect event
+  t.plan(9)
+  await startupAndConnect()
+  await nextEvent(t) // ignore connect event
 
   let payload = {
     action: 'some-random-action',
@@ -131,40 +140,34 @@ test('[WebSockets] Connect, send payloads (falls back to default), disconnect', 
   }
   sendMessage(payload)
 
-  let messageEvent = await events.nextRequest(t)
+  let messageEvent = await nextEvent(t)
   expectFunctionBasics(t, messageEvent, 'default')
   expectPayload(t, messageEvent, payload)
 
   await closeWebSocket(t)
-  await events.nextRequest(t) // ignore disconnect event but wait for it so the lambda doesn't error
-  await events.shutdown(t)
+  await nextEvent(t) // ignore disconnect event but wait for it so the lambda doesn't error
 })
 
 test('[WebSockets] Connect, send non json payload (falls back to default), disconnect', async t => {
-  t.plan(9)
-  let events = await makeSideChannel()
-
-  await connectWebSocket()
-  await events.nextRequest(t) // ignore connect event
+  t.plan(8)
+  await startupAndConnect()
+  await nextEvent(t) // ignore connect event
 
   let payload = 'foobar'
   sendMessage(payload)
 
-  let messageEvent = await events.nextRequest(t)
+  let messageEvent = await nextEvent(t)
   expectFunctionBasics(t, messageEvent, 'default')
   expectPayload(t, messageEvent, payload)
 
   await closeWebSocket(t)
-  await events.nextRequest(t) // ignore disconnect event but wait for it so the lambda doesn't error
-  await events.shutdown(t)
+  await nextEvent(t) // ignore disconnect event but wait for it so the lambda doesn't error
 })
 
 test('[WebSockets] Connect, send payloads (custom action), disconnect', async t => {
-  t.plan(10)
-  let events = await makeSideChannel()
-
-  await connectWebSocket()
-  await events.nextRequest(t) // ignore connect event
+  t.plan(9)
+  await startupAndConnect()
+  await nextEvent(t) // ignore connect event
 
   let payload = {
     action: 'hello',
@@ -172,21 +175,18 @@ test('[WebSockets] Connect, send payloads (custom action), disconnect', async t 
   }
   sendMessage(payload)
 
-  let messageEvent = await events.nextRequest(t)
+  let messageEvent = await nextEvent(t)
   expectFunctionBasics(t, messageEvent, 'hello')
   expectPayload(t, messageEvent, payload)
 
   await closeWebSocket(t)
-  await events.nextRequest(t) // ignore disconnect event but wait for it so the lambda doesn't error
-  await events.shutdown(t)
+  await nextEvent(t) // ignore disconnect event but wait for it so the lambda doesn't error
 })
 
 test('[WebSockets] Connect, send payloads (custom filepath), disconnect', async t => {
-  t.plan(10)
-  let events = await makeSideChannel()
-
-  await connectWebSocket()
-  await events.nextRequest(t) // ignore connect event
+  t.plan(9)
+  await startupAndConnect()
+  await nextEvent(t) // ignore connect event
 
   let payload = {
     action: 'custom',
@@ -194,17 +194,17 @@ test('[WebSockets] Connect, send payloads (custom filepath), disconnect', async 
   }
   sendMessage(payload)
 
-  let messageEvent = await events.nextRequest(t)
+  let messageEvent = await nextEvent(t)
   expectFunctionBasics(t, messageEvent, 'custom')
   expectPayload(t, messageEvent, payload)
 
   await closeWebSocket(t)
-  await events.nextRequest(t) // ignore disconnect event but wait for it so the lambda doesn't error
-  await events.shutdown(t)
+  await nextEvent(t) // ignore disconnect event but wait for it so the lambda doesn't error
 })
 
 test('[WebSockets] Shut down Sandbox', async t => {
   t.plan(1)
   await sandbox.end()
-  t.ok(true, 'Sandbox shutdown')
+  await _events.shutdown()
+  t.ok(true, 'Sandbox and side channel shutdown')
 })
