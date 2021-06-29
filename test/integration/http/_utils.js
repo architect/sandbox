@@ -196,7 +196,7 @@ let makeSideChannel = async (port = 3433) => {
       }
       if (events.length === 0) {
         console.log('waiting for events in sideChannel')
-        await new Promise(resolve => activeSideChannel.once('request', (req, res) => res.once('close', resolve)))
+        await new Promise(resolve => activeSideChannel.once('request', (req, res) => res.once('finish', resolve)))
       }
       // parsing here makes the errors show a decent stacktrace
       return JSON.parse(events.shift())
