@@ -165,11 +165,14 @@ function rmPublic (t) {
   }
 }
 
+let activeSideChannel
 let makeSideChannel = async (port = 3433) => {
+  if (activeSideChannel) {
+    throw new Error('A side channel is already active, only one can be active at a time')
+  }
   let events = []
-  console.log('starting server')
-  let httpServer = http.createServer((req, res) => {
-    console.log('on request')
+  console.log('starting side channel')
+  activeSideChannel = http.createServer((req, res) => {
     let inputData = []
     req.on('data', data => {
       inputData.push(data)
@@ -179,25 +182,30 @@ let makeSideChannel = async (port = 3433) => {
       res.end(() => {
         const postData = Buffer.concat(inputData).toString()
         events.push(postData)
-        console.log('pushed event')
       })
     })
   })
 
-  await new Promise((resolve, reject) => httpServer.listen(port, (err) => err ? reject(err) : resolve()))
-  console.log('server started')
+  await new Promise((resolve, reject) => activeSideChannel.listen(port, (err) => err ? reject(err) : resolve()))
+  console.log('started side channel')
   return {
-    async nextRequest () {
+    async nextRequest (t) {
+      if (!activeSideChannel) {
+        throw new Error('sideChannel has been shutdown')
+      }
       if (events.length === 0) {
         console.log('waiting for events in sideChannel')
-        await new Promise(resolve => httpServer.once('request', (req, res) => res.once('close', resolve)))
-        console.log('got event!')
+        await new Promise(resolve => activeSideChannel.once('request', (req, res) => res.once('close', resolve)))
       }
-      console.log(`returning one of ${events.length} events`)
-      return events.shift()
+      // parsing here makes the errors show a decent stacktrace
+      const event = JSON.parse(events.shift())
+      t.ok(true, 'Event Received')
+      return event
     },
-    async shutdown () {
-      await new Promise((resolve, reject) => httpServer.close(err => err ? reject(err) : resolve()))
+    async shutdown (t) {
+      await new Promise((resolve, reject) => activeSideChannel.close(err => err ? reject(err) : resolve()))
+      activeSideChannel = undefined
+      t.notOk(activeSideChannel, 'shutdown side channel')
     }
   }
 }

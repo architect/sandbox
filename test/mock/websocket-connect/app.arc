@@ -1,4 +1,0 @@
-@app
-mockapp
-
-@ws

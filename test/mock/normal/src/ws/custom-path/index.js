@@ -1,11 +1,12 @@
 let arc = require('@architect/functions')
+let tiny = require('tiny-json-http')
 
 exports.handler = async function ws (event) {
-  await arc.ws.send({
-    id: event.requestContext.connectionId,
-    payload: {
+  await tiny.post({
+    url: 'http://localhost:3433/',
+    body: {
       functionName: 'custom',
-      event
+      event,
     },
   })
   return { statusCode: 200 }
