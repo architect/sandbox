@@ -35,7 +35,7 @@ let sendMessage = payload => {
 }
 
 let nextEvent = async t => {
-  const request = await _events.nextRequest()
+  let request = await _events.nextRequest()
   t.ok(true, 'got next request')
   return request
 }

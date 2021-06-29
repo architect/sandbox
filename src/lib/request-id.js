@@ -1,6 +1,6 @@
-const Hashid = require('@begin/hashid')
+let Hashid = require('@begin/hashid')
 
-const hash = new Hashid('requestId')
+let hash = new Hashid('requestId')
 
 let counter = Date.now()
 module.exports = function makeRequestId () {

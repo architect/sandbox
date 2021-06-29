@@ -8,7 +8,7 @@ module.exports = function connection ({ cwd, inventory, update, connectedAt, dom
   // Save this for send to use
   pool.register(connectionId, ws)
 
-  const makeRequestContext = (extra) => ({
+  let makeRequestContext = (extra) => ({
     messageId: makeRequestId(),
     messageDirection: 'IN',
     connectedAt,
@@ -23,7 +23,7 @@ module.exports = function connection ({ cwd, inventory, update, connectedAt, dom
   ws.on('message', function message (msg) {
     let lambda
     try {
-      const payload = JSON.parse(msg)
+      let payload = JSON.parse(msg)
       lambda = payload.action && get.ws(payload.action)
     }
     catch (e) {

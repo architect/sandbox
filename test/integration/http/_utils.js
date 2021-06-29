@@ -180,7 +180,7 @@ let makeSideChannel = async (port = 3433) => {
     req.on('end', () => {
       res.writeHead(200)
       res.end(() => {
-        const postData = Buffer.concat(inputData).toString()
+        let postData = Buffer.concat(inputData).toString()
         events.push(postData)
       })
     })
