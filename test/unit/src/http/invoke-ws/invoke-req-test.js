@@ -16,7 +16,7 @@ test('Internal WebSocket events: no req, no body', t => {
   let connectionId = 'much-unique-uuid'
   let params = {
     lambda: { src: 'src/ws/default' }, // not a real action
-    connectionId
+    connectionId,
   }
   invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
@@ -31,23 +31,33 @@ test('Internal WebSocket events: no req, no body', t => {
 })
 
 test('Internal WebSocket events: body (WS message), no req', t => {
-  t.plan(6)
-  let connectionId = 'much-unique-uuid'
+  t.plan(10)
   let body = JSON.stringify({ message: 'howdy' })
   let params = {
-    lambda: { src: 'src/ws/default' }, // not a real action
+    lambda: {
+      name: 'default',
+      src: 'src/ws/default'
+    }, // not a real action
     body,
-    connectionId
+    connectionId: 'much-unique-uuid',
+    domainName: 'space.cat',
   }
   invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
     let { lambda, event: req } = result
     t.deepEqual(params.lambda, lambda, match('Lambda', lambda))
-    t.equal(connectionId, req.requestContext.connectionId, match('connectionId', req.requestContext.connectionId))
+
     t.equal(body, req.body, match('body', req.body))
     t.notOk(req.isBase64Encoded, 'isBase64Encoded set to false')
     t.notOk(req.headers, 'req.headers not present')
     t.notOk(req.query, 'req.query not present')
+
+    let { connectedAt, connectionId, domainName, eventType, routeKey } = req.requestContext
+    t.ok(connectedAt, 'connectedAt returned')
+    t.equal(params.connectionId, connectionId, match('connectionId', connectionId))
+    t.equal(params.domainName, domainName, match('domainName', domainName))
+    t.equal(eventType, 'MESSAGE', match('eventType', eventType))
+    t.equal(routeKey, '$default', match('routeKey', routeKey))
   })
 })
 
@@ -57,7 +67,10 @@ test('WebSocket connect / disconnect event: get /', t => {
   let request = arc6.getIndex
   request.url = 'localhost'
   let params = {
-    lambda: { src: 'src/ws/connect' }, // not a real action
+    lambda: {
+      name: 'connect',
+      src: 'src/ws/connect'
+    }, // not a real action
     connectionId,
     req: request
   }
@@ -77,9 +90,12 @@ test('WebSocket connect / disconnect event: get /?whats=up', t => {
   let request = arc6.getIndex // gonna have to manually add query string
   request.url = 'localhost/?whats=up'
   let params = {
-    lambda: { src: 'src/ws/connect' }, // not a real action
+    lambda: {
+      name: 'connect',
+      src: 'src/ws/connect'
+    }, // not a real action
+    req: request,
     connectionId,
-    req: request
   }
   invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
