@@ -36,7 +36,8 @@ let sendMessage = payload => {
 
 let nextEvent = async t => {
   let request = await _events.nextRequest()
-  t.pass('got next request')
+  t.pass('Got next WebSocket request')
+  console.log(request)
   return request
 }
 

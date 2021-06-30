@@ -168,10 +168,10 @@ function rmPublic (t) {
 let activeSideChannel
 let makeSideChannel = async (port = 3433) => {
   if (activeSideChannel) {
-    throw new Error('A side channel is already active, only one can be active at a time')
+    throw new Error('A test side-channel is already active, only one can be active at a time')
   }
   let events = []
-  console.log('starting side channel')
+  console.log('Starting test side-channel')
   activeSideChannel = http.createServer((req, res) => {
     let inputData = []
     req.on('data', data => {
@@ -187,15 +187,15 @@ let makeSideChannel = async (port = 3433) => {
   })
 
   await new Promise((resolve, reject) => activeSideChannel.listen(port, (err) => err ? reject(err) : resolve()))
-  console.log('started side channel')
+  console.log('Started test side-channel')
 
   return {
     async nextRequest () {
       if (!activeSideChannel) {
-        throw new Error('sideChannel has been shutdown')
+        throw new Error('Test side-channel has been shut down')
       }
       if (events.length === 0) {
-        console.log('waiting for events in sideChannel')
+        console.log('Waiting for events in test side-channel')
         await new Promise(resolve => activeSideChannel.once('request', (req, res) => res.once('finish', resolve)))
       }
       // parsing here makes the errors show a decent stacktrace
