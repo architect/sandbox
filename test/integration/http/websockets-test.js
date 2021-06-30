@@ -36,7 +36,7 @@ let sendMessage = payload => {
 
 let nextEvent = async t => {
   let request = await _events.nextRequest()
-  t.ok(true, 'got next request')
+  t.pass('got next request')
   return request
 }
 
@@ -83,9 +83,10 @@ let expectRequestContext = (t, websocketMessage, expectedContext = {}) => {
 }
 
 test('Set up env', async t => {
-  t.plan(1)
+  t.plan(2)
   _events = await makeSideChannel()
-  t.ok(sandbox, 'Got sandbox, setup side channel')
+  t.ok(sandbox, 'Got sandbox')
+  t.ok(_events, 'Setup side channel')
 })
 
 test('[WebSockets] Start Sandbox', t => {
@@ -206,5 +207,5 @@ test('[WebSockets] Shut down Sandbox', async t => {
   t.plan(1)
   await sandbox.end()
   await _events.shutdown()
-  t.ok(true, 'Sandbox and side channel shutdown')
+  t.pass('Sandbox and side channel shutdown')
 })

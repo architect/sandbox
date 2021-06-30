@@ -1,7 +1,6 @@
 let http = require('http')
 let makeRequestId = require('../../lib/request-id')
 let invoke = require('../invoke-ws')
-let Hashid = require('@begin/hashid')
 
 /**
  * Handle handleshake and possibly return error; note:
@@ -16,9 +15,7 @@ module.exports = function upgrade (wss, { cwd, inventory, update, connectedAt, d
     // Get the $connect Lambda
     let lambda = get.ws('connect')
 
-    // Create a connectionId uuid
-    let h = new Hashid()
-    let connectionId = h.encode(Date.now())
+    let connectionId = makeRequestId()
     update.status('ws/connect: ' + connectionId)
 
     let requestContext = {

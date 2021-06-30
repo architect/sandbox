@@ -9,7 +9,7 @@ module.exports = function registerWebSocket (params) {
   let wss = new WebSocket.Server({ noServer: true })
   let connectedAt = Date.now()
   let domainName = `localhost:${httpPort}`
-  let stage = 'staging'
+  let stage = process.env.NODE_ENV || 'testing'
   // Listens for HTTP 101 request
   httpServer.on('upgrade', upgrade(wss, { cwd, inventory, update, connectedAt, domainName, stage }))
 
