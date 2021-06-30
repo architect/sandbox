@@ -2,6 +2,19 @@
 
 ---
 
+## [3.7.4] 2021-06-30
+
+### Added
+
+- Added more detailed `context` for WebSocket (`@ws`) requests, thanks @reconbot!
+
+
+### Changed
+
+- Refactored and improved WebSocket tests, also thanks @reconbot!
+
+---
+
 ## [3.7.3] 2021-06-24
 
 ### Added
