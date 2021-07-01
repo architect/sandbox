@@ -54,6 +54,9 @@ module.exports = function connection ({ cwd, inventory, update, domainName }, co
       update,
       connectionId,
       domainName
-    }, noop)
+    }, err => {
+      pool.delete(connectionId)
+      noop(err)
+    })
   })
 }

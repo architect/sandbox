@@ -1,5 +1,6 @@
 let URL = require('url')
 let makeRequestId = require('../../lib/request-id')
+let pool = require('../register-websocket/pool')
 
 /**
  * Arc 6+ APIGWv2 request formatter
@@ -7,7 +8,7 @@ let makeRequestId = require('../../lib/request-id')
  */
 module.exports = function requestFormatter ({ name, req, body, connectionId, domainName }) {
 
-  let connectedAt = Date.now()
+  let connectedAt = pool.getConnectedAt(connectionId) || Date.now()
   let routeKey = `$${name}`
   let eventType = name === 'connect' || name === 'disconnect'
     ? name.toUpperCase()
