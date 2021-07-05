@@ -1,6 +1,7 @@
 let http = require('http')
 let _listener = require('./_listener')
 let { getPorts } = require('../lib')
+let destroyer = require('server-destroy')
 
 /**
  * Internal Architect services, including:
@@ -22,13 +23,14 @@ module.exports = function _internal (inventory) {
       if (err) callback(err)
       else {
         update.done('Started service discovery emulator')
+        destroyer(_arcServices)
         callback()
       }
     })
   }
 
   _arc.end = function end (callback) {
-    if (_arcServices) _arcServices.close(callback)
+    if (_arcServices) _arcServices.destroy(callback)
     else callback()
   }
 

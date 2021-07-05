@@ -20,7 +20,7 @@ let serialize = i => chalk.dim(JSON.stringify(i, null, 2))
  * @param {function} callback - node style errback
  */
 module.exports = function invokeLambda (params, callback) {
-  let { lambda, event, inventory, update } = params
+  let { cwd, lambda, event, inventory, update } = params
   // handlerFile is defined for all non-ASAP functions; ASAP bypasses this check
   if (!hasHandler(lambda)) {
     callback(Error('lambda_not_found'))
@@ -37,7 +37,7 @@ module.exports = function invokeLambda (params, callback) {
     else {
       let { src, config } = lambda
       let { runtime, timeout } = config
-      let lambdaPath = src.replace(process.cwd(), '').substr(1)
+      let lambdaPath = src.replace(cwd, '').substr(1)
 
       update.debug.status(`Lambda config: ${lambdaPath}`)
       update.debug.raw(serialize(lambda))
@@ -49,7 +49,7 @@ module.exports = function invokeLambda (params, callback) {
       let defaults = {
         __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
         __ARC_CONFIG__: JSON.stringify({
-          projectSrc: process.cwd(),
+          projectSrc: cwd,
           handlerFile: 'index',
           handlerFunction: 'handler',
           shared: inventory.inv.shared,
@@ -82,10 +82,15 @@ module.exports = function invokeLambda (params, callback) {
       if (runtime.startsWith('ruby'))   exec = runInRuby
 
       if (!exec) {
-        missingRuntime({ runtime, src, update })
+        missingRuntime({ cwd, runtime, src, update })
         return callback('Missing runtime')
       }
-      exec({ options, request, timeout: timeout * 1000, update }, function done (err, result) {
+      exec({
+        options,
+        request,
+        timeout: timeout * 1000,
+        update
+      }, function done (err, result) {
         if (err) callback(err)
         else {
           let missing
@@ -99,7 +104,7 @@ module.exports = function invokeLambda (params, callback) {
             update.debug.raw(serialize(result.__DEP_DEBUG__))
             delete result.__DEP_DEBUG__
           }
-          warn({ missing, inventory, src, update })
+          warn({ cwd, missing, inventory, src, update })
           callback(null, result)
         }
       })

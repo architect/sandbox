@@ -1,13 +1,12 @@
 let { join } = require('path')
 let test = require('tape')
 let dynalite = require('dynalite')
-let { tables } = require('../../src')
-let getDBClient = require('../../src/tables/_get-db-client')
+let { tables } = require(join(process.cwd(), 'src'))
+let getDBClient = require(join(process.cwd(), 'src', 'tables', '_get-db-client'))
 let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
-let mock = join(__dirname, '..', 'mock')
+let mock = join(process.cwd(), 'test', 'mock')
 let str = s => JSON.stringify(s, null, 2)
-let cwd = process.cwd()
 let dynamo
 let dbPort = 4567
 let dynaliteServer
@@ -15,13 +14,12 @@ let dynaliteServer
 test('Set up env', t => {
   t.plan(1)
   t.ok(tables, 'Tables module is present')
-  process.chdir(join(mock, 'normal'))
 })
 
 test('Async tables.start', async t => {
   t.plan(1)
   try {
-    let result = await tables.start({ quiet: true })
+    let result = await tables.start({ cwd: join(mock, 'normal'), quiet: true })
     t.equal(result, 'DynamoDB successfully started', 'Tables started (async)')
   }
   catch (err) {
@@ -62,7 +60,7 @@ test('Async tables.end', async t => {
 
 test('Sync tables.start', t => {
   t.plan(1)
-  tables.start({ quiet: true }, function (err, result) {
+  tables.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
   })
@@ -182,8 +180,7 @@ test('Start external DB', t => {
   t.plan(1)
   process.env.ARC_DB_EXTERNAL = true
   process.env.ARC_TABLES_PORT = dbPort
-  process.chdir(join(mock, 'external-db'))
-  dynaliteServer = dynalite({ path: './.db', createTableMs: 0 })
+  dynaliteServer = dynalite({ path: join(mock, 'normal', '.db'), createTableMs: 0 })
   dynaliteServer.listen(dbPort, err => {
     if (err) t.fail(err)
     else t.pass('External DB successfully started')
@@ -193,7 +190,7 @@ test('Start external DB', t => {
 test('Async tables.start', async t => {
   t.plan(1)
   try {
-    let result = await tables.start({})
+    let result = await tables.start({ cwd: join(mock, 'external-db') })
     t.equal(result, 'DynamoDB successfully started', 'Tables started in external mode')
   }
   catch (err) {
@@ -222,14 +219,12 @@ test('Can list tables', t => {
 })
 
 test('Async tables.end', async t => {
-  t.plan(2)
+  t.plan(1)
   try {
     let ended = await tables.end()
-    t.equal(ended, 'DynamoDB successfully shut down', 'Tables ended')
-    process.chdir(cwd)
-    t.equal(process.cwd(), cwd, 'Switched back to original working dir')
     delete process.env.ARC_DB_EXTERNAL
     delete process.env.ARC_TABLES_PORT
+    t.equal(ended, 'DynamoDB successfully shut down', 'Tables ended')
   }
   catch (err) {
     t.fail(err)
@@ -251,8 +246,7 @@ test('Stop external DB', t => {
 test('Sync tables.start (deprecated)', t => {
   t.plan(1)
   process.env.DEPRECATED = true
-  process.chdir(join(mock, 'normal'))
-  tables.start({ quiet: true }, function (err, result) {
+  tables.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
   })
@@ -369,22 +363,18 @@ test('Can query the index', t => {
 })
 
 test('Sync tables.end (deprecated)', t => {
-  t.plan(2)
+  t.plan(1)
   delete process.env.DEPRECATED
   tables.end(function (err, result) {
     if (err) t.fail(err)
-    else {
-      t.equal(result, 'DynamoDB successfully shut down', 'Tables ended')
-      process.chdir(cwd)
-      t.equal(process.cwd(), cwd, 'Switched back to original working dir')
-    }
+    else t.equal(result, 'DynamoDB successfully shut down', 'Tables ended')
   })
 })
 
 // `all:true` option for starting and stopping
 test('Sync tables.start({ all: true })', t => {
   t.plan(1)
-  tables.start({ quiet: true, all: true }, function (err, result) {
+  tables.start({ cwd: join(mock, 'normal'), quiet: true, all: true }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
   })
@@ -401,7 +391,7 @@ test('Sync tables.end({ all: true })', t => {
 test('Async tables.start({ all: true })', async t => {
   t.plan(1)
   try {
-    let result = await tables.start({ quiet: true, all: true })
+    let result = await tables.start({ cwd: join(mock, 'normal'), quiet: true, all: true })
     t.equal(result, 'DynamoDB successfully started', 'Tables started (async)')
   }
   catch (err) {

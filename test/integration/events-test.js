@@ -5,8 +5,7 @@ let { existsSync, mkdirSync, readFileSync, statSync } = require('fs')
 let { join } = require('path')
 let { events } = require('../../src')
 let { sync: rm } = require('rimraf')
-let cwd = process.cwd()
-let mock = join(__dirname, '..', 'mock')
+let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
 
 function setup (t) {
@@ -47,13 +46,12 @@ function checkFile (t, file, message) {
 test('Set up env', t => {
   t.plan(1)
   t.ok(events, 'Events module is present')
-  process.chdir(join(mock, 'normal'))
 })
 
 test('Async events.start', async t => {
   t.plan(1)
   try {
-    let result = await events.start({ quiet: true })
+    let result = await events.start({ cwd: join(mock, 'normal'), quiet: true })
     t.equal(result, 'Event bus successfully started', 'Events started (async)')
   }
   catch (err) {
@@ -144,7 +142,7 @@ test('Async events.end', async t => {
 
 test('Sync events.start', t => {
   t.plan(1)
-  events.start({ quiet: true }, function (err, result) {
+  events.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'Event bus successfully started', 'Events started (sync)')
   })
@@ -200,61 +198,11 @@ test('arc.queues.publish (failure)', t => {
   })
 })
 
-test('invoke-lambda should respect timeout for async functions and process should be killed', t => {
-  t.plan(1)
-  let fileThatShouldNotBeWritten = join(tmp, 'foo-async')
-  arc.events.publish({
-    name: 'event-timeout-async',
-    payload: { path: fileThatShouldNotBeWritten }
-  },
-  function done (err) {
-    if (err) t.fail(err)
-    else setTimeout(() => {
-      t.notOk(existsSync(fileThatShouldNotBeWritten), 'file not created by event as event timed out and process was terminated appropriately')
-    }, 1250) // 1s is the configured timeout of test/mock/normal/src/events/event-timeout-async so we pad it a bit and check after delay
-  })
-})
-
-test('invoke-lambda should respect timeout for async functions (even if they include a settimeout within them) and process should be killed', t => {
-  t.plan(1)
-  let fileThatShouldNotBeWritten = join(tmp, 'foo-async-settimeout')
-  arc.events.publish({
-    name: 'event-timeout-async-w-settimeout',
-    payload: { path: fileThatShouldNotBeWritten }
-  },
-  function done (err) {
-    if (err) t.fail(err)
-    else setTimeout(() => {
-      t.notOk(existsSync(fileThatShouldNotBeWritten), 'file not created by event as event timed out and process was terminated appropriately')
-    }, 1250) // 1s is the configured timeout of test/mock/normal/src/events/event-timeout-async-w-timeout so we pad it a bit and check after delay
-  })
-})
-
-test('invoke-lambda should respect timeout for sync functions and process should be killed', t => {
-  t.plan(1)
-  let fileThatShouldNotBeWritten = join(tmp, 'foo-sync')
-  arc.events.publish({
-    name: 'event-timeout-sync',
-    payload: { path: fileThatShouldNotBeWritten }
-  },
-  function done (err) {
-    if (err) t.fail(err)
-    else setTimeout(() => {
-      t.notOk(existsSync(fileThatShouldNotBeWritten), 'file not created by event as event timed out and process was terminated appropriately')
-    }, 1250) // 1s is the configured timeout of test/mock/normal/src/events/event-timeout-sync so we pad it a bit and check after delay
-  })
-})
-
 test('Sync events.end', t => {
-  t.plan(2)
-  setTimeout(() => {
-    events.end(function (err, result) {
-      if (err) t.fail(err)
-      else {
-        t.equal(result, 'Event bus successfully shut down', 'Events ended')
-        process.chdir(cwd)
-        t.equal(process.cwd(), cwd, 'Switched back to original working dir')
-      }
-    })
-  }, 100)
+  t.plan(1)
+  delete process.env.AWS_LAMBDA_FUNCTION_NAME
+  events.end(function (err, result) {
+    if (err) t.fail(err)
+    else t.equal(result, 'Event bus successfully shut down', 'Events ended')
+  })
 })

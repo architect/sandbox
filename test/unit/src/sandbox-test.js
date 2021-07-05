@@ -3,8 +3,7 @@ let tiny = require('tiny-json-http')
 let sandbox = require('../../../src')
 let { join } = require('path')
 let series = require('run-series')
-let origCwd = process.cwd()
-let mock = join(__dirname, '..', '..', 'mock')
+let mock = join(process.cwd(), 'test', 'mock')
 let url = `http://localhost:${process.env.PORT || 3333}`
 
 // Verify sandbox shut down
@@ -21,9 +20,8 @@ test('Set up env', t => {
 
 test('Sandbox returns a Promise', async t => {
   t.plan(8)
-  process.chdir(join(mock, 'no-functions'))
   try {
-    await sandbox.start({ quiet: true })
+    await sandbox.start({ cwd: join(mock, 'no-functions'), quiet: true })
     t.pass('sandbox.start returned Promise (without params)')
   }
   catch (err) {
@@ -132,12 +130,11 @@ test('Sandbox has correct env vars populated', async t => {
   let roundsOfTesting = 3
   let tests = (roundsOfTesting * envVars.length) + (roundsOfTesting * 2)
   t.plan(tests)
-  process.chdir(join(mock, 'normal'))
 
   // Architect 6+ (local)
   try {
     cleanEnv(t)
-    await sandbox.start()
+    await sandbox.start({ cwd: join(mock, 'normal') })
     envVars.forEach(v => {
       if (v === 'ARC_CLOUDFORMATION' || v === 'DEPRECATED')
         t.notOk(process.env[v], `${v} is not set`)
@@ -201,12 +198,11 @@ test('Sandbox (Architect v5) has correct env vars populated', async t => {
   let roundsOfTesting = 3
   let tests = (roundsOfTesting * envVars.length) + (roundsOfTesting * 2)
   t.plan(tests)
-  process.chdir(join(mock, 'normal'))
 
   // Architect 5 (local)
   try {
     cleanEnv(t)
-    await sandbox.start({ version: 'Architect 5.x' })
+    await sandbox.start({ cwd: join(mock, 'normal'), version: 'Architect 5.x' })
     envVars.forEach(v => {
       if (v === 'ARC_CLOUDFORMATION')
         t.notOk(process.env[v], `${v} is not set`)
@@ -267,8 +263,6 @@ test('Sandbox (Architect v5) has correct env vars populated', async t => {
 })
 
 test('Teardown', t => {
-  t.plan(2)
-  process.chdir(origCwd)
-  t.equals(process.cwd(), origCwd)
+  t.plan(1)
   cleanEnv(t)
 })

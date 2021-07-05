@@ -4,8 +4,7 @@ let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let { http } = require(sut)
 let { url, verifyShutdown } = require('./_utils')
-let cwd = process.cwd()
-let mock = join(__dirname, '..', '..', 'mock')
+let mock = join(process.cwd(), 'test', 'mock')
 
 test('Set up env', t => {
   t.plan(1)
@@ -19,8 +18,7 @@ test('Set up env', t => {
  */
 test('Sync http.start', t => {
   t.plan(3)
-  process.chdir(join(mock, 'normal'))
-  http.start({ quiet: true }, function (err, result) {
+  http.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
     t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -40,22 +38,6 @@ test('get /', t => {
     })
 })
 
-test('[Timeout] get /times-out', t => {
-  t.plan(3)
-  tiny.get({
-    url: url + '/times-out'
-  }, function _got (err, result) {
-    if (err) {
-      let message = 'Timeout Error'
-      let time = '1 second'
-      t.equal(err.statusCode, 500, 'Errors with 500')
-      t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
-      t.match(err.body, new RegExp(time), `Timed out set to ${time}`)
-    }
-    else t.fail(result)
-  })
-})
-
 test('Sync http.end', t => {
   t.plan(1)
   http.end((err, result) => {
@@ -72,9 +54,8 @@ test('Sync http.end', t => {
 
 test('Async http.start', async t => {
   t.plan(3)
-  process.chdir(join(mock, 'normal'))
   try {
-    let result = await http.start({ quiet: true })
+    let result = await http.start({ cwd: join(mock, 'normal'), quiet: true })
     t.equal(result, 'HTTP successfully started', 'Sandbox started')
     t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
     t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
@@ -108,15 +89,13 @@ test('Async http.end', async t => {
 })
 
 test('Teardown', t => {
-  t.plan(4)
+  t.plan(3)
   tiny.get({ url }, err => {
     if (err) verifyShutdown(t, err)
     else t.fail('Sandbox did not shut down')
   })
   delete process.env.ARC_API_TYPE
   delete process.env.DEPRECATED
-  process.chdir(cwd)
   t.notOk(process.env.ARC_API_TYPE, 'API type NOT set')
   t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
-  t.equal(process.cwd(), cwd, 'Switched back to original working dir')
 })

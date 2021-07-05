@@ -1,15 +1,36 @@
 let URL = require('url')
+let makeRequestId = require('../../lib/request-id')
 
 /**
  * Arc 6+ APIGWv2 request formatter
  * - Mocks essentials of request object shape from WS Lambda proxy integration
  */
-module.exports = function requestFormatter ({ req, body, connectionId }) {
+module.exports = function requestFormatter ({ name, req, body, connectionId, domainName }) {
+
+  let connectedAt = Date.now()
+  let routeKey = `$${name}`
+  let eventType = name === 'connect' || name === 'disconnect'
+    ? name.toUpperCase()
+    : 'MESSAGE'
+
   let request = {
     requestContext: {
-      connectionId
+      connectedAt,
+      connectionId,
+      domainName,
+      eventType,
+      messageDirection: 'IN',
+      messageId: makeRequestId(),
+      requestId: makeRequestId(),
+      requestTimeEpoch: Date.now(),
+      routeKey,
+      stage: process.env.NODE_ENV || 'testing',
     },
     isBase64Encoded: false
+  }
+
+  if (name === 'disconnect') {
+    request.requestContext.disconnectReason = ''
   }
 
   /**

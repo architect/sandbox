@@ -2,6 +2,65 @@
 
 ---
 
+## [3.7.4] 2021-06-30
+
+### Added
+
+- Added more detailed `context` for WebSocket (`@ws`) requests, thanks @reconbot!
+
+
+### Changed
+
+- Refactored and improved WebSocket tests, also thanks @reconbot!
+
+---
+
+## [3.7.3] 2021-06-24
+
+### Added
+
+- Populate Sandbox startup commands (`prefs.arc` `@sandbox-startup`) with `ARC_INV` env var, providing access to the project's Inventory object
+
+
+### Fixed
+
+- Ensure Sandbox startup commands respect `cwd`
+
+---
+
+## [3.7.2] 2021-06-22
+
+### Fixed
+
+- Attempted to fix Sandbox not terminating processes properly when running in Lambda due to Lambda not having *nix `ps`
+- Hardened process termination testing
+
+---
+
+## [3.7.0 - 3.7.1] 2021-06-14
+
+### Added
+
+- Added `cwd` API param, making it easier to run Sandbox against one or many mock project directories in tests
+- Added `@ws` route printing
+
+
+### Changed
+
+- Stopped making unnecessary Inventory calls during Sandbox / services startup, Sandbox now starts 10-25% faster most of the time
+- Purified tests, removing all `process.chdir` calls (except those essential for testing the actual inferred working directory)
+- Updated dependencies
+
+
+### Fixed
+
+- Fixed issue where CLI might take a long time to reload local routes (or not reload them at all) due to [issues related to Node.js stalling while closing its http server](https://github.com/nodejs/node/issues/2642)
+- Fixed issue that could cause `sandbox.http.end()` and `sandbox.events.end()` to hang during tests
+- Ensure plugin `invokeFunction` has all necessary params, fixes #1162
+- Fixed issue where plugin functions might not be hydrated by Sandbox
+
+---
+
 ## [3.6.0] 2021-05-24
 
 ### Added

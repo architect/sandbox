@@ -157,27 +157,28 @@ module.exports = function cli (params = {}, callback) {
           arcEventTimer = setTimeout(() => {
             ts()
             // Always attempt to close the http server, but only reload if necessary
-            sandbox.http.end()
             update.status('Architect project manifest changed')
-
-            let start = Date.now()
-            let quiet = process.env.ARC_QUIET
-            process.env.ARC_QUIET = true
-            sandbox.http.start({ quiet: true }, function (err, result) {
-              if (!quiet) delete process.env.ARC_QUIET
+            sandbox.http.end(err => {
               if (err) update.err(err)
-              // HTTP passes back success message if it actually did need to (re)start
-              if (result === 'HTTP successfully started') {
-                let end = Date.now()
-                update.done(`HTTP routes reloaded in ${end - start}ms`)
-                if (deprecated) {
-                  rehydrate({
-                    timer: rehydrateArcTimer,
-                    only: 'arcFile',
-                    msg: 'Rehydrating functions with new project manifest'
-                  })
+              let start = Date.now()
+              let quiet = process.env.ARC_QUIET
+              process.env.ARC_QUIET = true
+              sandbox.http.start({ _refreshInventory: true, quiet: true }, function (err, result) {
+                if (!quiet) delete process.env.ARC_QUIET
+                if (err) update.err(err)
+                // HTTP passes back success message if it actually did need to (re)start
+                if (result === 'HTTP successfully started') {
+                  let end = Date.now()
+                  update.done(`HTTP routes reloaded in ${end - start}ms`)
+                  if (deprecated) {
+                    rehydrate({
+                      timer: rehydrateArcTimer,
+                      only: 'arcFile',
+                      msg: 'Rehydrating functions with new project manifest'
+                    })
+                  }
                 }
-              }
+              })
             })
           }, 50)
         }

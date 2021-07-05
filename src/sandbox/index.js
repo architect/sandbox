@@ -8,6 +8,7 @@ let { getFlags } = require('../lib')
 let { updater } = require('@architect/utils')
 let { logLevel, quiet } = getFlags()
 let update = updater('Sandbox', { logLevel, quiet })
+let cwd
 
 /**
  * Server - contains Sandbox service singletons that can operate independently
@@ -22,15 +23,24 @@ let server = {
 /**
  * Core Sandbox services
  */
-let events = service({ server, update, logLevel, quiet, type: 'events' })
-let http =   service({ server, update, logLevel, quiet, type: 'http' })
-let tables = service({ server, update, logLevel, quiet, type: 'tables' })
-let _arc =   service({ server, update, logLevel, quiet, type: '_arc' })
+let params = { inventory: null, logLevel, quiet, server, update }
+let events = service(params, 'events')
+let http =   service(params, 'http')
+let tables = service(params, 'tables')
+let _arc =   service(params, '_arc')
 
 /**
  * Run startup routines and start all services
  */
-function start (options = {}, callback) {
+function start (options, callback) {
+  options = options || {}
+  options.cwd = cwd = options.cwd || process.cwd()
+
+  update = updater('Sandbox', {
+    logLevel: options && options.logLevel || logLevel,
+    quiet: options && options.quiet || quiet,
+  })
+
   // Set up promise if there's no callback
   let promise
   if (!callback) {
@@ -41,26 +51,31 @@ function start (options = {}, callback) {
     })
   }
 
-  inv({}, function (err, inventory) {
-    if (err) callback(err)
-    else {
-      update = updater('Sandbox', {
-        logLevel: options && options.logLevel || logLevel,
-        quiet: options && options.quiet || quiet,
-      })
-
-      _start({
-        ...options,
-        update,
-        events,
-        http,
-        tables,
-        _arc,
-        inventory,
-        server
-      }, callback)
-    }
-  })
+  function go () {
+    _start({
+      inventory: params.inventory,
+      update,
+      events,
+      http,
+      tables,
+      _arc,
+      server,
+      ...options,
+    }, callback)
+  }
+  if (options.inventory) {
+    params.inventory = options.inventory
+    go()
+  }
+  else {
+    inv({ cwd }, function (err, result) {
+      if (err) callback(err)
+      else {
+        params.inventory = result
+        go()
+      }
+    })
+  }
 
   return promise
 }
@@ -79,10 +94,19 @@ function end (callback) {
     })
   }
 
-  inv({}, function (err, inventory) {
-    if (err) callback(err)
-    else _end({ events, http, tables, _arc, inventory }, callback)
-  })
+  if (!params.inventory) {
+    callback(Error('Sandbox already shut down!'))
+  }
+  else {
+    _end({ events, http, tables, _arc, inventory: params.inventory }, function (err, result) {
+      if (err) callback(err)
+      else {
+        params.inventory = undefined
+        callback(null, result)
+      }
+    })
+  }
+
   return promise
 }
 

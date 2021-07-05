@@ -2,7 +2,7 @@ let { exec } = require('child_process')
 let series = require('run-series')
 
 module.exports = function startupScripts (params, callback) {
-  let { inventory, update } = params
+  let { cwd, inventory, update } = params
   let { preferences: prefs } = inventory.inv._project
 
   if (prefs && prefs.sandbox && prefs.sandbox.startup) {
@@ -11,13 +11,13 @@ module.exports = function startupScripts (params, callback) {
   }
   else if (prefs && prefs['sandbox-startup']) {
     let now = Date.now()
-    // let ARC_INV = JSON.stringify(inventory.inv) // TODO enable soon once Inventory settles
+    let ARC_INV = JSON.stringify(inventory.inv)
     let ARC_RAW = JSON.stringify(inventory.inv._project.arc)
     update.status('Running startup scripts')
     let ops = prefs['sandbox-startup'].map(cmd => {
       return function (callback) {
-        let env = { /* ARC_INV, */ ARC_RAW, ...process.env }
-        exec(cmd, { env }, function (err, stdout, stderr) {
+        let env = { ARC_INV, ARC_RAW, ...process.env }
+        exec(cmd, { cwd, env }, function (err, stdout, stderr) {
           if (err) callback(err)
           else {
             stdout = stdout ? stdout.toString() : ''

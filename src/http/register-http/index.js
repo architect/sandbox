@@ -1,42 +1,28 @@
-let log = require('./pretty-print-route')
 let invoker = require('../invoke-http')
 
-module.exports = function reg ({ app, routes, inventory, update }) {
+module.exports = function reg (params) {
+  let { app, cwd, routes, inventory, update } = params
+
   let apiType = process.env.ARC_API_TYPE
   let deprecated = process.env.DEPRECATED
-  let msgs = {
-    deprecated: 'REST API mode / Lambda integration',
-    rest: 'REST API mode / Lambda proxy',
-    http: 'HTTP API mode / Lambda proxy v2.0 format',
-    httpv2: 'HTTP API mode / Lambda proxy v2.0 format',
-    httpv1: 'HTTP API mode / Lambda proxy v1.0 format',
-  }
-  let msg = deprecated ? msgs.deprecated : msgs[apiType]
-  update.done(`Loaded routes (${msg})`)
 
   routes.forEach(lambda => {
     // ASAP handled by middleware
     if (lambda.arcStaticAssetProxy) return
-    let { method, path, src } = lambda
+    let { method, path } = lambda
 
     // Methods not implemented by Arc for legacy REST APIs
     if (deprecated || apiType === 'rest') {
       let httpOnly = [ 'any', 'head', 'options' ]
       let hasCatchall = path.includes('*')
       if (!httpOnly.some(h => h === method) && !hasCatchall) {
-        // Pretty print the route reg
-        log({ method, path, src })
-        // Register the route with the Router instance
-        let exec = invoker({ lambda, apiType, inventory, update })
+        let exec = invoker({ cwd, lambda, apiType, inventory, update })
         app[method](path, exec)
       }
     }
     else {
-      // Pretty print the route reg
-      log({ method, path, src })
-
       // Register the route with the Router instance
-      let exec = invoker({ lambda, apiType, inventory, update })
+      let exec = invoker({ cwd, lambda, apiType, inventory, update })
       if (method !== 'any') {
         app[method](path, exec)
       }
@@ -49,4 +35,6 @@ module.exports = function reg ({ app, routes, inventory, update }) {
       }
     }
   })
+
+  update.done(`@http server started`)
 }

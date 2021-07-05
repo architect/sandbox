@@ -1,7 +1,7 @@
 let os = require('os')
 let fs = require('fs')
 let { join } = require('path')
-let file = join(process.cwd(), 'syncplugin.test')
+let file = join(process.cwd(), 'test', 'mock', 'plugins-sync', 'syncplugin.test')
 
 module.exports = {
   variables: function ({ arc, stage, inventory }) {
@@ -11,10 +11,12 @@ module.exports = {
   },
   sandbox: {
     start: function ({ arc, inventory, services }, callback) {
+      console.log('sync plugin start hook writing', file)
       fs.writeFileSync(file, 'test')
       callback()
     },
     end: function ({ arc, inventory, services }, callback) {
+      console.log('sync plugin end hook unlinking', file)
       if (fs.existsSync(file)) fs.unlinkSync(file, 'syncplugin.test')
       callback()
     }

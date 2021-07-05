@@ -1,13 +1,13 @@
 let http = require('http')
+let makeRequestId = require('../../lib/request-id')
 let invoke = require('../invoke-ws')
-let Hashid = require('@begin/hashid')
 
 /**
  * Handle handleshake and possibly return error; note:
  * - In APIGWv2, !2xx responses hang up and return the status code
  * - However, 2xx responses initiate a socket connection (automatically responding with 101)
  */
-module.exports = function upgrade (wss, { inventory, update }) {
+module.exports = function upgrade (wss, { cwd, inventory, update, domainName }) {
   let { get } = inventory
 
   return function upgrade (req, socket, head) {
@@ -15,17 +15,17 @@ module.exports = function upgrade (wss, { inventory, update }) {
     // Get the $connect Lambda
     let lambda = get.ws('connect')
 
-    // Create a connectionId uuid
-    let h = new Hashid
-    let connectionId = h.encode(Date.now())
+    let connectionId = makeRequestId()
     update.status('ws/connect: ' + connectionId)
 
     invoke({
+      cwd,
       lambda,
-      connectionId,
       req,
       inventory,
       update,
+      connectionId,
+      domainName,
     },
     function connect (err, res) {
       let statusCode = res && res.statusCode

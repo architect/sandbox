@@ -1,3 +1,4 @@
+// Don't destructure requires, so we can mock them in unit tests
 let fs = require('fs')
 let url = require('url')
 let send = require('send')

@@ -55,7 +55,8 @@ module.exports = function end (server, callback) {
   ], function closed (err) {
     if (err) callback(err)
     else {
-      callback(null, 'Sandbox successfully shut down')
+      let msg = 'Sandbox successfully shut down'
+      callback(null, msg)
     }
   })
 

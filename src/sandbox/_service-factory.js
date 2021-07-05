@@ -5,8 +5,8 @@ let _http = require('../http')
 let _tables = require('../tables')
 let _arc = require('../arc')
 
-module.exports = function serviceFactory (params) {
-  let { server, type, update, logLevel, quiet } = params
+module.exports = function serviceFactory (params, type) {
+  let { logLevel, quiet, server, update } = params
   let t = t => type === t
   let init
   if (t('events'))  init = _events
@@ -14,7 +14,10 @@ module.exports = function serviceFactory (params) {
   if (t('tables'))  init = _tables
   if (t('_arc'))    init = _arc
   return {
-    start: function (options = {}, callback) {
+    start: function (options, callback) {
+      options = options || {}
+      options.cwd = options.cwd || process.cwd()
+
       // Set up promise if there's no callback
       let promise
       if (!callback) {
@@ -33,21 +36,33 @@ module.exports = function serviceFactory (params) {
         })
       }
 
-      inv({}, function (err, inventory) {
-        if (err) callback(err)
-        else {
-          if (!server[type]) {
-            let service = init(inventory)
-            if (service) {
-              options.update = update
-              server[type] = service
-              server[type].start(options, callback)
-            }
-            else callback()
+      function go () {
+        if (!server[type]) {
+          let service = init(params.inventory)
+          if (service) {
+            options.update = update
+            options.inventory = params.inventory
+            server[type] = service
+            server[type].start(options, callback)
           }
           else callback()
         }
-      })
+        else callback()
+      }
+
+      if (options._refreshInventory || !params.inventory) {
+        // Get it for the first (and hopefully last) time
+        inv({ cwd: options.cwd }, function (err, result) {
+          if (err) callback(err)
+          else {
+            params.inventory = result
+            // Don't pass along refreshInventory flag to _arc, etc.
+            delete options._refreshInventory
+            go()
+          }
+        })
+      }
+      else go()
 
       return promise
     },

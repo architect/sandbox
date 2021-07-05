@@ -1,7 +1,7 @@
-let cli = require('../../src/cli')
 let { join } = require('path')
 let test = require('tape')
-let mock = join(__dirname, '..', 'mock')
+let cli = require(join(process.cwd(), 'src', 'cli'))
+let mock = join(process.cwd(), 'test', 'mock')
 
 /**
  * May take a few seconds to close all related threads

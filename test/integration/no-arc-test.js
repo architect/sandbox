@@ -4,8 +4,7 @@ let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let getDBClient = require('../../src/tables/_get-db-client')
-let cwd = process.cwd()
-let mock = join(__dirname, '..', 'mock')
+let mock = join(process.cwd(), 'test', 'mock')
 let url = `http://localhost:${process.env.PORT || 3333}`
 
 // Verify sandbox shut down
@@ -16,7 +15,6 @@ let shutdown = (t, err) => {
 test('Set up env', t => {
   t.plan(1)
   t.ok(sandbox, 'Sandbox is present')
-  process.chdir(join(mock, 'no-arc'))
 })
 
 /**
@@ -24,7 +22,7 @@ test('Set up env', t => {
  */
 test('Start Sandbox without an Architect project manifest', t => {
   t.plan(1)
-  sandbox.start({ quiet: true }, function (err) {
+  sandbox.start({ cwd: join(mock, 'no-arc'), quiet: true }, function (err) {
     if (err) t.fail('Sandbox failed (sync)')
     else t.pass('Sandbox started (sync)')
   })
@@ -79,14 +77,10 @@ test('Default tables present', t => {
 })
 
 test('Shut down sandbox', t => {
-  t.plan(2)
+  t.plan(1)
   sandbox.end(() => {
     tiny.get({ url }, err => {
-      if (err) {
-        shutdown(t, err)
-        process.chdir(cwd)
-        t.equal(process.cwd(), cwd, 'Switched back to original working dir')
-      }
+      if (err) shutdown(t, err)
       else t.fail('Sandbox did not shut down')
     })
   })

@@ -11,7 +11,7 @@ let httpProxy = require('http-proxy')
  * - ASAP handling (if present)
  * - Error out
  */
-module.exports = function fallback ({ inventory, update }, req, res, next) {
+module.exports = function fallback ({ cwd, inventory, update }, req, res, next) {
   let { inv, get } = inventory
   let apiType = process.env.ARC_API_TYPE
   let httpAPI = apiType.startsWith('http')
@@ -115,6 +115,7 @@ module.exports = function fallback ({ inventory, update }, req, res, next) {
     let name = `${rootParam[0]} /${rootParam[1]}`
     let lambda = get.http(name)
     let exec = invoker({
+      cwd,
       lambda,
       apiType,
       inventory,
@@ -125,7 +126,7 @@ module.exports = function fallback ({ inventory, update }, req, res, next) {
   }
   // Arc 6 greedy `get /{proxy+}`
   else if (restGreedyRoot) {
-    let src = join(process.cwd(), 'src', 'http', `get-index`) // We can assume this file path bc custom didn't land until Arc 8
+    let src = join(cwd, 'src', 'http', `get-index`) // We can assume this file path bc custom didn't land until Arc 8
     invokeProxy(src)
   }
   else if (inv._project.plugins) {
@@ -144,6 +145,7 @@ module.exports = function fallback ({ inventory, update }, req, res, next) {
   // Invoke a root proxy payload
   function invokeProxy (src) {
     let exec = invoker({
+      cwd,
       lambda: {
         method,
         src,
