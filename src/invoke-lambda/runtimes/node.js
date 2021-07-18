@@ -13,6 +13,10 @@ let handler = './' + handlerFile;
 let fn = require(handler)[handlerFunction];
 let cwd = process.cwd();
 
+function isPromise (obj) {
+  return obj && typeof obj.then === 'function';
+}
+
 let event = '';
 process.stdin.on('data', chunk => event += chunk);
 process.stdin.on('close', () => {
@@ -102,12 +106,15 @@ process.stdin.on('close', () => {
     console.log('__ARC__', JSON.stringify(payload), '__ARC_END__');
   }
 
-  if (fn.constructor.name === 'AsyncFunction') {
-    fn(event, context, callback).then(function win (result) {
-      callback(null, result);
-    }).catch(callback);
+  try {
+    const response = fn(event, context, callback);
+    if (isPromise(response)) {
+      response.then(function win (result) {
+        callback(null, result);
+      }).catch(callback);
+    }
   }
-  else {
-    fn(event, context, callback);
+  catch (err) {
+    callback(err);
   }
 })

@@ -424,6 +424,21 @@ test('[HTTP mode] get /no-return (noop)', t => {
   })
 })
 
+test('[HTTP mode] get /promise-return (returned promise vs async function)', t => {
+  t.plan(2)
+  let rawPath = '/promise-return'
+  tiny.get({
+    url: url + rawPath
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'got /promise-return')
+      let { body } = result
+      t.equal(body.message, 'Hello from get promise-return', `Got 'Hello from get promise-return' string back`)
+    }
+  })
+})
+
 test('[HTTP mode] get /custom', t => {
   t.plan(15)
   let rawPath = '/custom'
