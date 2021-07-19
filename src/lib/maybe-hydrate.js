@@ -94,6 +94,13 @@ module.exports = function maybeHydrate ({ cwd, inventory }, callback) {
             }
             else callback()
           },
+          function _deno (callback) {
+            let isDenoRuntime = (path !== shared && path !== views && inv.lambdasBySrcDir[path].config.runtime === 'deno')
+            if (isDenoRuntime) {
+              install(callback)
+            }
+            else callback()
+          }
         ], callback)
       }
     })
