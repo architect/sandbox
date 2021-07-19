@@ -26,6 +26,9 @@ get     /deno
 get     /get-p-c/:param/*
 get     /get-c/*
 get     /no-return
+get     /promise-return
+get     /reject-promise
+get     /throw-sync-error
 get     /times-out
 /custom
   method get

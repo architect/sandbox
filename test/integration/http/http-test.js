@@ -425,6 +425,21 @@ test('[HTTP mode] get /no-return (noop)', t => {
   })
 })
 
+test('[HTTP mode] get /promise-return (returned promise vs async function)', t => {
+  t.plan(2)
+  let rawPath = '/promise-return'
+  tiny.get({
+    url: url + rawPath
+  }, function _got (err, result) {
+    if (err) t.fail(err)
+    else {
+      t.ok(result, 'got /promise-return')
+      let { body } = result
+      t.equal(body.message, 'Hello from get promise-return', `Got 'Hello from get promise-return' string back`)
+    }
+  })
+})
+
 test('[HTTP mode] get /custom', t => {
   t.plan(15)
   let rawPath = '/custom'
@@ -851,6 +866,36 @@ test('[HTTP mode] get /any-p/:param', t => {
         isBase64Encoded: false,
         body: undefined,
       })
+    }
+  })
+})
+
+test('[HTTP mode] get /reject-promise should fail', t => {
+  t.plan(2)
+  tiny.get({
+    url: url + '/reject-promise'
+  }, function _got (err) {
+    if (err) {
+      t.equal(err.statusCode, 500, 'Got 500 for function error')
+      t.match(err.body, /Hello from get reject promise/, 'Got function error')
+    }
+    else {
+      t.fail('request should have failed')
+    }
+  })
+})
+
+test('[HTTP mode] get /throw-sync-error should fail', t => {
+  t.plan(2)
+  tiny.get({
+    url: url + '/throw-sync-error'
+  }, function _got (err) {
+    if (err) {
+      t.equal(err.statusCode, 500, 'Got 500 for function error')
+      t.match(err.body, /Hello from get throw sync error/, 'Got function error')
+    }
+    else {
+      t.fail('request should have failed')
     }
   })
 })

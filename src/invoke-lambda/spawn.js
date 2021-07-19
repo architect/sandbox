@@ -168,13 +168,16 @@ module.exports = function spawnChild (params, callback) {
       else if (parsed) {
         // If it's an error pretty print it
         if (parsed.name && parsed.message && parsed.stack) {
-          parsed.body = `${head}
+          const body = `${head}
           <h1>${parsed.name}</h1>
           <p>${parsed.message}</p>
           <pre>${parsed.stack}</pre>
           `
-          parsed.code = 500
-          parsed.type = 'text/html'
+          return callback(null, {
+            statusCode: 500,
+            headers,
+            body,
+          })
         }
         // otherwise just return the command line
         callback(null, parsed)
