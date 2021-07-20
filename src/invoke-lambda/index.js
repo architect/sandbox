@@ -46,8 +46,16 @@ module.exports = function invokeLambda (params, callback) {
         ? `${join(src, 'vendor')}:${process.env.PYTHONPATH}`
         : join(src, 'vendor')
 
+      let appName = inventory.inv.app // needs camelcase
+      let env = 'Testing' // is this right?
+      let functionName = src.split('/').pop() // this isn't right
+
       let defaults = {
-        __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
+        __ARC_CONTEXT__: JSON.stringify({
+          'functionName': `${appName}${env}-${functionName}`,
+          'functionVersion': '$LATEST',
+          // todo awsRequestId // needs to be a first class thing right now it only exists in request context for websockets
+        }),
         __ARC_CONFIG__: JSON.stringify({
           projectSrc: cwd,
           handlerFile: 'index',
