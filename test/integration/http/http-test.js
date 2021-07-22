@@ -15,11 +15,10 @@ test('Set up env', t => {
 })
 
 test('[HTTP mode] Start Sandbox', t => {
-  t.plan(4)
+  t.plan(3)
   sandbox.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
-      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
       t.equal(result, 'Sandbox successfully started', 'Sandbox started')
@@ -896,11 +895,10 @@ test('[HTTP mode] Shut down Sandbox', t => {
  * Arc v6: test failing to load index.html without get / defined
  */
 test('[HTTP mode] Start Sandbox', t => {
-  t.plan(3)
+  t.plan(2)
   sandbox.start({ cwd: join(mock, 'no-index-fail'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
-      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
       t.equal(result, 'Sandbox successfully started', 'Sandbox started')
     }
@@ -927,11 +925,10 @@ test('[HTTP mode] Shut down Sandbox', t => {
  * Arc v6: test successfully loading index.html without get / defined
  */
 test('[HTTP mode] Start Sandbox', t => {
-  t.plan(3)
+  t.plan(2)
   sandbox.start({ cwd: join(mock, 'no-index-pass'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
-      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
       t.equal(result, 'Sandbox successfully started', 'Sandbox started')
     }
@@ -961,11 +958,10 @@ test('[HTTP mode] Shut down Sandbox', t => {
  * Arc v6: test failing to load an endpoint missing its local handler file
  */
 test('[HTTP mode] Start Sandbox', t => {
-  t.plan(3)
+  t.plan(2)
   sandbox.start({ cwd: join(mock, 'missing-handler'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
-      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
       t.equal(result, 'Sandbox successfully started', 'Sandbox started')
     }

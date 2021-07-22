@@ -2,6 +2,16 @@
 
 ---
 
+## [4.0.0] 2021-07-22
+
+### Changed
+
+- Breaking change: removed support for Architect 5 (and lower)
+  - This change in reality should not impact anyone, as Architect 5 LTS releases haven't used modern versions of Sandbox for quite some time
+- Removed deprecated `@sandbox startup` warning
+
+---
+
 ## [3.7.4] 2021-06-30
 
 ### Added

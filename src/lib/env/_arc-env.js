@@ -4,7 +4,7 @@ let { toLogicalID } = require('@architect/utils')
  * Handle important Architect environment variables
  */
 module.exports = function env (params, callback) {
-  let { version, quiet, inventory } = params
+  let { quiet, inventory } = params
   let { inv } = inventory
 
   // Set up quietude
@@ -21,21 +21,15 @@ module.exports = function env (params, callback) {
     process.env.NODE_ENV = 'testing'
   }
 
-  // Set Arc 5 / 6+ Lambda config env
-  if (version && version.startsWith('Architect 5') || process.env.DEPRECATED) {
-    process.env.DEPRECATED = true
-    process.env.ARC_HTTP = 'aws'
+  // Set Arc 6+ Lambda config env
+  process.env.ARC_HTTP = 'aws_proxy'
+  if (env === 'staging' || env === 'production') {
+    let capEnv = env.charAt(0).toUpperCase() + env.substr(1)
+    process.env.ARC_CLOUDFORMATION = `${toLogicalID(inv.app)}${capEnv}`
   }
-  else {
-    process.env.ARC_HTTP = 'aws_proxy'
-    if (env === 'staging' || env === 'production') {
-      let capEnv = env.charAt(0).toUpperCase() + env.substr(1)
-      process.env.ARC_CLOUDFORMATION = `${toLogicalID(inv.app)}${capEnv}`
-    }
 
-    // @static spa
-    if (inv.static && inv.static.spa !== undefined) process.env.ARC_STATIC_SPA = inv.static.spa
-  }
+  // @static spa
+  if (inv.static && inv.static.spa !== undefined) process.env.ARC_STATIC_SPA = inv.static.spa
 
   // Populate session table (if not present)
   if (!process.env.SESSION_TABLE_NAME) {

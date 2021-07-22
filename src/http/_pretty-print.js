@@ -13,17 +13,14 @@ module.exports = function prettyPrint ({ cwd, inventory, port, update }) {
 
   if (http) {
     let apiType = process.env.ARC_API_TYPE
-    let deprecated = process.env.DEPRECATED
     let msgs = {
-      deprecated: 'REST API mode / Lambda integration',
       rest: 'REST API mode / Lambda proxy',
       http: 'HTTP API mode / Lambda proxy v2.0 format',
       httpv2: 'HTTP API mode / Lambda proxy v2.0 format',
       httpv1: 'HTTP API mode / Lambda proxy v1.0 format',
     }
-    let msg = deprecated ? msgs.deprecated : msgs[apiType]
     let andWs = ws ? '& @ws ' : ''
-    update.done(`Available @http (${msg}) ${andWs}routes`)
+    update.done(`Available @http (${msgs[apiType]}) ${andWs}routes`)
     http.forEach(({ method, path, src }) => {
       let routeMethod = chalk.grey(padL(method))
       let routePath = chalk.cyan(path) + ' '

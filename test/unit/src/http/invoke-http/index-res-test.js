@@ -7,7 +7,7 @@ let sut = join(process.cwd(), 'src', 'http', 'invoke-http')
 let invoke = proxyquire(sut, {
   '../../invoke-lambda': lambdaStub
 })
-let { arc7, arc6, arc5, arc } = require('../http-res-fixtures')
+let { arc7, arc6 } = require('../http-res-fixtures')
 
 let b64dec = i => Buffer.from(i, 'base64').toString()
 let b64enc = i => Buffer.from(i).toString('base64')
@@ -71,7 +71,6 @@ function getInvoker (params, response, callback) {
 function teardown () {
   lambdaStub.reset() // mostly jic
   returnError = false
-  delete process.env.DEPRECATED
 }
 
 test('Unknown invocation error', t => {
@@ -210,7 +209,7 @@ test('Architect v7 dependency-free responses (HTTP API mode)', t => {
 })
 
 test('Architect v7 dependency-free responses (HTTP API + Lambda v1.0)', t => {
-  t.plan(32)
+  t.plan(30)
   let lambda = { method: 'GET', route: '/' }
   let params = { lambda, apiType: 'httpv1' }
   let run = getInvoker.bind({}, params)
@@ -270,12 +269,6 @@ test('Architect v7 dependency-free responses (HTTP API + Lambda v1.0)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc5.cookie
-  run(mock, res => {
-    t.doesNotMatch(res.body, /Invalid response parameter/, 'Arc v5 style cookie parameter is ignored')
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
   mock = arc6.multiValueHeaders
   run(mock, res => {
     t.deepEqual(res.headers['set-cookie'], [ 'Foo', 'Bar', 'Baz' ], 'Header values set')
@@ -292,7 +285,7 @@ test('Architect v7 dependency-free responses (HTTP API + Lambda v1.0)', t => {
 })
 
 test('Architect v6 dependency-free responses (REST API mode)', t => {
-  t.plan(32)
+  t.plan(30)
   let lambda = { method: 'GET', route: '/' }
   let params = { lambda, apiType: 'rest' }
   let run = getInvoker.bind({}, params)
@@ -352,12 +345,6 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
     t.equal(res.statusCode, 200, 'Responded with 200')
   })
 
-  mock = arc5.cookie
-  run(mock, res => {
-    t.match(res.body, /Invalid response parameter/, 'Arc v5 style cookie parameter causes error')
-    t.equal(res.statusCode, 502, 'Responded with 502')
-  })
-
   mock = arc6.multiValueHeaders
   run(mock, res => {
     t.deepEqual(res.headers['set-cookie'], [ 'Foo', 'Bar', 'Baz' ], 'Header values set')
@@ -368,151 +355,6 @@ test('Architect v6 dependency-free responses (REST API mode)', t => {
   run(mock, res => {
     t.match(res.body, /Invalid response type/, 'Invalid multiValueHeaders causes error')
     t.equal(res.statusCode, 502, 'Responded with 502')
-  })
-
-  teardown()
-})
-
-test('Architect v5 (REST API mode) & Architect Functions', t => {
-  t.plan(35)
-  process.env.DEPRECATED = true
-  let lambda = { method: 'GET', route: '/' }
-  let params = { lambda, apiType: 'rest' }
-  let run = getInvoker.bind({}, params)
-  let mock
-  let cacheControl = 'max-age=86400'
-  let antiCache = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
-
-  mock = arc5.body
-  run(mock, res => {
-    t.equal(str(res.body), str(mock.body), match('res.body', res.body))
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  // Same getHeader for arc5.cacheControl as in arc5.body
-  mock = arc5.cacheControl
-  run(mock, res => {
-    t.equal(res.headers['Cache-Control'], mock.headers['cache-control'], match(`res.headers['Cache-Control']`, res.headers['Cache-Control']))
-    if (!res.headers['cache-control'] && mock.headers['cache-control'])
-      t.pass(`Headers normalized and de-duped: ${str(res.headers)}`)
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  mock = arc5.noCacheControlHTML
-  run(mock, res => {
-    t.equal(res.headers['Cache-Control'], antiCache, 'Default anti-caching headers set for HTML response')
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  mock = arc5.noCacheControlJSON
-  run(mock, res => {
-    t.equal(res.headers['Cache-Control'], antiCache, 'Default anti-caching headers set for JSON response')
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  // Architect v5 only detected plain JSON, and not vendored JSON
-  mock = arc5.noCacheControlJSONapi
-  run(mock, res => {
-    t.equal(res.headers['Cache-Control'], cacheControl, 'Default caching headers set for vnd.api+json response')
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  mock = arc5.noCacheControlOther
-  run(mock, res => {
-    t.equal(res.headers['Cache-Control'], cacheControl, 'Default caching headers set for non-HTML/JSON response')
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  mock = arc5.defaultsToJson
-  run(mock, res => {
-    t.match(res.headers['Content-Type'], /application\/json/, 'Unspecified content type defaults to JSON')
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  mock = arc5.type
-  run(mock, res => {
-    t.equal(res.headers['Content-Type'], mock.type, `type matches res.headers['Content-Type']: ${res.headers['Content-Type']}`)
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  // Testing that cookie is set, not that a valid cookie was passed
-  mock = arc5.cookie
-  run(mock, res => {
-    t.equal(res.headers['Set-Cookie'], mock.cookie, `Cookie set: ${mock.cookie}`)
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  mock = arc5.secureCookie
-  run(mock, res => {
-    // Upcased bc VTL iirc
-    t.equal(res.headers['Set-Cookie'], localCookie, `Cookie SSL replaced with local path modification: ${localCookie}`)
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  mock = arc5.secureCookieHeader
-  run(mock, res => {
-    // Lowcased by default otherwise iirc
-    t.equal(res.headers['set-cookie'], localCookie, `Cookie SSL replaced with local path modification: ${localCookie}`)
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  mock = arc5.cors
-  run(mock, res => {
-    t.equal(res.headers['Access-Control-Allow-Origin'], '*', `CORS boolean set res.headers['Access-Control-Allow-Origin'] === '*'`)
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  mock = arc5.isBase64Encoded
-  run(mock, res => {
-    t.equal(b64enc(res.body), mock.body, match('res.body', res.body))
-    t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  mock = arc5.isBase64EncodedType
-  run(mock, res => {
-    t.equal(b64enc(res.body), mock.body, match('res.body', res.body))
-    t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  mock = arc5.isBase64EncodedUnknownCT
-  run(mock, res => {
-    t.ok(res.body instanceof Buffer, 'Unknown type returned raw buffer')
-    t.equal(b64enc(res.body), mock.body, match('res.body', res.body))
-    t.ok(res.isBase64Encoded, 'isBase64Encoded param passed through')
-    t.equal(res.statusCode, 200, 'Responded with 200')
-  })
-
-  teardown()
-})
-
-test('Architect <6 (REST API mode) & Architect Functions', t => {
-  t.plan(4)
-  process.env.DEPRECATED = true
-  let lambda = { method: 'GET', route: '/' }
-  let params = { lambda, apiType: 'rest' }
-  let run = getInvoker.bind({}, params)
-  let mock
-
-  mock = arc.location
-  run(mock, res => {
-    t.equal(mock.location, res.headers.Location, match('res.headers.Location', res.headers.Location))
-  })
-
-  mock = arc.status
-  run(mock, res => {
-    t.equal(mock.status, res.statusCode, match('status', res.statusCode))
-  })
-
-  mock = arc.code
-  run(mock, res => {
-    t.equal(mock.code, res.statusCode, match('code', res.statusCode))
-  })
-
-  mock = arc.statusCode
-  run(mock, res => {
-    t.equal(mock.statusCode, res.statusCode, match('statusCode', res.statusCode))
   })
 
   teardown()

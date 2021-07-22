@@ -15,7 +15,6 @@ test('Set up env', t => {
 async function setup (t, type, dir) {
   process.env.ARC_API_TYPE = type
   let start = await sandbox.start({ cwd: join(mock, 'root-handling', dir), quiet: true })
-  t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
   t.equal(process.env.ARC_API_TYPE, type, `API type set to ${type}`)
   t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
   t.equal(start, 'Sandbox successfully started', 'Sandbox started')
@@ -29,7 +28,7 @@ function teardown (t) {
  * Root param with nested exact match: /:param/there
  */
 test('[HTTP mode] get /hi/there - root param at /:param/there', async t => {
-  t.plan(22)
+  t.plan(21)
   await setup(t, 'http', 'param-exact')
 
   let result
@@ -56,7 +55,7 @@ test('[HTTP mode] get /hi/there - root param at /:param/there', async t => {
 })
 
 test('[HTTP v1.0 (REST) mode] get /hi/there - root param at /:param/there', async t => {
-  t.plan(23)
+  t.plan(22)
   await setup(t, 'httpv1', 'param-exact')
 
   let result
@@ -87,7 +86,7 @@ test('[HTTP v1.0 (REST) mode] get /hi/there - root param at /:param/there', asyn
 // This shouldn't be possible, as /:param/whatever can't coexist with /{proxy+} ASAP in REST
 /*
 test('[REST mode] get /hi/there - root param at /:param/there', async t => {
-  t.plan(8)
+  t.plan(7)
   await setup(t, 'rest', 'param-exact')
 
   try {
@@ -107,7 +106,7 @@ test('[REST mode] get /hi/there - root param at /:param/there', async t => {
  * Root param only: /:param
  */
 test('[HTTP mode] get / - root param at /:param', async t => {
-  t.plan(21)
+  t.plan(20)
   await setup(t, 'http', 'root-param')
 
   let result = await tiny.get({ url })
@@ -129,7 +128,7 @@ test('[HTTP mode] get / - root param at /:param', async t => {
 })
 
 test('[HTTP v1.0 (REST) mode] get / - root param at /:param', async t => {
-  t.plan(22)
+  t.plan(21)
   await setup(t, 'httpv1', 'root-param')
 
   let result = await tiny.get({ url })
@@ -153,7 +152,7 @@ test('[HTTP v1.0 (REST) mode] get / - root param at /:param', async t => {
 
 // This shouldn't be possible, as /:param can't coexist with /{proxy+} ASAP in REST
 test('[REST mode] get / - root param at /:param', async t => {
-  t.plan(7)
+  t.plan(6)
   await setup(t, 'rest', 'root-param')
 
   try {
@@ -172,7 +171,7 @@ test('[REST mode] get / - root param at /:param', async t => {
  * Nothing dynamic in root, all ASAP all the time
  */
 test('[HTTP mode] get / - ASAP', async t => {
-  t.plan(7)
+  t.plan(6)
   await setup(t, 'http', 'asap')
 
   let result = await tiny.get({ url })
@@ -183,7 +182,7 @@ test('[HTTP mode] get / - ASAP', async t => {
 })
 
 test('[HTTP v1.0 (REST) mode] get / - ASAP', async t => {
-  t.plan(7)
+  t.plan(6)
   await setup(t, 'httpv1', 'asap')
 
   let result = await tiny.get({ url })
@@ -194,7 +193,7 @@ test('[HTTP v1.0 (REST) mode] get / - ASAP', async t => {
 })
 
 test('[REST mode] get / - ASAP', async t => {
-  t.plan(7)
+  t.plan(6)
   await setup(t, 'rest', 'asap')
 
   let result = await tiny.get({ url })
@@ -208,7 +207,7 @@ test('[REST mode] get / - ASAP', async t => {
  * Nothing dynamic in root, but only a bare @static - no @http
  */
 test('[HTTP mode] get / - ASAP (@static only)', async t => {
-  t.plan(7)
+  t.plan(6)
   await setup(t, 'http', 'bare-static')
 
   let result = await tiny.get({ url })
@@ -219,7 +218,7 @@ test('[HTTP mode] get / - ASAP (@static only)', async t => {
 })
 
 test('[HTTP v1.0 (REST) mode] get / - ASAP (@static only)', async t => {
-  t.plan(7)
+  t.plan(6)
   await setup(t, 'httpv1', 'bare-static')
 
   let result = await tiny.get({ url })
@@ -230,7 +229,7 @@ test('[HTTP v1.0 (REST) mode] get / - ASAP (@static only)', async t => {
 })
 
 test('[REST mode] get / - ASAP (@static only)', async t => {
-  t.plan(7)
+  t.plan(6)
   await setup(t, 'rest', 'bare-static')
 
   let result = await tiny.get({ url })
@@ -244,7 +243,7 @@ test('[REST mode] get / - ASAP (@static only)', async t => {
  * Root is greedy: retired for HTTP APIs in Arc 8, still available in REST mode
  */
 test('[HTTP mode] get / - greedy index', async t => {
-  t.plan(7)
+  t.plan(6)
   await setup(t, 'http', 'greedy-get-index')
 
   try {
@@ -260,7 +259,7 @@ test('[HTTP mode] get / - greedy index', async t => {
 })
 
 test('[HTTP v1.0 (REST) mode] get / - greedy index', async t => {
-  t.plan(7)
+  t.plan(6)
   await setup(t, 'httpv1', 'greedy-get-index')
 
   try {
@@ -276,7 +275,7 @@ test('[HTTP v1.0 (REST) mode] get / - greedy index', async t => {
 })
 
 test('[REST mode] get / - greedy index', async t => {
-  t.plan(22)
+  t.plan(21)
   await setup(t, 'rest', 'greedy-get-index')
 
   let path = '/hi/there'

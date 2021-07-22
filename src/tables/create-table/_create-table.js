@@ -26,7 +26,7 @@ module.exports = function _createTable (params, callback) {
         }
 
         // Handle global secondary index stuff
-        let gsi = getGSI({ name, inventory, TableName })
+        let gsi = getGSI({ name, inventory })
         if (gsi) creating.GlobalSecondaryIndexes = gsi
 
         dynamo.createTable(creating, callback)

@@ -7,16 +7,9 @@ let b64enc = i => Buffer.from(i).toString('base64')
  * If you make changes to either, reflect it in the other(s)!
  */
 
-// Basic obj
-let data = { hi: 'there' }
-
 // Content examples
-let css = '.hi:before {content: "there";}'
 let html = '<span>hi there</span>'
-let js = `console.log('hi there')`
-let json = data
 let text = 'hi there'
-let xml = '<hi>there</hi>'
 
 let arc7 = {
   // Not returning is valid, and returns a 'null' string as JSON (lol)
@@ -149,145 +142,7 @@ let arc6 = {
   }
 }
 
-let arc5 = {
-  // Set body
-  body: {
-    body: text
-  },
-
-  // Set cacheControl
-  cacheControl: {
-    body: text,
-    cacheControl: 'max-age=1',
-    headers: { 'cache-control': 'max-age=60' } // cacheControl should win
-  },
-
-  // Test default anti-caching on HTML
-  noCacheControlHTML: {
-    body: html,
-    headers: { 'Content-Type': 'text/html; charset=uft8' }
-  },
-
-  // Test default anti-caching on JSON
-  noCacheControlJSON: {
-    body: json,
-    headers: { 'Content-Type': 'application/json; charset=uft8' }
-  },
-
-  // Test default anti-caching on JSON API – works in Functions, but never worked in V5
-  noCacheControlJSONapi: {
-    body: json,
-    headers: { 'Content-Type': 'application/vnd.api+json; charset=uft8' }
-  },
-
-  // No default anti-caching on other content types
-  noCacheControlOther: {
-    body: text,
-    headers: { 'Content-Type': 'text/plain; charset=uft8' }
-  },
-
-  // Not specifying a content type should default to JSON
-  defaultsToJson: {
-    body: json
-  },
-
-  // Set type
-  type: {
-    body: text,
-    type: 'text/plain'
-  },
-
-  // Set cookie
-  cookie: {
-    body: html,
-    cookie: 'hi=there'
-  },
-
-  // ... now SSL
-  secureCookie: {
-    body: html,
-    cookie: 'hi=there; Secure'
-  },
-
-  // ... now via header
-  secureCookieHeader: {
-    body: html,
-    headers: { 'set-cookie': 'hi=there; Secure' }
-  },
-
-  // Set cors
-  cors: {
-    body: html,
-    cors: true
-  },
-
-  // Set isBase64Encoded
-  isBase64Encoded: {
-    body: b64enc('hi there\n'),
-    isBase64Encoded: true
-  },
-
-  // ... with type param
-  isBase64EncodedType: {
-    body: b64enc('hi there\n'),
-    type: 'application/json',
-    isBase64Encoded: true
-  },
-
-  // ... with an unknown document type (in type param)
-  isBase64EncodedUnknownCT: {
-    body: b64enc('hi there\n'),
-    headers: { 'content-type': 'application/pdf' },
-    isBase64Encoded: true
-  },
-}
-
-let arc4 = {
-  /**
-   * Deprecated statically-bound content type style responses
-   */
-  css: { css },
-  html: { html },
-  js: { js },
-  json: { json },
-  text: { text },
-  xml: { xml }
-}
-
-let arc = {
-  /**
-   * Arc Functions + early Arc response params
-   */
-  // Set location
-  location: {
-    location: '/hi'
-  },
-
-  // Set statusCode via status
-  status: {
-    status: 201
-  },
-
-  // Set statusCode via code
-  code: {
-    code: 201
-  },
-
-  // Set statusCode
-  statusCode: {
-    statusCode: 201
-  },
-
-  // Set session
-  session: {
-    session: data
-  }
-}
-
 module.exports = {
   arc7,
   arc6,
-  arc5,
-  arc4,
-  arc
 }

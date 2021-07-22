@@ -19,11 +19,10 @@ test('Set up env', t => {
 })
 
 test('[Misc] Start Sandbox', t => {
-  t.plan(4)
+  t.plan(3)
   sandbox.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
-      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
       t.equal(result, 'Sandbox successfully started', 'Sandbox started')
@@ -161,11 +160,10 @@ test('[Misc] Shut down Sandbox', t => {
 })
 
 test('[Env vars (.env)] Start Sandbox', t => {
-  t.plan(4)
+  t.plan(3)
   sandbox.start({ cwd: join(mock, 'env', 'dot-env'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
-      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
       t.equal(result, 'Sandbox successfully started', 'Sandbox started')
@@ -196,11 +194,10 @@ test('[Env vars (.env)] Shut down Sandbox', t => {
 })
 
 test('[Env vars (preferences.arc)] Start Sandbox', t => {
-  t.plan(4)
+  t.plan(3)
   sandbox.start({ cwd: join(mock, 'env', 'preferences'), }, function (err, result) {
     if (err) t.fail(err)
     else {
-      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
       t.equal(result, 'Sandbox successfully started', 'Sandbox started')
@@ -231,11 +228,10 @@ test('[Env vars (preferences.arc)] Shut down Sandbox', t => {
 })
 
 test('[Env vars (.arc-env)] Start Sandbox', t => {
-  t.plan(4)
+  t.plan(3)
   sandbox.start({ cwd: join(mock, 'env', 'dot-arc-env'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
-      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
       t.equal(result, 'Sandbox successfully started', 'Sandbox started')
@@ -266,11 +262,10 @@ test('[Misc] Shut down Sandbox', t => {
 })
 
 test('[Multiple possible handlers] Start Sandbox', t => {
-  t.plan(4)
+  t.plan(3)
   sandbox.start({ cwd: join(mock, 'multihandler'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     else {
-      t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
       t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
       t.equal(result, 'Sandbox successfully started', 'Sandbox started')

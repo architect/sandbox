@@ -2,11 +2,10 @@ let { join } = require('path')
 
 module.exports = function config (arc, cwd) {
   // Handle API type
-  let defaultApiType = process.env.DEPRECATED ? 'rest' : 'http'
   let findAPIType = s => s[0] && s[0] === 'apigateway' && s[1]
   let arcAPIType = arc.aws && arc.aws.some(findAPIType) && arc.aws.find(findAPIType)[1]
   let apiIsValid = arcAPIType && [ 'http', 'httpv1', 'httpv2', 'rest' ].some(api => api === arcAPIType)
-  let api = apiIsValid ? arcAPIType : defaultApiType
+  let api = apiIsValid ? arcAPIType : 'http'
   process.env.ARC_API_TYPE = process.env.ARC_API_TYPE || api
 
   // Allow override of 'public' folder
