@@ -17,6 +17,7 @@ module.exports = function registerWebSocket (params) {
   wss.on('connection', connection)
 
   // Listen for arc.ws.send invocations
+  // TODO remove in favor of API Gateway v2 service mock
   app.post('/__arc', send)
 
   update.done(`@ws server started`)

@@ -8,6 +8,7 @@
 
 - Breaking change: removed support for Architect 5 (and lower)
   - This change in reality should not impact anyone, as Architect 5 LTS releases haven't used modern versions of Sandbox for quite some time
+- Breaking change: removed internal tables lookup at `/_asd`, deprecated in favor of Sandbox's proper internal service discovery
 - Removed deprecated `@sandbox startup` warning
 
 ---
