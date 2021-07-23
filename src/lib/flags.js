@@ -22,10 +22,10 @@ module.exports = function getFlags () {
   let findPort = option => [ '-p', '--port', 'port' ].includes(option)
   if (args.some(findPort)) {
     let thePort = i => args[args.indexOf(i) + 1]
-    if (args.includes('-p'))           port = thePort('-p')
-    else if (args.includes('--port'))  port = thePort('--port')
-    else if (args.includes('port'))    port = thePort('port')
-    if (isNaN(Number(port)))           port = 3333
+    if (args.includes('-p'))           port = Number(thePort('-p'))
+    else if (args.includes('--port'))  port = Number(thePort('--port'))
+    else if (args.includes('port'))    port = Number(thePort('port'))
+    if (isNaN(port))                   port = 3333
   }
 
   // Quiet stdout

@@ -2,6 +2,15 @@
 
 ---
 
+## [3.7.x] 2021-xx-xx
+
+
+### Changed
+
+- Fix CLI to parse larger port numbers correctly.
+
+---
+
 ## [3.7.4] 2021-06-30
 
 ### Added
