@@ -7,7 +7,7 @@ let sut = join(process.cwd(), 'src', 'http', 'invoke-http')
 let invoke = proxyquire(sut, {
   '../../invoke-lambda': lambdaStub
 })
-let { arc7, arc6 } = require('../http-res-fixtures')
+let { arc7, arc6 } = require('@architect/req-res-fixtures').http.res
 
 let b64dec = i => Buffer.from(i, 'base64').toString()
 let b64enc = i => Buffer.from(i).toString('base64')

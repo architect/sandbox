@@ -7,7 +7,7 @@ let sut = join(process.cwd(), 'src', 'http', 'invoke-http')
 let invoke = proxyquire(sut, {
   '../../invoke-lambda': lambdaStub
 })
-let { arc7, arc6, headers } = require('../http-req-fixtures')
+let { arc7, arc6, headers } = require('@architect/req-res-fixtures').http.req
 
 let inventory = { inv: {} }
 lambdaStub.yields(null, {})
