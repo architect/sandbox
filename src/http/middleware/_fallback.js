@@ -15,7 +15,6 @@ module.exports = function fallback ({ cwd, inventory, update }, req, res, next) 
   let { inv, get } = inventory
   let apiType = process.env.ARC_API_TYPE
   let httpAPI = apiType.startsWith('http')
-  let deprecated = process.env.DEPRECATED
   let method = req.method.toLowerCase()
 
   // Read all routes
@@ -87,13 +86,13 @@ module.exports = function fallback ({ cwd, inventory, update }, req, res, next) 
 
   // Establish root handler status
   let rootHandler = inv._project.rootHandler
-  let hasASAP = rootHandler === 'arcStaticAssetProxy' && !deprecated
+  let hasASAP = rootHandler === 'arcStaticAssetProxy'
 
   // Bail on exact, param, or catchall matches
   let match = exactMatch || anyMethodMatch || paramsMatch || catchallMatch
 
   // Backwards compatibility with Arc 6+ `REST`'s greedy `get /` (deprecated in Arc 8 `HTTP`)
-  let restGreedyRoot = apiType === 'rest' && !deprecated && rootHandler && pathname !== '/'
+  let restGreedyRoot = apiType === 'rest' && rootHandler && pathname !== '/'
 
   // Matches
   if (match) {

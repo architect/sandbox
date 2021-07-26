@@ -5,11 +5,7 @@ module.exports = function startupScripts (params, callback) {
   let { cwd, inventory, update } = params
   let { preferences: prefs } = inventory.inv._project
 
-  if (prefs && prefs.sandbox && prefs.sandbox.startup) {
-    update.warn('The @sandbox scripts setting has been deprecated, please use the @sandbox-startup pragma')
-    callback()
-  }
-  else if (prefs && prefs['sandbox-startup']) {
+  if (prefs && prefs['sandbox-startup']) {
     let now = Date.now()
     let ARC_INV = JSON.stringify(inventory.inv)
     let ARC_RAW = JSON.stringify(inventory.inv._project.arc)

@@ -17,11 +17,10 @@ test('Set up env', t => {
  * - Now with multiple API paths, we'll test this (hopefully) free of side effects
  */
 test('Sync http.start', t => {
-  t.plan(3)
+  t.plan(2)
   http.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
     t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
-    t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
     t.equal(result, 'HTTP successfully started', 'HTTP started')
   })
 })
@@ -53,12 +52,11 @@ test('Sync http.end', t => {
 })
 
 test('Async http.start', async t => {
-  t.plan(3)
+  t.plan(2)
   try {
     let result = await http.start({ cwd: join(mock, 'normal'), quiet: true })
     t.equal(result, 'HTTP successfully started', 'Sandbox started')
     t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
-    t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
   }
   catch (err) {
     t.fail(err)
@@ -89,13 +87,11 @@ test('Async http.end', async t => {
 })
 
 test('Teardown', t => {
-  t.plan(3)
+  t.plan(2)
   tiny.get({ url }, err => {
     if (err) verifyShutdown(t, err)
     else t.fail('Sandbox did not shut down')
   })
   delete process.env.ARC_API_TYPE
-  delete process.env.DEPRECATED
   t.notOk(process.env.ARC_API_TYPE, 'API type NOT set')
-  t.notOk(process.env.DEPRECATED, 'Arc v5 deprecated status NOT set')
 })

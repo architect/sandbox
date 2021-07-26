@@ -22,7 +22,6 @@ module.exports = function cli (params = {}, callback) {
 
     // Setup
     let update = updater('Sandbox', { logLevel, quiet })
-    let deprecated = process.env.DEPRECATED
 
     let watcher
     try {
@@ -42,7 +41,6 @@ module.exports = function cli (params = {}, callback) {
     // Timers
     let lastEvent
     let arcEventTimer
-    let rehydrateArcTimer
     let rehydrateSharedTimer
     let rehydrateStaticTimer
     let rehydrateViewsTimer
@@ -170,13 +168,6 @@ module.exports = function cli (params = {}, callback) {
                 if (result === 'HTTP successfully started') {
                   let end = Date.now()
                   update.done(`HTTP routes reloaded in ${end - start}ms`)
-                  if (deprecated) {
-                    rehydrate({
-                      timer: rehydrateArcTimer,
-                      only: 'arcFile',
-                      msg: 'Rehydrating functions with new project manifest'
-                    })
-                  }
                 }
               })
             })

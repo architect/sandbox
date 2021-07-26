@@ -1,5 +1,5 @@
 module.exports = function _getGSI (params) {
-  let { name, inventory, TableName } = params
+  let { name, inventory } = params
   let { inv, get } = inventory
 
   // Get all indexes that correspond to the table in question
@@ -13,12 +13,9 @@ module.exports = function _getGSI (params) {
         throw Error(`Invalid @indexes: ${name}`)
       }
 
-      let deprecated = process.env.DEPRECATED
       let s = sortKey ? `-${sortKey}` : '' // Naming extension for multi-keys
       let IndexName = index.indexName
-      if (!IndexName) IndexName = deprecated
-        ? `${TableName}-${partitionKey}${s}-index` // Old school index naming
-        : `${partitionKey}${s}-index` // New school index naming
+      if (!IndexName) IndexName = `${partitionKey}${s}-index`
 
       // Always add the partition key (HASH)
       let KeySchema = [ {

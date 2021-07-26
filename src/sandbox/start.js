@@ -33,8 +33,6 @@ module.exports = function _start (params, callback) {
   // Set `all` to instruct service modules not to hydrate again, etc.
   params.all = true
 
-  let deprecated = process.env.DEPRECATED
-
   series([
     // Set up Arc + userland env vars + print the banner
     function _env (callback) {
@@ -44,7 +42,7 @@ module.exports = function _start (params, callback) {
     // Initialize any missing functions on startup
     function _init (callback) {
       let autocreateEnabled = prefs && prefs.create && prefs.create.autocreate
-      if (autocreateEnabled && !deprecated) {
+      if (autocreateEnabled) {
         create({ inventory }, callback)
       }
       else callback()
