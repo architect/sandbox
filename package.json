@@ -48,7 +48,7 @@
     "server-destroy": "~1.0.1",
     "tree-kill": "~1.2.2",
     "update-notifier": "~5.1.0",
-    "ws": "~7.5.3"
+    "ws": "~8.0.0"
   },
   "devDependencies": {
     "@architect/eslint-config": "~1.0.0",
