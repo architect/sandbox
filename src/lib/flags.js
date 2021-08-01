@@ -3,8 +3,8 @@ let flags
 /**
  * Read CLI flags and populate userland options
  */
-module.exports = function getFlags () {
-  if (flags) return flags
+module.exports = function getFlags (useCache = true) {
+  if (flags && useCache) return flags
 
   // TODO refactor all this janky custom logic into something like yargs
   let args = process.argv.slice(2)
@@ -33,7 +33,7 @@ module.exports = function getFlags () {
   let quiet = args.some(findQuiet)
 
   // Disable hydration symlinking
-  let symlink = args.some(o => o === '--disable-symlinks') ? false : true
+  let symlink = args.includes('--disable-symlinks')
 
   return flags = {
     logLevel,
