@@ -7,7 +7,7 @@ function lambdaStub (params, callback) {
 let invoke = proxyquire('../../../../../src/http/invoke-ws', {
   '../../invoke-lambda': lambdaStub
 })
-let { arc6 } = require('../http-req-fixtures')
+let { arc6 } = require('@architect/req-res-fixtures').http.req
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${str(item)}`
 

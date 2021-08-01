@@ -121,39 +121,6 @@ function checkRestResult (t, result, checks) {
   t.equal(requestContext.resourcePath, resource, `Got correct requestContext.resourcePath param: ${path}`)
 }
 
-function checkDeprecatedResult (t, result, checks) {
-  t.ok(result, 'Got result!')
-  let { version, body } = result
-  if (has(result, 'version')) {
-    t.equal(version, '1.0', 'Got Lambda v1.0 payload')
-  }
-  else {
-    t.notOk(version, 'No Lambda payload version specified')
-  }
-  Object.entries(checks).forEach(([ param, value ]) => {
-    if (param.startsWith('_')) { /* noop */ }
-    else if (value === undefined) {
-      t.ok(!has(result, param), `${msgs.notReturned}: ${param}`)
-    }
-    else if ((typeof result[param] === 'object' &&
-              !Object.keys(result[param]).length) ||
-             param === 'query' ||
-             param === 'queryStringParameters') {
-      let val = JSON.stringify(value)
-      t.equal(JSON.stringify(result[param]), val, `${msgs.correct} ${param}: ${val}`)
-    }
-    else if (param === 'body' && value) {
-      t.equal(JSON.stringify(body), JSON.stringify(data), 'Got JSON-serialized body payload')
-    }
-    else if (value === '🤷🏽‍♀️') {
-      t.ok(has(result, param), `${msgs.returned} ${param}`)
-    }
-    else {
-      t.equal(result[param], value, `${msgs.correct} ${param}: ${value}`)
-    }
-  })
-}
-
 function rmPublic (t) {
   try {
     let publicFolder = join(process.cwd(), 'public')
@@ -219,7 +186,6 @@ module.exports = {
   shutdownAsync,
   checkHttpResult,
   checkRestResult,
-  checkDeprecatedResult,
   rmPublic,
   makeSideChannel,
 }

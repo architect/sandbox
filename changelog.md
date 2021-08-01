@@ -2,12 +2,25 @@
 
 ---
 
-## [3.7.x] 2021-xx-xx
+## [unreleased] 2021-xx-xx
 
+
+### Fixed
+
+- Fixed CLI when parsing larger port numbers (e.g. `--port 33333`); fixes #1023, thanks @filmaj + LumaKernel!
+
+---
+
+## [4.0.0 - 4.0.1] 2021-07-22
 
 ### Changed
 
-- Fix CLI to parse larger port numbers correctly.
+- Breaking change: removed support for Node.js 10.x (now EOL, and no longer available to create / update in AWS Lambda)
+- Breaking change: removed support for Architect 5 (and lower)
+  - This change in reality should not impact anyone, as Architect 5 LTS releases haven't used modern versions of Sandbox for quite some time
+- Breaking change: removed internal tables lookup at `/_asd`, deprecated in favor of Sandbox's proper internal service discovery
+- Removed deprecated `@sandbox startup` warning
+- Update and tidy up dependencies
 
 ---
 

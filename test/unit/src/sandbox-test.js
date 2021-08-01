@@ -112,7 +112,6 @@ let envVars = [
   'ARC_WSS_URL',
   'AWS_ACCESS_KEY_ID',
   'AWS_SECRET_ACCESS_KEY',
-  'DEPRECATED',
   'NODE_ENV',
   'PORT',
   'SESSION_TABLE_NAME'
@@ -136,7 +135,7 @@ test('Sandbox has correct env vars populated', async t => {
     cleanEnv(t)
     await sandbox.start({ cwd: join(mock, 'normal') })
     envVars.forEach(v => {
-      if (v === 'ARC_CLOUDFORMATION' || v === 'DEPRECATED')
+      if (v === 'ARC_CLOUDFORMATION')
         t.notOk(process.env[v], `${v} is not set`)
       else if (v !== 'ARC_QUIET')
         t.ok(process.env[v], `${v} present`)
@@ -157,9 +156,7 @@ test('Sandbox has correct env vars populated', async t => {
     process.env.NODE_ENV = 'staging'
     await sandbox.start()
     envVars.forEach(v => {
-      if (v === 'DEPRECATED')
-        t.notOk(process.env[v], `${v} is not set`)
-      else if (v !== 'ARC_QUIET')
+      if (v !== 'ARC_QUIET')
         t.ok(process.env[v], `${v} present`)
       else if (v === 'ARC_QUIET')
         t.equal(process.env[v], '', `${v} is falsy`)
@@ -178,77 +175,7 @@ test('Sandbox has correct env vars populated', async t => {
     process.env.NODE_ENV = 'production'
     await sandbox.start()
     envVars.forEach(v => {
-      if (v === 'DEPRECATED')
-        t.notOk(process.env[v], `${v} is not set`)
-      else if (v !== 'ARC_QUIET')
-        t.ok(process.env[v], `${v} present`)
-      else if (v === 'ARC_QUIET')
-        t.equal(process.env[v], '', `${v} is falsy`)
-    })
-    await sandbox.end()
-    await tiny.get({ url }) // Will fail; final test in catch block
-  }
-  catch (err) {
-    if (err) shutdown(t, err)
-    else t.fail(err)
-  }
-})
-
-test('Sandbox (Architect v5) has correct env vars populated', async t => {
-  let roundsOfTesting = 3
-  let tests = (roundsOfTesting * envVars.length) + (roundsOfTesting * 2)
-  t.plan(tests)
-
-  // Architect 5 (local)
-  try {
-    cleanEnv(t)
-    await sandbox.start({ cwd: join(mock, 'normal'), version: 'Architect 5.x' })
-    envVars.forEach(v => {
-      if (v === 'ARC_CLOUDFORMATION')
-        t.notOk(process.env[v], `${v} is not set`)
-      else if (v !== 'ARC_QUIET')
-        t.ok(process.env[v], `${v} present`)
-      else if (v === 'ARC_QUIET')
-        t.equal(process.env[v], '', `${v} is falsy`)
-    })
-    await sandbox.end()
-    await tiny.get({ url }) // Will fail; final test in catch block
-  }
-  catch (err) {
-    if (err) shutdown(t, err)
-    else t.fail(err)
-  }
-
-  // Architect 5 (staging)
-  try {
-    cleanEnv(t)
-    process.env.NODE_ENV = 'staging'
-    await sandbox.start({ version: 'Architect 5.x' })
-    envVars.forEach(v => {
-      if (v === 'ARC_CLOUDFORMATION')
-        t.notOk(process.env[v], `${v} is not set`)
-      else if (v !== 'ARC_QUIET')
-        t.ok(process.env[v], `${v} present`)
-      else if (v === 'ARC_QUIET')
-        t.equal(process.env[v], '', `${v} is falsy`)
-    })
-    await sandbox.end()
-    await tiny.get({ url }) // Will fail; final test in catch block
-  }
-  catch (err) {
-    if (err) shutdown(t, err)
-    else t.fail(err)
-  }
-
-  // Architect 5 (production)
-  try {
-    cleanEnv(t)
-    process.env.NODE_ENV = 'production'
-    await sandbox.start({ version: 'Architect 5.x' })
-    envVars.forEach(v => {
-      if (v === 'ARC_CLOUDFORMATION')
-        t.notOk(process.env[v], `${v} is not set`)
-      else if (v !== 'ARC_QUIET')
+      if (v !== 'ARC_QUIET')
         t.ok(process.env[v], `${v} present`)
       else if (v === 'ARC_QUIET')
         t.equal(process.env[v], '', `${v} is falsy`)

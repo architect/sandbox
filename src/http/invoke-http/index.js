@@ -1,7 +1,5 @@
 // REST APIs
-let requestFormatterDeprecated = require('./deprecated/_req-fmt')
 let requestFormatterRest = require('./rest/_req-fmt')
-let responseFormatterDeprecated = require('./deprecated/_res-fmt')
 let responseFormatterRest = require('./rest/_res-fmt')
 let responseValidatorRest = require('./rest/_res-validate')
 
@@ -22,16 +20,12 @@ module.exports = function invokeHTTP (params) {
   let { method, path } = lambda
 
   method = method.toUpperCase()
-  let deprecated = process.env.DEPRECATED
   let restApi = apiType === 'rest'
   let httpApiV1 = apiType === 'httpv1'
 
   return function respond (req, res) {
     let request
-    if (deprecated) {
-      request = requestFormatterDeprecated({ method, req })
-    }
-    else if (httpApiV1 || restApi) {
+    if (httpApiV1 || restApi) {
       request = requestFormatterRest({ method, path, req }, httpApiV1)
     }
     else {
@@ -52,20 +46,14 @@ module.exports = function invokeHTTP (params) {
       }
       else {
         // Totally separate out response validation paths to ensure type checks don't inadvertently blow everything up
-        let resty = deprecated || restApi || httpApiV1
+        let resty = restApi || httpApiV1
         if (resty) {
           let { body, valid } = responseValidatorRest({ res, result }, httpApiV1)
           if (!valid) {
             end(res, body)
           }
           else {
-            let body
-            if (deprecated) {
-              body = responseFormatterDeprecated({ res, result })
-            }
-            else {
-              body = responseFormatterRest({ res, result }, httpApiV1)
-            }
+            let body = responseFormatterRest({ res, result }, httpApiV1)
             end(res, body)
           }
         }

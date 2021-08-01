@@ -7,7 +7,6 @@ module.exports = function responseValidator ({ res, result }, httpApi) {
   let { statusCode, body, headers, multiValueHeaders, isBase64Encoded } = result
 
   let params = Object.getOwnPropertyNames(result)
-  let deprecated = process.env.DEPRECATED
   let validParams = [
     'statusCode',
     'body',
@@ -34,7 +33,7 @@ module.exports = function responseValidator ({ res, result }, httpApi) {
     let body = errors.isRawBuffer
     return invalid(res, body)
   }
-  if (body && (typeof body !== 'string' && typeof body !== 'number') && !deprecated) {
+  if (body && (typeof body !== 'string' && typeof body !== 'number')) {
     let body = errors.invalidType('body', 'String')
     return invalid(res, body)
   }
@@ -60,7 +59,7 @@ module.exports = function responseValidator ({ res, result }, httpApi) {
 
   // Check for invalid params
   let invalidParams = params.some(p => !validParams.includes(p))
-  if (invalidParams && !deprecated && !httpApi) {
+  if (invalidParams && !httpApi) {
     let body = errors.invalidParam(validParams) + `Recieved:<pre> ${JSON.stringify(result, null, 2)}</pre>`
     return invalid(res, body)
   }
