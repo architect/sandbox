@@ -2,6 +2,15 @@
 
 ---
 
+## [unreleased] 2021-xx-xx
+
+
+### Fixed
+
+- Fixed CLI when parsing larger port numbers (e.g. `--port 33333`); fixes #1023, thanks @filmaj + LumaKernel!
+
+---
+
 ## [4.0.0 - 4.0.1] 2021-07-22
 
 ### Changed
