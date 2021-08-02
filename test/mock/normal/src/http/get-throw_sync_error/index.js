@@ -1,3 +1,3 @@
 exports.handler = () => {
-  throw new Error('Hello from get throw sync error')
+  throw new Error('Hello from get /throw-sync-error')
 }

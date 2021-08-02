@@ -8,11 +8,13 @@
 ### Changed
 
 - Update dependencies; resolve breaking changes from `ws@8.0.0`
+- Improved invocation behavior for JS functions where non-async handlers returning a Promise should not fail, thanks @reconbot!
 
 
 ### Fixed
 
 - Fixed CLI when parsing larger port numbers (e.g. `--port 33333`); fixes #1023, thanks @filmaj + LumaKernel!
+- Fixed inconsistent error reporting, thanks @reconbot!
 
 ---
 

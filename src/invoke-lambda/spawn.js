@@ -168,7 +168,7 @@ module.exports = function spawnChild (params, callback) {
       else if (parsed) {
         // If it's an error pretty print it
         if (parsed.name && parsed.message && parsed.stack) {
-          const body = `${head}
+          let body = `${head}
           <h1>${parsed.name}</h1>
           <p>${parsed.message}</p>
           <pre>${parsed.stack}</pre>
