@@ -7,7 +7,8 @@ module.exports = function connection ({ cwd, inventory, update, domainName }, co
   // Save this for send to use
   pool.register(connectionId, ws)
 
-  ws.on('message', function message (msg) {
+  ws.on('message', function message (data, isBinary) {
+    let msg = isBinary ? data : data.toString()
     let lambda
     try {
       let payload = JSON.parse(msg)
