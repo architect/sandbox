@@ -5,6 +5,11 @@
 ## [unreleased] 2021-xx-xx
 
 
+### Changed
+
+- Update dependencies; resolve breaking changes from `ws@8.0.0`
+
+
 ### Fixed
 
 - Fixed CLI when parsing larger port numbers (e.g. `--port 33333`); fixes #1023, thanks @filmaj + LumaKernel!

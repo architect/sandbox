@@ -147,7 +147,15 @@ module.exports = function createHttpServer (inventory) {
           else callback()
         },
         function _webSocketEnd (callback) {
-          if (websocketServer) websocketServer.close(callback)
+          if (websocketServer) {
+            websocketServer.close(err => {
+              for (let ws of websocketServer.clients) {
+                ws.terminate()
+              }
+              if (err) callback(err)
+              else callback()
+            })
+          }
           else callback()
         },
         function _arcEnd (callback) {
