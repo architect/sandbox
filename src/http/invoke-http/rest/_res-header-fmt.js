@@ -15,7 +15,7 @@ module.exports = function responseHeaderFormatter (normalizedHeaders, httpApi) {
     drops.push('connection')
     for (let [ key, value ] of Object.entries(normalizedHeaders)) {
       key = key.toLowerCase()
-      if (drops.some(d => d === key)) continue
+      if (drops.includes(key)) continue
       headers[key] = value
     }
   }
@@ -38,8 +38,8 @@ module.exports = function responseHeaderFormatter (normalizedHeaders, httpApi) {
 
     for (let [ key, value ] of Object.entries(normalizedHeaders)) {
       key = key.toLowerCase()
-      if (drops.some(d => d === key)) continue
-      if (remapped.some(r => r === key)) {
+      if (drops.includes(key)) continue
+      if (remapped.includes(key)) {
         let remappedName = `x-amzn-remapped-${key}`
         headers[remappedName] = value
       }

@@ -50,15 +50,11 @@ module.exports = function populateEnv (params, callback) {
     }
 
     // Populate env vars
-    if (prefs.env && prefs.env[environment] && !setEnv) {
+    if (prefs?.env?.[environment] && !setEnv) {
       let proj = inv._project
-      let global =  proj.globalPreferences &&
-                    proj.globalPreferences.env &&
-                    proj.globalPreferences.env[environment] &&
+      let global =  proj?.globalPreferences?.env?.[environment] &&
                     `~${sep}${basename(proj.globalPreferencesFile)}`
-      let local =   proj.localPreferences &&
-                    proj.localPreferences.env &&
-                    proj.localPreferences.env[environment] &&
+      let local =   proj?.localPreferences?.env?.[environment] &&
                     basename(proj.localPreferencesFile)
       let filepath = local || global || null
       populate(prefs.env[environment])

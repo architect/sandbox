@@ -65,7 +65,7 @@ module.exports = function eventBusListener ({ cwd, inventory, update }, req, res
 
       let event = mock()
       invoke({ cwd, lambda, event, inventory, update }, function snap (err) {
-        if (err && err.message === 'lambda_not_found') {
+        if (err?.message === 'lambda_not_found') {
           update.warn(
             `@${arcType} ${name} missing Lambda handler file\n` +
             `Please create a handler file, or run [npx] arc init, or add 'autocreate true' to your project preferences file's '@create' pragma`

@@ -42,10 +42,10 @@ module.exports = function requestFormatter ({ name, req, body, connectionId, dom
     request.body = body
   }
   // Also, only $connect receives headers / query params, etc.
-  if (req && req.headers) {
+  if (req?.headers) {
     request.headers = req.headers
   }
-  if (req && req.url) {
+  if (req?.url) {
     let { query } = URL.parse(req.url, true)
     if (Object.keys(query).length) {
       request.queryStringParameters = query

@@ -28,7 +28,7 @@ module.exports = function upgrade (wss, { cwd, inventory, update, domainName }) 
       domainName,
     },
     function connect (err, res) {
-      let statusCode = res && res.statusCode
+      let statusCode = res?.statusCode
       if (err || !statusCode || typeof statusCode !== 'number') {
         update.verbose.status(`Error during WS upgrade (code: ${statusCode})`, JSON.stringify(err, null, 2), JSON.stringify(res, null, 2))
         socket.write(`HTTP/1.1 502 ${http.STATUS_CODES[502]}\r\n\r\n`)

@@ -9,7 +9,7 @@ module.exports = function invokeWebSocketEvent (params, callback) {
   let { name } = lambda
 
   // Only $connect + $disconnect WS invocations have headers
-  if (req && req.headers) {
+  if (req?.headers) {
     // Coerce API Gateway 'Cookie' from express 'cookie'
     req.headers.Cookie = req.headers.cookie
     delete req.headers.cookie

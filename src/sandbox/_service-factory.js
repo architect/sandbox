@@ -31,8 +31,8 @@ module.exports = function serviceFactory (params, type) {
       // Populate updater with passed options (if any)
       if (options.logLevel || options.quiet) {
         update = updater('Sandbox', {
-          logLevel: options && options.logLevel || logLevel,
-          quiet: options && options.quiet || quiet,
+          logLevel: options?.logLevel || logLevel,
+          quiet: options?.quiet || quiet,
         })
       }
 

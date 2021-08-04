@@ -9,10 +9,10 @@ module.exports = function initDynamoClient (callback) {
    * - Only AWS_SECRET_ACCESS_KEY + AWS_ACCESS_KEY_ID are technically required to mock Lambda
    */
   let creds = aws.config.credentials
-  if (!process.env.AWS_ACCESS_KEY_ID && creds && creds.accessKeyId) {
+  if (!process.env.AWS_ACCESS_KEY_ID && creds?.accessKeyId) {
     process.env.AWS_ACCESS_KEY_ID = creds.accessKeyId
   }
-  if (!process.env.AWS_SECRET_ACCESS_KEY && creds && creds.secretAccessKey) {
+  if (!process.env.AWS_SECRET_ACCESS_KEY && creds?.secretAccessKey) {
     process.env.AWS_SECRET_ACCESS_KEY = creds.secretAccessKey
   }
   if (!creds) {

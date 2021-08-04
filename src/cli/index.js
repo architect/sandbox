@@ -36,7 +36,7 @@ module.exports = function cli (params = {}, callback) {
     // Arc stuff
     let { inv } = inventory
     let manifest = inv._project.manifest
-    let staticFolder = inv.static && inv.static.folder
+    let staticFolder = inv?.static?.folder
 
     // Timers
     let lastEvent
