@@ -32,8 +32,8 @@ module.exports = function maybeHydrate ({ cwd, inventory }, callback) {
     // Make a new array, don't inventory
     let lambdaSrcDirs = [ ...inv.lambdaSrcDirs ]
 
-    let shared = inv.shared && inv.shared.src || join(cwd, 'src', 'shared')
-    let views = inv.views && inv.views.src || join(cwd, 'src', 'views')
+    let shared = inv?.shared?.src || join(cwd, 'src', 'shared')
+    let views = inv?.views?.src || join(cwd, 'src', 'views')
     lambdaSrcDirs.push(shared)
     lambdaSrcDirs.push(views)
 

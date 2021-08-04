@@ -94,12 +94,12 @@ module.exports = function invokeLambda (params, callback) {
         if (err) callback(err)
         else {
           let missing
-          if (result && result.__DEP_ISSUES__) {
+          if (result?.__DEP_ISSUES__) {
             missing = result.__DEP_ISSUES__
             delete result.__DEP_ISSUES__
           }
           // Dependency warning debugger - handy for introspection during Lambda execution
-          if (result && result.__DEP_DEBUG__) {
+          if (result?.__DEP_DEBUG__) {
             update.debug.status(`Lambda dependency tree: ${lambdaPath}`)
             update.debug.raw(serialize(result.__DEP_DEBUG__))
             delete result.__DEP_DEBUG__

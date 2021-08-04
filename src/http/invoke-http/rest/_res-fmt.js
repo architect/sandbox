@@ -23,7 +23,7 @@ module.exports = function responseFormatter ({ res, result }) {
       let header = h.toLowerCase()
       if (merged[header]) {
         // Don't set the same header multiple times
-        if (!merged[header].some(m => m === value)) {
+        if (!merged[header].includes(value)) {
           merged[header].push(value)
         }
       }
@@ -32,10 +32,10 @@ module.exports = function responseFormatter ({ res, result }) {
   }
 
   // Content type
-  let contentType = (multiValueHeaders && multiValueHeaders['content-type']) ||
-                    (multiValueHeaders && multiValueHeaders['Content-Type']) ||
-                    (headers && headers['content-type']) ||
-                    (headers && headers['Content-Type']) ||
+  let contentType = multiValueHeaders?.['content-type'] ||
+                    multiValueHeaders?.['Content-Type'] ||
+                    headers?.['content-type'] ||
+                    headers?.['Content-Type'] ||
                     'application/json; charset=utf-8'
   merged['content-type'] = merged['content-type']
     ? [ merged['content-type'][0] ]

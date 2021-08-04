@@ -41,7 +41,7 @@ module.exports = function _start (params, callback) {
 
     // Initialize any missing functions on startup
     function _init (callback) {
-      let autocreateEnabled = prefs && prefs.create && prefs.create.autocreate
+      let autocreateEnabled = prefs?.create?.autocreate
       if (autocreateEnabled) {
         create({ inventory }, callback)
       }
@@ -72,7 +72,7 @@ module.exports = function _start (params, callback) {
     function _plugins (callback) {
       if (inv._project.plugins) {
         let pluginServices = Object.values(inv._project.plugins).
-          map(pluginModule => pluginModule && pluginModule.sandbox ? pluginModule.sandbox.start : null).
+          map(pluginModule => pluginModule?.sandbox?.start || null).
           filter(start => start).
           map(start => {
             // To be compatible with run-series, we can't use async functions.

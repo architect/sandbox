@@ -37,8 +37,8 @@ function start (options, callback) {
   options.cwd = cwd = options.cwd || process.cwd()
 
   update = updater('Sandbox', {
-    logLevel: options && options.logLevel || logLevel,
-    quiet: options && options.quiet || quiet,
+    logLevel: options?.logLevel || logLevel,
+    quiet: options?.quiet || quiet,
   })
 
   // Set up promise if there's no callback

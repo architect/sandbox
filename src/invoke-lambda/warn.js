@@ -3,11 +3,12 @@
  */
 module.exports = function warn (params) {
   let { missing = [], inventory, src, update } = params
+  let { inv } = inventory
   if (missing.length) {
     let dirs = {
       lambda: src,
-      shared: inventory.inv.shared && inventory.inv.shared.src,
-      views: inventory.inv.views && inventory.inv.views.src,
+      shared: inv?.shared?.src,
+      views: inv?.views?.src,
     }
     let deps = {}
     missing.forEach(m => {

@@ -42,16 +42,16 @@ process.stdin.on('close', () => {
     let item = require.cache[mod];
     let loaded = item.loaded;
     let parent = item.parent;
-    let isSubDep = parent && parent.id.includes('node_modules');
+    let isSubDep = parent?.id?.includes('node_modules');
     let name = item.filename.split('node_modules')[1];
     if (!name || !loaded || isSubDep) return;
 
     /* Dependency load location predicates */
-    let loadedInsideShared = shared && parent && parent.filename.startsWith(shared.src);
-    let loadedInsideViews = views && parent && parent.filename.startsWith(views.src);
+    let loadedInsideShared = shared && parent?.filename?.startsWith(shared.src);
+    let loadedInsideViews = views && parent?.filename?.startsWith(views.src);
     let loadedInsideLambda = item.filename.startsWith(cwd);
     let rootPath = join(projectSrc, 'node_modules', name);
-    let loadedInsideRoot = require.cache[rootPath] && require.cache[rootPath].loaded === true;
+    let loadedInsideRoot = require.cache?.[rootPath]?.loaded === true;
 
     /* Final dep name */
     name = name.substr(1).split(sep);
@@ -81,7 +81,7 @@ process.stdin.on('close', () => {
 
     if (loadedInsideShared || loadedInsideViews) {
       if (lambdaPackage) {
-        if (lambdaPackage.dependencies && lambdaPackage.dependencies[name]) return;
+        if (lambdaPackage?.dependencies?.[name]) return;
         else return warn.lambda(name);
       }
     }

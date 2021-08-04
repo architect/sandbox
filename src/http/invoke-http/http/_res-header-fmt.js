@@ -18,7 +18,7 @@ module.exports = function responseHeaderFormatter (normalizedHeaders) {
 
   for (let [ key, value ] of Object.entries(normalizedHeaders)) {
     key = key.toLowerCase()
-    if (drops.some(d => d === key)) continue
+    if (drops.includes(key)) continue
     else headers[key] = value
   }
 

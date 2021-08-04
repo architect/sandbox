@@ -14,11 +14,11 @@ module.exports = function servicePopulator (inventory) {
       })
     }
     if (inv._project.plugins) {
-      const plugins = Object.keys(inv._project.plugins)
+      let plugins = Object.keys(inv._project.plugins)
       plugins.forEach(pluginName => {
-        const pluginModule = inv._project.plugins[pluginName]
-        if (pluginModule && pluginModule.variables) {
-          const pluginVars = pluginModule.variables({ arc: inv._project.arc, stage: 'testing', inventory })
+        let pluginModule = inv._project.plugins[pluginName]
+        if (pluginModule?.variables) {
+          let pluginVars = pluginModule.variables({ arc: inv._project.arc, stage: 'testing', inventory })
           services[pluginName] = pluginVars
         }
       })

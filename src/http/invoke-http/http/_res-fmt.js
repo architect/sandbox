@@ -43,7 +43,7 @@ module.exports = function responseFormatter ({ res, result }) {
 
   // Content type
   // Special because it gets a fallback
-  let contentType = headers && headers['content-type']
+  let contentType = headers?.['content-type']
   res.setHeader('content-type', contentType || 'text/plain; charset=utf-8')
 
   // Headers

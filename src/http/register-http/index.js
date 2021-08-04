@@ -14,7 +14,7 @@ module.exports = function reg (params) {
     if (apiType === 'rest') {
       let httpOnly = [ 'any', 'head', 'options' ]
       let hasCatchall = path.includes('*')
-      if (!httpOnly.some(h => h === method) && !hasCatchall) {
+      if (!httpOnly.includes(method) && !hasCatchall) {
         let exec = invoker({ cwd, lambda, apiType, inventory, update })
         app[method](path, exec)
       }
