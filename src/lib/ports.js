@@ -8,7 +8,7 @@ function getPorts (port) {
   let { PORT, ARC_EVENTS_PORT, ARC_TABLES_PORT, ARC_INTERNAL } = process.env
 
   // CLI config (which are passed to this fn) > env var config
-  let httpPort = port || Number(PORT) || 3333
+  let httpPort = Number(port) || Number(PORT) || 3333
   let eventsPort = Number(ARC_EVENTS_PORT) || httpPort + 1
   let tablesPort = Number(ARC_TABLES_PORT) || 5000
   let _arcPort = Number(ARC_INTERNAL) || httpPort - 1
