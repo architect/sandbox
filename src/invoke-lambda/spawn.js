@@ -54,44 +54,45 @@ module.exports = function spawnChild (params, callback) {
   // Ensure we don't have dangling processes due to open connections, etc.
   function maybeShutdown (event) {
     update.debug.status(`${functionPath} (pid ${pid}) shutting down (via ${event} event)`)
-    if (isRunning(pid) && !murderInProgress && !closed) {
-      update.debug.status(`${functionPath} (pid ${pid}) is still running, terminating now...`)
-      murderInProgress = true
-      let code = 0
-      if (error) {
-        update.error(`${functionPath} (pid ${pid}) caught hanging execution with an error, attempting to exit 1`)
-        code = 1
-      }
-      if (!isInLambda) {
-        kill(pid, SIG, () => {
-          murderInProgress = false
-          update.debug.status(`${functionPath} (pid ${pid}) successfully terminated`)
-          if (!closed) done(code)
-        })
-      }
-      else {
-        // tree-kill relies on *nix `ps`, which Lambda doesn't have – but it does have /proc
-        // Node process.kill() + Lambda Linux /proc/<pid>/task/<tid> is mysterious, so this may not be the best or proper approach
-        try {
-          let tasks = readdirSync(`/proc/${pid}/task`)
-          tasks.forEach(tid => {
-            try { process.kill(tid) }
-            catch (err) {
-              // Task may have ended naturally or been killed by killing child.pid, I guess we don't really know
-              update.debug.status(`${functionPath} (pid ${pid}) did not kill task (tid ${tid})`)
-            }
-          })
-          update.debug.status(`${functionPath} (pid ${pid}) (possibly maybe) successfully terminated inside Lambda`)
-        }
-        catch (err) {
-          update.debug.status(`${functionPath} (pid ${pid}) failed to terminate inside Lambda: ${err.message}`)
-        }
-        murderInProgress = false
-        if (!closed) done(code)
-      }
+    if (!isRunning(pid) || murderInProgress || closed) {
+      return update.debug.status(`${functionPath} (pid ${pid}) is not running (termination in progress: ${murderInProgress}; process closed: ${closed}`)
     }
-    else {
-      update.debug.status(`${functionPath} (pid ${pid}) is not running (termination in progress: ${murderInProgress}; process closed: ${closed}`)
+    update.debug.status(`${functionPath} (pid ${pid}) is still running, terminating now...`)
+    murderInProgress = true
+    let code = 0
+    if (error) {
+      update.error(`${functionPath} (pid ${pid}) caught hanging execution with an error, attempting to exit 1`)
+      code = 1
+    }
+    if (!isInLambda) {
+      kill(pid, SIG, () => {
+        murderInProgress = false
+        update.debug.status(`${functionPath} (pid ${pid}) successfully terminated`)
+        if (!closed) {
+          done(code)
+        }
+      })
+      return
+    }
+    // tree-kill relies on *nix `ps`, which Lambda doesn't have – but it does have /proc
+    // Node process.kill() + Lambda Linux /proc/<pid>/task/<tid> is mysterious, so this may not be the best or proper approach
+    try {
+      let tasks = readdirSync(`/proc/${pid}/task`)
+      tasks.forEach(tid => {
+        try { process.kill(tid) }
+        catch (err) {
+          // Task may have ended naturally or been killed by killing child.pid, I guess we don't really know
+          update.debug.status(`${functionPath} (pid ${pid}) did not kill task (tid ${tid})`)
+        }
+      })
+      update.debug.status(`${functionPath} (pid ${pid}) (possibly maybe) successfully terminated inside Lambda`)
+    }
+    catch (err) {
+      update.debug.status(`${functionPath} (pid ${pid}) failed to terminate inside Lambda: ${err.message}`)
+    }
+    murderInProgress = false
+    if (!closed) {
+      done(code)
     }
   }
 
@@ -145,15 +146,15 @@ module.exports = function spawnChild (params, callback) {
 
     clearTimeout(to) // ensure the timeout doesn't block
     if (timedout) {
-      callback(null, {
+      return callback(null, {
         statusCode: 500,
         headers,
         body: `${head}<h1>Timeout Error</h1>
         <p>Lambda <code>${functionPath}</code> timed out after <b>${timeout / 1000} seconds</b></p>`
       })
     }
-    else if (error) {
-      callback(null, {
+    if (error) {
+      return callback(null, {
         statusCode: 502,
         headers,
         body: `${head}<h1>Requested function is missing or not defined, or unknown error</h1>
@@ -161,11 +162,11 @@ module.exports = function spawnChild (params, callback) {
         `
       })
     }
-    else if (code === 0 || returned) {
+    if (code === 0 || returned) {
       if (!returned && apiType === 'http') {
-        callback()
+        return callback()
       }
-      else if (parsed) {
+      if (parsed) {
         // If it's an error pretty print it
         if (parsed.name && parsed.message && parsed.stack) {
           let body = `${head}
@@ -180,13 +181,13 @@ module.exports = function spawnChild (params, callback) {
           })
         }
         // otherwise just return the command line
-        callback(null, parsed)
+        return callback(null, parsed)
       }
-      else {
-        callback(null, {
-          statusCode: 500,
-          headers,
-          body: `${head}<h1>Async error</h1>
+
+      return callback(null, {
+        statusCode: 500,
+        headers,
+        body: `${head}<h1>Async error</h1>
 <p><strong>Lambda <code>${functionPath}</code> ran without executing the completion callback or returning a value.</strong></p>
 
 <p>Dependency-free functions, or functions that use <code>@architect/functions arc.http.async()</code> must return a correctly formatted response object.</p>
@@ -195,19 +196,16 @@ module.exports = function spawnChild (params, callback) {
 
 <p>Learn more about <a href="https://arc.codes/primitives/http">dependency-free responses</a>, or about using <code><a href="https://arc.codes/reference/functions/http/node/classic">arc.http()</a></code> and <code><a href="https://arc.codes/reference/functions/http/node/async">arc.http.async()</a></code></p>.
           `
-        })
-      }
+      })
     }
-    else {
-      callback(null, {
-        statusCode: 500,
-        headers,
-        body: `${head}<h1>Error</h1>
+    return callback(null, {
+      statusCode: 500,
+      headers,
+      body: `${head}<h1>Error</h1>
         <p>Process exited with ${code}<p>
         <pre>${stdout}</pre>
         <pre>${stderr}</pre>`
-      })
-    }
+    })
   }
 
   child.stdout.on('data', data => {
