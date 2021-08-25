@@ -16,4 +16,8 @@ module.exports = {
     delete ledger[connectionId]
     delete times[connectionId]
   },
+  reset () {
+    ledger = {}
+    times = {}
+  }
 }
