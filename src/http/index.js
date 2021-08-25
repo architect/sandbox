@@ -16,6 +16,7 @@ let hydrate = require('@architect/hydrate')
 let registerHTTP = require('./register-http')
 let registerWS = require('./register-websocket')
 let prettyPrint = require('./_pretty-print')
+let pool = require('./register-websocket/pool')
 
 /**
  * Creates an HTTP + WebSocket server that emulates API Gateway
@@ -150,8 +151,10 @@ module.exports = function createHttpServer (inventory) {
           if (websocketServer) {
             websocketServer.close(err => {
               for (let ws of websocketServer.clients) {
+                ws.removeAllListeners('close')
                 ws.terminate()
               }
+              pool.reset()
               if (err) callback(err)
               else callback()
             })
