@@ -25,7 +25,14 @@ module.exports = function cli (params = {}, callback) {
 
     let watcher
     try {
-      watcher = watch(process.cwd(), { recursive: true })
+      watcher = watch(process.cwd(), {
+        recursive: true,
+        filter (file, skip) {
+          // Ignore changes to any node_modules dir + .git
+          if (/\/node_modules/.test(file) || /\.git/.test(file)) return skip
+          return true
+        }
+      })
     }
     catch (e) {
       update.warn('Automatic rehydration watcher failed: system file watcher limit may have been reached')
