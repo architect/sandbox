@@ -2,8 +2,7 @@
 
 ---
 
-## [unreleased] 2021-xx-xx
-
+## [4.0.2] 2021-09-05
 
 ### Changed
 
@@ -15,6 +14,7 @@
 
 - Fixed CLI when parsing larger port numbers (e.g. `--port 33333`); fixes #1023, thanks @filmaj + LumaKernel!
 - Fixed inconsistent error reporting, thanks @reconbot!
+- Disable filesystem watching of node_modules and .git by default; fixes #1213
 
 ---
 
