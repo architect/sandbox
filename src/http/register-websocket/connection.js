@@ -7,6 +7,12 @@ module.exports = function connection ({ cwd, inventory, update, domainName }, co
   // Save this for send to use
   pool.register(connectionId, ws)
 
+  const respondToError = (err, resp) => {
+    if (err || resp && resp.statusCode >= 400) {
+      ws.send(JSON.stringify({ 'message': 'Internal server error', connectionId, 'requestId': 'xxxxxx=' }), noop)
+    }
+  }
+
   ws.on('message', function message (data, isBinary) {
     let msg = isBinary ? data : data.toString()
     let lambda
@@ -27,7 +33,7 @@ module.exports = function connection ({ cwd, inventory, update, domainName }, co
         update,
         connectionId,
         domainName,
-      }, noop)
+      }, respondToError)
     }
     else {
       let lambda = get.ws('default')
@@ -40,7 +46,7 @@ module.exports = function connection ({ cwd, inventory, update, domainName }, co
         update,
         connectionId,
         domainName,
-      }, noop)
+      }, respondToError)
     }
   })
 
