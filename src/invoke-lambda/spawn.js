@@ -54,9 +54,12 @@ module.exports = function spawnChild (params, callback) {
   // Ensure we don't have dangling processes due to open connections, etc.
   function maybeShutdown (event) {
     update.debug.status(`${functionPath} (pid ${pid}) shutting down (via ${event} event)`)
+
+    // Exit early if process isn't running, or we've already (started to) shut down
     if (!isRunning(pid) || murderInProgress || closed) {
       return update.debug.status(`${functionPath} (pid ${pid}) is not running (termination in progress: ${murderInProgress}; process closed: ${closed}`)
     }
+
     update.debug.status(`${functionPath} (pid ${pid}) is still running, terminating now...`)
     murderInProgress = true
     let code = 0

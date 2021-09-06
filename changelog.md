@@ -8,6 +8,7 @@
 
 - Update dependencies; resolve breaking changes from `ws@8.0.0`
 - Improved invocation behavior for JS functions where non-async handlers returning a Promise should not fail, thanks @reconbot!
+- Improved WebSocket behavior when responding with !`200`; messages now respond with an error message instead of failing silently, thanks @reconbot!
 
 
 ### Fixed
@@ -15,6 +16,7 @@
 - Fixed CLI when parsing larger port numbers (e.g. `--port 33333`); fixes #1023, thanks @filmaj + LumaKernel!
 - Fixed inconsistent error reporting, thanks @reconbot!
 - Disable filesystem watching of node_modules and .git by default; fixes #1213
+- Fixed WebSocket disconnect firing when Sandbox shuts down, thanks @reconbot!
 
 ---
 
