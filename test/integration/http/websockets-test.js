@@ -37,7 +37,7 @@ let sendMessage = payload => {
 let nextEvent = async t => {
   let request = await _events.nextRequest()
   t.pass('Got next WebSocket request')
-  console.log(request)
+  // console.log(request)
   return request
 }
 
@@ -198,6 +198,32 @@ test('[WebSockets] Connect, send payloads (custom filepath), disconnect', async 
   let messageEvent = await nextEvent(t)
   expectFunctionBasics(t, messageEvent, 'custom')
   expectPayload(t, messageEvent, payload)
+
+  await closeWebSocket(t)
+  await nextEvent(t) // ignore disconnect event but wait for it so the lambda doesn't error
+})
+
+test('[WebSockets] Connect, send payloads (errors), disconnect', async t => {
+  t.plan(12)
+  await startupAndConnect()
+  await nextEvent(t) // ignore connect event
+
+  const payload = {
+    action: 'error',
+    message: 'error',
+  }
+
+  let errorPromise = new Promise(resolve => _ws.on('message', resolve))
+  sendMessage(payload)
+
+  let messageEvent = await nextEvent(t)
+  expectFunctionBasics(t, messageEvent, 'error')
+  expectPayload(t, messageEvent, payload)
+
+  const errorMessage = JSON.parse(await errorPromise)
+  t.equal(errorMessage.message, 'Internal server error', 'Got error message')
+  t.ok(errorMessage.connectionId, 'Got connectionId')
+  t.ok(errorMessage.requestId, 'Got requestId')
 
   await closeWebSocket(t)
   await nextEvent(t) // ignore disconnect event but wait for it so the lambda doesn't error
