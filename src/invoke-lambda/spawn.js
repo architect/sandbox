@@ -112,6 +112,7 @@ module.exports = function spawnChild (params, callback) {
     // Only ever run once per execution
     if (closed) return
     closed = true
+    update.debug.status('Raw output:', stdout)
     // Output any console logging from the child process
     let tidy = stdout.toString()
       .split('\n')

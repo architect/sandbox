@@ -19,19 +19,21 @@ let found = false;
 let method = 'handler';
 let handler;
 
-for (let path of paths) {
-  found = await exists(path);
-  if (found) {
-    let mod = await import(`file://${path}`);
-    handler = mod[method];
-    if (typeof handler != "function") {
-      found = false;
-    }
-    else {
-      break;
+(async () => {
+  for (let path of paths) {
+    found = await exists(path);
+    if (found) {
+      let mod = await import(`file://${path}`);
+      handler = mod[method];
+      if (typeof handler != "function") {
+        found = false;
+      }
+      else {
+        break;
+      }
     }
   }
-}
+})();
 
 function callback(err, result) {
   if (err) console.log(err);
