@@ -3,7 +3,8 @@ let { EventEmitter } = require('events')
 let proxyquire = require('proxyquire')
 let params = null
 let listener = proxyquire('../../../../src/arc/_listener', {
-  './_ssm': (ps, req, res) => { params = ps; res.end() }
+  './_ssm': (ps, req, res) => { params = ps; params.service = 'ssm'; res.end() },
+  './_ws': (ps, req, res) => { params = ps; params.service = 'ws'; res.end() }
 })
 let req
 let res
@@ -13,14 +14,7 @@ function reset (t) {
   params = null
 }
 
-test('ssm listener returns 404 for non-POST requests', t => {
-  t.plan(2)
-  reset(t)
-  req.method = 'GET'
-  listener({}, req, res)
-  t.equals(res.statusCode, 404, 'HTTP response status code set to 404')
-})
-test('ssm listener returns 404 for POST requests to paths other than /_arc/ssm', t => {
+test('_arc listener returns 404 for POST requests to bad urls', t => {
   t.plan(2)
   reset(t)
   req.method = 'POST'
@@ -29,8 +23,9 @@ test('ssm listener returns 404 for POST requests to paths other than /_arc/ssm',
   req.emit('end')
   t.equals(res.statusCode, 404, 'HTTP response status code set to 404')
 })
-test('ssm listener passes request body to SSM service module for POST requests to /_arc/ssm', t => {
-  t.plan(2)
+
+test('_arc listener passes request body to SSM service module for POST requests to /_arc/ssm', t => {
+  t.plan(3)
   reset(t)
   req.method = 'POST'
   req.url = '/_arc/ssm'
@@ -38,4 +33,17 @@ test('ssm listener passes request body to SSM service module for POST requests t
   req.emit('data', { toString: () => 'somedata' })
   req.emit('end')
   t.equals(params.body, 'somedata', 'HTTP request body passed to ssm server module')
+  t.equals(params.service, 'ssm', 'HTTP request body passed to ssm server module')
+})
+
+test('_arc listener passes request body to WS service module for POST requests to /_arc/ws', t => {
+  t.plan(3)
+  reset(t)
+  req.method = 'POST'
+  req.url = '/_arc/ws'
+  listener({}, req, res)
+  req.emit('data', { toString: () => 'somedata' })
+  req.emit('end')
+  t.equals(params.body, 'somedata', 'HTTP request body passed to ssm server module')
+  t.equals(params.service, 'ws', 'HTTP request body passed to ssm server module')
 })

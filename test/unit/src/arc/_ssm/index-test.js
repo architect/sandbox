@@ -10,6 +10,7 @@ let resBody
 function reset (t) {
   resBody = null
   req = new EventEmitter()
+  req.method = 'POST'
   res = {
     end: (body) => {
       resBody = body
@@ -23,7 +24,7 @@ test('ssm module should return 400 if request body is not JSON', t => {
   t.plan(2)
   reset(t)
   ssm({ body: '{not-json', inventory: { inv: {} } }, req, res)
-  t.equals(res.statusCode, 400, 'response statuscode set to 400')
+  t.equals(res.statusCode, 400, 'response statusCode not set to 400')
 })
 
 test('ssm module should return JSON containing all parameters for a stack if only stack specified', t => {
