@@ -3,6 +3,12 @@ let services = require('./_services')
 module.exports = function _ssm (params, req, res) {
   let { body, inventory } = params
 
+  if (req.method !== 'POST') {
+    res.statusCode = 404
+    res.end()
+    return
+  }
+
   // Populate services: a rare inv mutation, necessary because this is an artifact of the current inventory
   services(inventory)
   let { _serviceDiscovery } = inventory.inv
