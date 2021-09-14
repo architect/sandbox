@@ -6,6 +6,7 @@ let runInNode = require('./run-in-node')
 let runInDeno = require('./run-in-deno')
 let runInPython = require('./run-in-python')
 let runInRuby = require('./run-in-ruby')
+let runInPhp = require('./run-in-php')
 
 let warn = require('./warn')
 let missingRuntime = require('./missing-runtime')
@@ -80,6 +81,7 @@ module.exports = function invokeLambda (params, callback) {
       if (runtime.startsWith('deno'))   exec = runInDeno
       if (runtime.startsWith('python')) exec = runInPython
       if (runtime.startsWith('ruby'))   exec = runInRuby
+      if (runtime.startsWith('php'))    exec = runInPhp
 
       if (!exec) {
         missingRuntime({ cwd, runtime, src, update })
@@ -118,6 +120,17 @@ function hasHandler (lambda) {
   // We don't need to do a handlerFile check if it's an ASAP / Arc 6 greedy root req
   if (_proxy) return true
   let { runtime } = lambda.config
+  if (runtime === 'php') {
+    let found = false
+    let paths = [
+      join(src, 'index.php')
+    ]
+    paths.forEach(p => {
+      if (found) return
+      if (existsSync(p)) found = p
+    })
+    return found
+  }
   if (runtime === 'deno') {
     let found = false
     let paths = [
