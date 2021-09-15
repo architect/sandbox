@@ -2,6 +2,16 @@
 
 ---
 
+## [4.0.3] 2021-09-14
+
+
+### Changed
+
+- Internal: Updated Architect Parser to v5
+- Updated dependencies
+
+---
+
 ## [4.0.2] 2021-09-05
 
 ### Changed
