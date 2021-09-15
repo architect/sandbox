@@ -19,7 +19,7 @@ let found = false;
 let method = 'handler';
 let handler;
 
-(async () => {
+async function getHandler () {
   for (let path of paths) {
     found = await exists(path);
     if (found) {
@@ -33,7 +33,8 @@ let handler;
       }
     }
   }
-})();
+}
+await getHandler();
 
 function callback(err, result) {
   if (err) console.log(err);
