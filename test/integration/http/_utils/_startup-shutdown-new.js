@@ -21,6 +21,7 @@ let verifyShutdown = (t, type) => {
 
 let startup = {
   module: (t, mockDir) => {
+    t.plan(2)
     sandbox.start({
       cwd: join(mock, mockDir),
       quiet,
@@ -33,8 +34,8 @@ let startup = {
     })
   },
   binary: (t, mockDir) => {
+    t.plan(2)
     if (child) throw Error('Unclean test env, found hanging child process!')
-
     let cwd = join(mock, mockDir)
     child = spawn(`${process.cwd()}/bin/sandbox-binary`, [], { cwd })
     t.ok(child, 'Sandbox child process started')
@@ -56,7 +57,8 @@ let startup = {
 }
 
 let shutdown = {
-  module: t => {
+  module: (t, setPlan = true) => {
+    if (setPlan) t.plan(1)
     sandbox.end((err, result) => {
       if (err) t.fail(err)
       if (result !== 'Sandbox successfully shut down') {
@@ -65,7 +67,8 @@ let shutdown = {
       verifyShutdown(t, 'module')
     })
   },
-  binary: t => {
+  binary: (t, setPlan = true) => {
+    if (setPlan) t.plan(1)
     child.kill('SIGINT')
     child = undefined
     verifyShutdown(t, 'binary')
@@ -89,7 +92,7 @@ let teardown = {
     t.notOk(process.env.ARC_QUIET, 'ARC_QUIET not set')
     delete process.env.ARC_API_TYPE
     t.notOk(process.env.ARC_API_TYPE, 'ARC_API_TYPE not set')
-    shutdown.module(t)
+    shutdown.module(t, false)
   },
   binary: t => {
     t.plan(3)
@@ -97,7 +100,7 @@ let teardown = {
     t.notOk(process.env.ARC_QUIET, 'ARC_QUIET not set')
     delete process.env.ARC_API_TYPE
     t.notOk(process.env.ARC_API_TYPE, 'ARC_API_TYPE not set')
-    shutdown.binary(t)
+    shutdown.binary(t, false)
   }
 }
 

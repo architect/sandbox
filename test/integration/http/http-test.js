@@ -27,7 +27,6 @@ test('Binary', t => {
 
 function runTests (runType) {
   test(`[HTTP mode] Start Sandbox (${runType})`, t => {
-    t.plan(2)
     process.env.ARC_API_TYPE = 'http'
     startup[runType](t, 'normal')
   })
@@ -938,7 +937,6 @@ function runTests (runType) {
   })
 
   test(`[HTTP mode] Shut down Sandbox (${runType})`, t => {
-    t.plan(1)
     shutdown[runType](t)
   })
 
@@ -946,7 +944,6 @@ function runTests (runType) {
    * Arc v6: test failing to load index.html without get / defined
    */
   test(`[HTTP mode] Start Sandbox (${runType})`, t => {
-    t.plan(2)
     startup[runType](t, 'no-index-fail')
   })
 
@@ -962,7 +959,6 @@ function runTests (runType) {
   })
 
   test(`[HTTP mode] Shut down Sandbox (${runType})`, t => {
-    t.plan(1)
     shutdown[runType](t)
   })
 
@@ -970,7 +966,6 @@ function runTests (runType) {
    * Arc v6: test successfully loading index.html without get / defined
    */
   test(`[HTTP mode] Start Sandbox (${runType})`, t => {
-    t.plan(2)
     startup[runType](t, 'no-index-pass')
   })
 
@@ -989,7 +984,6 @@ function runTests (runType) {
   })
 
   test(`[HTTP mode] Shut down Sandbox (${runType})`, t => {
-    t.plan(1)
     shutdown[runType](t)
   })
 
@@ -997,7 +991,6 @@ function runTests (runType) {
    * Arc v6: test failing to load an endpoint missing its local handler file
    */
   test(`[HTTP mode] Start Sandbox (${runType})`, t => {
-    t.plan(2)
     startup[runType](t, 'missing-handler')
   })
 
@@ -1015,7 +1008,6 @@ function runTests (runType) {
   })
 
   test(`[HTTP mode] Shut down Sandbox (${runType})`, t => {
-    t.plan(1)
     shutdown[runType](t)
   })
 
@@ -1023,7 +1015,6 @@ function runTests (runType) {
    * Test to ensure sandbox loads without defining @http
    */
   test(`[HTTP mode] Start Sandbox (${runType})`, t => {
-    t.plan(2)
     startup[runType](t, 'no-http')
   })
 
