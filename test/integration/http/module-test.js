@@ -3,8 +3,9 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let { http } = require(sut)
-let { url, verifyShutdown } = require('./_utils')
+let { url, verifyShutdownNew } = require('./_utils')
 let mock = join(process.cwd(), 'test', 'mock')
+let name = 'HTTP module'
 
 test('Set up env', t => {
   t.plan(1)
@@ -38,16 +39,11 @@ test('get /', t => {
 })
 
 test('Sync http.end', t => {
-  t.plan(1)
+  t.plan(2)
   http.end((err, result) => {
     if (err) t.fail(err)
-    if (result !== 'HTTP successfully shut down') {
-      t.fail('Did not get back HTTP shutdown message')
-    }
-    tiny.get({ url }, err => {
-      if (err) verifyShutdown(t, err)
-      else t.fail('http did not shut down')
-    })
+    t.equal(result, 'HTTP successfully shut down', 'HTTP ended')
+    verifyShutdownNew(t, name)
   })
 })
 
@@ -88,10 +84,7 @@ test('Async http.end', async t => {
 
 test('Teardown', t => {
   t.plan(2)
-  tiny.get({ url }, err => {
-    if (err) verifyShutdown(t, err)
-    else t.fail('Sandbox did not shut down')
-  })
+  verifyShutdownNew(t, name)
   delete process.env.ARC_API_TYPE
   t.notOk(process.env.ARC_API_TYPE, 'API type NOT set')
 })
