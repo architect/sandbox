@@ -21,7 +21,7 @@ let serialize = i => chalk.dim(JSON.stringify(i, null, 2))
  * @param {function} callback - node style errback
  */
 module.exports = function invokeLambda (params, callback) {
-  let { cwd, lambda, event, inventory, update } = params
+  let { apiType, cwd, lambda, event, inventory, update } = params
   // handlerFile is defined for all non-ASAP functions; ASAP bypasses this check
   if (!hasHandler(lambda)) {
     callback(Error('lambda_not_found'))
@@ -77,7 +77,7 @@ module.exports = function invokeLambda (params, callback) {
       if (chonky) update.verbose.status('Truncated event payload log at 10KB')
 
       // ASAP fallback does not apply to REST APIs
-      let notRest = process.env.ARC_API_TYPE !== 'rest'
+      let notRest = apiType !== 'rest'
       let exec
       if (runtime.startsWith('nodejs')) exec = runInNode
       if (runtime.startsWith('deno'))   exec = runInDeno
@@ -89,6 +89,7 @@ module.exports = function invokeLambda (params, callback) {
         return callback('Missing runtime')
       }
       exec({
+        apiType,
         options,
         request,
         timeout: timeout * 1000,

@@ -5,7 +5,7 @@ let { getPorts } = require('../lib')
 /**
  * Pretty print @http + @ws routes
  */
-module.exports = function prettyPrint ({ cwd, inventory, port, update }) {
+module.exports = function prettyPrint ({ apiType, cwd, inventory, port, update }) {
   let { http, ws } = inventory.inv
 
   let padL = str => str.padStart(7)
@@ -14,7 +14,6 @@ module.exports = function prettyPrint ({ cwd, inventory, port, update }) {
 
   if (http) {
     let folder = `${inventory.inv.static.folder}${sep}`
-    let apiType = process.env.ARC_API_TYPE
     let msgs = {
       rest: 'REST API mode / Lambda proxy',
       http: 'HTTP API mode / Lambda proxy v2.0 format',

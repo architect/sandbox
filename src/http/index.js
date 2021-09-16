@@ -37,11 +37,11 @@ module.exports = function createHttpServer (inventory) {
     app.start = function start (options, callback) {
       let { all, cwd, port, symlink = true, update } = options
 
-      middleware(app, { cwd, inventory, update })
-
       // Set up ports and HTTP-specific env vars
       let { httpPort } = getPorts(port)
-      httpEnv(arc, cwd)
+      let { apiType } = httpEnv(arc, cwd)
+
+      middleware(app, { apiType, cwd, inventory, update })
 
       series([
         // Set up Arc + userland env vars
@@ -92,7 +92,7 @@ module.exports = function createHttpServer (inventory) {
           }
 
           if (inv.http) {
-            registerHTTP({ app, cwd, routes: inv.http, inventory, update })
+            registerHTTP({ app, apiType, cwd, routes: inv.http, inventory, update })
           }
 
           callback()
@@ -126,7 +126,7 @@ module.exports = function createHttpServer (inventory) {
         // Pretty print routes
         function _printRoutes (callback) {
           if (!all) {
-            prettyPrint({ cwd, inventory, port, update })
+            prettyPrint({ apiType, cwd, inventory, port, update })
             callback()
           }
           else callback()

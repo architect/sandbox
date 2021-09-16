@@ -6,7 +6,7 @@ let { head } = template
 const SIG = 'SIGINT'
 
 module.exports = function spawnChild (params, callback) {
-  let { cwd, command, args, options, request, timeout, update } = params
+  let { apiType, cwd, command, args, options, request, timeout, update } = params
   let functionPath = options.cwd.replace(cwd, '').substr(1)
   let isInLambda = process.env.AWS_LAMBDA_FUNCTION_NAME
   let timedout = false
@@ -133,7 +133,6 @@ module.exports = function spawnChild (params, callback) {
     let command = line => line.startsWith('__ARC__')
     let result = stdout.split('\n').find(command)
     let returned = result && result !== '__ARC__ undefined __ARC_END__'
-    let apiType = process.env.ARC_API_TYPE
     let parsed
     if (returned) {
       let raw = result

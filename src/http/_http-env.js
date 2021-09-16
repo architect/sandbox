@@ -12,4 +12,6 @@ module.exports = function config (arc, cwd) {
   let staticFolder = tuple => tuple[0] === 'folder'
   let folder = arc?.static?.find(staticFolder)?.[1] || 'public'
   process.env.ARC_SANDBOX_PATH_TO_STATIC = join(cwd, folder)
+
+  return { apiType: process.env.ARC_API_TYPE }
 }

@@ -1,8 +1,7 @@
 /**
  * Emulates our API Gateway binary → base64 handling
  */
-module.exports = function binary (req, res, next) {
-  let apiType = process.env.ARC_API_TYPE
+module.exports = function binary ({ apiType }, req, res, next) {
   let { headers } = req
 
   function isJson () {

@@ -1,9 +1,7 @@
 let invoker = require('../invoke-http')
 
 module.exports = function reg (params) {
-  let { app, cwd, routes, inventory, update } = params
-
-  let apiType = process.env.ARC_API_TYPE
+  let { app, apiType, cwd, routes, inventory, update } = params
 
   routes.forEach(lambda => {
     // ASAP handled by middleware

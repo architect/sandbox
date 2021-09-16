@@ -1,4 +1,4 @@
-let binaryHandler = require('../../../../../src/http/middleware/_binary-handler')
+let _binaryHandler = require('../../../../../src/http/middleware/_binary-handler')
 let { EventEmitter: events } = require('events')
 let { Readable } = require('stream')
 let test = require('tape')
@@ -6,16 +6,11 @@ let dec = i => new Buffer.from(i, 'base64').toString()
 
 test('Set up env', t => {
   t.plan(1)
-  t.ok(binaryHandler, 'Got binary handler')
+  t.ok(_binaryHandler, 'Got binary handler')
 })
-
-function teardown () {
-  delete process.env.ARC_API_TYPE
-}
 
 test('Arc v6 (HTTP): base64 encode body & flag', t => {
   t.plan(3)
-  process.env.ARC_API_TYPE = 'http'
   let body = 'hi there'
   let e = new events()
   let stream = new Readable()
@@ -23,6 +18,7 @@ test('Arc v6 (HTTP): base64 encode body & flag', t => {
   stream.body = ''
   stream.push(body)
   stream.push(null)
+  let binaryHandler = _binaryHandler.bind({}, { apiType: 'http' })
   e.addListener('data', binaryHandler)
   e.emit('data', stream, {}, () => {
     let result = stream.body
@@ -30,12 +26,10 @@ test('Arc v6 (HTTP): base64 encode body & flag', t => {
     t.equal(dec(result), body, 'Decoded body matches request')
     t.ok(stream.isBase64Encoded, 'isBase64Encoded param set')
   })
-  teardown()
 })
 
 test('Arc v6 (HTTP): do not encode JSON', t => {
   t.plan(3)
-  process.env.ARC_API_TYPE = 'http'
   let body = 'hi there'
   let e = new events()
   let stream = new Readable()
@@ -43,6 +37,7 @@ test('Arc v6 (HTTP): do not encode JSON', t => {
   stream.body = ''
   stream.push(body)
   stream.push(null)
+  let binaryHandler = _binaryHandler.bind({}, { apiType: 'http' })
   e.addListener('data', binaryHandler)
   e.emit('data', stream, {}, () => {
     let result = stream.body
@@ -50,12 +45,10 @@ test('Arc v6 (HTTP): do not encode JSON', t => {
     t.equal(result, body, 'Body matches request')
     t.equal(stream.isBase64Encoded, false, 'isBase64Encoded param not set')
   })
-  teardown()
 })
 
 test('Arc v6 (HTTP): do not encode vendored JSON', t => {
   t.plan(3)
-  process.env.ARC_API_TYPE = 'http'
   let body = 'hi there'
   let e = new events()
   let stream = new Readable()
@@ -63,6 +56,7 @@ test('Arc v6 (HTTP): do not encode vendored JSON', t => {
   stream.body = ''
   stream.push(body)
   stream.push(null)
+  let binaryHandler = _binaryHandler.bind({}, { apiType: 'http' })
   e.addListener('data', binaryHandler)
   e.emit('data', stream, {}, () => {
     let result = stream.body
@@ -70,7 +64,6 @@ test('Arc v6 (HTTP): do not encode vendored JSON', t => {
     t.equal(result, body, 'Body matches request')
     t.equal(stream.isBase64Encoded, false, 'isBase64Encoded param not set')
   })
-  teardown()
 })
 
 test('Arc v6 (REST): base64 encode body & flag', t => {
@@ -82,6 +75,7 @@ test('Arc v6 (REST): base64 encode body & flag', t => {
   stream.body = ''
   stream.push(body)
   stream.push(null)
+  let binaryHandler = _binaryHandler.bind({}, {})
   e.addListener('data', binaryHandler)
   e.emit('data', stream, {}, () => {
     let result = stream.body
@@ -89,7 +83,6 @@ test('Arc v6 (REST): base64 encode body & flag', t => {
     t.equal(dec(result), body, 'Decoded body matches request')
     t.ok(stream.isBase64Encoded, 'isBase64Encoded param set')
   })
-  teardown()
 })
 
 test('Arc v6 (REST): handle empty body', t => {
@@ -99,6 +92,7 @@ test('Arc v6 (REST): handle empty body', t => {
   stream.headers = {}
   stream.body = ''
   stream.push(null)
+  let binaryHandler = _binaryHandler.bind({}, {})
   e.addListener('data', binaryHandler)
   e.emit('data', stream, {}, () => {
     let result = stream.body
@@ -106,7 +100,6 @@ test('Arc v6 (REST): handle empty body', t => {
     t.notOk(Object.getOwnPropertyNames(stream.body).length, 'Body object is empty')
     t.notOk(stream.isBase64Encoded, 'isBase64Encoded param NOT set')
   })
-  teardown()
 })
 
 test('Skip if missing content-length header', t => {
@@ -116,13 +109,13 @@ test('Skip if missing content-length header', t => {
   stream.headers = {}
   stream.body = 'hi there'
   stream.push(null)
+  let binaryHandler = _binaryHandler.bind({}, {})
   e.addListener('data', binaryHandler)
   e.emit('data', stream, {}, () => {
     let result = stream.body.base64
     t.notOk(result, 'Did not get base64 body object back')
     t.notOk(Object.getOwnPropertyNames(stream.body).length, 'Body object is empty')
     t.notOk(stream.isBase64Encoded, 'isBase64Encoded param NOT set')
-    teardown()
   })
 })
 
@@ -133,13 +126,13 @@ test('Skip if content-length is 0', t => {
   stream.headers = { 'content-length': '0' }
   stream.body = 'hi there'
   stream.push(null)
+  let binaryHandler = _binaryHandler.bind({}, {})
   e.addListener('data', binaryHandler)
   e.emit('data', stream, {}, () => {
     let result = stream.body.base64
     t.notOk(result, 'Did not get base64 body object back')
     t.notOk(Object.getOwnPropertyNames(stream.body).length, 'Body object is empty')
     t.notOk(stream.isBase64Encoded, 'isBase64Encoded param NOT set')
-    teardown()
   })
 })
 
@@ -151,12 +144,12 @@ test('Skip if posting to /__arc (WebSocket endpoint)', t => {
   stream.body = 'hi there'
   stream.url = '/___'
   stream.push(null)
+  let binaryHandler = _binaryHandler.bind({}, {})
   e.addListener('data', binaryHandler)
   e.emit('data', stream, {}, () => {
     let result = stream.body.base64
     t.notOk(result, 'Did not get base64 body object back')
     t.notOk(Object.getOwnPropertyNames(stream.body).length, 'Body object is empty')
     t.notOk(stream.isBase64Encoded, 'isBase64Encoded param NOT set')
-    teardown()
   })
 })
