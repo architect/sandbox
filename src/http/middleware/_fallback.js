@@ -149,7 +149,7 @@ module.exports = function fallback ({ cwd, inventory, update }, req, res, next) 
         method,
         src,
         config: inv._project.defaultFunctionConfig,
-        _proxy: true
+        arcStaticAssetProxy: true
       },
       apiType,
       inventory,

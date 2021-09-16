@@ -230,7 +230,8 @@ module.exports = function spawnChild (params, callback) {
 
   child.on('error', err => {
     error = err
-    if (err.includes('__ARC_END__')) {
+    // Seen some non-string oob errors come via binary compilation
+    if (err.includes?.('__ARC_END__') || err.code) {
       maybeShutdown('error')
     }
   })

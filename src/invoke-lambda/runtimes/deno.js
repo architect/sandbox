@@ -1,18 +1,18 @@
 const env = Deno.env.toObject();
+const { sep } = JSON.parse(env.__ARC_META__);
 const event = JSON.parse(env.__ARC_REQ__);
 const context = JSON.parse(env.__ARC_CONTEXT__);
 const root = env.LAMBDA_TASK_ROOT;
-const isWin = Deno.build.os === 'windows';
-const sep = isWin ? '\\' : '/';
 
 /* look for index.{js,ts,tsx} and fallback to mod.{js,ts,tsx} */
+const getPath = file => root + sep + file;
 const paths = [
-  `${root}${sep}index.js`,
-  `${root}${sep}mod.js`,
-  `${root}${sep}index.ts`,
-  `${root}${sep}mod.ts`,
-  `${root}${sep}index.tsx`,
-  `${root}${sep}mod.tsx`,
+  getPath('index.js'),
+  getPath('mod.js'),
+  getPath('index.ts'),
+  getPath('mod.ts'),
+  getPath('index.tsx'),
+  getPath('mod.tsx'),
 ];
 
 let found = false;
@@ -23,9 +23,10 @@ async function getHandler () {
   for (let path of paths) {
     found = await exists(path);
     if (found) {
-      let mod = await import(`file://${path}`);
+      let file = 'file://' + path;
+      let mod = await import(file);
       handler = mod[method];
-      if (typeof handler != "function") {
+      if (typeof handler !== 'function') {
         found = false;
       }
       else {
@@ -46,9 +47,9 @@ function callback(err, result) {
 }
 
 if (handler.constructor.name === 'AsyncFunction') {
-  handler(event, context, callback).then(function win(result) {
-    callback(null, result);
-  }).catch(callback);
+  handler(event, context, callback)
+    .then(result => callback(null, result))
+    .catch(callback)
 }
 else {
   handler(event, context, callback);

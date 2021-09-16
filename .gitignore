@@ -1,12 +1,15 @@
 __pycache__
-node_modules/
 !test/mock/dep-warn/**/node_modules
 .nyc_output/
+bin/*-binary
 coverage/
+node_modules/
 package-lock.json
+scratch/
 test/mock/*/.db
 test/mock/*/src/*/*/vendor/
 test/mock/*/tmp
 test/mock/tmp
+
 # special case in which we're testing local shared file dependency paths
 test/mock/dep-warn/**/node_modules/@architect/

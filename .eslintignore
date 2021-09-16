@@ -1,2 +1,3 @@
 src/invoke-lambda/runtimes/deno.js
 test/mock
+scratch/
