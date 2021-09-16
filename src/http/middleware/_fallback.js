@@ -106,7 +106,7 @@ module.exports = function fallback ({ apiType, cwd, inventory, update }, req, re
   }
   // ASAP – not supported by Arc <6, supported by Arc 6+
   else if (hasASAP) {
-    invokeProxy(inv._project.asapSrc)
+    invokeProxy(inv._project.asapSrc, true)
   }
   // HTTP APIs can fall back to /:param (REST APIs cannot)
   else if (rootParam && httpAPI) {
@@ -124,8 +124,8 @@ module.exports = function fallback ({ apiType, cwd, inventory, update }, req, re
   }
   // Arc 6 greedy `get /{proxy+}`
   else if (restGreedyRoot) {
-    let src = join(cwd, 'src', 'http', `get-index`) // We can assume this file path bc custom didn't land until Arc 8
-    invokeProxy(src)
+    let src = join(cwd, 'src', 'http', 'get-index') // We can assume this file path bc custom didn't land until Arc 8
+    invokeProxy(src, false)
   }
   else if (inv._project.plugins) {
     // in case the project has plugins, plugins may override http server behaviour in sandbox with additional routes.
@@ -141,14 +141,16 @@ module.exports = function fallback ({ apiType, cwd, inventory, update }, req, re
   }
 
   // Invoke a root proxy payload
-  function invokeProxy (src) {
+  function invokeProxy (src, arcStaticAssetProxy) {
     let exec = invoker({
       cwd,
       lambda: {
         method,
         src,
         config: inv._project.defaultFunctionConfig,
-        arcStaticAssetProxy: true
+        arcStaticAssetProxy,
+        // In the case of REST greedy root skipping the handler check could lead to broken requests, but it's really legacy now and fixing it isn't worth the trouble
+        _skipHandlerCheck: true,
       },
       apiType,
       inventory,

@@ -36,7 +36,7 @@ module.exports = function invokeLambda (params, callback) {
       callback(err)
     }
     else {
-      let { src, config, arcStaticAssetProxy: asap } = lambda
+      let { src, config, arcStaticAssetProxy } = lambda
       let { runtime, timeout } = config
       let lambdaPath = src.replace(cwd, '').substr(1)
 
@@ -76,14 +76,12 @@ module.exports = function invokeLambda (params, callback) {
       update.verbose.raw(output + '...')
       if (chonky) update.verbose.status('Truncated event payload log at 10KB')
 
-      // ASAP fallback does not apply to REST APIs
-      let notRest = apiType !== 'rest'
       let exec
       if (runtime.startsWith('nodejs')) exec = runInNode
       if (runtime.startsWith('deno'))   exec = runInDeno
       if (runtime.startsWith('python')) exec = runInPython
       if (runtime.startsWith('ruby'))   exec = runInRuby
-      if (asap && notRest)              exec = runInASAP
+      if (arcStaticAssetProxy)          exec = runInASAP
       if (!exec) {
         missingRuntime({ cwd, runtime, src, update })
         return callback('Missing runtime')
@@ -118,9 +116,9 @@ module.exports = function invokeLambda (params, callback) {
 
 // Handle multi-handler exploration here
 function hasHandler (lambda) {
-  let { src, handlerFile, arcStaticAssetProxy } = lambda
+  let { src, handlerFile, arcStaticAssetProxy, _skipHandlerCheck } = lambda
   // We don't need to do a handlerFile check if it's an ASAP / Arc 6 greedy root req
-  if (arcStaticAssetProxy) return true
+  if (arcStaticAssetProxy || _skipHandlerCheck) return true
   let { runtime } = lambda.config
   if (runtime === 'deno') {
     let found = false

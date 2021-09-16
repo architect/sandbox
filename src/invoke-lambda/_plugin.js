@@ -8,7 +8,7 @@ module.exports = function invokePluginFunction ({ cwd, inventory, update }, { sr
     lambda: {
       src,
       config: getFunctionConfig(src),
-      arcStaticAssetProxy: true // short circuits sandbox's lambda invocation handler check
+      _skipHandlerCheck: true // short circuits Lambda invocation handler check
     },
     event: payload,
     inventory,
