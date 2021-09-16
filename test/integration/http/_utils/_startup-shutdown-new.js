@@ -78,15 +78,27 @@ let shutdownAsync = {
     if (result !== 'Sandbox successfully shut down') {
       t.fail('Did not get back Sandbox shutdown message')
     }
-    try {
-      await tiny.get({ url })
-      t.fail('Sandbox did not shut down')
-    }
-    catch (err) {
-      verifyShutdown(t, err, 'module')
-    }
-  },
+    verifyShutdown(t, 'module')
+  }
+}
 
+let teardown = {
+  module: t => {
+    t.plan(3)
+    delete process.env.ARC_QUIET
+    t.notOk(process.env.ARC_QUIET, 'ARC_QUIET not set')
+    delete process.env.ARC_API_TYPE
+    t.notOk(process.env.ARC_API_TYPE, 'ARC_API_TYPE not set')
+    shutdown.module(t)
+  },
+  binary: t => {
+    t.plan(3)
+    delete process.env.ARC_QUIET
+    t.notOk(process.env.ARC_QUIET, 'ARC_QUIET not set')
+    delete process.env.ARC_API_TYPE
+    t.notOk(process.env.ARC_API_TYPE, 'ARC_API_TYPE not set')
+    shutdown.binary(t)
+  }
 }
 
 module.exports = {
@@ -94,4 +106,5 @@ module.exports = {
   startupNew: startup,
   shutdownNew: shutdown,
   shutdownAsyncNew: shutdownAsync,
+  teardown,
 }

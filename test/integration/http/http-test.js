@@ -4,12 +4,11 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { b64dec, url, data, startupNew: startup, shutdownNew: shutdown, checkHttpResult: checkResult, rmPublic } = require('./_utils')
+let { b64dec, url, data, startupNew: startup, shutdownNew: shutdown, checkHttpResult: checkResult, rmPublic, teardown } = require('./_utils')
 
 test('Set up env', t => {
   t.plan(1)
-  process.env.ARC_API_TYPE = 'http'
-  t.ok(sandbox, 'Got sandbox')
+  t.ok(sandbox, 'Got Sandbox')
 })
 
 test('Module', t => {
@@ -29,6 +28,7 @@ test('Binary', t => {
 function runTests (runType) {
   test(`[HTTP mode] Start Sandbox (${runType})`, t => {
     t.plan(2)
+    process.env.ARC_API_TYPE = 'http'
     startup[runType](t, 'normal')
   })
 
@@ -1038,9 +1038,6 @@ function runTests (runType) {
   })
 
   test(`[HTTP mode] Teardown (${runType})`, t => {
-    t.plan(2)
-    shutdown[runType](t)
-    delete process.env.ARC_API_TYPE
-    t.notOk(process.env.ARC_API_TYPE, 'API type NOT set')
+    teardown[runType](t)
   })
 }
