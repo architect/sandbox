@@ -26,12 +26,14 @@ test('Binary', t => {
 })
 
 function runTests (runType) {
-  test(`[REST mode] Start Sandbox (${runType})`, t => {
+  let mode = `[REST mode / ${runType}]`
+
+  test(`${mode} Start Sandbox`, t => {
     process.env.ARC_API_TYPE = 'rest'
     startup[runType](t, 'normal')
   })
 
-  test('[REST mode] get /', t => {
+  test(`${mode} get /`, t => {
     t.plan(16)
     tiny.get({
       url
@@ -55,7 +57,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /?whats=up', t => {
+  test(`${mode} get /?whats=up`, t => {
     t.plan(16)
     tiny.get({
       url: url + '/?whats=up'
@@ -79,7 +81,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /?whats=up&whats=there', t => {
+  test(`${mode} get /?whats=up&whats=there`, t => {
     t.plan(16)
     tiny.get({
       url: url + '/?whats=up&whats=there'
@@ -103,7 +105,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /binary', t => {
+  test(`${mode} get /binary`, t => {
     t.plan(17)
     let path = '/binary'
     tiny.get({
@@ -130,7 +132,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /nodejs12.x', t => {
+  test(`${mode} get /nodejs12.x`, t => {
     t.plan(16)
     let path = '/nodejs12.x'
     tiny.get({
@@ -155,7 +157,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /nodejs10.x', t => {
+  test(`${mode} get /nodejs10.x`, t => {
     t.plan(16)
     let path = '/nodejs10.x'
     tiny.get({
@@ -180,7 +182,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /nodejs8.10', t => {
+  test(`${mode} get /nodejs8.10`, t => {
     t.plan(16)
     let path = '/nodejs8.10'
     tiny.get({
@@ -205,7 +207,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /python3.8', t => {
+  test(`${mode} get /python3.8`, t => {
     t.plan(16)
     let path = '/python3.8'
     tiny.get({
@@ -230,7 +232,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /python3.7', t => {
+  test(`${mode} get /python3.7`, t => {
     t.plan(16)
     let path = '/python3.7'
     tiny.get({
@@ -255,7 +257,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /python3.6', t => {
+  test(`${mode} get /python3.6`, t => {
     t.plan(16)
     let path = '/python3.6'
     tiny.get({
@@ -280,7 +282,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /ruby2.5', t => {
+  test(`${mode} get /ruby2.5`, t => {
     t.plan(16)
     let path = '/ruby2.5'
     tiny.get({
@@ -305,7 +307,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /deno', t => {
+  test(`${mode} get /deno`, t => {
     t.plan(16)
     let path = '/deno'
     tiny.get({
@@ -330,7 +332,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /no-return (noop)', t => {
+  test(`${mode} get /no-return (noop)`, t => {
     t.plan(2)
     tiny.get({
       url: url + '/no-return'
@@ -344,7 +346,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] post /post', t => {
+  test(`${mode} post /post`, t => {
     t.plan(16)
     let path = '/post'
     tiny.post({
@@ -372,7 +374,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] put /put', t => {
+  test(`${mode} put /put`, t => {
     t.plan(16)
     let path = '/put'
     tiny.put({
@@ -398,7 +400,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] patch /patch', t => {
+  test(`${mode} patch /patch`, t => {
     t.plan(16)
     let path = '/patch'
     tiny.patch({
@@ -424,7 +426,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] delete /delete', t => {
+  test(`${mode} delete /delete`, t => {
     t.plan(16)
     let path = '/delete'
     tiny.del({
@@ -453,7 +455,7 @@ function runTests (runType) {
   /**
    * Arc v6: greedy root (`any /{proxy+}`) fallthrough
    */
-  test('[REST mode] post / - route should fail when not explicitly defined, but only because `any /{proxy+}` does not cover requests to root', t => {
+  test(`${mode} post / - route should fail when not explicitly defined, but only because 'any /{proxy+}' does not cover requests to root`, t => {
     t.plan(2)
     tiny.post({
       url,
@@ -468,7 +470,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /foobar – route should fall through to greedy root', t => {
+  test(`${mode} get /foobar – route should fall through to greedy root`, t => {
     t.plan(16)
     let path = '/foobar'
     tiny.get({
@@ -493,7 +495,7 @@ function runTests (runType) {
     })
   })
 
-  test('[REST mode] get /path/* – route should fall through to greedy root because catchalls are not supported in this mode', t => {
+  test(`${mode} get /path/* – route should fall through to greedy root because catchalls are not supported in this mode`, t => {
     t.plan(16)
     let path = '/path/hello/there'
     tiny.get({
@@ -518,7 +520,7 @@ function runTests (runType) {
     })
   })
 
-  test(`[REST mode] get /any – route should fall through to greedy root because 'any' is not supported in this mode`, t => {
+  test(`${mode} get /any – route should fall through to greedy root because 'any' is not supported in this mode`, t => {
     t.plan(16)
     let path = '/any'
     tiny.get({
@@ -543,18 +545,18 @@ function runTests (runType) {
     })
   })
 
-  test(`[REST mode] Shut down Sandbox (${runType})`, t => {
+  test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
   /**
    * Arc v6: test failing to load index.html without get / defined
    */
-  test(`[REST mode] Start Sandbox (${runType})`, t => {
+  test(`${mode} Start Sandbox`, t => {
     startup[runType](t, 'no-index-fail')
   })
 
-  test('[REST mode] get / without defining get / should fail if index.html not present', t => {
+  test(`${mode} get / without defining get / should fail if index.html not present`, t => {
     t.plan(2)
     rmPublic(t)
     tiny.get({
@@ -565,18 +567,18 @@ function runTests (runType) {
     })
   })
 
-  test(`[REST mode] Shut down Sandbox (${runType})`, t => {
+  test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
   /**
    * Arc v6: test successfully loading index.html without get / defined
    */
-  test(`[REST mode] Start Sandbox (${runType})`, t => {
+  test(`${mode} Start Sandbox`, t => {
     startup[runType](t, 'no-index-pass')
   })
 
-  test('[REST mode] get / without defining get / should succeed if index.html is present', t => {
+  test(`${mode} get / without defining get / should succeed if index.html is present`, t => {
     t.plan(2)
     tiny.get({
       url
@@ -590,18 +592,18 @@ function runTests (runType) {
     })
   })
 
-  test(`[REST mode] Shut down Sandbox (${runType})`, t => {
+  test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
   /**
    * Arc v6: test failing to load an endpoint missing its local handler file
    */
-  test(`[REST mode] Start Sandbox (${runType})`, t => {
+  test(`${mode} Start Sandbox`, t => {
     startup[runType](t, 'missing-handler')
   })
 
-  test('[REST mode] get /missing should fail if missing its handler file', t => {
+  test(`${mode} get /missing should fail if missing its handler file`, t => {
     t.plan(2)
     tiny.get({
       url: url + '/missing'
@@ -614,18 +616,18 @@ function runTests (runType) {
     })
   })
 
-  test(`[REST mode] Shut down Sandbox (${runType})`, t => {
+  test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
   /**
    * Test to ensure sandbox loads without defining @http
    */
-  test(`[REST mode] Start Sandbox (${runType})`, t => {
+  test(`${mode} Start Sandbox`, t => {
     startup[runType](t, 'no-http')
   })
 
-  test('[REST mode] get / without defining @http', t => {
+  test(`${mode} get / without defining @http`, t => {
     t.plan(1)
     tiny.get({
       url
@@ -635,7 +637,7 @@ function runTests (runType) {
     })
   })
 
-  test(`[REST mode] Teardown (${runType})`, t => {
+  test(`${mode} Teardown`, t => {
     teardown[runType](t)
   })
 }

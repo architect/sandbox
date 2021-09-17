@@ -33,11 +33,11 @@ test('Binary', t => {
 })
 
 function runTests (runType) {
-  test(`[Misc] Start Sandbox (${runType})`, t => {
+  test(`[Misc / ${runType}] Start Sandbox`, t => {
     startup[runType](t, 'normal')
   })
 
-  test('[Catchall] get /path - calls without trailing /* should fall through (and in this case fail)', t => {
+  test(`[Catchall / ${runType}] get /path - calls without trailing /* should fall through (and in this case fail)`, t => {
     t.plan(2)
     let path = '/path'
     tiny.get({
@@ -52,7 +52,7 @@ function runTests (runType) {
     })
   })
 
-  test('[Catchall] get /get-c (matches at root of catchall with trailing slash)', t => {
+  test(`[Catchall / ${runType}] get /get-c (matches at root of catchall with trailing slash)`, t => {
     t.plan(3)
     let path = '/get-c/'
     tiny.get({
@@ -68,7 +68,7 @@ function runTests (runType) {
     })
   })
 
-  test('[Catchall] get /get-c (matches with one child path part)', t => {
+  test(`[Catchall / ${runType}] get /get-c (matches with one child path part)`, t => {
     t.plan(3)
     let path = '/get-c/hi'
     tiny.get({
@@ -84,7 +84,7 @@ function runTests (runType) {
     })
   })
 
-  test('[Catchall] get /get-c (matches with one child path part, trailing slash)', t => {
+  test(`[Catchall / ${runType}] get /get-c (matches with one child path part, trailing slash)`, t => {
     t.plan(3)
     let path = '/get-c/hi/'
     tiny.get({
@@ -100,7 +100,7 @@ function runTests (runType) {
     })
   })
 
-  test('[Catchall] get /get-c (matches with multiple child path parts)', t => {
+  test(`[Catchall / ${runType}] get /get-c (matches with multiple child path parts)`, t => {
     t.plan(3)
     let path = '/get-c/hi/there/wonderful/person'
     tiny.get({
@@ -116,7 +116,7 @@ function runTests (runType) {
     })
   })
 
-  test('[Timeout] get /times-out', t => {
+  test(`[Timeout / ${runType}] get /times-out`, t => {
     t.plan(3)
     tiny.get({
       url: url + '/times-out'
@@ -132,7 +132,7 @@ function runTests (runType) {
     })
   })
 
-  test('[Oversized response] get /chonky', t => {
+  test(`[Oversized response / ${runType}] get /chonky`, t => {
     t.plan(2)
     tiny.get({
       url: url + '/chonky'
@@ -146,15 +146,15 @@ function runTests (runType) {
     })
   })
 
-  test(`[Misc] Shut down Sandbox (${runType})`, t => {
+  test(`[Misc / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
-  test(`[Env vars (.env)] Start Sandbox (${runType})`, t => {
+  test(`[Env vars (.env) / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('env', 'dot-env'))
   })
 
-  test('[Env vars (.env)] get /env', t => {
+  test(`[Env vars (.env)] get /env`, t => {
     t.plan(6)
     tiny.get({ url }, function _got (err, result) {
       if (err) t.fail(err)
@@ -171,15 +171,15 @@ function runTests (runType) {
     })
   })
 
-  test(`[Env vars (.env)] Shut down Sandbox (${runType})`, t => {
+  test(`[Env vars (.env) / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
-  test(`[Env vars (preferences.arc)] Start Sandbox (${runType})`, t => {
+  test(`[Env vars (preferences.arc) / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('env', 'preferences'))
   })
 
-  test('[Env vars (preferences.arc)] get /env', t => {
+  test(`[Env vars (preferences.arc) / ${runType}] get /env`, t => {
     t.plan(6)
     tiny.get({ url }, function _got (err, result) {
       if (err) t.fail(err)
@@ -196,15 +196,15 @@ function runTests (runType) {
     })
   })
 
-  test(`[Env vars (preferences.arc)] Shut down Sandbox (${runType})`, t => {
+  test(`[Env vars (preferences.arc) / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
-  test(`[Env vars (.arc-env)] Start Sandbox (${runType})`, t => {
+  test(`[Env vars (.arc-env) / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('env', 'dot-arc-env'))
   })
 
-  test('[Env vars (.arc-env)] get /env', t => {
+  test(`[Env vars (.arc-env) / ${runType}] get /env`, t => {
     t.plan(6)
     tiny.get({ url }, function _got (err, result) {
       if (err) t.fail(err)
@@ -221,15 +221,15 @@ function runTests (runType) {
     })
   })
 
-  test(`[Misc] Shut down Sandbox (${runType})`, t => {
+  test(`[Misc / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
-  test(`[Multiple possible handlers] Start Sandbox (${runType})`, t => {
+  test(`[Multiple possible handlers / ${runType}] Start Sandbox`, t => {
     startup[runType](t, 'multihandler')
   })
 
-  test('[Multiple possible handlers] get /deno/index.js', t => {
+  test(`[Multiple possible handlers / ${runType}] get /deno/index.js`, t => {
     t.plan(6)
     let rawPath = '/deno/index.js'
     tiny.get({
@@ -244,7 +244,7 @@ function runTests (runType) {
     })
   })
 
-  test('[Multiple possible handlers] get /deno/index.ts', t => {
+  test(`[Multiple possible handlers / ${runType}] get /deno/index.ts`, t => {
     t.plan(6)
     let rawPath = '/deno/index.ts'
     tiny.get({
@@ -259,7 +259,7 @@ function runTests (runType) {
     })
   })
 
-  test('[Multiple possible handlers] get /deno/index.tsx', t => {
+  test(`[Multiple possible handlers / ${runType}] get /deno/index.tsx`, t => {
     t.plan(6)
     let rawPath = '/deno/index.tsx'
     tiny.get({
@@ -274,7 +274,7 @@ function runTests (runType) {
     })
   })
 
-  test('[Multiple possible handlers] get /deno/mod.js', t => {
+  test(`[Multiple possible handlers / ${runType}] get /deno/mod.js`, t => {
     t.plan(6)
     let rawPath = '/deno/mod.js'
     tiny.get({
@@ -289,7 +289,7 @@ function runTests (runType) {
     })
   })
 
-  test('[Multiple possible handlers] get /deno/mod.ts', t => {
+  test(`[Multiple possible handlers / ${runType}] get /deno/mod.ts`, t => {
     t.plan(6)
     let rawPath = '/deno/mod.ts'
     tiny.get({
@@ -304,7 +304,7 @@ function runTests (runType) {
     })
   })
 
-  test('[Multiple possible handlers] get /deno/mod.tsx', t => {
+  test(`[Multiple possible handlers / ${runType}] get /deno/mod.tsx`, t => {
     t.plan(6)
     let rawPath = '/deno/mod.tsx'
     tiny.get({
@@ -319,7 +319,7 @@ function runTests (runType) {
     })
   })
 
-  test(`[Misc] Shut down Sandbox (${runType})`, t => {
+  test(`[Misc / ${runType}] Shut down Sandbox`, t => {
     rm(tmp)
     teardown[runType](t)
   })
