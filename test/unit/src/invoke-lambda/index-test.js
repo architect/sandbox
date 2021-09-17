@@ -1,21 +1,23 @@
 let { join } = require('path')
 let proxyquire = require('proxyquire')
-let sinon = require('sinon')
 let test = require('tape')
 let _inventory = require('@architect/inventory')
 let update = require('@architect/utils').updater()
 let mock = join(process.cwd(), 'test', 'mock')
 
-let fake = (params, callback) => callback(null, params)
-let nodeFake = sinon.fake(fake)
-let pythonFake = sinon.fake(fake)
-let rubyFake = sinon.fake(fake)
-let denoFake = sinon.fake(fake)
+let runtimes = {
+  asap: 0,
+  deno: 0,
+  node: 0,
+  python: 0,
+  ruby: 0
+}
+let exec = (run, params, callback) => {
+  runtimes[run]++
+  callback(null, params)
+}
 let invoke = proxyquire('../../../../src/invoke-lambda', {
-  './run-in-node': nodeFake,
-  './run-in-python': pythonFake,
-  './run-in-ruby': rubyFake,
-  './run-in-deno': denoFake
+  './exec': exec,
 })
 let event = { something: 'happened' }
 let inventory = { inv: {} }
@@ -23,8 +25,12 @@ let inv
 let get
 
 test('Set up env', t => {
-  t.plan(3)
+  t.plan(1)
   t.ok(invoke, 'Got invoke')
+})
+
+test('Get inventory', t => {
+  t.plan(2)
   _inventory({ cwd: join(mock, 'normal') }, function (err, result) {
     if (err) t.fail(err)
     else {
@@ -113,14 +119,6 @@ test('Test runtime invocations', t => {
   })
 })
 
-test('Verify call counts from runtime invocations', t => {
-  t.plan(4)
-  t.equals(nodeFake.callCount, 4, 'Node called correct number of times')
-  t.equals(pythonFake.callCount, 3, 'Python called correct number of times')
-  t.equals(rubyFake.callCount, 1, 'Ruby called correct number of times')
-  t.equals(denoFake.callCount, 1, 'Deno called correct number of times')
-})
-
 // This test will still hit the node call counter at least once
 test('Test body size limits', t => {
   t.plan(4)
@@ -150,4 +148,38 @@ test('Test body size limits', t => {
   invoke({ lambda, event, inventory, update }, (err) => {
     t.notOk(err instanceof Error, 'Event: sub 6MB request bodies are fine')
   })
+})
+
+
+test('Get inventory again to exercise ASAP', t => {
+  t.plan(2)
+  _inventory({ cwd: join(mock, 'no-index-pass') }, function (err, result) {
+    if (err) t.fail(err)
+    else {
+      inv = result.inv
+      get = result.get
+      t.ok(inv, 'Got inventory')
+      t.ok(get, 'Got inventory getter')
+    }
+  })
+})
+
+test('Test ASAP invocation', t => {
+  t.plan(3)
+  let lambda = get.http('get /*')
+  invoke({ lambda, event, inventory, update }, (err, { options, request, timeout }) => {
+    if (err) t.fail(err)
+    t.equals(options.cwd, lambda.src, 'Default runtime passed correct path')
+    t.equals(timeout, 5000, 'Default runtime ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'Default runtime received event')
+  })
+})
+
+test('Verify call counts from runtime invocations', t => {
+  t.plan(5)
+  t.equals(runtimes.asap, 1, 'ASAP called correct number of times')
+  t.equals(runtimes.deno, 1, 'Deno called correct number of times')
+  t.equals(runtimes.node, 4 + 2, 'Node called correct number of times')
+  t.equals(runtimes.python, 3, 'Python called correct number of times')
+  t.equals(runtimes.ruby, 1, 'Ruby called correct number of times')
 })

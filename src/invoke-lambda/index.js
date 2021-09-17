@@ -2,12 +2,7 @@ let { join } = require('path')
 let { existsSync } = require('fs')
 let chalk = require('chalk')
 
-let runInASAP = require('./run-in-asap')
-let runInNode = require('./run-in-node')
-let runInDeno = require('./run-in-deno')
-let runInPython = require('./run-in-python')
-let runInRuby = require('./run-in-ruby')
-
+let exec = require('./exec')
 let warn = require('./warn')
 let missingRuntime = require('./missing-runtime')
 
@@ -77,17 +72,17 @@ module.exports = function invokeLambda (params, callback) {
       update.verbose.raw(output + '...')
       if (chonky) update.verbose.status('Truncated event payload log at 10KB')
 
-      let exec
-      if (runtime.startsWith('nodejs')) exec = runInNode
-      if (runtime.startsWith('deno'))   exec = runInDeno
-      if (runtime.startsWith('python')) exec = runInPython
-      if (runtime.startsWith('ruby'))   exec = runInRuby
-      if (arcStaticAssetProxy)          exec = runInASAP
-      if (!exec) {
+      let run
+      if (runtime.startsWith('nodejs')) run = 'node'
+      if (runtime.startsWith('deno'))   run = 'deno'
+      if (runtime.startsWith('python')) run = 'python'
+      if (runtime.startsWith('ruby'))   run = 'ruby'
+      if (arcStaticAssetProxy)          run = 'asap'
+      if (!run) {
         missingRuntime({ cwd, runtime, src, update })
         return callback('Missing runtime')
       }
-      exec({
+      exec(run, {
         context,
         options,
         request,
