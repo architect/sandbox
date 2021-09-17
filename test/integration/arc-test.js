@@ -93,8 +93,6 @@ test('Get & check params provided by plugin (without specifying a type)', t => {
 })
 
 test('Teardown', t => {
-  t.plan(2)
+  t.plan(1)
   shutdown(t)
-  delete process.env.ARC_API_TYPE
-  t.notOk(process.env.ARC_API_TYPE, 'API type NOT set')
 })

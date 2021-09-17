@@ -1,7 +1,7 @@
 let invoker = require('../invoke-http')
 
 module.exports = function reg (params) {
-  let { app, apiType, cwd, routes, inventory, update } = params
+  let { apiType, app, cwd, inventory, routes, update } = params
 
   routes.forEach(lambda => {
     // ASAP handled by middleware
@@ -13,13 +13,13 @@ module.exports = function reg (params) {
       let httpOnly = [ 'any', 'head', 'options' ]
       let hasCatchall = path.includes('*')
       if (!httpOnly.includes(method) && !hasCatchall) {
-        let exec = invoker({ cwd, lambda, apiType, inventory, update })
+        let exec = invoker({ apiType, cwd, inventory, lambda, update })
         app[method](path, exec)
       }
     }
     else {
       // Register the route with the Router instance
-      let exec = invoker({ cwd, lambda, apiType, inventory, update })
+      let exec = invoker({ apiType, cwd, inventory, lambda, update })
       if (method !== 'any') {
         app[method](path, exec)
       }

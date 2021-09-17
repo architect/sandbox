@@ -13,20 +13,15 @@ let missingRuntime = require('./missing-runtime')
 
 let serialize = i => chalk.dim(JSON.stringify(i, null, 2))
 
-/**
- * mocks a lambda.. not much to it eh!
- *
- * @param {string} function - Inventory function object
- * @param {object} event - HTTP / event payload to invoke lambda function with
- * @param {function} callback - node style errback
- */
 module.exports = function invokeLambda (params, callback) {
-  let { apiType, cwd, lambda, event, inventory, update } = params
+  let { apiType, cwd, lambda, event, inventory, staticPath, update } = params
+
   // handlerFile is defined for all non-ASAP functions; ASAP bypasses this check
   if (!hasHandler(lambda)) {
     callback(Error('lambda_not_found'))
   }
   else {
+    // Next check payload size is within limits
     let maxSize = 1000 * 6000
     let { body, Records } = event
     let bodySize = body && JSON.stringify(body).length || 0
@@ -36,8 +31,13 @@ module.exports = function invokeLambda (params, callback) {
       callback(err)
     }
     else {
+      // Now send along for execution
       let { src, config, arcStaticAssetProxy } = lambda
       let { runtime, timeout } = config
+
+      // Internal execution context
+      let context = { apiType, inventory, staticPath, update }
+
       let lambdaPath = src.replace(cwd, '').substr(1)
 
       update.debug.status(`Lambda config: ${lambdaPath}`)
@@ -47,6 +47,7 @@ module.exports = function invokeLambda (params, callback) {
         ? `${join(src, 'vendor')}:${process.env.PYTHONPATH}`
         : join(src, 'vendor')
 
+      // Runtime environment variables
       let defaults = {
         __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
         __ARC_CONFIG__: JSON.stringify({
@@ -87,11 +88,10 @@ module.exports = function invokeLambda (params, callback) {
         return callback('Missing runtime')
       }
       exec({
-        apiType,
+        context,
         options,
         request,
         timeout: timeout * 1000,
-        update,
       }, function done (err, result) {
         if (err) callback(err)
         else {

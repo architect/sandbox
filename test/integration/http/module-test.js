@@ -18,10 +18,9 @@ test('Set up env', t => {
  * - Now with multiple API paths, we'll test this (hopefully) free of side effects
  */
 test('Sync http.start', t => {
-  t.plan(2)
+  t.plan(1)
   http.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) t.fail(err)
-    t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
     t.equal(result, 'HTTP successfully started', 'HTTP started')
   })
 })
@@ -48,11 +47,10 @@ test('Sync http.end', t => {
 })
 
 test('Async http.start', async t => {
-  t.plan(2)
+  t.plan(1)
   try {
     let result = await http.start({ cwd: join(mock, 'normal'), quiet: true })
     t.equal(result, 'HTTP successfully started', 'Sandbox started')
-    t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
   }
   catch (err) {
     t.fail(err)
@@ -83,8 +81,6 @@ test('Async http.end', async t => {
 })
 
 test('Teardown', t => {
-  t.plan(2)
+  t.plan(1)
   verifyShutdownNew(t, name)
-  delete process.env.ARC_API_TYPE
-  t.notOk(process.env.ARC_API_TYPE, 'API type NOT set')
 })

@@ -11,7 +11,8 @@ let httpProxy = require('http-proxy')
  * - ASAP handling (if present)
  * - Error out
  */
-module.exports = function fallback ({ apiType, cwd, inventory, update }, req, res, next) {
+module.exports = function fallback (args, req, res, next) {
+  let { apiType, cwd, inventory, staticPath, update } = args
   let { inv, get } = inventory
   let httpAPI = apiType.startsWith('http')
   let method = req.method.toLowerCase()
@@ -143,6 +144,7 @@ module.exports = function fallback ({ apiType, cwd, inventory, update }, req, re
   // Invoke a root proxy payload
   function invokeProxy (src, arcStaticAssetProxy) {
     let exec = invoker({
+      apiType,
       cwd,
       lambda: {
         method,
@@ -152,8 +154,8 @@ module.exports = function fallback ({ apiType, cwd, inventory, update }, req, re
         // In the case of REST greedy root skipping the handler check could lead to broken requests, but it's really legacy now and fixing it isn't worth the trouble
         _skipHandlerCheck: true,
       },
-      apiType,
       inventory,
+      staticPath,
       update,
     })
     let proxy = pathname.startsWith('/') ? pathname.substr(1) : pathname

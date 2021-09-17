@@ -6,7 +6,8 @@ let { head } = template
 const SIG = 'SIGINT'
 
 module.exports = function spawnChild (params, callback) {
-  let { apiType, cwd, command, args, options, request, timeout, update } = params
+  let { context, cwd, command, args, options, request, timeout } = params
+  let { apiType, update } = context
   let functionPath = options.cwd.replace(cwd, '').substr(1)
   let isInLambda = process.env.AWS_LAMBDA_FUNCTION_NAME
   let timedout = false

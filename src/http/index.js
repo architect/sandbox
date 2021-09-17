@@ -11,7 +11,7 @@ let destroyer = require('server-destroy')
 let { fingerprint } = require('@architect/utils')
 let { env, getPorts, checkPort, maybeHydrate } = require('../lib')
 let middleware = require('./middleware')
-let httpEnv = require('./_http-env')
+let config = require('./_config')
 let hydrate = require('@architect/hydrate')
 let registerHTTP = require('./register-http')
 let registerWS = require('./register-websocket')
@@ -24,7 +24,6 @@ let pool = require('./register-websocket/pool')
 module.exports = function createHttpServer (inventory) {
   let { inv } = inventory
   let isDefaultProject = !inv._project.manifest
-  let arc = inv._project.arc
 
   if (inv.http || inv.static || inv.ws) {
     let app = Router({ mergeParams: true })
@@ -37,11 +36,11 @@ module.exports = function createHttpServer (inventory) {
     app.start = function start (options, callback) {
       let { all, cwd, port, symlink = true, update } = options
 
-      // Set up ports and HTTP-specific env vars
+      // Set up ports and HTTP-specific config
       let { httpPort } = getPorts(port)
-      let { apiType } = httpEnv(arc, cwd)
+      let { apiType, staticPath } = config(inv, cwd)
 
-      middleware(app, { apiType, cwd, inventory, update })
+      middleware({ apiType, app, cwd, inventory, staticPath, update })
 
       series([
         // Set up Arc + userland env vars
@@ -92,7 +91,7 @@ module.exports = function createHttpServer (inventory) {
           }
 
           if (inv.http) {
-            registerHTTP({ app, apiType, cwd, routes: inv.http, inventory, update })
+            registerHTTP({ apiType, app, cwd, routes: inv.http, inventory, staticPath, update })
           }
 
           callback()

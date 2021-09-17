@@ -91,14 +91,13 @@ test('Set up env', async t => {
 })
 
 test('[WebSockets] Start Sandbox', t => {
-  t.plan(3)
+  t.plan(2)
   delete process.env.ARC_QUIET
   sandbox.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
     if (err) {
       t.fail(err)
     }
     else {
-      t.equal(process.env.ARC_API_TYPE, 'http', 'API type set to http')
       t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
       t.equal(result, 'Sandbox successfully started', 'Sandbox started')
     }

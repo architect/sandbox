@@ -88,19 +88,15 @@ let shutdown = {
 
 let teardown = {
   module: t => {
-    t.plan(3)
+    t.plan(2)
     delete process.env.ARC_QUIET
     t.notOk(process.env.ARC_QUIET, 'ARC_QUIET not set')
-    delete process.env.ARC_API_TYPE
-    t.notOk(process.env.ARC_API_TYPE, 'ARC_API_TYPE not set')
     shutdown.module(t, false)
   },
   binary: t => {
-    t.plan(3)
+    t.plan(2)
     delete process.env.ARC_QUIET
     t.notOk(process.env.ARC_QUIET, 'ARC_QUIET not set')
-    delete process.env.ARC_API_TYPE
-    t.notOk(process.env.ARC_API_TYPE, 'ARC_API_TYPE not set')
     shutdown.binary(t, false)
   }
 }
