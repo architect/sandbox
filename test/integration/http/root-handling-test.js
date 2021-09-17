@@ -1,299 +1,356 @@
 let { join } = require('path')
+let { existsSync } = require('fs')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sandbox = require('../../../src')
-let { url, shutdownAsync, checkHttpResult, checkRestResult } = require('./_utils')
-
-let mock = join(process.cwd(), 'test', 'mock')
+let { url, startupNew: startup, checkHttpResult, checkRestResult, teardown } = require('./_utils')
 let indexHTML = 'Hello from public/index.html!'
 
 test('Set up env', t => {
   t.plan(1)
-  t.ok(sandbox, 'got sandbox')
+  t.ok(sandbox, 'Got sandbox')
 })
 
-async function setup (t, type, dir) {
-  process.env.ARC_API_TYPE = type
-  let start = await sandbox.start({ cwd: join(mock, 'root-handling', dir), quiet: true })
-  t.equal(process.env.ARC_API_TYPE, type, `API type set to ${type}`)
-  t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
-  t.equal(start, 'Sandbox successfully started', 'Sandbox started')
+test('Module', t => {
+  runTests('module')
+  t.end()
+})
+
+test('Binary', t => {
+  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
+  if (existsSync(bin)) {
+    runTests('binary')
+    t.end()
+  }
+  else t.end()
+})
+
+function runTests (runType) {
+  function setup (t, type, dir) {
+    process.env.ARC_API_TYPE = type
+    startup[runType](t, join('root-handling', dir))
+  }
+
+  /**
+   * Root param with nested exact match: /:param/there
+   */
+  test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'http', 'param-exact')
+  })
+
+  test(`[HTTP mode / ${runType}] get /hi/there - root param at /:param/there`, async t => {
+    t.plan(16)
+
+    let result
+    result = await tiny.get({ url })
+    t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
+
+    let rawPath = '/hi/there'
+    result = await tiny.get({ url: url + rawPath })
+    checkHttpResult(t, result.body, {
+      message: 'Hello from get /:param/there running the default runtime',
+      routeKey: 'GET /{param}/there',
+      rawPath,
+      pathParameters: { param: 'hi' },
+      cookies: undefined,
+      queryStringParameters: undefined,
+      rawQueryString: '',
+      headers: '🤷🏽‍♀️',
+      isBase64Encoded: false,
+      body: undefined,
+    })
+  })
+
+  test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'httpv1', 'param-exact')
+  })
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] get /hi/there - root param at /:param/there`, async t => {
+    t.plan(17)
+    let result
+    result = await tiny.get({ url })
+    t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
+
+    let path = '/hi/there'
+    result = await tiny.get({ url: url + path })
+    checkRestResult(t, result.body, {
+      message: 'Hello from get /:param/there running the default runtime',
+      resource: '/{param}/there',
+      path,
+      httpMethod: 'GET',
+      headers: '🤷🏽‍♀️',
+      multiValueHeaders: '🤷🏽‍♀️',
+      queryStringParameters: null,
+      multiValueQueryStringParameters: null,
+      pathParameters: { param: 'hi' },
+      body: null,
+      isBase64Encoded: false,
+    })
+  })
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+  // TODO fix this test, see: arc#982
+  // This shouldn't be possible, as /:param/whatever can't coexist with /{proxy+} ASAP in REST
+  /*
+  test('[REST mode] get /hi/there - root param at /:param/there', async t => {
+    setup(t, 'rest', 'param-exact')
+    try {
+      await tiny.get({ url: url + '/hi/there' })
+      t.fail(`Should not have gotten result`)
+    }
+    catch (err) {
+      t.equal(err.statusCode, 403, 'Errors with 403')
+    }
+  })
+  */
+
+  /**
+   * Root param only: /:param
+   */
+  test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'http', 'root-param')
+  })
+
+  test(`[HTTP mode / ${runType}] get / - root param at /:param`, async t => {
+    t.plan(15)
+    let result = await tiny.get({ url })
+    checkHttpResult(t, result.body, {
+      message: 'Hello from get /:param running the default runtime',
+      routeKey: 'GET /{param}',
+      rawPath: '/',
+      pathParameters: { param: '' },
+      cookies: undefined,
+      queryStringParameters: undefined,
+      rawQueryString: '',
+      headers: '🤷🏽‍♀️',
+      isBase64Encoded: false,
+      body: undefined,
+    })
+  })
+
+  test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'httpv1', 'root-param')
+  })
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] get / - root param at /:param`, async t => {
+    t.plan(16)
+    let result = await tiny.get({ url })
+    checkRestResult(t, result.body, {
+      message: 'Hello from get /:param running the default runtime',
+      resource: '/{param}',
+      path: '/',
+      httpMethod: 'GET',
+      headers: '🤷🏽‍♀️',
+      multiValueHeaders: '🤷🏽‍♀️',
+      queryStringParameters: null,
+      multiValueQueryStringParameters: null,
+      pathParameters: { param: '' },
+      body: null,
+      isBase64Encoded: false,
+    })
+  })
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+
+  // This shouldn't be possible, as /:param can't coexist with /{proxy+} ASAP in REST
+  test(`[REST mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'rest', 'root-param')
+  })
+
+  test(`[REST mode / ${runType}] get / - root param at /:param`, async t => {
+    t.plan(1)
+    try {
+      await tiny.get({ url })
+      t.fail(`Should not have gotten result`)
+    }
+    catch (err) {
+      t.equal(err.statusCode, 403, 'Errors with 403')
+    }
+  })
+
+  test(`[REST mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+  /**
+   * Nothing dynamic in root, all ASAP all the time
+   */
+  test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'http', 'asap')
+  })
+
+  test(`[HTTP mode / ${runType}] get / - ASAP`, async t => {
+    t.plan(1)
+    let result = await tiny.get({ url })
+    t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
+  })
+
+  test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'httpv1', 'asap')
+  })
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] get / - ASAP`, async t => {
+    t.plan(1)
+    let result = await tiny.get({ url })
+    t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
+  })
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+
+  test(`[REST mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'rest', 'asap')
+  })
+
+  test(`[REST mode / ${runType}] get / - ASAP`, async t => {
+    t.plan(1)
+    let result = await tiny.get({ url })
+    t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
+  })
+
+  test(`[REST mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+
+  /**
+   * Nothing dynamic in root, but only a bare @static - no @http
+   */
+  test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'http', 'bare-static')
+  })
+
+  test(`[HTTP mode / ${runType}] get / - ASAP (@static only)`, async t => {
+    t.plan(1)
+    let result = await tiny.get({ url })
+    t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
+  })
+
+  test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'httpv1', 'bare-static')
+  })
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] get / - ASAP (@static only)`, async t => {
+    t.plan(1)
+    let result = await tiny.get({ url })
+    t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
+  })
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+
+  test(`[REST mode mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'rest', 'bare-static')
+  })
+
+  test(`[REST mode / ${runType}] get / - ASAP (@static only)`, async t => {
+    t.plan(1)
+    let result = await tiny.get({ url })
+    t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
+  })
+
+  test(`[REST mode mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+
+  /**
+   * Root is greedy: retired for HTTP APIs in Arc 8, still available in REST mode
+   */
+  test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'http', 'greedy-get-index')
+  })
+
+  test(`[HTTP mode / ${runType}] get / - greedy index`, async t => {
+    t.plan(1)
+    try {
+      await tiny.get({ url: url + '/hi/there' })
+      t.fail(`Should not have gotten result`)
+    }
+    catch (err) {
+      t.equal(err.statusCode, 403, 'Errors with 403')
+    }
+  })
+
+  test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'httpv1', 'greedy-get-index')
+  })
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] get / - greedy index`, async t => {
+    t.plan(1)
+    try {
+      await tiny.get({ url: url + '/hi/there' })
+      t.fail(`Should not have gotten result`)
+    }
+    catch (err) {
+      t.equal(err.statusCode, 403, 'Errors with 403')
+    }
+  })
+
+  test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
+
+
+  test(`[REST mode / ${runType}] Start Sandbox`, t => {
+    setup(t, 'rest', 'greedy-get-index')
+  })
+
+  test(`[REST mode / ${runType}] get / - greedy index`, async t => {
+    t.plan(16)
+    let path = '/hi/there'
+    let result = await tiny.get({ url: url + path })
+    checkRestResult(t, result.body, {
+      message: 'Hello from get / running the default runtime',
+      resource: '/{proxy+}',
+      path,
+      httpMethod: 'GET',
+      headers: '🤷🏽‍♀️',
+      multiValueHeaders: '🤷🏽‍♀️',
+      queryStringParameters: null,
+      multiValueQueryStringParameters: null,
+      pathParameters: { proxy: 'hi/there' },
+      body: null,
+      isBase64Encoded: false,
+    })
+  })
+
+  test(`[REST mode / ${runType}] Shut down Sandbox`, t => {
+    teardown[runType](t)
+  })
 }
-function teardown (t) {
-  delete process.env.ARC_API_TYPE
-  t.notOk(process.env.ARC_API_TYPE, 'API type NOT set')
-}
-
-/**
- * Root param with nested exact match: /:param/there
- */
-test('[HTTP mode] get /hi/there - root param at /:param/there', async t => {
-  t.plan(21)
-  await setup(t, 'http', 'param-exact')
-
-  let result
-  result = await tiny.get({ url })
-  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
-
-  let rawPath = '/hi/there'
-  result = await tiny.get({ url: url + rawPath })
-  checkHttpResult(t, result.body, {
-    message: 'Hello from get /:param/there running the default runtime',
-    routeKey: 'GET /{param}/there',
-    rawPath,
-    pathParameters: { param: 'hi' },
-    cookies: undefined,
-    queryStringParameters: undefined,
-    rawQueryString: '',
-    headers: '🤷🏽‍♀️',
-    isBase64Encoded: false,
-    body: undefined,
-  })
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-test('[HTTP v1.0 (REST) mode] get /hi/there - root param at /:param/there', async t => {
-  t.plan(22)
-  await setup(t, 'httpv1', 'param-exact')
-
-  let result
-  result = await tiny.get({ url })
-  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
-
-  let path = '/hi/there'
-  result = await tiny.get({ url: url + path })
-  checkRestResult(t, result.body, {
-    message: 'Hello from get /:param/there running the default runtime',
-    resource: '/{param}/there',
-    path,
-    httpMethod: 'GET',
-    headers: '🤷🏽‍♀️',
-    multiValueHeaders: '🤷🏽‍♀️',
-    queryStringParameters: null,
-    multiValueQueryStringParameters: null,
-    pathParameters: { param: 'hi' },
-    body: null,
-    isBase64Encoded: false,
-  })
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-// TODO fix this test, see: arc#982
-// This shouldn't be possible, as /:param/whatever can't coexist with /{proxy+} ASAP in REST
-/*
-test('[REST mode] get /hi/there - root param at /:param/there', async t => {
-  t.plan(7)
-  await setup(t, 'rest', 'param-exact')
-
-  try {
-    await tiny.get({ url: url + '/hi/there' })
-    t.fail(`Should not have gotten result`)
-  }
-  catch (err) {
-    t.equal(err.statusCode, 403, 'Errors with 403')
-  }
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-*/
-
-/**
- * Root param only: /:param
- */
-test('[HTTP mode] get / - root param at /:param', async t => {
-  t.plan(20)
-  await setup(t, 'http', 'root-param')
-
-  let result = await tiny.get({ url })
-  checkHttpResult(t, result.body, {
-    message: 'Hello from get /:param running the default runtime',
-    routeKey: 'GET /{param}',
-    rawPath: '/',
-    pathParameters: { param: '' },
-    cookies: undefined,
-    queryStringParameters: undefined,
-    rawQueryString: '',
-    headers: '🤷🏽‍♀️',
-    isBase64Encoded: false,
-    body: undefined,
-  })
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-test('[HTTP v1.0 (REST) mode] get / - root param at /:param', async t => {
-  t.plan(21)
-  await setup(t, 'httpv1', 'root-param')
-
-  let result = await tiny.get({ url })
-  checkRestResult(t, result.body, {
-    message: 'Hello from get /:param running the default runtime',
-    resource: '/{param}',
-    path: '/',
-    httpMethod: 'GET',
-    headers: '🤷🏽‍♀️',
-    multiValueHeaders: '🤷🏽‍♀️',
-    queryStringParameters: null,
-    multiValueQueryStringParameters: null,
-    pathParameters: { param: '' },
-    body: null,
-    isBase64Encoded: false,
-  })
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-// This shouldn't be possible, as /:param can't coexist with /{proxy+} ASAP in REST
-test('[REST mode] get / - root param at /:param', async t => {
-  t.plan(6)
-  await setup(t, 'rest', 'root-param')
-
-  try {
-    await tiny.get({ url })
-    t.fail(`Should not have gotten result`)
-  }
-  catch (err) {
-    t.equal(err.statusCode, 403, 'Errors with 403')
-  }
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-/**
- * Nothing dynamic in root, all ASAP all the time
- */
-test('[HTTP mode] get / - ASAP', async t => {
-  t.plan(6)
-  await setup(t, 'http', 'asap')
-
-  let result = await tiny.get({ url })
-  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-test('[HTTP v1.0 (REST) mode] get / - ASAP', async t => {
-  t.plan(6)
-  await setup(t, 'httpv1', 'asap')
-
-  let result = await tiny.get({ url })
-  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-test('[REST mode] get / - ASAP', async t => {
-  t.plan(6)
-  await setup(t, 'rest', 'asap')
-
-  let result = await tiny.get({ url })
-  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-/**
- * Nothing dynamic in root, but only a bare @static - no @http
- */
-test('[HTTP mode] get / - ASAP (@static only)', async t => {
-  t.plan(6)
-  await setup(t, 'http', 'bare-static')
-
-  let result = await tiny.get({ url })
-  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-test('[HTTP v1.0 (REST) mode] get / - ASAP (@static only)', async t => {
-  t.plan(6)
-  await setup(t, 'httpv1', 'bare-static')
-
-  let result = await tiny.get({ url })
-  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-test('[REST mode] get / - ASAP (@static only)', async t => {
-  t.plan(6)
-  await setup(t, 'rest', 'bare-static')
-
-  let result = await tiny.get({ url })
-  t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-/**
- * Root is greedy: retired for HTTP APIs in Arc 8, still available in REST mode
- */
-test('[HTTP mode] get / - greedy index', async t => {
-  t.plan(6)
-  await setup(t, 'http', 'greedy-get-index')
-
-  try {
-    await tiny.get({ url: url + '/hi/there' })
-    t.fail(`Should not have gotten result`)
-  }
-  catch (err) {
-    t.equal(err.statusCode, 403, 'Errors with 403')
-  }
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-test('[HTTP v1.0 (REST) mode] get / - greedy index', async t => {
-  t.plan(6)
-  await setup(t, 'httpv1', 'greedy-get-index')
-
-  try {
-    await tiny.get({ url: url + '/hi/there' })
-    t.fail(`Should not have gotten result`)
-  }
-  catch (err) {
-    t.equal(err.statusCode, 403, 'Errors with 403')
-  }
-
-  await shutdownAsync(t)
-  teardown(t)
-})
-
-test('[REST mode] get / - greedy index', async t => {
-  t.plan(21)
-  await setup(t, 'rest', 'greedy-get-index')
-
-  let path = '/hi/there'
-  let result = await tiny.get({ url: url + path })
-  checkRestResult(t, result.body, {
-    message: 'Hello from get / running the default runtime',
-    resource: '/{proxy+}',
-    path,
-    httpMethod: 'GET',
-    headers: '🤷🏽‍♀️',
-    multiValueHeaders: '🤷🏽‍♀️',
-    queryStringParameters: null,
-    multiValueQueryStringParameters: null,
-    pathParameters: { proxy: 'hi/there' },
-    body: null,
-    isBase64Encoded: false,
-  })
-
-  await shutdownAsync(t)
-  teardown(t)
-})

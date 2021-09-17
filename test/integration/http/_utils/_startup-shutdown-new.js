@@ -49,10 +49,6 @@ let startup = {
         t.pass('Sandbox started (binary)')
       }
     })
-    child.stderr.on('data', chunk => {
-      data += chunk.toString()
-      if (!quiet) { console.log(data) }
-    })
   }
 }
 
@@ -70,18 +66,23 @@ let shutdown = {
   binary: (t, setPlan = true) => {
     if (setPlan) t.plan(1)
     child.kill('SIGINT')
-    child = undefined
-    verifyShutdown(t, 'binary')
-  }
-}
-
-let shutdownAsync = {
-  module: async t => {
-    let result = await sandbox.end()
-    if (result !== 'Sandbox successfully shut down') {
-      t.fail('Did not get back Sandbox shutdown message')
+    // Child processes can take a bit to shut down
+    // If we don't confirm it's exited, the next test may try to start a second Sandbox and blow everything up
+    let tries = 0
+    function check () {
+      if (child.exitCode === null && tries <= 10) {
+        tries++
+        setTimeout(check, 25)
+      }
+      else if (child.exitCode === null) {
+        throw Error(`Could not exit Sandbox binary child process (${child.pid})`)
+      }
+      else {
+        child = undefined
+        verifyShutdown(t, 'binary')
+      }
     }
-    verifyShutdown(t, 'module')
+    check()
   }
 }
 
@@ -108,6 +109,5 @@ module.exports = {
   verifyShutdownNew: verifyShutdown,
   startupNew: startup,
   shutdownNew: shutdown,
-  shutdownAsyncNew: shutdownAsync,
   teardown,
 }
