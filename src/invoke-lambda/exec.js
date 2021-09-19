@@ -44,6 +44,8 @@ module.exports = function exec (run, params, callback) {
       env: 'testing',
       // `sandboxPath` named differenty because `staticPath` was too vague within ASAP
       sandboxPath: context.staticPath,
+      // Pick up SPA setting (which may be overridden by process ARC_STATIC_SPA within ASAP)
+      spa: context.inventory.inv?.static?.spa
     })
     asap(JSON.parse(request))
       .then(result => callback(null, result))

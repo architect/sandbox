@@ -4,9 +4,8 @@ let { join, basename, sep } = require('path')
 let { existsSync, readFileSync } = require('fs')
 
 /**
- * Initialize process.env with .arc-env
- * - If NODE_ENV=staging the process.env is populated by @staging (etc)
- * - If ARC_LOCAL is present process.env is populated by @testing (so you can access remote dynamo locally)
+ * Initialize Lambdas with local environment variable settings
+ * - e.g. if ARC_ENV=staging the Lambda env is populated by `@staging`, etc.
  */
 module.exports = function populateUserEnv (params, callback) {
   let { cwd, update, inventory } = params

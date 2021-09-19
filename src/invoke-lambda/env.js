@@ -61,7 +61,7 @@ module.exports = function getEnv (params) {
     env.ARC_CLOUDFORMATION = `${toLogicalID(inv.app)}${capEnv}`
   }
 
-  // Declare a bucket for implicit proxy
+  // Env vars for users manually running ASAP in a Lambda
   if (inv.static) {
     env.ARC_STATIC_BUCKET = 'sandbox'
     // Add userland ARC_STATIC_SPA if defined, otherwise we'll pick it up via Inv
