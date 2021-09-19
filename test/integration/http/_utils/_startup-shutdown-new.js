@@ -1,7 +1,7 @@
 let { join } = require('path')
 let { spawn } = require('child_process')
 let sandbox = require('../../../../src')
-let { url } = require('./_lib')
+let { port, url } = require('./_lib')
 let tiny = require('tiny-json-http')
 let mock = join(process.cwd(), 'test', 'mock')
 let quiet = true
@@ -22,9 +22,10 @@ let startup = {
   module: (t, mockDir, apigateway) => {
     t.plan(1)
     sandbox.start({
-      cwd: join(mock, mockDir),
-      quiet,
       apigateway,
+      cwd: join(mock, mockDir),
+      port,
+      quiet,
     }, (err, result) => {
       if (err) t.fail(err)
       else t.equal(result, 'Sandbox successfully started', 'Sandbox started (module)')
@@ -36,7 +37,7 @@ let startup = {
     let cwd = join(mock, mockDir)
     child = spawn(`${process.cwd()}/bin/sandbox-binary`, [], {
       cwd,
-      env: { ARC_API_TYPE: apigateway, ...process.env }
+      env: { ARC_API_TYPE: apigateway, PORT: port, ...process.env }
     })
     t.ok(child, 'Sandbox child process started')
     let data = ''

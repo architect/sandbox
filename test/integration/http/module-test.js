@@ -3,7 +3,7 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let { http } = require(sut)
-let { url, verifyShutdownNew } = require('./_utils')
+let { port, quiet, url, verifyShutdownNew } = require('./_utils')
 let mock = join(process.cwd(), 'test', 'mock')
 let name = 'HTTP module'
 
@@ -19,7 +19,7 @@ test('Set up env', t => {
  */
 test('Sync http.start', t => {
   t.plan(1)
-  http.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
+  http.start({ cwd: join(mock, 'normal'), port, quiet }, function (err, result) {
     if (err) t.fail(err)
     t.equal(result, 'HTTP successfully started', 'HTTP started')
   })
@@ -49,7 +49,7 @@ test('Sync http.end', t => {
 test('Async http.start', async t => {
   t.plan(1)
   try {
-    let result = await http.start({ cwd: join(mock, 'normal'), quiet: true })
+    let result = await http.start({ cwd: join(mock, 'normal'), port, quiet })
     t.equal(result, 'HTTP successfully started', 'Sandbox started')
   }
   catch (err) {

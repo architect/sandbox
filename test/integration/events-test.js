@@ -7,6 +7,7 @@ let { events } = require('../../src')
 let { sync: rm } = require('rimraf')
 let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
+let { port, quiet } = require('./http/_utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 
 // Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally
@@ -15,7 +16,7 @@ function setup (t) {
   if (existsSync(tmp)) rm(tmp)
   mkdirSync(tmp, { recursive: true })
   t.ok(existsSync(tmp), 'Created tmp dir')
-  let { eventsPort } = getPorts()
+  let { eventsPort } = getPorts(port)
   process.env.ARC_EVENTS_PORT = eventsPort
   if (!process.env.ARC_EVENTS_PORT) t.fail('ARC_EVENTS_PORT should be set')
 }
@@ -60,7 +61,7 @@ test('Set up env', t => {
 test('Async events.start', async t => {
   t.plan(1)
   try {
-    let result = await events.start({ cwd: join(mock, 'normal'), quiet: true })
+    let result = await events.start({ cwd: join(mock, 'normal'), port, quiet })
     t.equal(result, 'Event bus successfully started', 'Events started (async)')
   }
   catch (err) {
@@ -124,10 +125,10 @@ test('arc.events.publish (failure)', t => {
 
 test('Random HTTP request to event bus with malformed JSON should return an HTTP 400 error', t => {
   t.plan(2)
-  let { eventsPort: port } = getPorts()
+  let { eventsPort } = getPorts(port)
   let req = http.request({
     method: 'POST',
-    port,
+    port: eventsPort,
     path: '/'
   }, function done (res) {
     let data = ''
@@ -155,7 +156,7 @@ test('Async events.end', async t => {
 
 test('Sync events.start', t => {
   t.plan(1)
-  events.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
+  events.start({ cwd: join(mock, 'normal'), port, quiet }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'Event bus successfully started', 'Events started (sync)')
   })

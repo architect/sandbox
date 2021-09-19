@@ -1,8 +1,6 @@
 let { join } = require('path')
 let { sync: rm } = require('rimraf')
 let { existsSync } = require('fs')
-let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
-let { httpPort } = getPorts()
 
 let b64dec = i => Buffer.from(i, 'base64').toString()
 
@@ -10,8 +8,12 @@ let copy = thing => JSON.parse(JSON.stringify(thing))
 
 let data = { hi: 'there' }
 
-let url = `http://localhost:${httpPort}`
-let wsUrl = `ws://localhost:${httpPort}`
+let port = 6666
+
+let quiet = process.env.NOISY_TESTS === 'true' ? false : true
+
+let url = `http://localhost:${port}`
+let wsUrl = `ws://localhost:${port}`
 
 function rmPublic (t) {
   try {
@@ -28,7 +30,9 @@ module.exports = {
   b64dec,
   copy,
   data,
+  port,
+  quiet,
+  rmPublic,
   url,
   wsUrl,
-  rmPublic
 }

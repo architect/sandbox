@@ -6,8 +6,9 @@ let getDBClient = require(join(process.cwd(), 'src', 'tables', '_get-db-client')
 let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
 let mock = join(process.cwd(), 'test', 'mock')
+let { port, quiet } = require('./http/_utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
-let ports
+let ports = getPorts(port)
 let str = s => JSON.stringify(s, null, 2)
 let dynamo
 let externalDBPort = 4567
@@ -15,26 +16,26 @@ let dynaliteServer
 
 // Because these tests use Arc Functions `tables`, that module needs a `ARC_TABLES_PORT` env var to run locally
 // That said, to prevent side-effects, destroy that env var immediately after use
-function setup (t, port) {
-  let { tablesPort } = getPorts()
-  process.env.ARC_TABLES_PORT = port || tablesPort
+function setup (t, provided) {
+  let { tablesPort } = ports
+  process.env.ARC_TABLES_PORT = provided || tablesPort
   if (!process.env.ARC_TABLES_PORT) t.fail('ARC_TABLES_PORT should be set')
 }
 function teardown (t) {
+  ports = getPorts(port)
   delete process.env.ARC_TABLES_PORT
   if (process.env.ARC_TABLES_PORT) t.fail('ARC_TABLES_PORT should not be set')
 }
 
 test('Set up env', t => {
   t.plan(1)
-  ports = getPorts()
   t.ok(tables, 'Tables module is present')
 })
 
 test('Async tables.start', async t => {
   t.plan(1)
   try {
-    let result = await tables.start({ cwd: join(mock, 'normal'), quiet: true })
+    let result = await tables.start({ cwd: join(mock, 'normal'), port, quiet })
     t.equal(result, 'DynamoDB successfully started', 'Tables started (async)')
   }
   catch (err) {
@@ -77,7 +78,7 @@ test('Async tables.end', async t => {
 
 test('Sync tables.start', t => {
   t.plan(1)
-  tables.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
+  tables.start({ cwd: join(mock, 'normal'), port, quiet }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
   })
@@ -227,8 +228,8 @@ test('Async tables.start', async t => {
   try {
     process.env.ARC_DB_EXTERNAL = true
     setup(t, externalDBPort)
-    ports = getPorts()
-    let result = await tables.start({ cwd: join(mock, 'external-db') })
+    ports = getPorts() // Reset those ports
+    let result = await tables.start({ cwd: join(mock, 'external-db'), quiet })
     t.equal(result, 'DynamoDB successfully started', 'Tables started in external mode')
     teardown(t)
   }
@@ -286,7 +287,7 @@ test('Stop external DB', t => {
 test('Sync tables.start({ all: true })', t => {
   t.plan(1)
   ports = getPorts() // Reset those ports
-  tables.start({ cwd: join(mock, 'normal'), quiet: true, all: true }, function (err, result) {
+  tables.start({ cwd: join(mock, 'normal'), port, quiet, all: true }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
   })
@@ -303,7 +304,7 @@ test('Sync tables.end({ all: true })', t => {
 test('Async tables.start({ all: true })', async t => {
   t.plan(1)
   try {
-    let result = await tables.start({ cwd: join(mock, 'normal'), quiet: true, all: true })
+    let result = await tables.start({ cwd: join(mock, 'normal'), port, quiet, all: true })
     t.equal(result, 'DynamoDB successfully started', 'Tables started (async)')
   }
   catch (err) {

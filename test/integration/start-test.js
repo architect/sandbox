@@ -4,7 +4,7 @@ let tiny = require('tiny-json-http')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let mock = join(process.cwd(), 'test', 'mock', 'normal')
-let { url } = require('./http/_utils')
+let { port, quiet, url } = require('./http/_utils')
 let cwd = process.cwd()
 let msg = 'Hello from get / running the default runtime'
 
@@ -23,7 +23,7 @@ test('Set up env', t => {
 test('Async sandbox.start (with cwd param)', async t => {
   t.plan(2)
   try {
-    await sandbox.start({ cwd: mock, quiet: true })
+    await sandbox.start({ cwd: mock, port, quiet })
     t.pass('Sandbox started (async)')
     let result = await tiny.get({ url })
     t.equal(msg, result.body.message, 'Got back get / handler')
@@ -49,7 +49,7 @@ test('Async sandbox.start (from process.cwd)', async t => {
   try {
     process.chdir(mock)
     t.equal(process.cwd(), mock, 'Process changed to mock dir')
-    await sandbox.start({ quiet: true })
+    await sandbox.start({ port, quiet })
     t.pass('Sandbox started (async)')
     let result = await tiny.get({ url })
     t.equal(msg, result.body.message, 'Got back get / handler')
@@ -74,7 +74,7 @@ test('Async sandbox.end', async t => {
 
 test('Sync sandbox.start (with cwd param)', t => {
   t.plan(2)
-  sandbox.start({ cwd: mock, quiet: true }, function (err) {
+  sandbox.start({ cwd: mock, port, quiet }, function (err) {
     if (err) t.fail('Sandbox failed (sync)')
     else {
       t.pass('Sandbox started (sync)')
@@ -100,7 +100,7 @@ test('Sync sandbox.start (from process.cwd)', t => {
   t.plan(3)
   process.chdir(mock)
   t.equal(process.cwd(), mock, 'Process changed to mock dir')
-  sandbox.start({ quiet: true }, function (err) {
+  sandbox.start({ port, quiet }, function (err) {
     if (err) t.fail('Sandbox failed (sync)')
     else {
       t.pass('Sandbox started (sync)')

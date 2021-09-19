@@ -4,7 +4,7 @@ let sandbox = require('../../../src')
 let { join } = require('path')
 let series = require('run-series')
 let mock = join(process.cwd(), 'test', 'mock')
-let { copy, url } = require(join(process.cwd(), 'test', 'integration', 'http', '_utils'))
+let { copy, port, quiet, url } = require(join(process.cwd(), 'test', 'integration', 'http', '_utils'))
 
 // Verify sandbox shut down
 let shutdown = (t, err) => {
@@ -22,7 +22,7 @@ test('Set up env', t => {
 test('Sandbox returns a Promise', async t => {
   t.plan(8)
   try {
-    await sandbox.start({ cwd: join(mock, 'no-functions'), quiet: true })
+    await sandbox.start({ cwd: join(mock, 'no-functions'), port, quiet })
     t.pass('sandbox.start returned Promise (without params)')
   }
   catch (err) {
@@ -129,7 +129,7 @@ test('Sandbox only minimally mutates env vars', async t => {
 
   // Architect 6+ (local)
   before = copy(process.env)
-  await sandbox.start({ cwd: join(mock, 'normal'), quiet: true })
+  await sandbox.start({ cwd: join(mock, 'normal'), port, quiet })
   after = copy(process.env)
   envVars.forEach(v => delete after[v])
   t.deepEqual(before, after, 'Did not materially mutate process env vars (local)')
@@ -139,7 +139,7 @@ test('Sandbox only minimally mutates env vars', async t => {
   // Architect 6+ (staging/prod)
   before = copy(process.env)
   process.env.NODE_ENV = 'staging'
-  await sandbox.start({ cwd: join(mock, 'normal'), quiet: true })
+  await sandbox.start({ cwd: join(mock, 'normal'), port, quiet })
   after = copy(process.env)
   envVars.forEach(v => delete after[v])
   t.deepEqual(before, after, 'Did not materially mutate process env vars (staging)')

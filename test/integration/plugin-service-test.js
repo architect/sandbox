@@ -4,6 +4,7 @@ let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let mock = join(process.cwd(), 'test', 'mock')
+let { port, quiet } = require('./http/_utils')
 let syncFile = join(mock, 'plugins-sync', 'syncplugin.test')
 let asyncFile = join(mock, 'plugins-async', 'asyncplugin.test')
 
@@ -31,7 +32,7 @@ test('Set up env', t => {
 
 test('Sync sandbox.start', t => {
   t.plan(1)
-  sandbox.start({ cwd: join(mock, 'plugins-sync'), quiet: true }, function (err) {
+  sandbox.start({ cwd: join(mock, 'plugins-sync'), port, quiet }, function (err) {
     if (err) t.fail(err, 'Sandbox failed (sync)')
     else t.ok(existsSync(syncFile), `plugin sandbox service start executed successfully (created ${syncFile})`)
   })
@@ -48,7 +49,7 @@ test('Sync sandbox.end', t => {
 test('Async sandbox.start', async t => {
   t.plan(1)
   try {
-    await sandbox.start({ cwd: join(mock, 'plugins-async'), quiet: true })
+    await sandbox.start({ cwd: join(mock, 'plugins-async'), port, quiet })
   }
   catch (err) {
     t.fail(err)

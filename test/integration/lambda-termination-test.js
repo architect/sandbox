@@ -5,6 +5,7 @@ let { join } = require('path')
 let { events } = require('../../src')
 let { sync: rm } = require('rimraf')
 let mock = join(process.cwd(), 'test', 'mock')
+let { port, quiet } = require('./http/_utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let tmp = join(mock, 'tmp')
 let fileThatShouldNotBeWritten = join(tmp, 'do-not-write-me')
@@ -17,7 +18,7 @@ function setup (t) {
   if (existsSync(tmp)) rm(tmp)
   mkdirSync(tmp, { recursive: true })
   t.ok(existsSync(tmp), 'Created tmp dir')
-  let { eventsPort } = getPorts()
+  let { eventsPort } = getPorts(port)
   process.env.ARC_EVENTS_PORT = eventsPort
   if (!process.env.ARC_EVENTS_PORT) t.fail('ARC_EVENTS_PORT should be set')
 }
@@ -43,7 +44,7 @@ test('Set up env', t => {
 
 test('events.start', t => {
   t.plan(1)
-  events.start({ cwd: join(mock, 'lambda-termination'), quiet: true, logLevel: 'debug' }, (err, result) => {
+  events.start({ cwd: join(mock, 'lambda-termination'), port, quiet, logLevel: 'debug' }, (err, result) => {
     if (err) t.fail(err)
     else t.equal(result, 'Event bus successfully started', 'Events started')
   })

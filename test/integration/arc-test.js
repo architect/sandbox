@@ -4,9 +4,9 @@ let aws = require('aws-sdk')
 let http = require('http')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { shutdown } = require('./http/_utils')
+let { port, quiet, shutdown } = require('./http/_utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
-let { _arcPort } = getPorts()
+let { _arcPort } = getPorts(port)
 
 let mock = join(process.cwd(), 'test', 'mock')
 let app = 'mockapp'
@@ -36,7 +36,7 @@ test('Set up env', t => {
 
 test('Start Sandbox ("normal" mock app)', t => {
   t.plan(1)
-  sandbox.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'normal'), port, quiet }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
@@ -74,7 +74,7 @@ test('Shut down Sandbox', t => {
 
 test(`Start Sandbox ('plugins-sync' mock app)`, t => {
   t.plan(1)
-  sandbox.start({ cwd: join(mock, 'plugins-sync'), quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'plugins-sync'), port, quiet }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })

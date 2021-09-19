@@ -5,9 +5,9 @@ let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let getDBClient = require('../../src/tables/_get-db-client')
 let mock = join(process.cwd(), 'test', 'mock')
+let { port, quiet, url } = require('./http/_utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
-let ports
-let url
+let ports = getPorts(port)
 
 // Verify sandbox shut down
 let shutdown = (t, err) => {
@@ -16,8 +16,6 @@ let shutdown = (t, err) => {
 
 test('Set up env', t => {
   t.plan(1)
-  ports = getPorts()
-  url = `http://localhost:${ports.httpPort}`
   t.ok(sandbox, 'Sandbox is present')
 })
 
@@ -26,7 +24,7 @@ test('Set up env', t => {
  */
 test('Start Sandbox without an Architect project manifest', t => {
   t.plan(1)
-  sandbox.start({ cwd: join(mock, 'no-arc'), quiet: true }, function (err) {
+  sandbox.start({ cwd: join(mock, 'no-arc'), port, quiet }, function (err) {
     if (err) t.fail('Sandbox failed (sync)')
     else t.pass('Sandbox started (sync)')
   })

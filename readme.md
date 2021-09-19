@@ -226,6 +226,8 @@ To run just the integration tests (which are located under `test/integration'):
 
     npm run test:integration
 
+To make tests run extra noisy-like, add the `NOISY_TESTS=true` env var
+
 
 [events]: https://arc.codes/reference/arc/events
 [http]: https://arc.codes/reference/arc/http

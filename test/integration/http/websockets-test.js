@@ -3,7 +3,7 @@ let test = require('tape')
 let Websocket = require('ws')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { makeSideChannel, wsUrl: url } = require('./_utils')
+let { makeSideChannel, port, quiet, wsUrl: url } = require('./_utils')
 
 let mock = join(process.cwd(), 'test', 'mock')
 let _ws
@@ -91,7 +91,7 @@ test('Set up env', async t => {
 
 test('[WebSockets] Start Sandbox', t => {
   t.plan(1)
-  sandbox.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
+  sandbox.start({ cwd: join(mock, 'normal'), quiet, port }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
