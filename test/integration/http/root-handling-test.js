@@ -3,7 +3,7 @@ let { existsSync } = require('fs')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sandbox = require('../../../src')
-let { url, startupNew: startup, checkHttpResult, checkRestResult, teardown } = require('./_utils')
+let { url, startupNew: startup,  shutdownNew: shutdown, checkHttpResult, checkRestResult } = require('./_utils')
 let indexHTML = 'Hello from public/index.html!'
 
 test('Set up env', t => {
@@ -57,7 +57,7 @@ function runTests (runType) {
   })
 
   test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
 
@@ -89,7 +89,7 @@ function runTests (runType) {
   })
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
   // TODO fix this test, see: arc#982
@@ -132,7 +132,7 @@ function runTests (runType) {
   })
 
   test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
 
@@ -159,7 +159,7 @@ function runTests (runType) {
   })
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
 
@@ -180,7 +180,7 @@ function runTests (runType) {
   })
 
   test(`[REST mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
   /**
@@ -197,7 +197,7 @@ function runTests (runType) {
   })
 
   test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
 
@@ -212,7 +212,7 @@ function runTests (runType) {
   })
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
 
@@ -227,7 +227,7 @@ function runTests (runType) {
   })
 
   test(`[REST mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
 
@@ -245,7 +245,7 @@ function runTests (runType) {
   })
 
   test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
 
@@ -260,7 +260,7 @@ function runTests (runType) {
   })
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
 
@@ -275,7 +275,7 @@ function runTests (runType) {
   })
 
   test(`[REST mode mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
 
@@ -298,7 +298,7 @@ function runTests (runType) {
   })
 
   test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
 
@@ -318,7 +318,7 @@ function runTests (runType) {
   })
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 
 
@@ -346,6 +346,6 @@ function runTests (runType) {
   })
 
   test(`[REST mode / ${runType}] Shut down Sandbox`, t => {
-    teardown[runType](t)
+    shutdown[runType](t)
   })
 }

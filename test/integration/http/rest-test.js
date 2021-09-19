@@ -4,7 +4,7 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { b64dec, url, data, startupNew: startup, shutdownNew: shutdown, checkRestResult: checkResult, rmPublic, teardown } = require('./_utils')
+let { b64dec, url, data, startupNew: startup, shutdownNew: shutdown, checkRestResult: checkResult, rmPublic } = require('./_utils')
 
 test('Set up env', t => {
   t.plan(1)
@@ -636,7 +636,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Teardown`, t => {
-    teardown[runType](t)
+  test(`${mode} Shut down Sandbox`, t => {
+    shutdown[runType](t)
   })
 }

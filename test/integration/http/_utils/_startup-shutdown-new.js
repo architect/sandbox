@@ -86,20 +86,8 @@ let shutdown = {
   }
 }
 
-let teardown = {
-  module: t => {
-    t.plan(1)
-    shutdown.module(t, false)
-  },
-  binary: t => {
-    t.plan(1)
-    shutdown.binary(t, false)
-  }
-}
-
 module.exports = {
   verifyShutdownNew: verifyShutdown,
   startupNew: startup,
   shutdownNew: shutdown,
-  teardown,
 }
