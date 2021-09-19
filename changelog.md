@@ -4,6 +4,12 @@
 
 ## [next] 2021-09-15
 
+### Added
+
+- Sandbox now accepts a `apigateway` option, in addition to `@aws apigateway` and `ARC_API_TYPE` env var
+  - As before, valid options include: `http` (default if not passed), `httpv1`, `rest`
+
+
 ### Changed
 
 - Route list now shows automatic static asset delivery at the root as mounting the public folder

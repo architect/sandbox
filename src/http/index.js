@@ -34,12 +34,12 @@ module.exports = function createHttpServer (inventory) {
 
     // Start the HTTP server
     app.start = function start (options, callback) {
-      let { all, cwd, port, quiet, symlink = true, update, userEnv } = options
+      let { all, apigateway, cwd, port, quiet, symlink = true, update, userEnv } = options
 
       // Set up ports and HTTP-specific config
       let ports = getPorts(port)
       let { httpPort } = ports
-      let { apiType, staticPath } = config(inv, cwd)
+      let { apiType, staticPath } = config({ apigateway, cwd, inv })
 
       // Main parameters needed throughout an invocation
       let params = { apiType, cwd, inventory, ports, staticPath, update, userEnv }

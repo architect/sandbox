@@ -19,21 +19,25 @@ let verifyShutdown = (t, type) => {
 }
 
 let startup = {
-  module: (t, mockDir) => {
+  module: (t, mockDir, apigateway) => {
     t.plan(1)
     sandbox.start({
       cwd: join(mock, mockDir),
       quiet,
+      apigateway,
     }, (err, result) => {
       if (err) t.fail(err)
       else t.equal(result, 'Sandbox successfully started', 'Sandbox started (module)')
     })
   },
-  binary: (t, mockDir) => {
+  binary: (t, mockDir, apigateway) => {
     t.plan(2)
     if (child) throw Error('Unclean test env, found hanging child process!')
     let cwd = join(mock, mockDir)
-    child = spawn(`${process.cwd()}/bin/sandbox-binary`, [], { cwd })
+    child = spawn(`${process.cwd()}/bin/sandbox-binary`, [], {
+      cwd,
+      env: { ARC_API_TYPE: apigateway, ...process.env }
+    })
     t.ok(child, 'Sandbox child process started')
     let data = ''
     let started = false

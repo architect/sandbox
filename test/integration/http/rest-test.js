@@ -29,8 +29,7 @@ function runTests (runType) {
   let mode = `[REST mode / ${runType}]`
 
   test(`${mode} Start Sandbox`, t => {
-    process.env.ARC_API_TYPE = 'rest'
-    startup[runType](t, 'normal')
+    startup[runType](t, 'normal', 'rest')
   })
 
   test(`${mode} get /`, t => {

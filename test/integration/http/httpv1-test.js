@@ -29,8 +29,7 @@ function runTests (runType) {
   let mode = `[HTTP v1.0 (REST) mode / ${runType}]`
 
   test(`${mode} Start Sandbox`, t => {
-    process.env.ARC_API_TYPE = 'httpv1'
-    startup[runType](t, 'normal')
+    startup[runType](t, 'normal', 'httpv1')
   })
 
   test(`${mode} get /`, t => {

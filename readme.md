@@ -35,6 +35,8 @@ npx arc sandbox
 - `-p`, `--port`, `port` - Manually specify HTTP port
   - Defaults to `3333`
 - `-v`, `--verbose`, `verbose` - Enable verbose logging
+- `-d`, `--debug`, `debug` - Enable debose logging
+- `-q`, `--quiet`, `quiet` - Disable (most) logging
 - `--disable-symlinks` - Disable symlinking `src/shared` into all functions and
     use file copying instead
 
@@ -50,9 +52,9 @@ npx arc sandbox
 - `ARC_EVENTS_PORT`- Manually specify event bus port
   - Defaults to `3334`
 - `ARC_TABLES_PORT`- Manually specify local DynamoDB port
-  - Defaults to `3335`
+  - Defaults to `5000`
 - `ARC_LOCAL`- If present and used in conjunction with `NODE_ENV=staging|production`, emulates live `staging` or `production` environment
-  - Uses your local `.arc-env` file's `@staging` or `@production` environment variables
+  - Uses your local preference file's `@staging` or `@production` environment variables
   - Connects Sandbox to live AWS events and DynamoDB infra
   - Requires valid AWS credentials with the same profile name as defined in your project manifest
 
@@ -63,13 +65,16 @@ npx arc sandbox
 Sandbox is designed to be integrated into your application's test suite. In most cases you'll only need to make use of `sandbox.start()` and `sandbox.end()`. However, individual Sandbox services can also be individually started and stopped. ([See below](#individual-sandbox-services).)
 
 Methods may be passed an options object containing the following parameters:
-- `cwd` - **String** - Manually specify a working directory (handy for aiming Sandbox at test mocks)
-- `port` - **String or Number** - Manually specify HTTP port
+- `apigateway` - **String** - Specify the API Gateway API type
+  - Can be one of `http` (aliased to `httpv2`), `httpv1`, `rest`
+  - Defaults to `http`
+- `cwd` - **String** - Specify a working directory (handy for aiming Sandbox at test mocks)
+- `port` - **String or Number** - Specify HTTP port
   - Defaults to `3333`
+- `quiet` - **Boolean** - Disables (most) logging
 - `symlink` - **Boolean** - Use symlinking to Architect shared code from within each Lambda's dependencies (e.g. `src/http/get-index/node_modules/@architect/shared` → `src/shared`)
   - Defaults to `true`
   - `false` copies shared code into each Lambda, which can result much slower startup and dependency rehydration speeds
-- `quiet` - **Boolean** - Disables (most) logging
 
 ---
 

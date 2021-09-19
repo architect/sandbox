@@ -26,16 +26,11 @@ test('Binary', t => {
 })
 
 function runTests (runType) {
-  function setup (t, type, dir) {
-    process.env.ARC_API_TYPE = type
-    startup[runType](t, join('root-handling', dir))
-  }
-
   /**
    * Root param with nested exact match: /:param/there
    */
   test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'http', 'param-exact')
+    startup[runType](t, join('root-handling', 'param-exact'), 'http')
   })
 
   test(`[HTTP mode / ${runType}] get /hi/there - root param at /:param/there`, async t => {
@@ -67,7 +62,7 @@ function runTests (runType) {
 
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'httpv1', 'param-exact')
+    startup[runType](t, join('root-handling', 'param-exact'), 'httpv1')
   })
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] get /hi/there - root param at /:param/there`, async t => {
@@ -116,7 +111,7 @@ function runTests (runType) {
    * Root param only: /:param
    */
   test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'http', 'root-param')
+    startup[runType](t, join('root-handling', 'root-param'), 'http')
   })
 
   test(`[HTTP mode / ${runType}] get / - root param at /:param`, async t => {
@@ -142,7 +137,7 @@ function runTests (runType) {
 
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'httpv1', 'root-param')
+    startup[runType](t, join('root-handling', 'root-param'), 'httpv1')
   })
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] get / - root param at /:param`, async t => {
@@ -170,7 +165,7 @@ function runTests (runType) {
 
   // This shouldn't be possible, as /:param can't coexist with /{proxy+} ASAP in REST
   test(`[REST mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'rest', 'root-param')
+    startup[runType](t, join('root-handling', 'root-param'), 'rest')
   })
 
   test(`[REST mode / ${runType}] get / - root param at /:param`, async t => {
@@ -192,7 +187,7 @@ function runTests (runType) {
    * Nothing dynamic in root, all ASAP all the time
    */
   test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'http', 'asap')
+    startup[runType](t, join('root-handling', 'asap'), 'http')
   })
 
   test(`[HTTP mode / ${runType}] get / - ASAP`, async t => {
@@ -207,7 +202,7 @@ function runTests (runType) {
 
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'httpv1', 'asap')
+    startup[runType](t, join('root-handling', 'asap'), 'httpv1')
   })
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] get / - ASAP`, async t => {
@@ -222,7 +217,7 @@ function runTests (runType) {
 
 
   test(`[REST mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'rest', 'asap')
+    startup[runType](t, join('root-handling', 'asap'), 'rest')
   })
 
   test(`[REST mode / ${runType}] get / - ASAP`, async t => {
@@ -240,7 +235,7 @@ function runTests (runType) {
    * Nothing dynamic in root, but only a bare @static - no @http
    */
   test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'http', 'bare-static')
+    startup[runType](t, join('root-handling', 'bare-static'), 'http')
   })
 
   test(`[HTTP mode / ${runType}] get / - ASAP (@static only)`, async t => {
@@ -255,7 +250,7 @@ function runTests (runType) {
 
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'httpv1', 'bare-static')
+    startup[runType](t, join('root-handling', 'bare-static'), 'httpv1')
   })
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] get / - ASAP (@static only)`, async t => {
@@ -270,7 +265,7 @@ function runTests (runType) {
 
 
   test(`[REST mode mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'rest', 'bare-static')
+    startup[runType](t, join('root-handling', 'bare-static'), 'rest')
   })
 
   test(`[REST mode / ${runType}] get / - ASAP (@static only)`, async t => {
@@ -288,7 +283,7 @@ function runTests (runType) {
    * Root is greedy: retired for HTTP APIs in Arc 8, still available in REST mode
    */
   test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'http', 'greedy-get-index')
+    startup[runType](t, join('root-handling', 'greedy-get-index'), 'http')
   })
 
   test(`[HTTP mode / ${runType}] get / - greedy index`, async t => {
@@ -308,7 +303,7 @@ function runTests (runType) {
 
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'httpv1', 'greedy-get-index')
+    startup[runType](t, join('root-handling', 'greedy-get-index'), 'httpv1')
   })
 
   test(`[HTTP v1.0 (REST) mode / ${runType}] get / - greedy index`, async t => {
@@ -328,7 +323,7 @@ function runTests (runType) {
 
 
   test(`[REST mode / ${runType}] Start Sandbox`, t => {
-    setup(t, 'rest', 'greedy-get-index')
+    startup[runType](t, join('root-handling', 'greedy-get-index'), 'rest')
   })
 
   test(`[REST mode / ${runType}] get / - greedy index`, async t => {
