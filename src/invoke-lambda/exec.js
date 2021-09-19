@@ -40,6 +40,7 @@ module.exports = function exec (run, params, callback) {
   if (run === 'asap') {
     let { context, request } = params
     let asap = _asap({
+      // Runs ASAP in local mode, skipping bucket config / env var checks, etc.
       env: 'testing',
       // `sandboxPath` named differenty because `staticPath` was too vague within ASAP
       sandboxPath: context.staticPath,

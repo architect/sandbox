@@ -1,6 +1,7 @@
 let invoke = require('../invoke-lambda')
 
-module.exports = function eventBusListener ({ cwd, inventory, update }, req, res) {
+module.exports = function eventBusListener (params, req, res) {
+  let { inventory, update } = params
   let { get } = inventory
   let { url } = req
   let body = ''
@@ -64,7 +65,7 @@ module.exports = function eventBusListener ({ cwd, inventory, update }, req, res
       }
 
       let event = mock()
-      invoke({ cwd, lambda, event, inventory, update }, function snap (err) {
+      invoke({ event, lambda, ...params }, function snap (err) {
         if (err?.message === 'lambda_not_found') {
           update.warn(
             `@${arcType} ${name} missing Lambda handler file\n` +

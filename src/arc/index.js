@@ -13,13 +13,11 @@ module.exports = function _internal (inventory) {
 
   _arc.start = function start (options, callback) {
     let { update, port } = options
-    let { httpPort } = getPorts(port)
-    let { ARC_INTERNAL } = process.env
-    ARC_INTERNAL = ARC_INTERNAL || Number(httpPort) - 1 // Yeah, it's a magical number, I know
+    let { _arcPort } = getPorts(port)
 
     let listener = _listener.bind({}, { inventory })
     _arcServices = http.createServer(listener)
-    _arcServices.listen(ARC_INTERNAL, err => {
+    _arcServices.listen(_arcPort, err => {
       if (err) callback(err)
       else {
         update.done('Started service discovery emulator')

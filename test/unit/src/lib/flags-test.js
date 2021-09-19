@@ -3,17 +3,14 @@ let sut = join(process.cwd(), 'src', 'lib', 'flags')
 let flags = require(sut)
 let test = require('tape')
 let args = process.argv
-let port = process.env.PORT // jic set by test script
 let cmd = i => {
   process.argv = [ '/path/to/node', 'some/file' ].concat(i)
   console.log('CLI args set:', process.argv)
 }
 
 test('Set up env', t => {
-  t.plan(2)
-  delete process.env.PORT
+  t.plan(1)
   t.ok(flags, 'Flags module is present')
-  t.notOk(process.env.PORT, 'PORT not set')
 })
 
 test('Test logLevel flags', t => {
@@ -53,6 +50,7 @@ test('Test port flags', t => {
   t.plan(6)
   let f
 
+  delete process.env.PORT
   cmd([])
   f = flags(false)
   t.equal(f.port, 3333, `No port flags returned: 3333`)
@@ -60,6 +58,7 @@ test('Test port flags', t => {
   process.env.PORT = 1234
   f = flags(false)
   t.equal(f.port, 1234, `PORT env var returned: 1234`)
+  delete process.env.PORT
 
   cmd([ '-p', 'foo' ])
   f = flags(false)
@@ -115,6 +114,5 @@ test('Test hydration symlinking flag', t => {
 test('Teardown', t => {
   t.plan(1)
   process.argv = args
-  process.env.PORT = port
-  t.pass('Reset process.argv + PORT')
+  t.pass('Reset process.argv')
 })

@@ -25,7 +25,7 @@ module.exports = function requestFormatter ({ name, req, body, connectionId, dom
       requestId: makeRequestId(),
       requestTimeEpoch: Date.now(),
       routeKey,
-      stage: process.env.NODE_ENV || 'testing',
+      stage: process.env.ARC_ENV || 'testing',
     },
     isBase64Encoded: false
   }

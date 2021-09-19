@@ -12,7 +12,7 @@ let httpProxy = require('http-proxy')
  * - Error out
  */
 module.exports = function fallback (args, req, res, next) {
-  let { apiType, cwd, inventory, staticPath, update } = args
+  let { apiType, cwd, inventory, ports, staticPath, update } = args
   let { inv, get } = inventory
   let httpAPI = apiType.startsWith('http')
   let method = req.method.toLowerCase()
@@ -118,7 +118,9 @@ module.exports = function fallback (args, req, res, next) {
       lambda,
       apiType,
       inventory,
+      ports,
       update,
+      userEnv: {},
     })
     req.params = { [rootParam[1].substr(1)]: '' }
     exec(req, res)
@@ -155,8 +157,10 @@ module.exports = function fallback (args, req, res, next) {
         _skipHandlerCheck: true,
       },
       inventory,
+      ports,
       staticPath,
       update,
+      userEnv: {},
     })
     let proxy = pathname.startsWith('/') ? pathname.substr(1) : pathname
     req.params = { proxy }

@@ -6,13 +6,28 @@ let getDBClient = require(join(process.cwd(), 'src', 'tables', '_get-db-client')
 let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
 let mock = join(process.cwd(), 'test', 'mock')
+let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
+let ports
 let str = s => JSON.stringify(s, null, 2)
 let dynamo
-let dbPort = 4567
+let externalDBPort = 4567
 let dynaliteServer
+
+// Because these tests use Arc Functions `tables`, that module needs a `ARC_TABLES_PORT` env var to run locally
+// That said, to prevent side-effects, destroy that env var immediately after use
+function setup (t, port) {
+  let { tablesPort } = getPorts()
+  process.env.ARC_TABLES_PORT = port || tablesPort
+  if (!process.env.ARC_TABLES_PORT) t.fail('ARC_TABLES_PORT should be set')
+}
+function teardown (t) {
+  delete process.env.ARC_TABLES_PORT
+  if (process.env.ARC_TABLES_PORT) t.fail('ARC_TABLES_PORT should not be set')
+}
 
 test('Set up env', t => {
   t.plan(1)
+  ports = getPorts()
   t.ok(tables, 'Tables module is present')
 })
 
@@ -29,7 +44,7 @@ test('Async tables.start', async t => {
 
 test('Get client', t => {
   t.plan(1)
-  getDBClient(function _gotDBClient (err, client) {
+  getDBClient(ports, function _gotDBClient (err, client) {
     if (err) console.log(err) // Yes, but actually no
     dynamo = client
     t.ok(dynamo, 'Got Dynamo client')
@@ -38,11 +53,13 @@ test('Get client', t => {
 
 test('Can list tables', t => {
   t.plan(1)
+  setup(t)
   dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)
     else {
       let { TableNames } = result
       t.ok(Array.isArray(TableNames), `Got tables back from the DB: ${TableNames}`)
+      teardown(t)
     }
   })
 })
@@ -68,7 +85,7 @@ test('Sync tables.start', t => {
 
 test('Get client', t => {
   t.plan(1)
-  getDBClient(function _gotDBClient (err, client) {
+  getDBClient(ports, function _gotDBClient (err, client) {
     if (err) console.log(err) // Yes, but actually no
     dynamo = client
     t.ok(dynamo, 'Got Dynamo client')
@@ -77,6 +94,7 @@ test('Get client', t => {
 
 test('Default tables are present', t => {
   t.plan(2)
+  setup(t)
   let defaultTables = [
     'mockapp-production-arc-sessions',
     'mockapp-staging-arc-sessions',
@@ -87,12 +105,14 @@ test('Default tables are present', t => {
       for (let table of defaultTables) {
         t.ok(result.TableNames.includes(table), `Found table: ${table}`)
       }
+      teardown(t)
     }
   })
 })
 
 test('Can insert a row', t => {
   t.plan(1)
+  setup(t)
   dynamo.putItem({
     TableName,
     Item: {
@@ -102,23 +122,31 @@ test('Can insert a row', t => {
   },
   function _put (err, result) {
     if (err) t.fail(err)
-    else t.ok(result, `Got result: ${str(result)}`)
+    else {
+      t.ok(result, `Got result: ${str(result)}`)
+      teardown(t)
+    }
   })
 })
 
 test('Can read index in Arc 6', t => {
   t.plan(1)
+  setup(t)
   dynamo.describeTable({
     TableName
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else t.equal(result.Table.GlobalSecondaryIndexes[0].IndexName, 'email-index', 'Got index: email-index')
+    else {
+      t.equal(result.Table.GlobalSecondaryIndexes[0].IndexName, 'email-index', 'Got index: email-index')
+      teardown(t)
+    }
   })
 })
 
 test('Can read index in Arc 6', t => {
   t.plan(3)
+  setup(t)
   dynamo.describeTable({
     TableName: TableName2
   },
@@ -129,12 +157,14 @@ test('Can read index in Arc 6', t => {
       t.equal(indexes.length, 2, 'Got back two indexes')
       t.equal(indexes[0].IndexName, 'petID-index', 'Got index: petID-index')
       t.equal(indexes[1].IndexName, 'accountID-petID-index', 'Got index: accountID-petID-index')
+      teardown(t)
     }
   })
 })
 
 test('Can read the row', t => {
   t.plan(1)
+  setup(t)
   dynamo.getItem({
     TableName,
     Key: {
@@ -143,12 +173,16 @@ test('Can read the row', t => {
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else t.ok(result, `Got result: ${str(result)}`)
+    else {
+      t.ok(result, `Got result: ${str(result)}`)
+      teardown(t)
+    }
   })
 })
 
 test('Can query the index', t => {
   t.plan(1)
+  setup(t)
   dynamo.query({
     TableName,
     IndexName: 'email-index',
@@ -161,7 +195,10 @@ test('Can query the index', t => {
   },
   function _desc (err, result) {
     if (err) t.fail(err)
-    else t.ok(result, `Got result: ${str(result)}`)
+    else {
+      t.ok(result, `Got result: ${str(result)}`)
+      teardown(t)
+    }
   })
 })
 
@@ -178,10 +215,8 @@ test('Sync tables.end', t => {
  */
 test('Start external DB', t => {
   t.plan(1)
-  process.env.ARC_DB_EXTERNAL = true
-  process.env.ARC_TABLES_PORT = dbPort
   dynaliteServer = dynalite({ path: join(mock, 'normal', '.db'), createTableMs: 0 })
-  dynaliteServer.listen(dbPort, err => {
+  dynaliteServer.listen(externalDBPort, err => {
     if (err) t.fail(err)
     else t.pass('External DB successfully started')
   })
@@ -190,8 +225,12 @@ test('Start external DB', t => {
 test('Async tables.start', async t => {
   t.plan(1)
   try {
+    process.env.ARC_DB_EXTERNAL = true
+    setup(t, externalDBPort)
+    ports = getPorts()
     let result = await tables.start({ cwd: join(mock, 'external-db') })
     t.equal(result, 'DynamoDB successfully started', 'Tables started in external mode')
+    teardown(t)
   }
   catch (err) {
     t.fail(err)
@@ -200,20 +239,24 @@ test('Async tables.start', async t => {
 
 test('Get client', t => {
   t.plan(1)
-  getDBClient(function _gotDBClient (err, client) {
+  setup(t, externalDBPort)
+  getDBClient(ports, function _gotDBClient (err, client) {
     if (err) console.log(err) // Yes, but actually no
     dynamo = client
     t.ok(dynamo, 'Got Dynamo client')
+    teardown(t)
   })
 })
 
 test('Can list tables', t => {
   t.plan(1)
+  setup(t, externalDBPort)
   dynamo.listTables({}, function done (err, result) {
     if (err) t.fail(err)
     else {
       let { TableNames } = result
       t.ok(Array.isArray(TableNames), `Got tables back from the DB: ${TableNames}`)
+      teardown(t)
     }
   })
 })
@@ -223,8 +266,8 @@ test('Async tables.end', async t => {
   try {
     let ended = await tables.end()
     delete process.env.ARC_DB_EXTERNAL
-    delete process.env.ARC_TABLES_PORT
     t.equal(ended, 'DynamoDB successfully shut down', 'Tables ended')
+    teardown(t)
   }
   catch (err) {
     t.fail(err)
@@ -242,6 +285,7 @@ test('Stop external DB', t => {
 // `all:true` option for starting and stopping
 test('Sync tables.start({ all: true })', t => {
   t.plan(1)
+  ports = getPorts() // Reset those ports
   tables.start({ cwd: join(mock, 'normal'), quiet: true, all: true }, function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')

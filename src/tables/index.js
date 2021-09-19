@@ -21,7 +21,8 @@ module.exports = function createTables (inventory) {
       let { all, port, update } = options
 
       // Set up ports and env vars
-      let { tablesPort } = getPorts(port)
+      let ports = getPorts(port)
+      let { tablesPort } = ports
 
       series([
         // Set up Arc + userland env vars
@@ -56,7 +57,7 @@ module.exports = function createTables (inventory) {
         },
 
         function _initializeTables (callback) {
-          init(inventory, callback)
+          init({ inventory, ports }, callback)
         }
       ],
       function _started (err) {

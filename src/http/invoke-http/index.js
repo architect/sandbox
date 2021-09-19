@@ -16,7 +16,7 @@ let { errors, invalid } = require('./utils/validate')
  * Formats and validates HTTP request and response event objects
  */
 module.exports = function invokeHTTP (params) {
-  let { apiType, cwd, lambda, inventory, staticPath, update } = params
+  let { apiType, lambda } = params
   let { method, path } = lambda
 
   method = method.toUpperCase()
@@ -33,8 +33,7 @@ module.exports = function invokeHTTP (params) {
     }
 
     // Run the Lambda sig locally
-    let args = { apiType, cwd, lambda, event: request, inventory, staticPath, update }
-    invoke(args, function _res (err, result) {
+    invoke({ event: request, ...params }, function _res (err, result) {
       if (err?.message === 'lambda_not_found') {
         let body = errors.notFound(lambda)
         invalid(res, body)

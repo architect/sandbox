@@ -2,6 +2,7 @@ let { join } = require('path')
 let { existsSync } = require('fs')
 let chalk = require('chalk')
 
+let getEnv = require('./env')
 let exec = require('./exec')
 let warn = require('./warn')
 let missingRuntime = require('./missing-runtime')
@@ -9,7 +10,7 @@ let missingRuntime = require('./missing-runtime')
 let serialize = i => chalk.dim(JSON.stringify(i, null, 2))
 
 module.exports = function invokeLambda (params, callback) {
-  let { apiType, cwd, lambda, event, inventory, staticPath, update } = params
+  let { apiType, cwd, event, inventory, lambda, staticPath, update } = params
 
   // handlerFile is defined for all non-ASAP functions; ASAP bypasses this check
   if (!hasHandler(lambda)) {
@@ -29,41 +30,10 @@ module.exports = function invokeLambda (params, callback) {
       // Now send along for execution
       let { src, config, arcStaticAssetProxy } = lambda
       let { runtime, timeout } = config
-
-      // Internal execution context
-      let context = { apiType, inventory, staticPath, update }
-
       let lambdaPath = src.replace(cwd, '').substr(1)
 
       update.debug.status(`Lambda config: ${lambdaPath}`)
       update.debug.raw(serialize(lambda))
-
-      let PYTHONPATH = process.env.PYTHONPATH
-        ? `${join(src, 'vendor')}:${process.env.PYTHONPATH}`
-        : join(src, 'vendor')
-
-      // Runtime environment variables
-      let defaults = {
-        __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to sandbox context
-        __ARC_CONFIG__: JSON.stringify({
-          projectSrc: cwd,
-          handlerFile: 'index',
-          handlerFunction: 'handler',
-          shared: inventory.inv.shared,
-          views: inventory.inv.views,
-        }),
-        PYTHONUNBUFFERED: true,
-        PYTHONPATH,
-        LAMBDA_TASK_ROOT: src,
-        TZ: 'UTC',
-      }
-
-      let options = {
-        shell: true,
-        cwd: src,
-        env: { ...process.env, ...defaults }
-      }
-      let request = JSON.stringify(event)
 
       let max = 10000
       let output = serialize(event).substr(0, max)
@@ -83,9 +53,15 @@ module.exports = function invokeLambda (params, callback) {
         return callback('Missing runtime')
       }
       exec(run, {
-        context,
-        options,
-        request,
+        // Internal execution context
+        context: { apiType, inventory, staticPath, update },
+        // Child process options
+        options: {
+          cwd: src,
+          env: getEnv(params),
+          shell: true,
+        },
+        request: JSON.stringify(event),
         timeout: timeout * 1000,
       }, function done (err, result) {
         if (err) callback(err)

@@ -5,7 +5,9 @@ let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let getDBClient = require('../../src/tables/_get-db-client')
 let mock = join(process.cwd(), 'test', 'mock')
-let url = `http://localhost:${process.env.PORT || 3333}`
+let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
+let ports
+let url
 
 // Verify sandbox shut down
 let shutdown = (t, err) => {
@@ -14,6 +16,8 @@ let shutdown = (t, err) => {
 
 test('Set up env', t => {
   t.plan(1)
+  ports = getPorts()
+  url = `http://localhost:${ports.httpPort}`
   t.ok(sandbox, 'Sandbox is present')
 })
 
@@ -43,7 +47,7 @@ test('get /', t => {
 let dynamo
 test('Get Dynamo client', t => {
   t.plan(1)
-  getDBClient(function _gotDBClient (err, client) {
+  getDBClient(ports, function _gotDBClient (err, client) {
     if (err) console.log(err) // Yes, but actually no
     dynamo = client
     t.ok(dynamo, 'Got Dynamo client')

@@ -34,13 +34,10 @@ test('Set up env', t => {
 })
 
 test('[Dependency warnings (basic)] Start Sandbox', t => {
-  t.plan(2)
+  t.plan(1)
   sandbox.start({ cwd: join(mock, 'basic') }, function (err, result) {
     if (err) t.fail(err)
-    else {
-      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
-      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-    }
+    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
 })
 
@@ -132,13 +129,10 @@ test('[Dependency warnings (basic)] Shut down Sandbox', t => {
 })
 
 test('[Dependency warnings (shared - no packages)] Start Sandbox', t => {
-  t.plan(2)
+  t.plan(1)
   sandbox.start({ cwd: join(mock, 'no-packages') }, function (err, result) {
     if (err) t.fail(err)
-    else {
-      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
-      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-    }
+    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
 })
 
@@ -178,13 +172,10 @@ test('[Dependency warnings (shared - no packages)] Shut down Sandbox', t => {
 })
 
 test('[Dependency warnings (shared - packages in shared)] Start Sandbox', t => {
-  t.plan(2)
+  t.plan(1)
   sandbox.start({ cwd: join(mock, 'shared-packages') }, function (err, result) {
     if (err) t.fail(err)
-    else {
-      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
-      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-    }
+    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
 })
 
@@ -232,13 +223,10 @@ test('[Dependency warnings (shared - packages in shared)] Shut down Sandbox', t 
 })
 
 test('[Dependency warnings (shared - packages in Lambdas)] Start Sandbox', t => {
-  t.plan(2)
+  t.plan(1)
   sandbox.start({ cwd: join(mock, 'lambda-packages') }, function (err, result) {
     if (err) t.fail(err)
-    else {
-      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
-      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-    }
+    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
 })
 
@@ -286,13 +274,10 @@ test('[Dependency warnings (shared - packages in Lambdas)] Shut down Sandbox', t
 })
 
 test('[Dependency warnings (shared - packages in shared + Lambdas)] Start Sandbox', t => {
-  t.plan(2)
+  t.plan(1)
   sandbox.start({ cwd: join(mock, 'all-packages') }, function (err, result) {
     if (err) t.fail(err)
-    else {
-      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
-      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-    }
+    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
 })
 

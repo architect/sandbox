@@ -3,10 +3,9 @@ let test = require('tape')
 let Websocket = require('ws')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { makeSideChannel } = require('./_utils')
+let { makeSideChannel, wsUrl: url } = require('./_utils')
 
 let mock = join(process.cwd(), 'test', 'mock')
-let url = `ws://localhost:${process.env.PORT || 3333}`
 let _ws
 let _events
 
@@ -91,16 +90,10 @@ test('Set up env', async t => {
 })
 
 test('[WebSockets] Start Sandbox', t => {
-  t.plan(2)
-  delete process.env.ARC_QUIET
+  t.plan(1)
   sandbox.start({ cwd: join(mock, 'normal'), quiet: true }, function (err, result) {
-    if (err) {
-      t.fail(err)
-    }
-    else {
-      t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
-      t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-    }
+    if (err) t.fail(err)
+    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
   })
 })
 

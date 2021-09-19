@@ -4,7 +4,7 @@ let sandbox = require('../../../src')
 let { join } = require('path')
 let series = require('run-series')
 let mock = join(process.cwd(), 'test', 'mock')
-let url = `http://localhost:${process.env.PORT || 3333}`
+let { copy, url } = require(join(process.cwd(), 'test', 'integration', 'http', '_utils'))
 
 // Verify sandbox shut down
 let shutdown = (t, err) => {
@@ -18,6 +18,7 @@ test('Set up env', t => {
   t.ok(sandbox.end, 'Found sandbox.end')
 })
 
+// These next tests also try starting sandbox with valid, invalid, `null`, and `undefined` options
 test('Sandbox returns a Promise', async t => {
   t.plan(8)
   try {
@@ -80,8 +81,7 @@ test('Sandbox uses continuation passing', t => {
     },
 
     callback => {
-      let params = { port: 3333, options: [], version: ' ' }
-      sandbox.start(params, err => {
+      sandbox.start(undefined, err => {
         if (err) t.fail(err)
         t.pass('sandbox.start executed callback (with params)')
         callback()
@@ -103,90 +103,48 @@ test('Sandbox uses continuation passing', t => {
   ])
 })
 
-// Standard Sandbox / AWS env vars to be populated
+// Standard env vars that may be populated during a banner / AWS init
 let envVars = [
-  'ARC_CLOUDFORMATION',
-  'ARC_HTTP',
-  'ARC_QUIET',
-  'ARC_STATIC_BUCKET',
-  'ARC_WSS_URL',
+  'ARC_APP_NAME',
+  'ARC_AWS_CREDS',
+  'ARC_ENV',
   'AWS_ACCESS_KEY_ID',
+  'AWS_PROFILE',
+  'AWS_REGION',
   'AWS_SECRET_ACCESS_KEY',
   'NODE_ENV',
-  'PORT',
-  'SESSION_TABLE_NAME'
 ]
-// TODO: tests for: ARC_SANDBOX_PATH_TO_STATIC, ARC_EVENTS_PORT, ARC_TABLES_PORT
 
 function cleanEnv (t) {
   envVars.forEach(v => delete process.env[v])
   let isClean = envVars.some(v => !process.env[v])
   t.ok(isClean, 'Sandbox env vars cleaned')
-  process.env.PORT = 6666
 }
 
-test('Sandbox has correct env vars populated', async t => {
-  let roundsOfTesting = 3
-  let tests = (roundsOfTesting * envVars.length) + (roundsOfTesting * 2)
-  t.plan(tests)
+test('Sandbox only minimally mutates env vars', async t => {
+  t.plan(5)
+  let before
+  let after
+  cleanEnv(t)
 
   // Architect 6+ (local)
-  try {
-    cleanEnv(t)
-    await sandbox.start({ cwd: join(mock, 'normal') })
-    envVars.forEach(v => {
-      if (v === 'ARC_CLOUDFORMATION')
-        t.notOk(process.env[v], `${v} is not set`)
-      else if (v !== 'ARC_QUIET')
-        t.ok(process.env[v], `${v} present`)
-      else if (v === 'ARC_QUIET')
-        t.equal(process.env[v], '', `${v} is falsy`)
-    })
-    await sandbox.end()
-    await tiny.get({ url }) // Will fail; final test in catch block
-  }
-  catch (err) {
-    if (err) shutdown(t, err)
-    else t.fail(err)
-  }
+  before = copy(process.env)
+  await sandbox.start({ cwd: join(mock, 'normal'), quiet: true })
+  after = copy(process.env)
+  envVars.forEach(v => delete after[v])
+  t.deepEqual(before, after, 'Did not materially mutate process env vars (local)')
+  await sandbox.end()
+  cleanEnv(t)
 
-  // Architect 6+ (staging)
-  try {
-    cleanEnv(t)
-    process.env.NODE_ENV = 'staging'
-    await sandbox.start()
-    envVars.forEach(v => {
-      if (v !== 'ARC_QUIET')
-        t.ok(process.env[v], `${v} present`)
-      else if (v === 'ARC_QUIET')
-        t.equal(process.env[v], '', `${v} is falsy`)
-    })
-    await sandbox.end()
-    await tiny.get({ url }) // Will fail; final test in catch block
-  }
-  catch (err) {
-    if (err) shutdown(t, err)
-    else t.fail(err)
-  }
-
-  // Architect 6+ (production)
-  try {
-    cleanEnv(t)
-    process.env.NODE_ENV = 'production'
-    await sandbox.start()
-    envVars.forEach(v => {
-      if (v !== 'ARC_QUIET')
-        t.ok(process.env[v], `${v} present`)
-      else if (v === 'ARC_QUIET')
-        t.equal(process.env[v], '', `${v} is falsy`)
-    })
-    await sandbox.end()
-    await tiny.get({ url }) // Will fail; final test in catch block
-  }
-  catch (err) {
-    if (err) shutdown(t, err)
-    else t.fail(err)
-  }
+  // Architect 6+ (staging/prod)
+  before = copy(process.env)
+  process.env.NODE_ENV = 'staging'
+  await sandbox.start({ cwd: join(mock, 'normal'), quiet: true })
+  after = copy(process.env)
+  envVars.forEach(v => delete after[v])
+  t.deepEqual(before, after, 'Did not materially mutate process env vars (staging)')
+  await sandbox.end()
+  cleanEnv(t)
 })
 
 test('Teardown', t => {

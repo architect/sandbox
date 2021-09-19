@@ -1,6 +1,7 @@
 __pycache__
 !test/mock/dep-warn/**/node_modules
 .nyc_output/
+bin/
 bin/*-binary
 coverage/
 node_modules/

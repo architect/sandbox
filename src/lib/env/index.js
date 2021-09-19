@@ -20,8 +20,8 @@ module.exports = function populateEnv (params, callback) {
     function _userEnv (callback) {
       userEnv(params, callback)
     },
-  ], function done (err) {
+  ], function done (err, result) {
     if (err) callback(err)
-    else callback()
+    else callback(null, result[3])
   })
 }

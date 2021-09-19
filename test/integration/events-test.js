@@ -7,15 +7,23 @@ let { events } = require('../../src')
 let { sync: rm } = require('rimraf')
 let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
+let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 
+// Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally
+// That said, to prevent side-effects, destroy that env var immediately after use
 function setup (t) {
   if (existsSync(tmp)) rm(tmp)
   mkdirSync(tmp, { recursive: true })
   t.ok(existsSync(tmp), 'Created tmp dir')
+  let { eventsPort } = getPorts()
+  process.env.ARC_EVENTS_PORT = eventsPort
+  if (!process.env.ARC_EVENTS_PORT) t.fail('ARC_EVENTS_PORT should be set')
 }
 function teardown (t) {
   rm(tmp)
   t.notOk(existsSync(tmp), 'Destroyed tmp dir')
+  delete process.env.ARC_EVENTS_PORT
+  if (process.env.ARC_EVENTS_PORT) t.fail('ARC_EVENTS_PORT should not be set')
 }
 
 // Check for the event artifact up to 10 times over 1 second or fail
@@ -44,8 +52,9 @@ function checkFile (t, file, message) {
 }
 
 test('Set up env', t => {
-  t.plan(1)
+  t.plan(2)
   t.ok(events, 'Events module is present')
+  t.notOk(process.env.ARC_EVENTS_PORT, 'ARC_EVENTS_PORT not set')
 })
 
 test('Async events.start', async t => {
@@ -98,20 +107,24 @@ test('arc.events.publish (custom)', t => {
 })
 
 test('arc.events.publish (failure)', t => {
-  t.plan(1)
+  t.plan(3)
+  setup(t)
   arc.events.publish({
     name: 'invalid-event',
     payload: {}
   },
   function done (err) {
-    if (err) t.match(err.message, /404/, 'Event not found')
+    if (err) {
+      t.match(err.message, /404/, 'Event not found')
+      teardown(t)
+    }
     else t.fail('Publish should have failed')
   })
 })
 
-test('random HTTP request to event bus with malformed JSON should return an HTTP 400 error', t => {
+test('Random HTTP request to event bus with malformed JSON should return an HTTP 400 error', t => {
   t.plan(2)
-  let port = process.env.ARC_EVENTS_PORT || 3334
+  let { eventsPort: port } = getPorts()
   let req = http.request({
     method: 'POST',
     port,
@@ -187,20 +200,23 @@ test('arc.queues.publish (custom)', t => {
 })
 
 test('arc.queues.publish (failure)', t => {
-  t.plan(1)
+  t.plan(3)
+  setup(t)
   arc.queues.publish({
     name: 'invalid-queue',
     payload: {}
   },
   function done (err) {
-    if (err) t.match(err.message, /404/, 'Event not found')
+    if (err) {
+      t.match(err.message, /404/, 'Event not found')
+      teardown(t)
+    }
     else t.fail('Publish should have failed')
   })
 })
 
 test('Sync events.end', t => {
   t.plan(1)
-  delete process.env.AWS_LAMBDA_FUNCTION_NAME
   events.end(function (err, result) {
     if (err) t.fail(err)
     else t.equal(result, 'Event bus successfully shut down', 'Events ended')

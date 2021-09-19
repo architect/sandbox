@@ -4,8 +4,8 @@ let tiny = require('tiny-json-http')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let mock = join(process.cwd(), 'test', 'mock', 'normal')
+let { url } = require('./http/_utils')
 let cwd = process.cwd()
-let url = `http://localhost:${process.env.PORT || 3333}`
 let msg = 'Hello from get / running the default runtime'
 
 // Verify sandbox shut down

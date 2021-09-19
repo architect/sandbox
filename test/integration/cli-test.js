@@ -17,7 +17,6 @@ test('Set up env', t => {
 
 test('Sandbox CLI interface', t => {
   t.plan(3)
-  delete process.env.ARC_QUIET // TODO remove this when we're done porting tests over to new utils
   let child = spawn('node', [ cli ], { cwd: mock })
   t.ok(child, 'Sandbox child process started')
   let data = ''

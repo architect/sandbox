@@ -2,7 +2,8 @@ let invoke = require('../invoke-ws')
 let pool = require('./pool')
 let noop = err => err ? console.log(err) : ''
 
-module.exports = function connection ({ cwd, inventory, update, domainName }, connectionId, ws) {
+module.exports = function connection (params, connectionId, ws) {
+  let { domainName, inventory, update } = params
   let { get } = inventory
   // Save this for send to use
   pool.register(connectionId, ws)
@@ -26,26 +27,20 @@ module.exports = function connection ({ cwd, inventory, update, domainName }, co
     if (lambda) {
       update.status(`ws/${lambda.name}: ${connectionId}`)
       invoke({
-        cwd,
-        lambda,
         body: msg,
-        inventory,
-        update,
         connectionId,
-        domainName,
+        lambda,
+        ...params,
       }, respondToError)
     }
     else {
       let lambda = get.ws('default')
       update.status('ws/default: ' + connectionId)
       invoke({
-        cwd,
-        lambda,
         body: msg,
-        inventory,
-        update,
         connectionId,
-        domainName,
+        lambda,
+        ...params,
       }, respondToError)
     }
   })
@@ -54,13 +49,10 @@ module.exports = function connection ({ cwd, inventory, update, domainName }, co
     let lambda = get.ws('disconnect')
     update.status(`ws/disconnect: ${connectionId}`)
     invoke({
-      cwd,
+      connectionId,
       lambda,
       req: { headers: { host: domainName } },
-      inventory,
-      update,
-      connectionId,
-      domainName
+      ...params,
     }, err => {
       pool.delete(connectionId)
       noop(err)

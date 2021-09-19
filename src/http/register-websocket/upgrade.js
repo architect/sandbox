@@ -7,7 +7,8 @@ let invoke = require('../invoke-ws')
  * - In APIGWv2, !2xx responses hang up and return the status code
  * - However, 2xx responses initiate a socket connection (automatically responding with 101)
  */
-module.exports = function upgrade (wss, { cwd, inventory, update, domainName }) {
+module.exports = function upgrade (wss, params) {
+  let { inventory, update } = params
   let { get } = inventory
 
   return function upgrade (req, socket, head) {
@@ -19,13 +20,10 @@ module.exports = function upgrade (wss, { cwd, inventory, update, domainName }) 
     update.status('ws/connect: ' + connectionId)
 
     invoke({
-      cwd,
+      connectionId,
       lambda,
       req,
-      inventory,
-      update,
-      connectionId,
-      domainName,
+      ...params,
     },
     function connect (err, res) {
       let statusCode = res?.statusCode

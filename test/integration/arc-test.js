@@ -5,14 +5,15 @@ let http = require('http')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let { shutdown } = require('./http/_utils')
+let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
+let { _arcPort } = getPorts()
 
 let mock = join(process.cwd(), 'test', 'mock')
-let port = process.env.PORT || 3333
 let app = 'mockapp'
 let tables = [ 'accounts', 'pets', 'places', 'data' ]
 
 // AWS services to test
-let endpoint = new aws.Endpoint(`http://localhost:${port - 1}/_arc/ssm`)
+let endpoint = new aws.Endpoint(`http://localhost:${_arcPort}/_arc/ssm`)
 let httpOptions = { agent: new http.Agent() }
 let ssm = new aws.SSM({ endpoint, region: 'us-west-2', httpOptions })
 

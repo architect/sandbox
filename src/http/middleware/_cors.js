@@ -1,4 +1,5 @@
 module.exports = function handleCors (req, res, next) {
+  // TODO [REMOVE]: deprecate in favor of local preferences
   if (process.env.ARC_SANDBOX_ENABLE_CORS) {
     res.setHeader('access-control-allow-origin', '*')
     res.setHeader('access-control-request-method', '*')

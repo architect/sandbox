@@ -8,6 +8,7 @@ let invoke = proxyquire(sut, {
   '../../invoke-lambda': lambdaStub
 })
 let { arc7, arc6 } = require('@architect/req-res-fixtures').http.res
+let { url } = require(join(process.cwd(), 'test', 'integration', 'http', '_utils'))
 
 let b64dec = i => Buffer.from(i, 'base64').toString()
 let b64enc = i => Buffer.from(i).toString('base64')
@@ -43,7 +44,7 @@ function parseOutput (output) {
 function getInvoker (params, response, callback) {
   // Generic input (shouldn't impact tests)
   let input = {
-    url: `http://localhost:${process.env.PORT || 3333}`,
+    url,
     body: {},
     headers: { 'Accept-Encoding': 'gzip' },
     params: {}

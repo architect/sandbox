@@ -5,12 +5,12 @@ let invocator = require('./')
 module.exports = function invokePluginFunction ({ cwd, inventory, update }, { src, payload }, callback) {
   let params = {
     cwd,
+    event: payload,
     lambda: {
       src,
       config: getFunctionConfig(src),
       _skipHandlerCheck: true // short circuits Lambda invocation handler check
     },
-    event: payload,
     inventory,
     update,
   }

@@ -34,18 +34,28 @@ module.exports = function createHttpServer (inventory) {
 
     // Start the HTTP server
     app.start = function start (options, callback) {
-      let { all, cwd, port, symlink = true, update } = options
+      let { all, cwd, port, quiet, symlink = true, update, userEnv } = options
 
       // Set up ports and HTTP-specific config
-      let { httpPort } = getPorts(port)
+      let ports = getPorts(port)
+      let { httpPort } = ports
       let { apiType, staticPath } = config(inv, cwd)
 
-      middleware({ apiType, app, cwd, inventory, staticPath, update })
+      // Main parameters needed throughout an invocation
+      let params = { apiType, cwd, inventory, ports, staticPath, update, userEnv }
+
+      middleware(app, params)
 
       series([
         // Set up Arc + userland env vars
         function _env (callback) {
-          if (!all) env({ ...options, inventory }, callback)
+          if (!all) env({ ...options, inventory }, function (err, userEnv) {
+            if (err) callback(err)
+            else {
+              params.userEnv = userEnv
+              callback()
+            }
+          })
           else callback()
         },
 
@@ -87,11 +97,11 @@ module.exports = function createHttpServer (inventory) {
           // Bind WebSocket app to HTTP server
           // This must be done before @http so it isn't clobbered by greedy routes
           if (inv.ws) {
-            websocketServer = registerWS({ app, cwd, httpServer, inventory, update, httpPort })
+            websocketServer = registerWS(app, httpServer, params)
           }
 
           if (inv.http) {
-            registerHTTP({ apiType, app, cwd, routes: inv.http, inventory, staticPath, update })
+            registerHTTP(app, params)
           }
 
           callback()
@@ -104,7 +114,7 @@ module.exports = function createHttpServer (inventory) {
 
         // Loop through functions and see if any need dependency hydration
         function _maybeHydrate (callback) {
-          if (!all) maybeHydrate({ cwd, inventory }, callback)
+          if (!all) maybeHydrate({ cwd, inventory, quiet }, callback)
           else callback()
         },
 
@@ -125,7 +135,7 @@ module.exports = function createHttpServer (inventory) {
         // Pretty print routes
         function _printRoutes (callback) {
           if (!all) {
-            prettyPrint({ apiType, cwd, inventory, port, update })
+            prettyPrint(params)
             callback()
           }
           else callback()

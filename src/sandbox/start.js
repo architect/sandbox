@@ -18,14 +18,15 @@ module.exports = function _start (params, callback) {
     // Settings
     cwd,
     port,
+    quiet,
     symlink = true,
     // Everything else
-    update,
     events,
     http,
     tables,
     _arc,
-    server
+    server,
+    update,
   } = params
   let { inv } = inventory
   let { preferences: prefs } = inv._project
@@ -36,7 +37,13 @@ module.exports = function _start (params, callback) {
   series([
     // Set up Arc + userland env vars + print the banner
     function _env (callback) {
-      env(params, callback)
+      env(params, function (err, userEnv) {
+        if (err) callback(err)
+        else {
+          params.userEnv = userEnv
+          callback()
+        }
+      })
     },
 
     // Initialize any missing functions on startup
@@ -99,7 +106,7 @@ module.exports = function _start (params, callback) {
 
     // Loop through functions and see if any need dependency hydration
     function _maybeHydrate (callback) {
-      maybeHydrate({ cwd, inventory }, callback)
+      maybeHydrate({ cwd, inventory, quiet }, callback)
     },
 
     // ... then hydrate Architect project files into functions

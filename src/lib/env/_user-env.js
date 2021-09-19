@@ -8,17 +8,18 @@ let { existsSync, readFileSync } = require('fs')
  * - If NODE_ENV=staging the process.env is populated by @staging (etc)
  * - If ARC_LOCAL is present process.env is populated by @testing (so you can access remote dynamo locally)
  */
-module.exports = function populateEnv (params, callback) {
+module.exports = function populateUserEnv (params, callback) {
   let { cwd, update, inventory } = params
   let { inv } = inventory
-  let environment = process.env.NODE_ENV
-  let setEnv = false
+  let environment = process.env.ARC_ENV
+  let setEnv = false // Ignore the second set of env vars if both .env + Arc prefs are found
+  let userEnv = {}
 
   function varsNotFound (env, file) {
     let msg = `No ${env} environment variables found` + (file ? ` in ${file}` : '')
     update.done(msg)
   }
-  function populatePrint (env, file) {
+  function print (env, file) {
     update.done(`Found ${env} environment variables: ${file}`)
   }
 
@@ -28,37 +29,39 @@ module.exports = function populateEnv (params, callback) {
     try {
       let raw = readFileSync(dotEnvPath).toString()
       let env = dotenv.parse(raw)
-      populate(env)
+      userEnv = env
       setEnv = true
-      populatePrint('testing', '.env')
+      print('testing', '.env')
     }
     catch (err) {
       let error = `.env parse error: ${err.stack}`
-      callback(error)
-      return
+      return callback(error)
     }
   }
   if (inv._project.preferences) {
     let prefs = inv._project.preferences
-    let { sandbox = {} } = prefs
 
-    // Environment prefs
-    if (sandbox.env) process.env.ARC_ENV = process.env.NODE_ENV = environment = sandbox.env
-    if (sandbox.useAWS) {
-      process.env.ARC_LOCAL = true
-      if (process.env.NODE_ENV === 'testing') process.env.NODE_ENV = 'staging'
+    // Local environment override
+    if (prefs?.sandbox?.env) {
+      process.env.ARC_ENV = environment = prefs.sandbox.env
+    }
+    // If useAWS is specified, force an AWS environment name
+    // TODO [REMOVE]: in a future breaking change where we stop relying on NODE_ENV, we can prob drop this; setting ARC_LOCAL is now handled during Lambda invocation
+    if (prefs?.sandbox?.useAWS &&
+        ![ 'staging', 'production' ].includes(process.env.NODE_ENV)) {
+      process.env.NODE_ENV = 'staging'
     }
 
     // Populate env vars
     if (prefs?.env?.[environment] && !setEnv) {
-      let proj = inv._project
+      let proj =  inv._project
       let global =  proj?.globalPreferences?.env?.[environment] &&
                     `~${sep}${basename(proj.globalPreferencesFile)}`
       let local =   proj?.localPreferences?.env?.[environment] &&
                     basename(proj.localPreferencesFile)
       let filepath = local || global || null
-      populate(prefs.env[environment])
-      populatePrint(environment, filepath)
+      userEnv = prefs.env[environment]
+      print(environment, filepath)
     }
     else if (!setEnv) varsNotFound(environment)
   }
@@ -67,23 +70,24 @@ module.exports = function populateEnv (params, callback) {
       let raw = readFileSync(legacyArcEnvPath).toString()
       let env = parse(raw)
       if (env[environment] && !setEnv) {
+        let legacyArcEnv = {}
         env[environment].forEach(tuple => {
-          process.env[tuple[0]] = tuple[1]
+          legacyArcEnv[tuple[0]] = tuple[1]
         })
-        populatePrint(environment, '.arc-env')
+        userEnv = legacyArcEnv
+        print(environment, '.arc-env')
       }
       else if (!setEnv) varsNotFound(environment, '.arc-env')
     }
     catch (err) {
       let error = `.arc-env parse error: ${err.stack}`
-      callback(error)
-      return
+      return callback(error)
     }
   }
   else if (!setEnv) varsNotFound(environment)
 
   // Wrap it up
-  if (process.env.ARC_LOCAL) {
+  if (inv._project?.preferences?.sandbox?.useAWS || process.env.ARC_LOCAL) {
     let live = [
       inv.tables ? '@tables' : '',
       inv.indexes ? '@indexes' : '',
@@ -92,11 +96,6 @@ module.exports = function populateEnv (params, callback) {
     ].filter(Boolean)
     update.done(`Using ${process.env.ARC_ENV} live AWS infra: ${live.join(', ')}`)
   }
-  callback()
-}
 
-function populate (env) {
-  Object.entries(env).forEach(([ n, v ]) => {
-    process.env[n] = v
-  })
+  callback(null, userEnv)
 }

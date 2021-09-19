@@ -54,7 +54,7 @@ module.exports = function cli (params = {}, callback) {
     let fingerprintTimer
 
     let ts = () => {
-      if (!process.env.ARC_QUIET) {
+      if (!quiet) {
         let date = new Date(lastEvent).toLocaleDateString()
         let time = new Date(lastEvent).toLocaleTimeString()
         console.log(`\n[${date}, ${time}]`)
@@ -166,10 +166,7 @@ module.exports = function cli (params = {}, callback) {
             sandbox.http.end(err => {
               if (err) update.err(err)
               let start = Date.now()
-              let quiet = process.env.ARC_QUIET
-              process.env.ARC_QUIET = true
               sandbox.http.start({ _refreshInventory: true, quiet: true }, function (err, result) {
-                if (!quiet) delete process.env.ARC_QUIET
                 if (err) update.err(err)
                 // HTTP passes back success message if it actually did need to (re)start
                 if (result === 'HTTP successfully started') {

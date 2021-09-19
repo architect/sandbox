@@ -12,7 +12,6 @@ let verifyShutdown = (t, type) => {
   tiny.get({ url }, err => {
     if (err) {
       let errs = [ 'ECONNREFUSED', 'ECONNRESET' ]
-      delete process.env.ARC_QUIET // Must be reset on shutdown so we can verify binary startup
       t.ok(errs.includes(err.code), `Sandbox succssfully shut down (${type})`)
     }
     else t.fail('Sandbox did not shut down')
@@ -21,16 +20,13 @@ let verifyShutdown = (t, type) => {
 
 let startup = {
   module: (t, mockDir) => {
-    t.plan(2)
+    t.plan(1)
     sandbox.start({
       cwd: join(mock, mockDir),
       quiet,
     }, (err, result) => {
       if (err) t.fail(err)
-      else {
-        t.equal(process.env.ARC_HTTP, 'aws_proxy', 'aws_proxy mode enabled')
-        t.equal(result, 'Sandbox successfully started', 'Sandbox started (module)')
-      }
+      else t.equal(result, 'Sandbox successfully started', 'Sandbox started (module)')
     })
   },
   binary: (t, mockDir) => {
@@ -88,15 +84,11 @@ let shutdown = {
 
 let teardown = {
   module: t => {
-    t.plan(2)
-    delete process.env.ARC_QUIET
-    t.notOk(process.env.ARC_QUIET, 'ARC_QUIET not set')
+    t.plan(1)
     shutdown.module(t, false)
   },
   binary: t => {
-    t.plan(2)
-    delete process.env.ARC_QUIET
-    t.notOk(process.env.ARC_QUIET, 'ARC_QUIET not set')
+    t.plan(1)
     shutdown.binary(t, false)
   }
 }

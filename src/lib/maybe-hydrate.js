@@ -18,9 +18,8 @@ let { chars } = require('@architect/utils')
  *
  * Not responsible for src/shared + views, handled elsewhere to optimize load time
  */
-module.exports = function maybeHydrate ({ cwd, inventory }, callback) {
+module.exports = function maybeHydrate ({ cwd, inventory, quiet }, callback) {
   let { inv } = inventory
-  let quiet = process.env.ARC_QUIET
   if (!inv.lambdaSrcDirs || !inv.lambdaSrcDirs.length) {
     callback()
   }

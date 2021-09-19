@@ -15,15 +15,25 @@ module.exports = function createEventBus (inventory) {
     let eventBus
 
     events.start = function start (options, callback) {
-      let { all, cwd, port, symlink = true, update } = options
+      let { all, cwd, port, quiet, symlink = true, update, userEnv } = options
 
       // Set up ports and env vars
-      let { eventsPort } = getPorts(port)
+      let ports = getPorts(port)
+      let { eventsPort } = ports
+
+      // Main parameters needed throughout an invocation
+      let params = { cwd, inventory, ports, update, userEnv }
 
       series([
         // Set up Arc + userland env vars
         function _env (callback) {
-          if (!all) env({ ...options, inventory }, callback)
+          if (!all) env({ ...options, inventory }, function (err, userEnv) {
+            if (err) callback(err)
+            else {
+              params.userEnv = userEnv
+              callback()
+            }
+          })
           else callback()
         },
 
@@ -43,7 +53,7 @@ module.exports = function createEventBus (inventory) {
         },
 
         function _finalSetup (callback) {
-          let listener = _listener.bind({}, { cwd, inventory, update })
+          let listener = _listener.bind({}, params)
           eventBus = http.createServer(listener)
           callback()
         },
@@ -55,7 +65,7 @@ module.exports = function createEventBus (inventory) {
 
         // Loop through functions and see if any need dependency hydration
         function _maybeHydrate (callback) {
-          if (!all) maybeHydrate({ cwd, inventory }, callback)
+          if (!all) maybeHydrate({ cwd, inventory, quiet }, callback)
           else callback()
         },
 

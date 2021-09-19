@@ -24,12 +24,12 @@
     "sandbox": "src/cli/cli.js"
   },
   "dependencies": {
-    "@architect/asap": "~4.0.1-RC.1",
+    "@architect/asap": "~4.0.1-RC.2",
     "@architect/create": "~2.0.1",
     "@architect/hydrate": "~2.0.2",
     "@architect/inventory": "~2.0.6",
     "@architect/parser": "~5.0.0",
-    "@architect/utils": "~3.0.2",
+    "@architect/utils": "~3.0.3",
     "@begin/hashid": "~1.0.0",
     "aws-sdk": "2.880.0",
     "body-parser": "~1.19.0",
