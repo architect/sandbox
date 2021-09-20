@@ -121,7 +121,7 @@ module.exports = function createHttpServer (inventory) {
         // ... then hydrate Architect project files into functions
         function _hydrateShared (callback) {
           if (!all) {
-            hydrate.shared({ cwd, inventory, symlink }, function next (err) {
+            hydrate.shared({ cwd, inventory, quiet, symlink }, function next (err) {
               if (err) callback(err)
               else {
                 update.done('Project files hydrated into functions')

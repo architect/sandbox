@@ -78,7 +78,7 @@ module.exports = function cli (params = {}, callback) {
           ts()
           let start = Date.now()
           if (msg) update.status(msg)
-          hydrate.shared({ only, symlink }, () => {
+          hydrate.shared({ only, quiet, symlink }, () => {
             let end = Date.now()
             update.done(`${symlink ? 'Symlinks' : 'Files'} rehydrated into functions in ${end - start}ms`)
           })
