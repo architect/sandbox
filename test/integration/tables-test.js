@@ -6,7 +6,7 @@ let getDBClient = require(join(process.cwd(), 'src', 'tables', '_get-db-client')
 let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
 let mock = join(process.cwd(), 'test', 'mock')
-let { port, quiet } = require('./http/_utils')
+let { port, quiet } = require('../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let ports = getPorts(port)
 let str = s => JSON.stringify(s, null, 2)

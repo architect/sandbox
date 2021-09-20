@@ -4,7 +4,7 @@ let sandbox = require('../../../src')
 let { join } = require('path')
 let series = require('run-series')
 let mock = join(process.cwd(), 'test', 'mock')
-let { copy, port, quiet, url } = require(join(process.cwd(), 'test', 'integration', 'http', '_utils'))
+let { copy, port, quiet, url } = require(join(process.cwd(), 'test', 'utils'))
 
 // Verify sandbox shut down
 let shutdown = (t, err) => {

@@ -4,7 +4,7 @@ let tiny = require('tiny-json-http')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let mock = join(process.cwd(), 'test', 'mock', 'normal')
-let { port, quiet, url } = require('./http/_utils')
+let { port, quiet, url } = require('../utils')
 let cwd = process.cwd()
 let msg = 'Hello from get / running the default runtime'
 

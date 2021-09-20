@@ -1,5 +1,5 @@
 let tiny = require('tiny-json-http')
-let sandbox = require('../../../../src')
+let sandbox = require('../../src')
 let { url } = require('./_lib')
 
 // Verify sandbox shut down

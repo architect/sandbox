@@ -1,6 +1,6 @@
 let { join } = require('path')
 let { spawn } = require('child_process')
-let sandbox = require('../../../../src')
+let sandbox = require('../../src')
 let { port, url } = require('./_lib')
 let tiny = require('tiny-json-http')
 let mock = join(process.cwd(), 'test', 'mock')

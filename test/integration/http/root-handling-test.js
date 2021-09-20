@@ -3,7 +3,7 @@ let { existsSync } = require('fs')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sandbox = require('../../../src')
-let { url, startupNew: startup,  shutdownNew: shutdown, checkHttpResult, checkRestResult } = require('./_utils')
+let { url, startupNew: startup,  shutdownNew: shutdown, checkHttpResult, checkRestResult } = require('../../utils')
 let indexHTML = 'Hello from public/index.html!'
 
 test('Set up env', t => {

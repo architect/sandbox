@@ -3,7 +3,7 @@ let test = require('tape')
 let Websocket = require('ws')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { makeSideChannel, port, quiet, wsUrl: url } = require('./_utils')
+let { makeSideChannel, port, quiet, wsUrl: url } = require('../../utils')
 
 let mock = join(process.cwd(), 'test', 'mock')
 let _ws

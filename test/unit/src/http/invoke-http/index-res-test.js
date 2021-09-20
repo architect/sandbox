@@ -8,7 +8,7 @@ let invoke = proxyquire(sut, {
   '../../invoke-lambda': lambdaStub
 })
 let { arc7, arc6 } = require('@architect/req-res-fixtures').http.res
-let { url } = require(join(process.cwd(), 'test', 'integration', 'http', '_utils'))
+let { url } = require(join(process.cwd(), 'test', 'utils'))
 
 let b64dec = i => Buffer.from(i, 'base64').toString()
 let b64enc = i => Buffer.from(i).toString('base64')

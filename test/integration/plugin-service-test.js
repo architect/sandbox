@@ -4,7 +4,7 @@ let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let mock = join(process.cwd(), 'test', 'mock')
-let { port, quiet } = require('./http/_utils')
+let { port, quiet } = require('../utils')
 let syncFile = join(mock, 'plugins-sync', 'syncplugin.test')
 let asyncFile = join(mock, 'plugins-async', 'asyncplugin.test')
 

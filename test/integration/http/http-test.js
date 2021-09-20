@@ -4,7 +4,7 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { b64dec, url, data, startupNew: startup, shutdownNew: shutdown, checkHttpResult: checkResult, rmPublic } = require('./_utils')
+let { b64dec, url, data, startupNew: startup, shutdownNew: shutdown, checkHttpResult: checkResult, rmPublic } = require('../../utils')
 
 test('Set up env', t => {
   t.plan(1)

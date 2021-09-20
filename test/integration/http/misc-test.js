@@ -5,7 +5,7 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { url, startupNew: startup, shutdownNew: shutdown, checkHttpResult: checkResult } = require('./_utils')
+let { url, startupNew: startup, shutdownNew: shutdown, checkHttpResult: checkResult } = require('../../utils')
 
 let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')

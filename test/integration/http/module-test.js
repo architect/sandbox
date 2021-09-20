@@ -3,7 +3,7 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let { http } = require(sut)
-let { port, quiet, url, verifyShutdownNew } = require('./_utils')
+let { port, quiet, url, verifyShutdownNew } = require('../../utils')
 let mock = join(process.cwd(), 'test', 'mock')
 let name = 'HTTP module'
 

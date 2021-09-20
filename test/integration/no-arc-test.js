@@ -5,7 +5,7 @@ let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let getDBClient = require('../../src/tables/_get-db-client')
 let mock = join(process.cwd(), 'test', 'mock')
-let { port, quiet, url } = require('./http/_utils')
+let { port, quiet, url } = require('../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let ports = getPorts(port)
 
