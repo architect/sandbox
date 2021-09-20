@@ -85,20 +85,7 @@ function runTests (runType) {
         t.fail(err)
       }
     }
-    else {
-      t.plan(1)
-      t.pass('Skipped because binary')
-    }
-  })
-
-  test(`${mode} Start Sandbox`, t => {
-    if (runType === 'binary') {
-      startup[runType](t, 'normal')
-    }
-    else {
-      t.plan(1)
-      t.pass('Skipped because module')
-    }
+    else await startup[runType].async(t, 'normal')
   })
 
   test(`${mode} arc.events.publish (normal)`, t => {
@@ -186,20 +173,7 @@ function runTests (runType) {
         t.fail(err)
       }
     }
-    else {
-      t.plan(1)
-      t.pass('Skipped because binary')
-    }
-  })
-
-  test(`${mode} Shut down Sandbox `, t => {
-    if (runType === 'binary') {
-      shutdown[runType](t)
-    }
-    else {
-      t.plan(1)
-      t.pass('Skipped because module')
-    }
+    else await shutdown[runType].async(t)
   })
 
   test(`${mode} Sync events.start`, t => {
@@ -210,20 +184,7 @@ function runTests (runType) {
         else t.equal(result, 'Event bus successfully started', 'Events started (sync)')
       })
     }
-    else {
-      t.plan(1)
-      t.pass('Skipped because binary')
-    }
-  })
-
-  test(`${mode} Start Sandbox`, t => {
-    if (runType === 'binary') {
-      startup[runType](t, 'normal')
-    }
-    else {
-      t.plan(1)
-      t.pass('Skipped because module')
-    }
+    else startup[runType](t, 'normal')
   })
 
   test(`${mode} arc.queues.publish (normal)`, t => {
@@ -288,19 +249,6 @@ function runTests (runType) {
         else t.equal(result, 'Event bus successfully shut down', 'Events ended')
       })
     }
-    else {
-      t.plan(1)
-      t.pass('Skipped because binary')
-    }
-  })
-
-  test(`${mode} Shut down Sandbox `, t => {
-    if (runType === 'binary') {
-      shutdown[runType](t)
-    }
-    else {
-      t.plan(1)
-      t.pass('Skipped because module')
-    }
+    else shutdown[runType](t)
   })
 }

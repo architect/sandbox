@@ -7,18 +7,19 @@ let mock = join(process.cwd(), 'test', 'mock')
 let child
 
 // Verify sandbox shut down
-let verifyShutdown = (t, type) => {
+let verifyShutdown = (t, type, callback) => {
   tiny.get({ url }, err => {
     if (err) {
       let errs = [ 'ECONNREFUSED', 'ECONNRESET' ]
       t.ok(errs.includes(err.code), `Sandbox succssfully shut down (${type})`)
+      if (callback) callback()
     }
     else t.fail('Sandbox did not shut down')
   })
 }
 
 let startup = {
-  module: (t, mockDir, options = {}) => {
+  module: (t, mockDir, options = {}, callback) => {
     t.plan(1)
     sandbox.start({
       cwd: join(mock, mockDir),
@@ -27,10 +28,13 @@ let startup = {
       ...options,
     }, (err, result) => {
       if (err) t.fail(err)
-      else t.equal(result, 'Sandbox successfully started', 'Sandbox started (module)')
+      else {
+        t.equal(result, 'Sandbox successfully started', 'Sandbox started (module)')
+        if (callback) callback()
+      }
     })
   },
-  binary: (t, mockDir, options = {}) => {
+  binary: (t, mockDir, options = {}, callback) => {
     t.plan(2)
     if (child) throw Error('Unclean test env, found hanging child process!')
     let cwd = join(mock, mockDir)
@@ -51,6 +55,7 @@ let startup = {
         started = true
         if (!quiet) { console.log(data) }
         t.pass('Sandbox started (binary)')
+        if (callback) callback()
       }
     })
     child.stderr.on('data', chunk => {
@@ -60,7 +65,7 @@ let startup = {
 }
 
 let shutdown = {
-  module: (t, options = {}) => {
+  module: (t, options = {}, callback) => {
     let { setPlan = true } = options
     if (setPlan) t.plan(1)
     sandbox.end((err, result) => {
@@ -68,10 +73,10 @@ let shutdown = {
       if (result !== 'Sandbox successfully shut down') {
         t.fail('Did not get back Sandbox shutdown message')
       }
-      verifyShutdown(t, 'module')
+      verifyShutdown(t, 'module', callback)
     })
   },
-  binary: (t, options = {}) => {
+  binary: (t, options = {}, callback) => {
     let { setPlan = true, child: anotherChild } = options
     if (setPlan) t.plan(1)
     let proc = anotherChild || child
@@ -89,12 +94,27 @@ let shutdown = {
       }
       else {
         anotherChild = child = undefined
-        verifyShutdown(t, 'binary')
+        verifyShutdown(t, 'binary', callback)
       }
     }
     check()
   }
 }
+
+let asyncify = obj => {
+  Object.keys(obj).forEach(type => {
+    obj[type].async = (...params) => new Promise((resolve, reject) => {
+      try {
+        obj[type](...params, resolve)
+      }
+      catch (err){
+        reject(err)
+      }
+    })
+  })
+}
+asyncify(startup)
+asyncify(shutdown)
 
 module.exports = {
   verifyShutdownNew: verifyShutdown,

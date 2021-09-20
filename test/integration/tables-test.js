@@ -61,20 +61,7 @@ function runTests (runType) {
         t.fail(err)
       }
     }
-    else {
-      t.plan(1)
-      t.pass('Skipped because binary')
-    }
-  })
-
-  test(`${mode} Start Sandbox`, t => {
-    if (runType === 'binary') {
-      startup[runType](t, 'normal')
-    }
-    else {
-      t.plan(1)
-      t.pass('Skipped because module')
-    }
+    else await startup[runType].async(t, 'normal')
   })
 
   test(`${mode} Get client`, t => {
@@ -110,20 +97,7 @@ function runTests (runType) {
         t.fail(err)
       }
     }
-    else {
-      t.plan(1)
-      t.pass('Skipped because binary')
-    }
-  })
-
-  test(`${mode} Shut down Sandbox`, t => {
-    if (runType === 'binary') {
-      shutdown[runType](t)
-    }
-    else {
-      t.plan(1)
-      t.pass('Skipped because module')
-    }
+    else await shutdown[runType].async(t)
   })
 
   test(`${mode} Sync tables.start`, t => {
@@ -134,20 +108,7 @@ function runTests (runType) {
         else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
       })
     }
-    else {
-      t.plan(1)
-      t.pass('Skipped because binary')
-    }
-  })
-
-  test(`${mode} Start Sandbox`, t => {
-    if (runType === 'binary') {
-      startup[runType](t, 'normal')
-    }
-    else {
-      t.plan(1)
-      t.pass('Skipped because module')
-    }
+    else startup[runType](t, 'normal')
   })
 
   test(`${mode} Get client`, t => {
@@ -277,20 +238,7 @@ function runTests (runType) {
         else t.equal(result, 'DynamoDB successfully shut down', 'Tables ended')
       })
     }
-    else {
-      t.plan(1)
-      t.pass('Skipped because binary')
-    }
-  })
-
-  test(`${mode} Shut down Sandbox`, t => {
-    if (runType === 'binary') {
-      shutdown[runType](t)
-    }
-    else {
-      t.plan(1)
-      t.pass('Skipped because module')
-    }
+    else shutdown[runType](t)
   })
 
   /**
@@ -306,12 +254,12 @@ function runTests (runType) {
   })
 
   test(`${mode} Async tables.start`, async t => {
+    process.env.ARC_DB_EXTERNAL = true
+    setup(t, externalDBPort)
+    ports = getPorts() // Reset those ports
     if (runType === 'module') {
       t.plan(1)
       try {
-        process.env.ARC_DB_EXTERNAL = true
-        setup(t, externalDBPort)
-        ports = getPorts() // Reset those ports
         let result = await tables.start({ cwd: join(mock, 'external-db'), quiet })
         t.equal(result, 'DynamoDB successfully started', 'Tables started in external mode')
         teardown(t)
@@ -320,24 +268,7 @@ function runTests (runType) {
         t.fail(err)
       }
     }
-    else {
-      t.plan(1)
-      t.pass('Skipped because binary')
-    }
-  })
-
-  test(`${mode} Start Sandbox`, t => {
-    if (runType === 'binary') {
-      process.env.ARC_DB_EXTERNAL = true
-      setup(t, externalDBPort)
-      ports = getPorts() // Reset those ports
-      startup[runType](t, 'external-db')
-      teardown(t)
-    }
-    else {
-      t.plan(1)
-      t.pass('Skipped because module')
-    }
+    else await startup[runType].async(t, 'external-db')
   })
 
   test(`${mode} Get client`, t => {
@@ -365,11 +296,11 @@ function runTests (runType) {
   })
 
   test(`${mode} Async tables.end`, async t => {
+    delete process.env.ARC_DB_EXTERNAL
     if (runType === 'module') {
       t.plan(1)
       try {
         let ended = await tables.end()
-        delete process.env.ARC_DB_EXTERNAL
         t.equal(ended, 'DynamoDB successfully shut down', 'Tables ended')
         teardown(t)
       }
@@ -377,22 +308,7 @@ function runTests (runType) {
         t.fail(err)
       }
     }
-    else {
-      t.plan(1)
-      t.pass('Skipped because binary')
-    }
-  })
-
-  test(`${mode} Shut down Sandbox`, t => {
-    if (runType === 'binary') {
-      delete process.env.ARC_DB_EXTERNAL
-      shutdown[runType](t)
-      teardown(t)
-    }
-    else {
-      t.plan(1)
-      t.pass('Skipped because module')
-    }
+    else await shutdown[runType].async(t)
   })
 
   test(`${mode} Stop external DB`, t => {
