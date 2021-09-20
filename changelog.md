@@ -1,5 +1,9 @@
 # Architect Sandbox changelog
 
+## Unreleased
+
+- Added function context object with `functionName` and `functionVersion`. `functionName` will be similar to staging and production without the unique characters. `functionVersion` will always be `$latest`.
+
 ---
 
 ## [next] 2021-10-05
