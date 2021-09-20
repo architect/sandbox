@@ -15,6 +15,7 @@ queue-custom
 get     /           # runs default
 get     /multi-cookies-res
 get     /binary
+get     /context
 get     /nodejs12.x
 get     /nodejs10.x
 get     /nodejs8.10

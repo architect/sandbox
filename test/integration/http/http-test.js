@@ -45,6 +45,33 @@ function runTests (runType, t) {
     })
   })
 
+  t.test(`${mode} get /context`, t => {
+    t.plan(16)
+    tiny.get({
+      url: `${url}/context`
+    }, function _got (err, result) {
+      if (err) t.fail(err)
+      else {
+        t.equal(result.body.message, 'Hello from get /context running the default runtime')
+        checkResult(t, result.body.event, {
+          routeKey: 'GET /context',
+          rawPath: '/context',
+          pathParameters: undefined,
+          cookies: undefined,
+          queryStringParameters: undefined,
+          rawQueryString: '',
+          headers: '🤷🏽‍♀️',
+          isBase64Encoded: false,
+          body: undefined,
+        })
+        t.deepEqual(result.body.context, {
+          functionName: 'sandbox-get-contextHTTP',
+          functionVersion: '$LATEST',
+        })
+      }
+    })
+  })
+
   t.test(`${mode} get /?whats=up`, t => {
     t.plan(15)
     let rawQueryString = 'whats=up'
