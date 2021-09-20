@@ -29,7 +29,7 @@ function runTests (runType) {
   let mode = `[REST mode / ${runType}]`
 
   test(`${mode} Start Sandbox`, t => {
-    startup[runType](t, 'normal', 'rest')
+    startup[runType](t, 'normal', { apigateway: 'rest' })
   })
 
   test(`${mode} get /`, t => {

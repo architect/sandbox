@@ -29,7 +29,7 @@ function runTests (runType) {
   let mode = `[HTTP v1.0 (REST) mode / ${runType}]`
 
   test(`${mode} Start Sandbox`, t => {
-    startup[runType](t, 'normal', 'httpv1')
+    startup[runType](t, 'normal', { apigateway: 'httpv1' })
   })
 
   test(`${mode} get /`, t => {

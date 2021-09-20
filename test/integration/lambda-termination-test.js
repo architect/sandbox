@@ -5,7 +5,7 @@ let { join } = require('path')
 let { events } = require('../../src')
 let { sync: rm } = require('rimraf')
 let mock = join(process.cwd(), 'test', 'mock')
-let { port, quiet } = require('../utils')
+let { port, startupNew: startup, shutdownNew: shutdown } = require('../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let tmp = join(mock, 'tmp')
 let fileThatShouldNotBeWritten = join(tmp, 'do-not-write-me')
@@ -42,12 +42,8 @@ test('Set up env', t => {
   t.notOk(process.env.ARC_EVENTS_PORT, 'ARC_EVENTS_PORT not set')
 })
 
-test('events.start', t => {
-  t.plan(1)
-  events.start({ cwd: join(mock, 'lambda-termination'), port, quiet, logLevel: 'debug' }, (err, result) => {
-    if (err) t.fail(err)
-    else t.equal(result, 'Event bus successfully started', 'Events started')
-  })
+test(`[Lambda invocation] Start Sandbox`, t => {
+  startup['module'](t, 'lambda-termination')
 })
 
 // Control test: if you change lambda invocation logic, this should pass!
@@ -156,10 +152,6 @@ test('[Lambda invocation] Respect timeout for sync functions and kill process + 
   }
 })
 
-test('Sync events.end', t => {
-  t.plan(1)
-  events.end(function (err, result) {
-    if (err) t.fail(err)
-    else t.equal(result, 'Event bus successfully shut down', 'Events ended')
-  })
+test(`[Lambda invocation] Shut down Sandbox`, t => {
+  shutdown['module'](t)
 })

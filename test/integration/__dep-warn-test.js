@@ -1,9 +1,9 @@
-let test = require('tape')
 let { join } = require('path')
+let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let tiny = require('tiny-json-http')
-let { port, shutdown, url } = require('../utils')
+let { startupNew: startup, shutdownNew: shutdown, url } = require('../utils')
 
 let mock = join(process.cwd(), 'test', 'mock', 'dep-warn')
 let instructions = str => str.match(/Please run:/g).length
@@ -33,15 +33,14 @@ test('Set up env', t => {
   t.ok(sandbox, 'got sandbox')
 })
 
-test('[Dependency warnings (basic)] Start Sandbox', t => {
-  t.plan(1)
-  sandbox.start({ cwd: join(mock, 'basic'), port }, function (err, result) {
-    if (err) t.fail(err)
-    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-  })
+let runType = 'module'
+let mode = `/ ${runType}`
+
+test(`[Dependency warnings (basic) ${mode}] Start Sandbox`, t => {
+  startup[runType](t, join('dep-warn', 'basic'), { quiet: false })
 })
 
-test('[Dependency warnings (basic)] Lambda has its own deps', t => {
+test(`[Dependency warnings (basic) ${mode}] Lambda has its own deps`, t => {
   t.plan(5)
   setup()
   tiny.get({
@@ -60,7 +59,7 @@ test('[Dependency warnings (basic)] Lambda has its own deps', t => {
   })
 })
 
-test('[Dependency warnings (basic)] Deps are in root', t => {
+test(`[Dependency warnings (basic) ${mode}] Deps are in root`, t => {
   t.plan(5)
   setup()
   tiny.get({
@@ -79,7 +78,7 @@ test('[Dependency warnings (basic)] Deps are in root', t => {
   })
 })
 
-test('[Dependency warnings (basic)] Deps are in shared', t => {
+test(`[Dependency warnings (basic) ${mode}] Deps are in shared`, t => {
   t.plan(5)
   setup()
   tiny.get({
@@ -98,7 +97,7 @@ test('[Dependency warnings (basic)] Deps are in shared', t => {
   })
 })
 
-test('[Dependency warnings (basic)] Deps found', t => {
+test(`[Dependency warnings (basic) ${mode}] Deps found`, t => {
   t.plan(1)
   setup()
   tiny.get({
@@ -113,7 +112,7 @@ test('[Dependency warnings (basic)] Deps found', t => {
   })
 })
 
-test('[Dependency warnings (basic)] Deps missing', t => {
+test(`[Dependency warnings (basic) ${mode}] Deps missing`, t => {
   t.plan(1)
   tiny.get({
     url: url + '/deps-missing'
@@ -123,20 +122,15 @@ test('[Dependency warnings (basic)] Deps missing', t => {
   })
 })
 
-test('[Dependency warnings (basic)] Shut down Sandbox', t => {
-  t.plan(1)
-  shutdown(t)
+test(`[Dependency warnings (basic) ${mode}] Shut down Sandbox`, t => {
+  shutdown[runType](t)
 })
 
-test('[Dependency warnings (shared - no packages)] Start Sandbox', t => {
-  t.plan(1)
-  sandbox.start({ cwd: join(mock, 'no-packages'), port }, function (err, result) {
-    if (err) t.fail(err)
-    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-  })
+test(`[Dependency warnings (shared - no packages) ${mode}] Start Sandbox`, t => {
+  startup[runType](t, join('dep-warn', 'no-packages'), { quiet: false })
 })
 
-test('[Dependency warnings (shared - no packages)] Shared deps', t => {
+test(`[Dependency warnings (shared - no packages) ${mode}] Shared deps`, t => {
   t.plan(1)
   setup()
   tiny.get({
@@ -151,7 +145,7 @@ test('[Dependency warnings (shared - no packages)] Shared deps', t => {
   })
 })
 
-test('[Dependency warnings (shared - no packages)] Views deps', t => {
+test(`[Dependency warnings (shared - no packages) ${mode}] Views deps`, t => {
   t.plan(1)
   setup()
   tiny.get({
@@ -166,20 +160,15 @@ test('[Dependency warnings (shared - no packages)] Views deps', t => {
   })
 })
 
-test('[Dependency warnings (shared - no packages)] Shut down Sandbox', t => {
-  t.plan(1)
-  shutdown(t)
+test(`[Dependency warnings (shared - no packages) ${mode}] Shut down Sandbox`, t => {
+  shutdown[runType](t)
 })
 
-test('[Dependency warnings (shared - packages in shared)] Start Sandbox', t => {
-  t.plan(1)
-  sandbox.start({ cwd: join(mock, 'shared-packages'), port }, function (err, result) {
-    if (err) t.fail(err)
-    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-  })
+test(`[Dependency warnings (shared - packages in shared) ${mode}] Start Sandbox`, t => {
+  startup[runType](t, join('dep-warn', 'shared-packages'), { quiet: false })
 })
 
-test('[Dependency warnings (shared - packages in shared)] Missing shared deps loaded from root', t => {
+test(`[Dependency warnings (shared - packages in shared) ${mode}] Missing shared deps loaded from root`, t => {
   t.plan(5)
   setup()
   tiny.get({
@@ -198,7 +187,7 @@ test('[Dependency warnings (shared - packages in shared)] Missing shared deps lo
   })
 })
 
-test('[Dependency warnings (shared - packages in shared)] Missing views deps loaded from root', t => {
+test(`[Dependency warnings (shared - packages in shared) ${mode}] Missing views deps loaded from root`, t => {
   t.plan(5)
   setup()
   tiny.get({
@@ -217,20 +206,15 @@ test('[Dependency warnings (shared - packages in shared)] Missing views deps loa
   })
 })
 
-test('[Dependency warnings (shared - packages in shared)] Shut down Sandbox', t => {
-  t.plan(1)
-  shutdown(t)
+test(`[Dependency warnings (shared - packages in shared) ${mode}] Shut down Sandbox`, t => {
+  shutdown[runType](t)
 })
 
-test('[Dependency warnings (shared - packages in Lambdas)] Start Sandbox', t => {
-  t.plan(1)
-  sandbox.start({ cwd: join(mock, 'lambda-packages'), port }, function (err, result) {
-    if (err) t.fail(err)
-    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-  })
+test(`[Dependency warnings (shared - packages in Lambdas) ${mode}] Start Sandbox`, t => {
+  startup[runType](t, join('dep-warn', 'lambda-packages'), { quiet: false })
 })
 
-test('[Dependency warnings (shared - packages in Lambdas)] Missing shared deps loaded from root', t => {
+test(`[Dependency warnings (shared - packages in Lambdas) ${mode}] Missing shared deps loaded from root`, t => {
   t.plan(5)
   setup()
   tiny.get({
@@ -249,7 +233,7 @@ test('[Dependency warnings (shared - packages in Lambdas)] Missing shared deps l
   })
 })
 
-test('[Dependency warnings (shared - packages in Lambdas)] Missing views deps loaded from root', t => {
+test(`[Dependency warnings (shared - packages in Lambdas) ${mode}] Missing views deps loaded from root`, t => {
   t.plan(5)
   setup()
   tiny.get({
@@ -268,20 +252,15 @@ test('[Dependency warnings (shared - packages in Lambdas)] Missing views deps lo
   })
 })
 
-test('[Dependency warnings (shared - packages in Lambdas)] Shut down Sandbox', t => {
-  t.plan(1)
-  shutdown(t)
+test(`[Dependency warnings (shared - packages in Lambdas) ${mode}] Shut down Sandbox`, t => {
+  shutdown[runType](t)
 })
 
-test('[Dependency warnings (shared - packages in shared + Lambdas)] Start Sandbox', t => {
-  t.plan(1)
-  sandbox.start({ cwd: join(mock, 'all-packages'), port }, function (err, result) {
-    if (err) t.fail(err)
-    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
-  })
+test(`[Dependency warnings (shared - packages in shared + Lambdas) ${mode}] Start Sandbox`, t => {
+  startup[runType](t, join('dep-warn', 'all-packages'), { quiet: false })
 })
 
-test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing shared deps loaded from root', t => {
+test(`[Dependency warnings (shared - packages in shared + Lambdas) ${mode}] Missing shared deps loaded from root`, t => {
   t.plan(6)
   setup()
   tiny.get({
@@ -301,7 +280,7 @@ test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing shar
   })
 })
 
-test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing views deps loaded from root', t => {
+test(`[Dependency warnings (shared - packages in shared + Lambdas) ${mode}] Missing views deps loaded from root`, t => {
   t.plan(6)
   setup()
   tiny.get({
@@ -321,7 +300,6 @@ test('[Dependency warnings (shared - packages in shared + Lambdas)] Missing view
   })
 })
 
-test('[Dependency warnings] Teardown', t => {
-  t.plan(1)
-  shutdown(t)
+test(`[Dependency warnings] Teardown`, t => {
+  shutdown[runType](t)
 })

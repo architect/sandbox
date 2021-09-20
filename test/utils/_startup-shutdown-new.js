@@ -18,29 +18,33 @@ let verifyShutdown = (t, type) => {
 }
 
 let startup = {
-  module: (t, mockDir, apigateway) => {
+  module: (t, mockDir, options = {}) => {
     t.plan(1)
     sandbox.start({
-      apigateway,
       cwd: join(mock, mockDir),
       port,
       quiet,
+      ...options,
     }, (err, result) => {
       if (err) t.fail(err)
       else t.equal(result, 'Sandbox successfully started', 'Sandbox started (module)')
     })
   },
-  binary: (t, mockDir, apigateway) => {
+  binary: (t, mockDir, options = {}) => {
     t.plan(2)
     if (child) throw Error('Unclean test env, found hanging child process!')
     let cwd = join(mock, mockDir)
     child = spawn(`${process.cwd()}/bin/sandbox-binary`, [], {
       cwd,
-      env: { ARC_API_TYPE: apigateway, PORT: port, ...process.env }
+      env: {
+        ARC_API_TYPE: options.apigateway,
+        PORT: port,
+        ...process.env
+      }
     })
     t.ok(child, 'Sandbox child process started')
-    let data = ''
     let started = false
+    let data = ''
     child.stdout.on('data', chunk => {
       data += chunk.toString()
       if (data.includes('Sandbox Started in') && !started) {
@@ -48,6 +52,9 @@ let startup = {
         if (!quiet) { console.log(data) }
         t.pass('Sandbox started (binary)')
       }
+    })
+    child.stderr.on('data', chunk => {
+      data += chunk.toString()
     })
   }
 }

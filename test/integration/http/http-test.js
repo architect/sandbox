@@ -29,7 +29,7 @@ function runTests (runType) {
   let mode = `[HTTP mode / ${runType}]`
 
   test(`${mode} Start Sandbox`, t => {
-    startup[runType](t, 'normal', 'http')
+    startup[runType](t, 'normal')
   })
 
   test(`${mode} get /`, t => {
