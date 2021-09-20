@@ -60,7 +60,8 @@ let startup = {
 }
 
 let shutdown = {
-  module: (t, setPlan = true) => {
+  module: (t, options = {}) => {
+    let { setPlan = true } = options
     if (setPlan) t.plan(1)
     sandbox.end((err, result) => {
       if (err) t.fail(err)
@@ -70,22 +71,24 @@ let shutdown = {
       verifyShutdown(t, 'module')
     })
   },
-  binary: (t, setPlan = true) => {
+  binary: (t, options = {}) => {
+    let { setPlan = true, child: anotherChild } = options
     if (setPlan) t.plan(1)
-    child.kill('SIGINT')
+    let proc = anotherChild || child
+    proc.kill('SIGINT')
     // Child processes can take a bit to shut down
     // If we don't confirm it's exited, the next test may try to start a second Sandbox and blow everything up
     let tries = 0
     function check () {
-      if (child.exitCode === null && tries <= 10) {
+      if (proc.exitCode === null && tries <= 10) {
         tries++
         setTimeout(check, 25)
       }
-      else if (child.exitCode === null) {
-        throw Error(`Could not exit Sandbox binary child process (${child.pid})`)
+      else if (proc.exitCode === null) {
+        throw Error(`Could not exit Sandbox binary child process (${proc.pid})`)
       }
       else {
-        child = undefined
+        anotherChild = child = undefined
         verifyShutdown(t, 'binary')
       }
     }

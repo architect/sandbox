@@ -8,6 +8,7 @@ let create = require('@architect/create')
 let { chars } = require('@architect/utils')
 let { env, maybeHydrate } = require('../lib')
 let invokePluginFunction = require('../invoke-lambda/_plugin')
+let httpConfig = require('../http/_config')
 let prettyPrint = require('../http/_pretty-print')
 let startupScripts = require('./_startup-scripts')
 
@@ -16,8 +17,8 @@ module.exports = function _start (params, callback) {
   let {
     inventory,
     // Settings
+    apigateway,
     cwd,
-    port,
     quiet,
     symlink = true,
     // Everything else
@@ -122,7 +123,11 @@ module.exports = function _start (params, callback) {
 
     // Pretty print routes
     function _printRoutes (callback) {
-      prettyPrint({ cwd, inventory, port, update })
+      let { http, ws } = inventory.inv
+      if (http || ws) {
+        let { apiType } = httpConfig({ apigateway, cwd, inv })
+        prettyPrint({ apiType, ...params })
+      }
       callback()
     },
 

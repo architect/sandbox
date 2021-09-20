@@ -2,7 +2,7 @@ let { join } = require('path')
 let { existsSync } = require('fs')
 let { spawn } = require('child_process')
 let test = require('tape')
-let { verifyShutdownNew } = require('../utils')
+let { shutdownNew: shutdown, verifyShutdownNew: verifyShutdown } = require('../utils')
 let cli = join(process.cwd(), 'src', 'cli', 'cli.js')
 let mock = join(process.cwd(), 'test', 'mock', 'normal')
 
@@ -26,8 +26,14 @@ test('Sandbox CLI interface', t => {
     if (data.includes('Sandbox Started in') && !started) {
       started = true
       t.pass('Sandbox started (binary)')
-      child.kill('SIGINT')
-      verifyShutdownNew(t, 'CLI interface')
+      // Windows doesn't terminate child processes nicely, so yet another special case for that very special OS
+      if (process.platform.startsWith('win')) {
+        child.kill('SIGINT')
+        verifyShutdown(t, 'CLI interface')
+      }
+      else {
+        shutdown['binary'](t, { setPlan: false, child })
+      }
     }
   })
 })

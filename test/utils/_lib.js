@@ -26,6 +26,8 @@ function rmPublic (t) {
   }
 }
 
+let _refreshInventory = true
+
 module.exports = {
   b64dec,
   copy,
@@ -35,4 +37,5 @@ module.exports = {
   rmPublic,
   url,
   wsUrl,
+  _refreshInventory
 }
