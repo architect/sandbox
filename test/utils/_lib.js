@@ -1,6 +1,7 @@
 let { join } = require('path')
 let { sync: rm } = require('rimraf')
 let { existsSync } = require('fs')
+let { NOISY_TESTS, CI } = process.env
 
 let b64dec = i => Buffer.from(i, 'base64').toString()
 
@@ -10,7 +11,11 @@ let data = { hi: 'there' }
 
 let port = 6666
 
-let quiet = process.env.NOISY_TESTS === 'true' ? false : true
+// Enable NOISY_TESTS for local debugging
+let quiet = NOISY_TESTS === 'true' ? false : true
+if (NOISY_TESTS && CI) {
+  throw Error('Noisy tests cannot be enabled in CI!')
+}
 
 let url = `http://localhost:${port}`
 let wsUrl = `ws://localhost:${port}`

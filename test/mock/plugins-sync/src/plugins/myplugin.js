@@ -1,7 +1,7 @@
 let os = require('os')
 let fs = require('fs')
 let { join } = require('path')
-let file = join(process.cwd(), 'test', 'mock', 'plugins-sync', 'syncplugin.test')
+let file = join(__dirname, '..', '..', 'syncplugin.test')
 
 module.exports = {
   variables: function ({ arc, stage, inventory }) {

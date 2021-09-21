@@ -1,7 +1,7 @@
 let fs = require('fs')
 let { promisify } = require('util')
 let { join } = require('path')
-let file = join(process.cwd(), 'test', 'mock', 'plugins-async', 'asyncplugin.test')
+let file = join(__dirname, '..', '..', 'asyncplugin.test')
 let write = promisify(fs.writeFile)
 let rm = promisify(fs.unlink)
 

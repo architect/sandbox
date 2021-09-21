@@ -1,14 +1,14 @@
 let { join } = require('path')
+let { existsSync } = require('fs')
 let test = require('tape')
 let aws = require('aws-sdk')
 let http = require('http')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { port, quiet, shutdown } = require('../utils')
+let { port, startupNew: startup, shutdownNew: shutdown } = require('../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let { _arcPort } = getPorts(port)
 
-let mock = join(process.cwd(), 'test', 'mock')
 let app = 'mockapp'
 let tables = [ 'accounts', 'pets', 'places', 'data' ]
 
@@ -34,66 +34,73 @@ test('Set up env', t => {
   t.ok(sandbox, 'Got Sandbox')
 })
 
-test('Start Sandbox ("normal" mock app)', t => {
-  t.plan(1)
-  sandbox.start({ cwd: join(mock, 'normal'), port, quiet }, function (err, result) {
-    if (err) t.fail(err)
-    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+test('Module', t => {
+  runTests('module')
+  t.end()
+})
+
+test('Binary', t => {
+  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
+  if (existsSync(bin)) {
+    runTests('binary')
+    t.end()
+  }
+  else t.end()
+})
+
+function runTests (runType) {
+  let mode = `[Internal Arc services / ${runType}]`
+  test(`${mode} Start Sandbox ('normal' mock app)`, t => {
+    startup[runType](t, 'normal')
   })
-})
 
-test('Get & check params (without specifying a type)', t => {
-  t.plan(5)
-  // Should get all tables params back
-  ssm.getParametersByPath({ Path: `/${app}` }, function (err, result) {
-    if (err) t.fail(err)
-    else check({ result, type: 'tables', items: tables, t })
+  test(`${mode} Get & check params (without specifying a type)`, t => {
+    t.plan(5)
+    // Should get all tables params back
+    ssm.getParametersByPath({ Path: `/${app}` }, function (err, result) {
+      if (err) t.fail(err)
+      else check({ result, type: 'tables', items: tables, t })
+    })
   })
-})
 
-test('Get & check params (specifying a type)', t => {
-  t.plan(5)
-  ssm.getParametersByPath({ Path: `/${app}/tables` }, function (err, result) {
-    if (err) t.fail(err)
-    else check({ result, type: 'tables', items: tables, t })
+  test(`${mode} Get & check params (specifying a type)`, t => {
+    t.plan(5)
+    ssm.getParametersByPath({ Path: `/${app}/tables` }, function (err, result) {
+      if (err) t.fail(err)
+      else check({ result, type: 'tables', items: tables, t })
+    })
   })
-})
 
-test('Get & check params (specifying an invalid or unknown)', t => {
-  t.plan(1)
-  ssm.getParametersByPath({ Path: `/${app}/idk` }, function (err, result) {
-    if (err) t.fail(err)
-    else t.deepEqual(result.Parameters, [], 'No parameters returned')
+  test(`${mode} Get & check params (specifying an invalid or unknown)`, t => {
+    t.plan(1)
+    ssm.getParametersByPath({ Path: `/${app}/idk` }, function (err, result) {
+      if (err) t.fail(err)
+      else t.deepEqual(result.Parameters, [], 'No parameters returned')
+    })
   })
-})
 
-test('Shut down Sandbox', t => {
-  t.plan(1)
-  shutdown(t)
-})
-
-test(`Start Sandbox ('plugins-sync' mock app)`, t => {
-  t.plan(1)
-  sandbox.start({ cwd: join(mock, 'plugins-sync'), port, quiet }, function (err, result) {
-    if (err) t.fail(err)
-    else t.equal(result, 'Sandbox successfully started', 'Sandbox started')
+  test(`${mode} Shut down Sandbox`, t => {
+    shutdown[runType](t)
   })
-})
 
-test('Get & check params provided by plugin (without specifying a type)', t => {
-  t.plan(3)
-  // Should get all tables params back
-  ssm.getParametersByPath({ Path: '/plugins-sandbox' }, function (err, result) {
-    if (err) t.fail(err)
-    else {
-      t.equals(result.Parameters.length, 1, 'one parameter returned')
-      t.equals(result.Parameters[0].Name, '/plugins-sandbox/myplugin/varOne', 'plugin parameter name correct')
-      t.equals(result.Parameters[0].Value, 'valueOne', 'plugin parameter value correct')
-    }
+  test(`${mode} Start Sandbox ('plugins-sync' mock app)`, t => {
+    startup[runType](t, 'plugins-sync')
   })
-})
 
-test('Teardown', t => {
-  t.plan(1)
-  shutdown(t)
-})
+  test(`${mode} Get & check params provided by plugin (without specifying a type)`, t => {
+    t.plan(3)
+    // Should get all tables params back
+    ssm.getParametersByPath({ Path: '/plugins-sandbox' }, function (err, result) {
+      if (err) t.fail(err)
+      else {
+        t.equals(result.Parameters.length, 1, 'one parameter returned')
+        t.equals(result.Parameters[0].Name, '/plugins-sandbox/myplugin/varOne', 'plugin parameter name correct')
+        t.equals(result.Parameters[0].Value, 'valueOne', 'plugin parameter value correct')
+      }
+    })
+  })
+
+  test(`${mode} Shut down Sandbox`, t => {
+    shutdown[runType](t)
+  })
+}

@@ -1,81 +1,56 @@
 let { join } = require('path')
-let { existsSync, stat } = require('fs')
+let { existsSync } = require('fs')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
+let { startupNew: startup, shutdownNew: shutdown } = require('../utils')
 let mock = join(process.cwd(), 'test', 'mock')
-let { port, quiet } = require('../utils')
 let syncFile = join(mock, 'plugins-sync', 'syncplugin.test')
 let asyncFile = join(mock, 'plugins-async', 'asyncplugin.test')
 
-function exists (f) {
-  let callback
-  let promise = new Promise(function (res, rej) {
-    callback = function (err) {
-      if (err) {
-        if (err.code === 'ENOENT') res(false)
-        else rej(err)
-      }
-      else res(true)
-    }
-  })
-  stat(f, callback)
-  return promise
-}
-
 test('Set up env', t => {
-  t.plan(2)
-  t.ok(sandbox, 'Sandbox is present')
-  t.ok(sandbox.start, 'sandbox.start module is present')
+  t.plan(1)
+  t.ok(sandbox, 'Got Sandbox')
 })
 
+test('Module', t => {
+  runTests('module')
+  t.end()
+})
 
-test('Sync sandbox.start', t => {
-  t.plan(1)
-  sandbox.start({ cwd: join(mock, 'plugins-sync'), port, quiet }, function (err) {
-    if (err) t.fail(err, 'Sandbox failed (sync)')
-    else t.ok(existsSync(syncFile), `plugin sandbox service start executed successfully (created ${syncFile})`)
+test('Binary', t => {
+  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
+  if (existsSync(bin)) {
+    runTests('binary')
+    t.end()
+  }
+  else t.end()
+})
+
+function runTests (runType) {
+  let mode = `[Plugins / ${runType}]`
+
+  test(`${mode} Start Sandbox (sync)`, t => {
+    startup[runType](t, 'plugins-sync', { planAdd: 1 }, () => {
+      t.ok(existsSync(syncFile), `plugin sandbox service start executed successfully (created ${syncFile})`)
+    })
   })
-})
 
-test('Sync sandbox.end', t => {
-  t.plan(1)
-  sandbox.end(() => {
-    t.notOk(existsSync(syncFile), `plugin sandbox service end executed successfully (removed ${syncFile})`)
+  test(`${mode} Shut down Sandbox (sync)`, t => {
+    shutdown[runType](t, { planAdd: 1 }, () => {
+      t.notOk(existsSync(syncFile), `plugin sandbox service end executed successfully (removed ${syncFile})`)
+    })
   })
-})
 
+  test(`${mode} Start Sandbox (async)`, async t => {
+    t.plan(2)
+    await startup[runType].async(t, 'plugins-async', { planAdd: 1 })
+    t.ok(existsSync(asyncFile), `plugin sandbox service start executed successfully (created ${asyncFile})`)
+  })
 
-test('Async sandbox.start', async t => {
-  t.plan(1)
-  try {
-    await sandbox.start({ cwd: join(mock, 'plugins-async'), port, quiet })
-  }
-  catch (err) {
-    t.fail(err)
-  }
-  try {
-    let result = await exists(asyncFile)
-    t.ok(result, `plugin sandbox service start executed successfully (created ${asyncFile})`)
-  }
-  catch (err) {
-    t.fail(err)
-  }
-})
-
-test('Async sandbox.end', async t => {
-  t.plan(1)
-  try {
-    await sandbox.end()
-  }
-  catch (err) {
-    t.fail(err)
-  }
-  try {
-    let result = await exists(asyncFile)
-    t.notOk(result, `plugin sandbox service end executed successfully (removed ${asyncFile})`)
-  }
-  catch (err) {
-    t.fail(err)
-  }
-})
+  test(`${mode} Shut down Sandbox (async)`, async t => {
+    t.plan(2)
+    await shutdown[runType].async(t, { planAdd: 1 })
+    t.notOk(existsSync(asyncFile), `plugin sandbox service end executed successfully (removed ${asyncFile})`)
+  })
+}

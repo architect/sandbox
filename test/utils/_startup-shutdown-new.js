@@ -5,6 +5,7 @@ let { port, quiet, url } = require('./_lib')
 let tiny = require('tiny-json-http')
 let mock = join(process.cwd(), 'test', 'mock')
 let child
+let data = ''
 
 // Verify sandbox shut down
 let verifyShutdown = (t, type, callback) => {
@@ -20,7 +21,8 @@ let verifyShutdown = (t, type, callback) => {
 
 let startup = {
   module: (t, mockDir, options = {}, callback) => {
-    t.plan(1)
+    let { planAdd = 0 } = options
+    t.plan(1 + planAdd)
     sandbox.start({
       cwd: join(mock, mockDir),
       port,
@@ -35,9 +37,11 @@ let startup = {
     })
   },
   binary: (t, mockDir, options = {}, callback) => {
-    t.plan(2)
+    let { planAdd = 0, print } = options
+    t.plan(2 + planAdd)
     if (child) throw Error('Unclean test env, found hanging child process!')
     let cwd = join(mock, mockDir)
+    // Quiet overrides are a bit more abstracted here bc we have to print from a child
     child = spawn(`${process.cwd()}/bin/sandbox-binary`, [], {
       cwd,
       env: {
@@ -48,12 +52,12 @@ let startup = {
     })
     t.ok(child, 'Sandbox child process started')
     let started = false
-    let data = ''
     child.stdout.on('data', chunk => {
       data += chunk.toString()
+      if (print && started) { console.log(chunk.toString()) }
       if (data.includes('Sandbox Started in') && !started) {
         started = true
-        if (!quiet) { console.log(data) }
+        if (print) { console.log(data) }
         t.pass('Sandbox started (binary)')
         if (callback) callback()
       }
@@ -61,13 +65,16 @@ let startup = {
     child.stderr.on('data', chunk => {
       data += chunk.toString()
     })
+    child.on('error', err => {
+      t.fail(err)
+    })
   }
 }
 
 let shutdown = {
   module: (t, options = {}, callback) => {
-    let { setPlan = true } = options
-    if (setPlan) t.plan(1)
+    let { planAdd = 0 } = options
+    t.plan(1 + planAdd)
     sandbox.end((err, result) => {
       if (err) t.fail(err)
       if (result !== 'Sandbox successfully shut down') {
@@ -77,10 +84,11 @@ let shutdown = {
     })
   },
   binary: (t, options = {}, callback) => {
-    let { setPlan = true, child: anotherChild } = options
-    if (setPlan) t.plan(1)
+    let { planAdd = 0, child: anotherChild } = options
+    t.plan(1 + planAdd)
     let proc = anotherChild || child
-    proc.kill('SIGINT')
+    proc.stdin.write('\u0003')
+    proc.stdin.end()
     // Child processes can take a bit to shut down
     // If we don't confirm it's exited, the next test may try to start a second Sandbox and blow everything up
     let tries = 0
@@ -94,6 +102,7 @@ let shutdown = {
       }
       else {
         anotherChild = child = undefined
+        data = ''
         verifyShutdown(t, 'binary', callback)
       }
     }

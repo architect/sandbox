@@ -4,6 +4,7 @@ let flags
  * Read CLI flags and populate userland options
  */
 module.exports = function getFlags (useCache = true) {
+  let { ARC_QUIET, QUIET, PORT } = process.env
   if (flags && useCache) return flags
 
   // TODO refactor all this janky custom logic into something like yargs
@@ -18,7 +19,7 @@ module.exports = function getFlags (useCache = true) {
 
   // Get the base port for HTTP / WebSockets; tables + events key off this
   // CLI args > env var
-  let port = Number(process.env.PORT) || 3333
+  let port = Number(PORT) || 3333
   let findPort = option => [ '-p', '--port', 'port' ].includes(option)
   if (args.some(findPort)) {
     let thePort = i => args[args.indexOf(i) + 1]
@@ -30,7 +31,9 @@ module.exports = function getFlags (useCache = true) {
 
   // Quiet stdout
   let findQuiet = option => [ '-q', '--quiet', 'quiet' ].includes(option)
-  let quiet = args.some(findQuiet)
+  let quiet = args.some(findQuiet) ||
+              (ARC_QUIET !== undefined && ARC_QUIET !== 'false') ||
+              (QUIET !== undefined && QUIET !== 'false')
 
   // Disable hydration symlinking
   let symlink = args.includes('--disable-symlinks')

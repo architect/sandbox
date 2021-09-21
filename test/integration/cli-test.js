@@ -32,7 +32,7 @@ test('Sandbox CLI interface', t => {
         verifyShutdown(t, 'CLI interface')
       }
       else {
-        shutdown['binary'](t, { setPlan: false, child })
+        shutdown['binary'](t, { planAdd: 2, child })
       }
     }
   })
