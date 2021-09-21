@@ -5,7 +5,7 @@ let aws = require('aws-sdk')
 let http = require('http')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { port, startupNew: startup, shutdownNew: shutdown } = require('../utils')
+let { port, startup, shutdown } = require('../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let { _arcPort } = getPorts(port)
 

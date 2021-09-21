@@ -4,7 +4,7 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { b64dec, url, data, startupNew: startup, shutdownNew: shutdown, checkRestResult: checkResult, rmPublic } = require('../../utils')
+let { b64dec, url, data, checkRestResult: checkResult, rmPublic, startup, shutdown, verifyShutdown } = require('../../utils')
 
 test('Set up env', t => {
   t.plan(1)
@@ -924,12 +924,7 @@ function runTests (runType) {
 
   test(`${mode} get / without defining @http`, t => {
     t.plan(1)
-    tiny.get({
-      url
-    }, function _got (err, result) {
-      if (err) t.equal(err.code, 'ECONNREFUSED', 'Connection refused')
-      else t.fail(result)
-    })
+    verifyShutdown(t, 'not actually shut down, just not using @http')
   })
 
   test(`${mode} Shut down Sandbox`, t => {

@@ -4,14 +4,9 @@ let tiny = require('tiny-json-http')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let mock = join(process.cwd(), 'test', 'mock', 'normal')
-let { port, quiet, url } = require('../utils')
+let { port, quiet, url, verifyShutdown } = require('../utils')
 let cwd = process.cwd()
 let msg = 'Hello from get / running the default runtime'
-
-// Verify sandbox shut down
-let shutdown = (t, err) => {
-  t.equal(err.code, 'ECONNREFUSED', 'Sandbox succssfully shut down')
-}
 
 test('Set up env', t => {
   t.plan(3)
@@ -44,6 +39,11 @@ test('Async sandbox.end', async t => {
   }
 })
 
+test('Double check', t => {
+  t.plan(1)
+  verifyShutdown(t, 'sandbox')
+})
+
 test('Async sandbox.start (from process.cwd)', async t => {
   t.plan(3)
   try {
@@ -72,6 +72,11 @@ test('Async sandbox.end', async t => {
   }
 })
 
+test('Double check', t => {
+  t.plan(1)
+  verifyShutdown(t, 'sandbox')
+})
+
 test('Sync sandbox.start (with cwd param)', t => {
   t.plan(2)
   sandbox.start({ cwd: mock, port, quiet }, function (err) {
@@ -89,10 +94,7 @@ test('Sync sandbox.start (with cwd param)', t => {
 test('Sync sandbox.end', t => {
   t.plan(1)
   sandbox.end(() => {
-    tiny.get({ url }, err => {
-      if (err) shutdown(t, err)
-      else t.fail('Sandbox did not shut down')
-    })
+    verifyShutdown(t, 'sandbox')
   })
 })
 
@@ -114,14 +116,9 @@ test('Sync sandbox.start (from process.cwd)', t => {
 
 test('Sync sandbox.end', t => {
   t.plan(2)
+  process.chdir(cwd)
+  t.equal(process.cwd(), cwd, 'Changed back to original working dir')
   sandbox.end(() => {
-    tiny.get({ url }, err => {
-      if (err) {
-        shutdown(t, err)
-        process.chdir(cwd)
-        t.equal(process.cwd(), cwd, 'Changed back to original working dir')
-      }
-      else t.fail('Sandbox did not shut down')
-    })
+    verifyShutdown(t, 'sandbox')
   })
 })

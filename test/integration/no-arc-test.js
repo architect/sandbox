@@ -5,7 +5,7 @@ let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let getDBClient = require('../../src/tables/_get-db-client')
-let { port, startupNew: startup, shutdownNew: shutdown, url } = require('../utils')
+let { port, startup, shutdown, url } = require('../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let ports = getPorts(port)
 

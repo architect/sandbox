@@ -3,7 +3,7 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let { http } = require(sut)
-let { port, quiet, url, verifyShutdownNew } = require('../../utils')
+let { port, quiet, url, verifyShutdown } = require('../../utils')
 let mock = join(process.cwd(), 'test', 'mock')
 let name = 'HTTP module'
 
@@ -42,7 +42,7 @@ test('Sync http.end', t => {
   http.end((err, result) => {
     if (err) t.fail(err)
     t.equal(result, 'HTTP successfully shut down', 'HTTP ended')
-    verifyShutdownNew(t, name)
+    verifyShutdown(t, name)
   })
 })
 
@@ -82,5 +82,5 @@ test('Async http.end', async t => {
 
 test('Teardown', t => {
   t.plan(1)
-  verifyShutdownNew(t, name)
+  verifyShutdown(t, name)
 })

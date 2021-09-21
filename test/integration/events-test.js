@@ -7,7 +7,7 @@ let { events } = require('../../src')
 let { sync: rm } = require('rimraf')
 let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
-let { port, quiet, _refreshInventory, startupNew: startup, shutdownNew: shutdown } = require('../utils')
+let { port, quiet, _refreshInventory, startup, shutdown } = require('../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 
 // Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally

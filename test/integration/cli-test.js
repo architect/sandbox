@@ -2,7 +2,7 @@ let { join } = require('path')
 let { existsSync } = require('fs')
 let { spawn } = require('child_process')
 let test = require('tape')
-let { shutdownNew: shutdown, verifyShutdownNew: verifyShutdown } = require('../utils')
+let { shutdown, verifyShutdown } = require('../utils')
 let cli = join(process.cwd(), 'src', 'cli', 'cli.js')
 let mock = join(process.cwd(), 'test', 'mock', 'normal')
 

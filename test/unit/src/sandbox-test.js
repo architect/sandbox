@@ -1,15 +1,9 @@
 let test = require('tape')
-let tiny = require('tiny-json-http')
 let sandbox = require('../../../src')
 let { join } = require('path')
 let series = require('run-series')
 let mock = join(process.cwd(), 'test', 'mock')
-let { copy, port, quiet, url } = require(join(process.cwd(), 'test', 'utils'))
-
-// Verify sandbox shut down
-let shutdown = (t, err) => {
-  t.equal(err.code, 'ECONNREFUSED', 'Sandbox succssfully shut down')
-}
+let { copy, port, quiet, verifyShutdown } = require(join(process.cwd(), 'test', 'utils'))
 
 test('Set up env', t => {
   t.plan(3)
@@ -34,11 +28,10 @@ test('Sandbox returns a Promise', async t => {
     t.pass('sandbox.end returned Promise (without params)')
     let returnedStr = typeof result === 'string'
     t.ok(returnedStr, `sandbox.end resolved and returned string: ${result}`)
-    await tiny.get({ url }) // Will fail; final test in catch block
+    await verifyShutdown.async(t, 'sandbox.end()')
   }
   catch (err) {
-    if (err) shutdown(t, err)
-    else t.fail(err)
+    t.fail(err)
   }
 
   try {
@@ -48,11 +41,10 @@ test('Sandbox returns a Promise', async t => {
     t.pass('sandbox.end returned Promise (without params)')
     let returnedStr = typeof result === 'string'
     t.ok(returnedStr, `sandbox.end resolved and returned string: ${result}`)
-    await tiny.get({ url }) // Will fail; final test in catch block
+    await verifyShutdown.async(t, 'sandbox.end()')
   }
   catch (err) {
-    if (err) shutdown(t, err)
-    else t.fail(err)
+    t.fail(err)
   }
 })
 
@@ -70,13 +62,7 @@ test('Sandbox uses continuation passing', t => {
     callback => {
       sandbox.end(() => {
         t.pass('sandbox.end executed callback')
-        tiny.get({ url }, err => {
-          if (err) {
-            shutdown(t, err)
-            callback()
-          }
-          else t.fail('Sandbox did not shut down')
-        })
+        verifyShutdown(t, 'sandbox.end()', callback)
       })
     },
 
@@ -91,13 +77,7 @@ test('Sandbox uses continuation passing', t => {
     callback => {
       sandbox.end(() => {
         t.pass('sandbox.end executed callback')
-        tiny.get({ url }, err => {
-          if (err) {
-            shutdown(t, err)
-            callback()
-          }
-          else t.fail('Sandbox did not shut down')
-        })
+        verifyShutdown(t, 'sandbox.end()', callback)
       })
     },
   ])

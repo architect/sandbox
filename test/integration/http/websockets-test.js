@@ -4,7 +4,7 @@ let test = require('tape')
 let Websocket = require('ws')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { makeSideChannel, wsUrl: url, startupNew: startup, shutdownNew: shutdown } = require('../../utils')
+let { makeSideChannel, startup, shutdown, wsUrl: url } = require('../../utils')
 
 test('Set up env', async t => {
   t.plan(1)

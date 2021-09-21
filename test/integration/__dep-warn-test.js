@@ -3,7 +3,7 @@ let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let tiny = require('tiny-json-http')
-let { startupNew: startup, shutdownNew: shutdown, url } = require('../utils')
+let { startup, shutdown, url } = require('../utils')
 
 let mock = join(process.cwd(), 'test', 'mock', 'dep-warn')
 let instructions = str => str.match(/Please run:/g).length
