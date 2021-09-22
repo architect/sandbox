@@ -1,8 +1,8 @@
 __pycache__
 !test/mock/dep-warn/**/node_modules
 .nyc_output/
-bin/
-bin/*-binary
+bin/*.json
+bin/sandbox-binary*
 coverage/
 node_modules/
 package-lock.json

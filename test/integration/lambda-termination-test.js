@@ -42,7 +42,9 @@ test('Set up env', t => {
 })
 
 test('Module', t => {
-  runTests('module')
+  if (!process.env.BINARY_ONLY) {
+    runTests('module')
+  }
   t.end()
 })
 
