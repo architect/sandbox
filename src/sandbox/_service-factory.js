@@ -29,10 +29,11 @@ module.exports = function serviceFactory (params, type) {
       }
 
       // Populate updater with passed options (if any)
-      if (options.logLevel || options.quiet) {
+      let hasQuietOpt = options.quiet !== undefined
+      if (options.logLevel || hasQuietOpt) {
         update = updater('Sandbox', {
           logLevel: options?.logLevel || logLevel,
-          quiet: options?.quiet || quiet,
+          quiet: hasQuietOpt ? options.quiet : quiet,
         })
       }
 

@@ -9,13 +9,14 @@ let data = ''
 
 let startup = {
   module: (t, mockDir, options = {}, callback) => {
-    let { planAdd = 0 } = options
+    let { planAdd = 0, print } = options
     t.plan(1 + planAdd)
     sandbox.start({
       cwd: join(mock, mockDir),
       port,
-      quiet,
+      quiet: print !== undefined ? false : quiet,
       ...options,
+      _refreshInventory: true,
     }, (err, result) => {
       if (err) t.fail(err)
       else {
@@ -42,10 +43,10 @@ let startup = {
     let started = false
     child.stdout.on('data', chunk => {
       data += chunk.toString()
-      if (print && started) { console.log(chunk.toString()) }
+      if ((print || !quiet) && started) { console.log(chunk.toString()) }
       if (data.includes('Sandbox Started in') && !started) {
         started = true
-        if (print) { console.log(data) }
+        if (print || !quiet) { console.log(data) }
         t.pass('Sandbox started (binary)')
         if (callback) callback()
       }

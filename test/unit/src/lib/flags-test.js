@@ -104,7 +104,7 @@ test('Test hydration symlinking flag', t => {
 
   cmd([])
   f = flags(false)
-  t.equal(f.symlink, false, `No symlink flags returned: false`)
+  t.equal(f.symlink, undefined, `No symlink flags returned: undefined`)
 
   cmd([ '--disable-symlinks' ])
   f = flags(false)

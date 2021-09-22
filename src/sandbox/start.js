@@ -152,7 +152,7 @@ module.exports = function _start (params, callback) {
     // Check aws-sdk installation status if installed globally
     function _checkAWS_SDK (callback) {
       let dir = __dirname
-      if (!dir.startsWith(cwd)) {
+      if (!dir.startsWith(cwd) && !process.pkg) {
         let awsDir = join(dir.split('@architect')[0], 'aws-sdk', 'package.json')
         if (!exists(awsDir)) {
           update.warn(`Possible global install of Architect without a global install of AWS-SDK, please run: npm i -g aws-sdk`)

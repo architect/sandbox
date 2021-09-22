@@ -8,7 +8,6 @@ let { getFlags } = require('../lib')
 let { updater } = require('@architect/utils')
 let { logLevel, quiet } = getFlags()
 let update = updater('Sandbox', { logLevel, quiet })
-let cwd
 
 /**
  * Server - contains Sandbox service singletons that can operate independently
@@ -17,7 +16,7 @@ let server = {
   events: undefined,
   http:   undefined,
   tables: undefined,
-  _arc: undefined,
+  _arc:   undefined,
 }
 
 /**
@@ -34,11 +33,11 @@ let _arc =   service(params, '_arc')
  */
 function start (options, callback) {
   options = options || {}
-  options.cwd = cwd = options.cwd || process.cwd()
+  options.cwd = options.cwd || process.cwd()
 
   update = updater('Sandbox', {
     logLevel: options?.logLevel || logLevel,
-    quiet: options?.quiet || quiet,
+    quiet: options?.quiet !== undefined ? options.quiet : quiet,
   })
 
   // Set up promise if there's no callback
@@ -68,7 +67,7 @@ function start (options, callback) {
     go()
   }
   else {
-    inv({ cwd }, function (err, result) {
+    inv({ cwd: options.cwd }, function (err, result) {
       if (err) callback(err)
       else {
         params.inventory = result
@@ -101,7 +100,7 @@ function end (callback) {
     _end({ events, http, tables, _arc, inventory: params.inventory }, function (err, result) {
       if (err) callback(err)
       else {
-        params.inventory = undefined
+        params.inventory = null
         callback(null, result)
       }
     })

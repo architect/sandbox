@@ -2,7 +2,7 @@ let arc = require('@architect/functions')
 let test = require('tape')
 let { existsSync, mkdirSync, readdirSync } = require('fs')
 let { join } = require('path')
-let { events } = require('../../src')
+let sandbox = require('../../src')
 let { sync: rm } = require('rimraf')
 let mock = join(process.cwd(), 'test', 'mock')
 let { port, startup, shutdown } = require('../utils')
@@ -37,106 +37,106 @@ function check (t) {
 }
 
 test('Set up env', t => {
-  t.plan(2)
-  t.ok(events, 'Events module is present')
-  t.notOk(process.env.ARC_EVENTS_PORT, 'ARC_EVENTS_PORT not set')
+  t.plan(1)
+  t.ok(sandbox, 'Sandbox is present')
 })
 
-test(`[Lambda invocation] Start Sandbox`, t => {
-  startup['module'](t, 'lambda-termination')
+test('Module', t => {
+  runTests('module')
+  t.end()
 })
 
-// Control test: if you change lambda invocation logic, this should pass!
-test('[Lambda invocation] Should not terminate a process early', t => {
-  t.plan(3)
-  setup(t)
-  let fine = join(tmp, 'fine-write-me')
-  arc.events.publish({
-    name: 'event-does-not-timeout',
-    payload: { path: fine }
-  },
-  function done (err) {
-    if (err) t.fail(err)
-    else setTimeout(() => {
-      console.log('Files in tmp:', readdirSync(tmp))
-      t.ok(existsSync(fine), 'File successfully created by event as event did not time out')
-      reset(t)
-    }, 1000)
+test('Binary', t => {
+  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
+  if (existsSync(bin)) {
+    runTests('binary')
+    t.end()
+  }
+  else t.end()
+})
+
+function runTests (runType) {
+  let mode = `[Lambda termination / ${runType}]`
+
+  test(`${mode} Start Sandbox`, t => {
+    startup[runType](t, 'lambda-termination')
   })
-})
 
-test('[Lambda invocation] Respect timeout for async functions and kill process', t => {
-  t.plan(3)
-  setup(t)
-  arc.events.publish({
-    name: 'event-timeout-async',
-    payload
-  },
-  function done (err) {
-    if (err) t.fail(err)
-    else check(t)
-  })
-})
-
-test('[Lambda invocation] Respect timeout for async functions and kill process + spawned children', t => {
-  t.plan(3)
-  setup(t)
-  arc.events.publish({
-    name: 'event-timeout-async-child',
-    payload
-  },
-  function done (err) {
-    if (err) t.fail(err)
-    else check(t)
-  })
-})
-
-test('[Lambda invocation] Respect timeout for async functions and kill process (with logic inside setTimeout)', t => {
-  // See: #1137
-  t.plan(3)
-  setup(t)
-  arc.events.publish({
-    name: 'event-timeout-async-settimeout',
-    payload
-  },
-  function done (err) {
-    if (err) t.fail(err)
-    else check(t)
-  })
-})
-
-test('[Lambda invocation] Respect timeout for sync functions and kill process', t => {
-  t.plan(3)
-  setup(t)
-  arc.events.publish({
-    name: 'event-timeout-sync',
-    payload
-  },
-  function done (err) {
-    if (err) t.fail(err)
-    else check(t)
-  })
-})
-
-test('[Lambda invocation] Respect timeout for sync functions and kill process + spawned children', t => {
-  t.plan(3)
-  setup(t)
-  arc.events.publish({
-    name: 'event-timeout-sync-child',
-    payload
-  },
-  function done (err) {
-    if (err) t.fail(err)
-    else check(t)
-  })
-})
-
-test('[Lambda invocation] Respect timeout for sync functions and kill process + spawned children (inside a Lambda via Linux /proc)', t => {
-  let isLinux = process.platform === 'linux'
-  if (isLinux) {
+  // Control test: if you change lambda invocation logic, this should pass!
+  test(`${mode} Should not terminate a process early`, t => {
     t.plan(3)
     setup(t)
-    process.env.AWS_LAMBDA_FUNCTION_NAME = 'yep'
+    let fine = join(tmp, 'fine-write-me')
+    arc.events.publish({
+      name: 'event-does-not-timeout',
+      payload: { path: fine }
+    },
+    function done (err) {
+      if (err) t.fail(err)
+      else setTimeout(() => {
+        console.log('Files in tmp:', readdirSync(tmp))
+        t.ok(existsSync(fine), 'File successfully created by event as event did not time out')
+        reset(t)
+      }, 1000)
+    })
+  })
+
+  test(`${mode} Respect timeout for async functions and kill process`, t => {
+    t.plan(3)
+    setup(t)
+    arc.events.publish({
+      name: 'event-timeout-async',
+      payload
+    },
+    function done (err) {
+      if (err) t.fail(err)
+      else check(t)
+    })
+  })
+
+  test(`${mode} Respect timeout for async functions and kill process + spawned children`, t => {
+    t.plan(3)
+    setup(t)
+    arc.events.publish({
+      name: 'event-timeout-async-child',
+      payload
+    },
+    function done (err) {
+      if (err) t.fail(err)
+      else check(t)
+    })
+  })
+
+  test(`${mode} Respect timeout for async functions and kill process (with logic inside setTimeout)`, t => {
+    // See: #1137
+    t.plan(3)
+    setup(t)
+    arc.events.publish({
+      name: 'event-timeout-async-settimeout',
+      payload
+    },
+    function done (err) {
+      if (err) t.fail(err)
+      else check(t)
+    })
+  })
+
+  test(`${mode} Respect timeout for sync functions and kill process`, t => {
+    t.plan(3)
+    setup(t)
+    arc.events.publish({
+      name: 'event-timeout-sync',
+      payload
+    },
+    function done (err) {
+      if (err) t.fail(err)
+      else check(t)
+    })
+  })
+
+  test(`${mode} Respect timeout for sync functions and kill process + spawned children`, t => {
+    t.plan(3)
+    setup(t)
     arc.events.publish({
       name: 'event-timeout-sync-child',
       payload
@@ -145,13 +145,30 @@ test('[Lambda invocation] Respect timeout for sync functions and kill process + 
       if (err) t.fail(err)
       else check(t)
     })
-  }
-  else {
-    t.plan(1)
-    t.pass('Skipped because !Linux')
-  }
-})
+  })
 
-test(`[Lambda invocation] Shut down Sandbox`, t => {
-  shutdown['module'](t)
-})
+  test(`${mode} Respect timeout for sync functions and kill process + spawned children (inside a Lambda via Linux /proc)`, t => {
+    let isLinux = process.platform === 'linux'
+    if (isLinux) {
+      t.plan(3)
+      setup(t)
+      process.env.AWS_LAMBDA_FUNCTION_NAME = 'yep'
+      arc.events.publish({
+        name: 'event-timeout-sync-child',
+        payload
+      },
+      function done (err) {
+        if (err) t.fail(err)
+        else check(t)
+      })
+    }
+    else {
+      t.plan(1)
+      t.pass('Skipped because !Linux')
+    }
+  })
+
+  test(`${mode} Shut down Sandbox`, t => {
+    shutdown[runType](t)
+  })
+}
