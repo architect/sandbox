@@ -1,11 +1,17 @@
 let { join } = require('path')
-let { sync: rm } = require('rimraf')
 let { existsSync } = require('fs')
+let { sync: rm } = require('rimraf')
 let { NOISY_TESTS, CI } = process.env
 
 let b64dec = i => Buffer.from(i, 'base64').toString()
 
 let copy = thing => JSON.parse(JSON.stringify(thing))
+
+// Dummy AWS creds
+let credentials = {
+  accessKeyId: 'xxx',
+  secretAccessKey: 'xxx',
+}
 
 let data = { hi: 'there' }
 
@@ -31,15 +37,28 @@ function rmPublic (t) {
   }
 }
 
+// Integration test runner
+let bin = join(process.cwd(), 'bin', `sandbox-binary${process.platform.startsWith('win') ? '.exe' : ''}`)
+let run = (runTests, t) => {
+  if (!process.env.BINARY_ONLY) {
+    runTests('module', t)
+  }
+  if (!process.env.MODULE_ONLY && existsSync(bin)) {
+    runTests('binary', t)
+  }
+}
+
 let _refreshInventory = true
 
 module.exports = {
   b64dec,
   copy,
+  credentials,
   data,
   port,
   quiet,
   rmPublic,
+  run,
   url,
   wsUrl,
   _refreshInventory

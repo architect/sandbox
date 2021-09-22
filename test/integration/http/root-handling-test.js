@@ -1,9 +1,8 @@
 let { join } = require('path')
-let { existsSync } = require('fs')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sandbox = require('../../../src')
-let { url, startup, shutdown, checkHttpResult, checkRestResult } = require('../../utils')
+let { checkRestResult, checkHttpResult, run, startup, shutdown, url } = require('../../utils')
 let indexHTML = 'Hello from public/index.html!'
 
 test('Set up env', t => {
@@ -11,31 +10,20 @@ test('Set up env', t => {
   t.ok(sandbox, 'Got sandbox')
 })
 
-test('Module', t => {
-  if (!process.env.BINARY_ONLY) {
-    runTests('module')
-  }
+test('Run root handling tests', t => {
+  run(runTests, t)
   t.end()
 })
 
-test('Binary', t => {
-  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
-  if (existsSync(bin)) {
-    runTests('binary')
-    t.end()
-  }
-  else t.end()
-})
-
-function runTests (runType) {
+function runTests (runType, t) {
   /**
    * Root param with nested exact match: /:param/there
    */
-  test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'param-exact'), { apigateway: 'http' })
   })
 
-  test(`[HTTP mode / ${runType}] get /hi/there - root param at /:param/there`, async t => {
+  t.test(`[HTTP mode / ${runType}] get /hi/there - root param at /:param/there`, async t => {
     t.plan(16)
 
     let result
@@ -58,16 +46,16 @@ function runTests (runType) {
     })
   })
 
-  test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'param-exact'), { apigateway: 'httpv1' })
   })
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] get /hi/there - root param at /:param/there`, async t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] get /hi/there - root param at /:param/there`, async t => {
     t.plan(17)
     let result
     result = await tiny.get({ url })
@@ -90,14 +78,14 @@ function runTests (runType) {
     })
   })
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
   // TODO fix this test, see: arc#982
   // This shouldn't be possible, as /:param/whatever can't coexist with /{proxy+} ASAP in REST
   /*
-  test('[REST mode] get /hi/there - root param at /:param/there', async t => {
+  t.test('[REST mode] get /hi/there - root param at /:param/there', async t => {
     setup(t, 'rest', 'param-exact')
     try {
       await tiny.get({ url: url + '/hi/there' })
@@ -112,11 +100,11 @@ function runTests (runType) {
   /**
    * Root param only: /:param
    */
-  test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'root-param'), { apigateway: 'http' })
   })
 
-  test(`[HTTP mode / ${runType}] get / - root param at /:param`, async t => {
+  t.test(`[HTTP mode / ${runType}] get / - root param at /:param`, async t => {
     t.plan(15)
     let result = await tiny.get({ url })
     checkHttpResult(t, result.body, {
@@ -133,16 +121,16 @@ function runTests (runType) {
     })
   })
 
-  test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'root-param'), { apigateway: 'httpv1' })
   })
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] get / - root param at /:param`, async t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] get / - root param at /:param`, async t => {
     t.plan(16)
     let result = await tiny.get({ url })
     checkRestResult(t, result.body, {
@@ -160,17 +148,17 @@ function runTests (runType) {
     })
   })
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
 
   // This shouldn't be possible, as /:param can't coexist with /{proxy+} ASAP in REST
-  test(`[REST mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[REST mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'root-param'), { apigateway: 'rest' })
   })
 
-  test(`[REST mode / ${runType}] get / - root param at /:param`, async t => {
+  t.test(`[REST mode / ${runType}] get / - root param at /:param`, async t => {
     t.plan(1)
     try {
       await tiny.get({ url })
@@ -181,54 +169,54 @@ function runTests (runType) {
     }
   })
 
-  test(`[REST mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[REST mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
   /**
    * Nothing dynamic in root, all ASAP all the time
    */
-  test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'asap'), { apigateway: 'http' })
   })
 
-  test(`[HTTP mode / ${runType}] get / - ASAP`, async t => {
+  t.test(`[HTTP mode / ${runType}] get / - ASAP`, async t => {
     t.plan(1)
     let result = await tiny.get({ url })
     t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
   })
 
-  test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'asap'), { apigateway: 'httpv1' })
   })
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] get / - ASAP`, async t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] get / - ASAP`, async t => {
     t.plan(1)
     let result = await tiny.get({ url })
     t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
   })
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
 
-  test(`[REST mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[REST mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'asap'), { apigateway: 'rest' })
   })
 
-  test(`[REST mode / ${runType}] get / - ASAP`, async t => {
+  t.test(`[REST mode / ${runType}] get / - ASAP`, async t => {
     t.plan(1)
     let result = await tiny.get({ url })
     t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
   })
 
-  test(`[REST mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[REST mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
@@ -236,47 +224,47 @@ function runTests (runType) {
   /**
    * Nothing dynamic in root, but only a bare @static - no @http
    */
-  test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'bare-static'), { apigateway: 'http' })
   })
 
-  test(`[HTTP mode / ${runType}] get / - ASAP (@static only)`, async t => {
+  t.test(`[HTTP mode / ${runType}] get / - ASAP (@static only)`, async t => {
     t.plan(1)
     let result = await tiny.get({ url })
     t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
   })
 
-  test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'bare-static'), { apigateway: 'httpv1' })
   })
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] get / - ASAP (@static only)`, async t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] get / - ASAP (@static only)`, async t => {
     t.plan(1)
     let result = await tiny.get({ url })
     t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
   })
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
 
-  test(`[REST mode mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[REST mode mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'bare-static'), { apigateway: 'rest' })
   })
 
-  test(`[REST mode / ${runType}] get / - ASAP (@static only)`, async t => {
+  t.test(`[REST mode / ${runType}] get / - ASAP (@static only)`, async t => {
     t.plan(1)
     let result = await tiny.get({ url })
     t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
   })
 
-  test(`[REST mode mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[REST mode mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
@@ -284,11 +272,11 @@ function runTests (runType) {
   /**
    * Root is greedy: retired for HTTP APIs in Arc 8, still available in REST mode
    */
-  test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[HTTP mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'greedy-get-index'), { apigateway: 'http' })
   })
 
-  test(`[HTTP mode / ${runType}] get / - greedy index`, async t => {
+  t.test(`[HTTP mode / ${runType}] get / - greedy index`, async t => {
     t.plan(1)
     try {
       await tiny.get({ url: url + '/hi/there' })
@@ -299,16 +287,16 @@ function runTests (runType) {
     }
   })
 
-  test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'greedy-get-index'), { apigateway: 'httpv1' })
   })
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] get / - greedy index`, async t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] get / - greedy index`, async t => {
     t.plan(1)
     try {
       await tiny.get({ url: url + '/hi/there' })
@@ -319,16 +307,16 @@ function runTests (runType) {
     }
   })
 
-  test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[HTTP v1.0 (REST) mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
 
-  test(`[REST mode / ${runType}] Start Sandbox`, t => {
+  t.test(`[REST mode / ${runType}] Start Sandbox`, t => {
     startup[runType](t, join('root-handling', 'greedy-get-index'), { apigateway: 'rest' })
   })
 
-  test(`[REST mode / ${runType}] get / - greedy index`, async t => {
+  t.test(`[REST mode / ${runType}] get / - greedy index`, async t => {
     t.plan(16)
     let path = '/hi/there'
     let result = await tiny.get({ url: url + path })
@@ -347,7 +335,7 @@ function runTests (runType) {
     })
   })
 
-  test(`[REST mode / ${runType}] Shut down Sandbox`, t => {
+  t.test(`[REST mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 }

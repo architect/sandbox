@@ -1,40 +1,28 @@
 let { join } = require('path')
-let { existsSync } = require('fs')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { b64dec, url, data, checkHttpResult: checkResult, rmPublic, startup, shutdown, verifyShutdown } = require('../../utils')
+let { b64dec, checkHttpResult: checkResult, data, rmPublic, run, shutdown, startup, url, verifyShutdown } = require('../../utils')
 
 test('Set up env', t => {
   t.plan(1)
   t.ok(sandbox, 'Got Sandbox')
 })
 
-test('Module', t => {
-  if (!process.env.BINARY_ONLY) {
-    runTests('module')
-  }
+test('Run HTTP tests', t => {
+  run(runTests, t)
   t.end()
 })
 
-test('Binary', t => {
-  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
-  if (existsSync(bin)) {
-    runTests('binary')
-    t.end()
-  }
-  else t.end()
-})
-
-function runTests (runType) {
+function runTests (runType, t) {
   let mode = `[HTTP mode / ${runType}]`
 
-  test(`${mode} Start Sandbox`, t => {
+  t.test(`${mode} Start Sandbox`, t => {
     startup[runType](t, 'normal')
   })
 
-  test(`${mode} get /`, t => {
+  t.test(`${mode} get /`, t => {
     t.plan(15)
     tiny.get({
       url
@@ -57,7 +45,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /?whats=up`, t => {
+  t.test(`${mode} get /?whats=up`, t => {
     t.plan(15)
     let rawQueryString = 'whats=up'
     tiny.get({
@@ -81,7 +69,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /?whats=up&whats=there`, t => {
+  t.test(`${mode} get /?whats=up&whats=there`, t => {
     t.plan(15)
     let rawQueryString = 'whats=up&whats=there'
     tiny.get({
@@ -105,7 +93,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get / + cookie`, t => {
+  t.test(`${mode} get / + cookie`, t => {
     t.plan(15)
     let cookie = 'a=cookie'
     tiny.get({
@@ -130,7 +118,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /multi-cookies-res`, t => {
+  t.test(`${mode} get /multi-cookies-res`, t => {
     t.plan(1)
     tiny.get({
       url: url + '/multi-cookies-res'
@@ -147,7 +135,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /binary`, t => {
+  t.test(`${mode} get /binary`, t => {
     t.plan(15)
     let rawPath = '/binary'
     tiny.get({
@@ -172,7 +160,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /nodejs12.x`, t => {
+  t.test(`${mode} get /nodejs12.x`, t => {
     t.plan(15)
     let rawPath = '/nodejs12.x'
     tiny.get({
@@ -196,7 +184,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /nodejs10.x`, t => {
+  t.test(`${mode} get /nodejs10.x`, t => {
     t.plan(15)
     let rawPath = '/nodejs10.x'
     tiny.get({
@@ -220,7 +208,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /nodejs8.10`, t => {
+  t.test(`${mode} get /nodejs8.10`, t => {
     t.plan(15)
     let rawPath = '/nodejs8.10'
     tiny.get({
@@ -244,7 +232,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /python3.8`, t => {
+  t.test(`${mode} get /python3.8`, t => {
     t.plan(15)
     let rawPath = '/python3.8'
     tiny.get({
@@ -268,7 +256,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /python3.7`, t => {
+  t.test(`${mode} get /python3.7`, t => {
     t.plan(15)
     let rawPath = '/python3.7'
     tiny.get({
@@ -292,7 +280,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /python3.6`, t => {
+  t.test(`${mode} get /python3.6`, t => {
     t.plan(15)
     let rawPath = '/python3.6'
     tiny.get({
@@ -316,7 +304,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /ruby2.5`, t => {
+  t.test(`${mode} get /ruby2.5`, t => {
     t.plan(15)
     let rawPath = '/ruby2.5'
     tiny.get({
@@ -340,7 +328,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /deno`, t => {
+  t.test(`${mode} get /deno`, t => {
     t.plan(15)
     let rawPath = '/deno'
     tiny.get({
@@ -364,7 +352,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /get-c/*`, t => {
+  t.test(`${mode} get /get-c/*`, t => {
     t.plan(15)
     let rawPath = '/get-c/hello/there'
     tiny.get({
@@ -388,7 +376,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /get-p-c/:param/*`, t => {
+  t.test(`${mode} get /get-p-c/:param/*`, t => {
     t.plan(15)
     let rawPath = '/get-p-c/why/hello/there'
     tiny.get({
@@ -415,7 +403,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /no-return (noop)`, t => {
+  t.test(`${mode} get /no-return (noop)`, t => {
     t.plan(3)
     let rawPath = '/no-return'
     tiny.get({
@@ -432,7 +420,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /promise-return (returned promise vs async function)`, t => {
+  t.test(`${mode} get /promise-return (returned promise vs async function)`, t => {
     t.plan(2)
     let rawPath = '/promise-return'
     tiny.get({
@@ -447,7 +435,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /custom`, t => {
+  t.test(`${mode} get /custom`, t => {
     t.plan(15)
     let rawPath = '/custom'
     tiny.get({
@@ -472,7 +460,7 @@ function runTests (runType) {
   })
 
   // Write (POST, PUT, etc.) tests exercise HTTP API mode's implicit JSON passthrough
-  test(`${mode} post /post (plain JSON)`, t => {
+  t.test(`${mode} post /post (plain JSON)`, t => {
     t.plan(15)
     let rawPath = '/post'
     tiny.post({
@@ -497,7 +485,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} post /post (flavored JSON)`, t => {
+  t.test(`${mode} post /post (flavored JSON)`, t => {
     t.plan(15)
     let rawPath = '/post'
     tiny.post({
@@ -523,7 +511,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} put /put`, t => {
+  t.test(`${mode} put /put`, t => {
     t.plan(15)
     let rawPath = '/put'
     tiny.put({
@@ -549,7 +537,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} patch /patch`, t => {
+  t.test(`${mode} patch /patch`, t => {
     t.plan(15)
     let rawPath = '/patch'
     tiny.patch({
@@ -574,7 +562,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} delete /delete`, t => {
+  t.test(`${mode} delete /delete`, t => {
     t.plan(15)
     let rawPath = '/delete'
     tiny.del({
@@ -599,7 +587,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} head /head`, t => {
+  t.test(`${mode} head /head`, t => {
     t.plan(15)
     let rawPath = '/head'
     tiny.head({
@@ -623,7 +611,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} options /options`, t => {
+  t.test(`${mode} options /options`, t => {
     t.plan(15)
     let rawPath = '/options'
     tiny.options({
@@ -647,7 +635,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /any`, t => {
+  t.test(`${mode} get /any`, t => {
     t.plan(15)
     let rawPath = '/any'
     tiny.get({
@@ -672,7 +660,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} post /any`, t => {
+  t.test(`${mode} post /any`, t => {
     t.plan(15)
     let rawPath = '/any'
     tiny.post({
@@ -699,7 +687,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} put /any`, t => {
+  t.test(`${mode} put /any`, t => {
     t.plan(15)
     let rawPath = '/any'
     tiny.put({
@@ -725,7 +713,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} patch /any`, t => {
+  t.test(`${mode} patch /any`, t => {
     t.plan(15)
     let rawPath = '/any'
     tiny.patch({
@@ -751,7 +739,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} delete /any`, t => {
+  t.test(`${mode} delete /any`, t => {
     t.plan(15)
     let rawPath = '/any'
     tiny.del({
@@ -777,7 +765,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} head /any`, t => {
+  t.test(`${mode} head /any`, t => {
     t.plan(15)
     let rawPath = '/any'
     tiny.head({
@@ -802,7 +790,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} options /any`, t => {
+  t.test(`${mode} options /any`, t => {
     t.plan(15)
     let rawPath = '/any'
     tiny.options({
@@ -827,7 +815,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /any-c/*`, t => {
+  t.test(`${mode} get /any-c/*`, t => {
     t.plan(15)
     let rawPath = '/any-c/hello/there'
     tiny.get({
@@ -852,7 +840,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /any-p/:param`, t => {
+  t.test(`${mode} get /any-p/:param`, t => {
     t.plan(15)
     let rawPath = '/any-p/hello'
     tiny.get({
@@ -877,7 +865,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /reject-promise should fail`, t => {
+  t.test(`${mode} get /reject-promise should fail`, t => {
     t.plan(2)
     tiny.get({
       url: url + '/reject-promise'
@@ -892,7 +880,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /throw-sync-error should fail`, t => {
+  t.test(`${mode} get /throw-sync-error should fail`, t => {
     t.plan(2)
     tiny.get({
       url: url + '/throw-sync-error'
@@ -910,7 +898,7 @@ function runTests (runType) {
   /**
    * Arc v8+: routes are now literal, no more greedy root (`any /{proxy+}`) fallthrough
    */
-  test(`${mode} post / - route should fail when not explicitly defined`, t => {
+  t.test(`${mode} post / - route should fail when not explicitly defined`, t => {
     t.plan(2)
     tiny.post({
       url,
@@ -925,7 +913,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /foobar - route should fail when not explicitly defined`, t => {
+  t.test(`${mode} get /foobar - route should fail when not explicitly defined`, t => {
     t.plan(2)
     tiny.get({
       url: url + '/foobar',
@@ -939,18 +927,18 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Shut down Sandbox`, t => {
+  t.test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
   /**
    * Arc v6: test failing to load index.html without get / defined
    */
-  test(`${mode} Start Sandbox`, t => {
+  t.test(`${mode} Start Sandbox`, t => {
     startup[runType](t, 'no-index-fail')
   })
 
-  test(`${mode} get / without defining get / should fail if index.html not present`, t => {
+  t.test(`${mode} get / without defining get / should fail if index.html not present`, t => {
     t.plan(2)
     rmPublic(t)
     tiny.get({
@@ -961,18 +949,18 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Shut down Sandbox`, t => {
+  t.test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
   /**
    * Arc v6: test successfully loading index.html without get / defined
    */
-  test(`${mode} Start Sandbox`, t => {
+  t.test(`${mode} Start Sandbox`, t => {
     startup[runType](t, 'no-index-pass')
   })
 
-  test(`${mode} get / without defining get / should succeed if index.html is present`, t => {
+  t.test(`${mode} get / without defining get / should succeed if index.html is present`, t => {
     t.plan(2)
     tiny.get({
       url
@@ -986,18 +974,18 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Shut down Sandbox`, t => {
+  t.test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
   /**
    * Arc v6: test failing to load an endpoint missing its local handler file
    */
-  test(`${mode} Start Sandbox`, t => {
+  t.test(`${mode} Start Sandbox`, t => {
     startup[runType](t, 'missing-handler')
   })
 
-  test(`${mode} get /missing should fail if missing its handler file`, t => {
+  t.test(`${mode} get /missing should fail if missing its handler file`, t => {
     t.plan(2)
     tiny.get({
       url: url + '/missing'
@@ -1010,23 +998,23 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Shut down Sandbox`, t => {
+  t.test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
   /**
    * Test to ensure sandbox loads without defining @http
    */
-  test(`${mode} Start Sandbox`, t => {
+  t.test(`${mode} Start Sandbox`, t => {
     startup[runType](t, 'no-http')
   })
 
-  test(`${mode} get / without defining @http`, t => {
+  t.test(`${mode} get / without defining @http`, t => {
     t.plan(1)
     verifyShutdown(t, 'not actually shut down, just not using @http')
   })
 
-  test(`${mode} Shut down Sandbox`, t => {
+  t.test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 }

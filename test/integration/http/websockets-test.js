@@ -1,34 +1,22 @@
 let { join } = require('path')
-let { existsSync } = require('fs')
 let test = require('tape')
 let Websocket = require('ws')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { makeSideChannel, startup, shutdown, wsUrl: url } = require('../../utils')
+let { makeSideChannel, run, startup, shutdown, wsUrl: url } = require('../../utils')
 
 test('Set up env', async t => {
   t.plan(1)
   t.ok(sandbox, 'Got Sandbox')
 })
 
-test('Module', t => {
-  if (!process.env.BINARY_ONLY) {
-    runTests('module')
-  }
+test('Run WebSocket tests', t => {
+  run(runTests, t)
   t.end()
 })
 
-test('Binary', t => {
-  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
-  if (existsSync(bin)) {
-    runTests('binary')
-    t.end()
-  }
-  else t.end()
-})
-
-function runTests (runType) {
-  let mode = `[HTTP mode / ${runType}]`
+function runTests (runType, t) {
+  let mode = `[WebSocket / ${runType}]`
   let _ws
   let _events
 
@@ -104,17 +92,17 @@ function runTests (runType) {
     }
   }
 
-  test(`${mode} Start Sandbox`, t => {
+  t.test(`${mode} Start Sandbox`, t => {
     startup[runType](t, 'normal')
   })
 
-  test('Start side channel', async t => {
+  t.test('Start side channel', async t => {
     t.plan(1)
     _events = await makeSideChannel()
     t.ok(_events, 'Setup side channel')
   })
 
-  test(`${mode} Connect, send payloads (default), disconnect`, async t => {
+  t.test(`${mode} Connect, send payloads (default), disconnect`, async t => {
     t.plan(29)
     await startupAndConnect()
 
@@ -138,7 +126,7 @@ function runTests (runType) {
     expectPayload(t, disconnectEvent, undefined)
   })
 
-  test(`${mode} Connect, send payloads (falls back to default), disconnect`, async t => {
+  t.test(`${mode} Connect, send payloads (falls back to default), disconnect`, async t => {
     t.plan(9)
     await startupAndConnect()
     await nextEvent(t) // ignore connect event
@@ -157,7 +145,7 @@ function runTests (runType) {
     await nextEvent(t) // ignore disconnect event but wait for it so the lambda doesn't error
   })
 
-  test(`${mode} Connect, send non json payload (falls back to default), disconnect`, async t => {
+  t.test(`${mode} Connect, send non json payload (falls back to default), disconnect`, async t => {
     t.plan(8)
     await startupAndConnect()
     await nextEvent(t) // ignore connect event
@@ -173,7 +161,7 @@ function runTests (runType) {
     await nextEvent(t) // ignore disconnect event but wait for it so the lambda doesn't error
   })
 
-  test(`${mode} Connect, send payloads (custom action), disconnect`, async t => {
+  t.test(`${mode} Connect, send payloads (custom action), disconnect`, async t => {
     t.plan(9)
     await startupAndConnect()
     await nextEvent(t) // ignore connect event
@@ -192,7 +180,7 @@ function runTests (runType) {
     await nextEvent(t) // ignore disconnect event but wait for it so the lambda doesn't error
   })
 
-  test(`${mode} Connect, send payloads (custom filepath), disconnect`, async t => {
+  t.test(`${mode} Connect, send payloads (custom filepath), disconnect`, async t => {
     t.plan(9)
     await startupAndConnect()
     await nextEvent(t) // ignore connect event
@@ -211,7 +199,7 @@ function runTests (runType) {
     await nextEvent(t) // ignore disconnect event but wait for it so the lambda doesn't error
   })
 
-  test(`${mode} Connect, send payloads (errors), disconnect`, async t => {
+  t.test(`${mode} Connect, send payloads (errors), disconnect`, async t => {
     t.plan(12)
     await startupAndConnect()
     await nextEvent(t) // ignore connect event
@@ -237,13 +225,13 @@ function runTests (runType) {
     await nextEvent(t) // ignore disconnect event but wait for it so the lambda doesn't error
   })
 
-  test(`${mode} Shut down sidechannel`, async t => {
+  t.test(`${mode} Shut down sidechannel`, async t => {
     t.plan(1)
     await _events.shutdown()
     t.pass('Side channel shut down')
   })
 
-  test(`${mode} Shut down Sandbox`, t => {
+  t.test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 }

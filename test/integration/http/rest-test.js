@@ -1,30 +1,18 @@
 let { join } = require('path')
-let { existsSync } = require('fs')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { b64dec, url, data, checkRestResult: checkResult, rmPublic, startup, shutdown, verifyShutdown } = require('../../utils')
+let { b64dec, checkRestResult: checkResult, data, rmPublic, run, shutdown, startup, url, verifyShutdown } = require('../../utils')
 
 test('Set up env', t => {
   t.plan(1)
   t.ok(sandbox, 'Got sandbox')
 })
 
-test('Module', t => {
-  if (!process.env.BINARY_ONLY) {
-    runTests('module')
-  }
+test('Run REST tests', t => {
+  run(runTests, t)
   t.end()
-})
-
-test('Binary', t => {
-  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
-  if (existsSync(bin)) {
-    runTests('binary')
-    t.end()
-  }
-  else t.end()
 })
 
 function runTests (runType) {

@@ -5,7 +5,7 @@ let { join } = require('path')
 let sandbox = require('../../src')
 let { sync: rm } = require('rimraf')
 let mock = join(process.cwd(), 'test', 'mock')
-let { port, startup, shutdown } = require('../utils')
+let { port, run, startup, shutdown } = require('../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let tmp = join(mock, 'tmp')
 let fileThatShouldNotBeWritten = join(tmp, 'do-not-write-me')
@@ -41,31 +41,20 @@ test('Set up env', t => {
   t.ok(sandbox, 'Sandbox is present')
 })
 
-test('Module', t => {
-  if (!process.env.BINARY_ONLY) {
-    runTests('module')
-  }
+test('Run Lambda termination tests', t => {
+  run(runTests, t)
   t.end()
 })
 
-test('Binary', t => {
-  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
-  if (existsSync(bin)) {
-    runTests('binary')
-    t.end()
-  }
-  else t.end()
-})
-
-function runTests (runType) {
+function runTests (runType, t) {
   let mode = `[Lambda termination / ${runType}]`
 
-  test(`${mode} Start Sandbox`, t => {
+  t.test(`${mode} Start Sandbox`, t => {
     startup[runType](t, 'lambda-termination')
   })
 
   // Control test: if you change lambda invocation logic, this should pass!
-  test(`${mode} Should not terminate a process early`, t => {
+  t.test(`${mode} Should not terminate a process early`, t => {
     t.plan(3)
     setup(t)
     let fine = join(tmp, 'fine-write-me')
@@ -83,7 +72,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Respect timeout for async functions and kill process`, t => {
+  t.test(`${mode} Respect timeout for async functions and kill process`, t => {
     t.plan(3)
     setup(t)
     arc.events.publish({
@@ -96,7 +85,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Respect timeout for async functions and kill process + spawned children`, t => {
+  t.test(`${mode} Respect timeout for async functions and kill process + spawned children`, t => {
     t.plan(3)
     setup(t)
     arc.events.publish({
@@ -109,7 +98,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Respect timeout for async functions and kill process (with logic inside setTimeout)`, t => {
+  t.test(`${mode} Respect timeout for async functions and kill process (with logic inside setTimeout)`, t => {
     // See: #1137
     t.plan(3)
     setup(t)
@@ -123,7 +112,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Respect timeout for sync functions and kill process`, t => {
+  t.test(`${mode} Respect timeout for sync functions and kill process`, t => {
     t.plan(3)
     setup(t)
     arc.events.publish({
@@ -136,7 +125,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Respect timeout for sync functions and kill process + spawned children`, t => {
+  t.test(`${mode} Respect timeout for sync functions and kill process + spawned children`, t => {
     t.plan(3)
     setup(t)
     arc.events.publish({
@@ -149,7 +138,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Respect timeout for sync functions and kill process + spawned children (inside a Lambda via Linux /proc)`, t => {
+  t.test(`${mode} Respect timeout for sync functions and kill process + spawned children (inside a Lambda via Linux /proc)`, t => {
     let isLinux = process.platform === 'linux'
     if (isLinux) {
       t.plan(3)
@@ -170,7 +159,7 @@ function runTests (runType) {
     }
   })
 
-  test(`${mode} Shut down Sandbox`, t => {
+  t.test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 }

@@ -1,11 +1,10 @@
 let { join } = require('path')
-let { existsSync } = require('fs')
 let test = require('tape')
 let aws = require('aws-sdk')
 let http = require('http')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { port, startup, shutdown } = require('../utils')
+let { credentials, port, run, startup, shutdown } = require('../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let { _arcPort } = getPorts(port)
 
@@ -15,7 +14,7 @@ let tables = [ 'accounts', 'pets', 'places', 'data' ]
 // AWS services to test
 let endpoint = new aws.Endpoint(`http://localhost:${_arcPort}/_arc/ssm`)
 let httpOptions = { agent: new http.Agent() }
-let ssm = new aws.SSM({ endpoint, region: 'us-west-2', httpOptions })
+let ssm = new aws.SSM({ endpoint, region: 'us-west-2', httpOptions, credentials })
 
 function check ({ result, type, items, t }) {
   t.equal(result.Parameters.length, items.length, 'Got correct number of params')
@@ -34,29 +33,18 @@ test('Set up env', t => {
   t.ok(sandbox, 'Got Sandbox')
 })
 
-test('Module', t => {
-  if (!process.env.BINARY_ONLY) {
-    runTests('module')
-  }
+test('Run internal Arc service tests', t => {
+  run(runTests, t)
   t.end()
 })
 
-test('Binary', t => {
-  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
-  if (existsSync(bin)) {
-    runTests('binary')
-    t.end()
-  }
-  else t.end()
-})
-
-function runTests (runType) {
+function runTests (runType, t) {
   let mode = `[Internal Arc services / ${runType}]`
-  test(`${mode} Start Sandbox ('normal' mock app)`, t => {
+  t.test(`${mode} Start Sandbox ('normal' mock app)`, t => {
     startup[runType](t, 'normal')
   })
 
-  test(`${mode} Get & check params (without specifying a type)`, t => {
+  t.test(`${mode} Get & check params (without specifying a type)`, t => {
     t.plan(5)
     // Should get all tables params back
     ssm.getParametersByPath({ Path: `/${app}` }, function (err, result) {
@@ -65,7 +53,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Get & check params (specifying a type)`, t => {
+  t.test(`${mode} Get & check params (specifying a type)`, t => {
     t.plan(5)
     ssm.getParametersByPath({ Path: `/${app}/tables` }, function (err, result) {
       if (err) t.fail(err)
@@ -73,7 +61,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Get & check params (specifying an invalid or unknown)`, t => {
+  t.test(`${mode} Get & check params (specifying an invalid or unknown)`, t => {
     t.plan(1)
     ssm.getParametersByPath({ Path: `/${app}/idk` }, function (err, result) {
       if (err) t.fail(err)
@@ -81,15 +69,15 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Shut down Sandbox`, t => {
+  t.test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 
-  test(`${mode} Start Sandbox ('plugins-sync' mock app)`, t => {
+  t.test(`${mode} Start Sandbox ('plugins-sync' mock app)`, t => {
     startup[runType](t, 'plugins-sync')
   })
 
-  test(`${mode} Get & check params provided by plugin (without specifying a type)`, t => {
+  t.test(`${mode} Get & check params provided by plugin (without specifying a type)`, t => {
     t.plan(3)
     // Should get all tables params back
     ssm.getParametersByPath({ Path: '/plugins-sandbox' }, function (err, result) {
@@ -102,7 +90,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Shut down Sandbox`, t => {
+  t.test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 }

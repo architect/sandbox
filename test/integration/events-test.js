@@ -7,7 +7,7 @@ let { events } = require('../../src')
 let { sync: rm } = require('rimraf')
 let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
-let { port, quiet, _refreshInventory, startup, shutdown } = require('../utils')
+let { port, quiet, _refreshInventory, run, startup, shutdown } = require('../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 
 // Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally
@@ -57,26 +57,15 @@ test('Set up env', t => {
   t.ok(events, 'Events module is present')
 })
 
-test('Module', t => {
-  if (!process.env.BINARY_ONLY) {
-    runTests('module')
-  }
+test('Run events tests', t => {
+  run(runTests, t)
   t.end()
 })
 
-test('Binary', t => {
-  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
-  if (existsSync(bin)) {
-    runTests('binary')
-    t.end()
-  }
-  else t.end()
-})
-
-function runTests (runType) {
+function runTests (runType, t) {
   let mode = `[Events / ${runType}]`
 
-  test(`${mode} Async events.start`, async t => {
+  t.test(`${mode} Async events.start`, async t => {
     if (runType === 'module') {
       t.plan(1)
       try {
@@ -90,7 +79,7 @@ function runTests (runType) {
     else await startup[runType].async(t, 'normal')
   })
 
-  test(`${mode} arc.events.publish (normal)`, t => {
+  t.test(`${mode} arc.events.publish (normal)`, t => {
     t.plan(5)
     setup(t)
     let filename = 'event-file-normal'
@@ -109,7 +98,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} arc.events.publish (custom)`, t => {
+  t.test(`${mode} arc.events.publish (custom)`, t => {
     t.plan(5)
     setup(t)
     let filename = 'event-file-custom'
@@ -128,7 +117,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} arc.events.publish (failure)`, t => {
+  t.test(`${mode} arc.events.publish (failure)`, t => {
     t.plan(3)
     setup(t)
     arc.events.publish({
@@ -144,7 +133,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Random HTTP request to event bus with malformed JSON should return an HTTP 400 error`, t => {
+  t.test(`${mode} Random HTTP request to event bus with malformed JSON should return an HTTP 400 error`, t => {
     t.plan(2)
     let { eventsPort } = getPorts(port)
     let req = http.request({
@@ -164,7 +153,7 @@ function runTests (runType) {
     req.end('\n')
   })
 
-  test(`${mode} Async events.end`, async t => {
+  t.test(`${mode} Async events.end`, async t => {
     if (runType === 'module') {
       t.plan(1)
       try {
@@ -178,7 +167,7 @@ function runTests (runType) {
     else await shutdown[runType].async(t)
   })
 
-  test(`${mode} Sync events.start`, t => {
+  t.test(`${mode} Sync events.start`, t => {
     if (runType === 'module') {
       t.plan(1)
       events.start({ cwd: join(mock, 'normal'), port, quiet, _refreshInventory }, function (err, result) {
@@ -189,7 +178,7 @@ function runTests (runType) {
     else startup[runType](t, 'normal')
   })
 
-  test(`${mode} arc.queues.publish (normal)`, t => {
+  t.test(`${mode} arc.queues.publish (normal)`, t => {
     t.plan(5)
     setup(t)
     let filename = 'queue-file-normal'
@@ -208,7 +197,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} arc.queues.publish (custom)`, t => {
+  t.test(`${mode} arc.queues.publish (custom)`, t => {
     t.plan(5)
     setup(t)
     let filename = 'queue-file-custom'
@@ -227,7 +216,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} arc.queues.publish (failure)`, t => {
+  t.test(`${mode} arc.queues.publish (failure)`, t => {
     t.plan(3)
     setup(t)
     arc.queues.publish({
@@ -243,7 +232,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Sync events.end`, t => {
+  t.test(`${mode} Sync events.end`, t => {
     if (runType === 'module') {
       t.plan(1)
       events.end(function (err, result) {

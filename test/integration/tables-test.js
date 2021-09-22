@@ -1,5 +1,4 @@
 let { join } = require('path')
-let { existsSync } = require('fs')
 let test = require('tape')
 let dynalite = require('dynalite')
 let { tables } = require(join(process.cwd(), 'src'))
@@ -7,7 +6,7 @@ let getDBClient = require(join(process.cwd(), 'src', 'tables', '_get-db-client')
 let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
 let mock = join(process.cwd(), 'test', 'mock')
-let { port, _refreshInventory, quiet, startup, shutdown } = require('../utils')
+let { port, _refreshInventory, run, quiet, startup, shutdown } = require('../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let ports = getPorts(port)
 let str = s => JSON.stringify(s, null, 2)
@@ -33,26 +32,15 @@ test('Set up env', t => {
   t.ok(tables, 'Tables module is present')
 })
 
-test('Module', t => {
-  if (!process.env.BINARY_ONLY) {
-    runTests('module')
-  }
+test('Run tables tests', t => {
+  run(runTests, t)
   t.end()
 })
 
-test('Binary', t => {
-  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
-  if (existsSync(bin)) {
-    runTests('binary')
-    t.end()
-  }
-  else t.end()
-})
-
-function runTests (runType) {
+function runTests (runType, t) {
   let mode = `[Tables / ${runType}]`
 
-  test(`${mode} Async tables.start`, async t => {
+  t.test(`${mode} Async tables.start`, async t => {
     if (runType === 'module') {
       t.plan(1)
       try {
@@ -66,7 +54,7 @@ function runTests (runType) {
     else await startup[runType].async(t, 'normal')
   })
 
-  test(`${mode} Get client`, t => {
+  t.test(`${mode} Get client`, t => {
     t.plan(1)
     getDBClient(ports, function _gotDBClient (err, client) {
       if (err) console.log(err) // Yes, but actually no
@@ -75,7 +63,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Can list tables`, t => {
+  t.test(`${mode} Can list tables`, t => {
     t.plan(1)
     setup(t)
     dynamo.listTables({}, function done (err, result) {
@@ -88,7 +76,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Async tables.end`, async t => {
+  t.test(`${mode} Async tables.end`, async t => {
     if (runType === 'module') {
       t.plan(1)
       try {
@@ -102,7 +90,7 @@ function runTests (runType) {
     else await shutdown[runType].async(t)
   })
 
-  test(`${mode} Sync tables.start`, t => {
+  t.test(`${mode} Sync tables.start`, t => {
     if (runType === 'module') {
       t.plan(1)
       tables.start({ cwd: join(mock, 'normal'), port, quiet, _refreshInventory }, function (err, result) {
@@ -113,7 +101,7 @@ function runTests (runType) {
     else startup[runType](t, 'normal')
   })
 
-  test(`${mode} Get client`, t => {
+  t.test(`${mode} Get client`, t => {
     t.plan(1)
     getDBClient(ports, function _gotDBClient (err, client) {
       if (err) console.log(err) // Yes, but actually no
@@ -122,7 +110,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Default tables are present`, t => {
+  t.test(`${mode} Default tables are present`, t => {
     t.plan(2)
     setup(t)
     let defaultTables = [
@@ -140,7 +128,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Can insert a row`, t => {
+  t.test(`${mode} Can insert a row`, t => {
     t.plan(1)
     setup(t)
     dynamo.putItem({
@@ -159,7 +147,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Can read index in Arc 6`, t => {
+  t.test(`${mode} Can read index in Arc 6`, t => {
     t.plan(1)
     setup(t)
     dynamo.describeTable({
@@ -174,7 +162,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Can read index in Arc 6`, t => {
+  t.test(`${mode} Can read index in Arc 6`, t => {
     t.plan(3)
     setup(t)
     dynamo.describeTable({
@@ -192,7 +180,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Can read the row`, t => {
+  t.test(`${mode} Can read the row`, t => {
     t.plan(1)
     setup(t)
     dynamo.getItem({
@@ -210,7 +198,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Can query the index`, t => {
+  t.test(`${mode} Can query the index`, t => {
     t.plan(1)
     setup(t)
     dynamo.query({
@@ -232,7 +220,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Sync tables.end`, t => {
+  t.test(`${mode} Sync tables.end`, t => {
     if (runType === 'module') {
       t.plan(1)
       tables.end(function (err, result) {
@@ -246,7 +234,7 @@ function runTests (runType) {
   /**
    * External database support
    */
-  test(`${mode} Start external DB`, t => {
+  t.test(`${mode} Start external DB`, t => {
     t.plan(1)
     dynaliteServer = dynalite({ path: join(mock, 'normal', '.db'), createTableMs: 0 })
     dynaliteServer.listen(externalDBPort, err => {
@@ -255,7 +243,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Async tables.start`, async t => {
+  t.test(`${mode} Async tables.start`, async t => {
     process.env.ARC_DB_EXTERNAL = true
     setup(t, externalDBPort)
     ports = getPorts() // Reset those ports
@@ -273,7 +261,7 @@ function runTests (runType) {
     else await startup[runType].async(t, 'external-db')
   })
 
-  test(`${mode} Get client`, t => {
+  t.test(`${mode} Get client`, t => {
     t.plan(1)
     setup(t, externalDBPort)
     getDBClient(ports, function _gotDBClient (err, client) {
@@ -284,7 +272,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Can list tables`, t => {
+  t.test(`${mode} Can list tables`, t => {
     t.plan(1)
     setup(t, externalDBPort)
     dynamo.listTables({}, function done (err, result) {
@@ -297,7 +285,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Async tables.end`, async t => {
+  t.test(`${mode} Async tables.end`, async t => {
     delete process.env.ARC_DB_EXTERNAL
     if (runType === 'module') {
       t.plan(1)
@@ -313,7 +301,7 @@ function runTests (runType) {
     else await shutdown[runType].async(t)
   })
 
-  test(`${mode} Stop external DB`, t => {
+  t.test(`${mode} Stop external DB`, t => {
     t.plan(1)
     dynaliteServer.close(err => {
       if (err) t.fail(err)
@@ -323,7 +311,7 @@ function runTests (runType) {
 
   if (runType === 'module') {
     // `all:true` option for starting and stopping
-    test(`${mode} Sync tables.start({ all: true })`, t => {
+    t.test(`${mode} Sync tables.start({ all: true })`, t => {
       t.plan(1)
       ports = getPorts(port) // Reset the port reset (from external DB tests)
       tables.start({ cwd: join(mock, 'normal'), port, _refreshInventory, quiet, all: true }, function (err, result) {
@@ -332,7 +320,7 @@ function runTests (runType) {
       })
     })
 
-    test(`${mode} Sync tables.end({ all: true })`, t => {
+    t.test(`${mode} Sync tables.end({ all: true })`, t => {
       t.plan(1)
       tables.end(function (err, result) {
         if (err) t.fail(err)
@@ -340,7 +328,7 @@ function runTests (runType) {
       })
     })
 
-    test(`${mode} Async tables.start({ all: true })`, async t => {
+    t.test(`${mode} Async tables.start({ all: true })`, async t => {
       t.plan(1)
       try {
         let result = await tables.start({ cwd: join(mock, 'normal'), port, _refreshInventory, quiet, all: true })
@@ -351,7 +339,7 @@ function runTests (runType) {
       }
     })
 
-    test(`${mode} Async tables.end({ all: true })`, async t => {
+    t.test(`${mode} Async tables.end({ all: true })`, async t => {
       t.plan(1)
       try {
         let ended = await tables.end()

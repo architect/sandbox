@@ -8,13 +8,15 @@
 
 - Sandbox now accepts a `apigateway` option, in addition to `@aws apigateway` and `ARC_API_TYPE` env var
   - As before, valid options include: `http` (default if not passed), `httpv1`, `rest`
+- Sandbox can now be shipped as a binary via `pkg`
+  - Added a new GitHub Actions workflow to per-platform build binary versions and run integration tests
 
 
 ### Changed
 
 - Route list now shows automatic static asset delivery at the root as mounting the public folder
 - Projects that don't define root handlers will now load static assets from the root much, *much* faster!
-- Internal: refactor to remove use of environment variables for passing data or config to various internals services, most notably the Lambda execution environment
+- Internal: refactor to remove use of environment variables for passing data or config to various internals services, most notably the Lambda execution environment; fixes #1222
   - Lambda executions' env vars are now completely pure and clean, having no extraneous host system env vars
   - Sandbox no longer mutates env vars (with the exception of `ARC_ENV` and `NODE_ENV` if unset or altered by preferences, such as `@sandbox useAWS`)
   - Clean up any non-essential reliance tests may have on env vars previously populated by Sandbox

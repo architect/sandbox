@@ -1,11 +1,10 @@
 let { join } = require('path')
-let { existsSync } = require('fs')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let getDBClient = require('../../src/tables/_get-db-client')
-let { port, startup, shutdown, url } = require('../utils')
+let { port, run, startup, shutdown, url } = require('../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let ports = getPorts(port)
 
@@ -14,30 +13,19 @@ test('Set up env', t => {
   t.ok(sandbox, 'Sandbox is present')
 })
 
-test('Module', t => {
-  if (!process.env.BINARY_ONLY) {
-    runTests('module')
-  }
+test('Run Arc project manifest tests', t => {
+  run(runTests, t)
   t.end()
 })
 
-test('Binary', t => {
-  let bin = join(process.cwd(), 'bin', 'sandbox-binary')
-  if (existsSync(bin)) {
-    runTests('binary')
-    t.end()
-  }
-  else t.end()
-})
-
-function runTests (runType) {
+function runTests (runType, t) {
   let mode = `[No manifest present / ${runType}]`
 
-  test(`${mode} Start Sandboxwithout an Architect project manifest`, t => {
+  t.test(`${mode} Start Sandbox without an Architect project manifest`, t => {
     startup[runType](t, 'no-arc')
   })
 
-  test('get /', t => {
+  t.test('get /', t => {
     t.plan(2)
     tiny.get({ url },
       function _got (err, data) {
@@ -50,7 +38,7 @@ function runTests (runType) {
   })
 
   let dynamo
-  test('Get Dynamo client', t => {
+  t.test('Get Dynamo client', t => {
     t.plan(1)
     getDBClient(ports, function _gotDBClient (err, client) {
       if (err) console.log(err) // Yes, but actually no
@@ -59,7 +47,7 @@ function runTests (runType) {
     })
   })
 
-  test('Can list tables', t => {
+  t.test('Can list tables', t => {
     t.plan(1)
     dynamo.listTables({}, function done (err, result) {
       if (err) t.fail(err)
@@ -67,7 +55,7 @@ function runTests (runType) {
     })
   })
 
-  test('Default tables present', t => {
+  t.test('Default tables present', t => {
     t.plan(4)
     let defaultTables = [
       'app-default-production-arc-sessions',
@@ -85,7 +73,7 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} Shut down Sandbox`, t => {
+  t.test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 }
