@@ -1,20 +1,17 @@
 let read = require('@architect/inventory/src/read')
 let defaultFunctionConfig = require('@architect/inventory/src/defaults/function-config')
-let invocator = require('./')
+let invoker = require('./')
 
-module.exports = function invokePluginFunction ({ cwd, inventory, update }, { src, payload }, callback) {
-  let params = {
-    cwd,
+module.exports = function invokePluginFunction (params, { src, payload }, callback) {
+  invoker({
     event: payload,
     lambda: {
       src,
       config: getFunctionConfig(src),
       _skipHandlerCheck: true // short circuits Lambda invocation handler check
     },
-    inventory,
-    update,
-  }
-  invocator(params, callback)
+    ...params,
+  }, callback)
 }
 
 // compile any per-function config.arc customizations

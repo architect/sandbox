@@ -43,7 +43,11 @@ module.exports = function end (server, callback) {
             return end
           })
         if (pluginServices.length) {
-          series(pluginServices.map(end => end.bind({}, { arc: inv._project.arc, inventory, services: server })), function (err) {
+          series(pluginServices.map(end => end.bind({}, {
+            arc: inv._project.arc,
+            inventory,
+            services: server
+          })), function (err) {
             if (err) callback(err)
             else callback()
           })
