@@ -29,7 +29,7 @@ module.exports = function cli (params = {}, callback) {
         recursive: true,
         filter (file, skip) {
           // Ignore changes to any node_modules dir + .git
-          if (/\/node_modules/.test(file) || /\.git/.test(file)) return skip
+          if (/node_modules/.test(file) || /\.git/.test(file)) return skip
           return true
         }
       })
