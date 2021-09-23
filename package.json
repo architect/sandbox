@@ -1,6 +1,6 @@
 {
   "name": "@architect/sandbox",
-  "version": "4.0.2",
+  "version": "4.0.4",
   "description": "Architect dev server: run full Architect projects locally & offline",
   "main": "src/index.js",
   "scripts": {
@@ -27,8 +27,8 @@
     "@architect/asap": "~4.0.0",
     "@architect/create": "~2.0.1",
     "@architect/hydrate": "~2.0.2",
-    "@architect/inventory": "~2.0.4",
-    "@architect/parser": "~4.0.1",
+    "@architect/inventory": "~2.0.6",
+    "@architect/parser": "~5.0.0",
     "@architect/utils": "~3.0.2",
     "@begin/hashid": "~1.0.0",
     "aws-sdk": "2.880.0",
@@ -48,7 +48,7 @@
     "server-destroy": "~1.0.1",
     "tree-kill": "~1.2.2",
     "update-notifier": "~5.1.0",
-    "ws": "~8.2.1"
+    "ws": "~8.2.2"
   },
   "devDependencies": {
     "@architect/eslint-config": "~2.0.0",

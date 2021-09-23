@@ -2,6 +2,24 @@
 
 ---
 
+## [next] 2021-09-15
+
+### Changed
+
+- Route list now shows automatic static asset delivery at the root as mounting the public folder
+
+---
+
+## [4.0.3 - 4.0.4] 2021-09-14
+
+
+### Changed
+
+- Internal: Updated Architect Parser to v5
+- Updated dependencies
+
+---
+
 ## [4.0.2] 2021-09-05
 
 ### Changed

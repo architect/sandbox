@@ -1,3 +1,4 @@
+let { sep } = require('path')
 let chalk = require('chalk')
 let { getPorts } = require('../lib')
 
@@ -12,6 +13,7 @@ module.exports = function prettyPrint ({ cwd, inventory, port, update }) {
   let strip = str => str.replace(cwd, '').substr(1)
 
   if (http) {
+    let folder = `${inventory.inv.static.folder}${sep}`
     let apiType = process.env.ARC_API_TYPE
     let msgs = {
       rest: 'REST API mode / Lambda proxy',
@@ -21,11 +23,11 @@ module.exports = function prettyPrint ({ cwd, inventory, port, update }) {
     }
     let andWs = ws ? '& @ws ' : ''
     update.done(`Available @http (${msgs[apiType]}) ${andWs}routes`)
-    http.forEach(({ method, path, src }) => {
+    http.forEach(({ method, path, src, arcStaticAssetProxy }) => {
       let routeMethod = chalk.grey(padL(method))
       let routePath = chalk.cyan(path) + ' '
       let lambdaPath = strip(src)
-      let lambda = chalk.grey(lambdaPath)
+      let lambda = chalk.grey(arcStaticAssetProxy ? folder : lambdaPath)
       update.raw(chalk.grey(`${routeMethod} ${padR(routePath)} ${lambda}`))
     })
   }
