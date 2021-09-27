@@ -56,10 +56,8 @@ module.exports = function getEnv (params) {
 
   // The presence of ARC_CLOUDFORMATION (Arc v6+) is used by Arc libs to key on live S3 infra
   // TODO [REMOVE]: this is probably no longer necessary after dropping Arc 5 support
-  if (ARC_ENV === 'staging' || ARC_ENV === 'production') {
-    let capEnv = ARC_ENV.charAt(0).toUpperCase() + ARC_ENV.substr(1)
-    env.ARC_CLOUDFORMATION = `${toLogicalID(inv.app)}${capEnv}`
-  }
+  let capEnv = ARC_ENV.charAt(0).toUpperCase() + ARC_ENV.substr(1)
+  env.ARC_CLOUDFORMATION = `${toLogicalID(inv.app)}${capEnv}`
 
   // Env vars for users manually running ASAP in a Lambda
   if (inv.static) {

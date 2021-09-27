@@ -20,7 +20,7 @@ let invoke = proxyquire('../../../../src/invoke-lambda', {
   './exec': exec,
 })
 let event = { something: 'happened' }
-let inventory = { inv: {} }
+let inventory = { inv: { app: 'hi' } }
 let userEnv = {}
 let params = { event, inventory, update, userEnv }
 let inv
@@ -29,6 +29,7 @@ let get
 test('Set up env', t => {
   t.plan(1)
   t.ok(invoke, 'Got invoke')
+  process.env.ARC_ENV = 'testing' // Must be set for ARC_CLOUDFORMATION
 })
 
 test('Get inventory', t => {
@@ -184,4 +185,5 @@ test('Verify call counts from runtime invocations', t => {
   t.equals(runtimes.node, 4 + 2, 'Node called correct number of times')
   t.equals(runtimes.python, 3, 'Python called correct number of times')
   t.equals(runtimes.ruby, 1, 'Ruby called correct number of times')
+  delete process.env.ARC_ENV
 })
