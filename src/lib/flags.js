@@ -37,7 +37,7 @@ module.exports = function getFlags (useCache = true) {
 
   // Disable hydration symlinking
   // (pass undefined if not found and let default values take the wheel)
-  let symlink = args.includes('--disable-symlinks') ? true : undefined
+  let symlink = !args.includes('--disable-symlinks')
 
   return flags = {
     logLevel,

@@ -24,6 +24,12 @@
 - Internal: refactor to more cleanly and consistently pass common parameters around through critical code paths
 - Added better support for `ARC_ENV` (instead of relying on / using `NODE_ENV`), helpful for improving reliability when running alongside certain other libraries that mutate `NODE_ENV`
 
+
+### Fixed
+
+- Fixed local symlinking issue introduced in 4.0.2
+
+
 ---
 
 ## [4.0.3 - 4.0.4] 2021-09-14
