@@ -47,6 +47,7 @@ module.exports = function invokeLambda (params, callback) {
       if (runtime.startsWith('deno'))   run = 'deno'
       if (runtime.startsWith('python')) run = 'python'
       if (runtime.startsWith('ruby'))   run = 'ruby'
+      if (runtime.startsWith('php'))    run = 'php'
       if (arcStaticAssetProxy)          run = 'asap'
       if (!run) {
         missingRuntime({ cwd, runtime, src, update })

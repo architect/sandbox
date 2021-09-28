@@ -32,6 +32,13 @@ let runtimes = {
       command: 'ruby',
       args: bootstrap,
     }
+  },
+  php: function (params, bootstrap) {
+    console.log(bootstrap)
+    return {
+      command: 'php',
+      args: [bootstrap],
+    }
   }
 }
 

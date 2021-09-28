@@ -6,7 +6,7 @@ let handlers
 module.exports = function () {
   if (handlers) return handlers
   handlers = {}
-  let runtimes = [ 'deno.js', 'node.js', 'python.py', 'ruby.rb' ]
+  let runtimes = [ 'deno.js', 'node.js', 'python.py', 'ruby.rb', 'php.php' ]
   runtimes.forEach(runtime => {
     try {
       let name = runtime.split('.')[0]
@@ -25,6 +25,9 @@ module.exports = function () {
           .filter(lTrimm)
           .map(line => [ '-e', `"${line}"` ])
           .reduce((a, b) => a.concat(b))
+      }
+      if (runtime.endsWith('.php')) {
+        script = path
       }
       handlers[name] = script
     }
