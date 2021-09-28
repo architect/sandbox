@@ -1,3 +1,4 @@
+.DS_Store
 __pycache__
 !test/mock/dep-warn/**/node_modules
 .nyc_output/
