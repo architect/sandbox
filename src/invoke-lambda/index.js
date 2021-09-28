@@ -91,6 +91,17 @@ function hasHandler (lambda) {
   // We don't need to do a handlerFile check if it's an ASAP / Arc 6 greedy root req
   if (arcStaticAssetProxy || _skipHandlerCheck) return true
   let { runtime } = lambda.config
+  if (runtime === 'php') {
+    let found = false
+    let paths = [
+      join(src, 'index.php')
+    ]
+    paths.forEach(p => {
+      if (found) return
+      if (existsSync(p)) found = p
+    })
+    return found
+  }
   if (runtime === 'deno') {
     let found = false
     let paths = [
