@@ -62,6 +62,8 @@ module.exports = function getEnv (params) {
   // Env vars for users manually running ASAP in a Lambda
   if (inv.static) {
     env.ARC_STATIC_BUCKET = 'sandbox'
+    // TODO [REMOVE]: retire ARC_SANDBOX_PATH_TO_STATIC in next breaking change in favor of ARC_STATIC_BUCKET for better local/prod symmetry
+    env.ARC_SANDBOX_PATH_TO_STATIC = join(cwd, inv.static.folder)
     // Add userland ARC_STATIC_SPA if defined, otherwise we'll pick it up via Inv
     if (ARC_STATIC_SPA) {
       env.ARC_STATIC_SPA = ARC_STATIC_SPA
