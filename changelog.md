@@ -2,6 +2,14 @@
 
 ---
 
+## [4.1.1] 2021-09-30
+
+### Changed
+
+- Restored missing ARC_SANDBOX_PATH_TO_STATIC in Lambda env vars for manual ASAP use; fixes #1231, thanks @andybee!
+
+---
+
 ## [4.1.0] 2021-09-15
 
 ### Added
