@@ -1,4 +1,4 @@
-let { join } = require('path')
+let { join, sep: pathSeparator } = require('path')
 let { toLogicalID } = require('@architect/utils')
 
 // Constructs Lambda execution environment variables
@@ -8,6 +8,10 @@ module.exports = function getEnv (params) {
   let { inv } = inventory
   let { ARC_ENV, ARC_LOCAL, ARC_STATIC_SPA, NODE_ENV, PATH, SESSION_TABLE_NAME } = process.env
   let { AWS_ACCESS_KEY_ID, AWS_PROFILE, AWS_REGION, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN } = process.env
+
+  let srcParts = src.split(pathSeparator)
+  let functionName = srcParts.pop()
+  let functionType = srcParts.pop().toUpperCase()
 
   // Runtime environment variables
   let env = {
@@ -20,7 +24,10 @@ module.exports = function getEnv (params) {
     LAMBDA_TASK_ROOT: src,
     TZ: 'UTC',
     // Internal for handler bootstrap
-    __ARC_CONTEXT__: JSON.stringify({}), // TODO add more stuff to Lambda req context!
+    __ARC_CONTEXT__: JSON.stringify({
+      'functionName': `sandbox-${functionName}${functionType}`,
+      'functionVersion': '$LATEST',
+    }),
     __ARC_CONFIG__: JSON.stringify({
       projectSrc: cwd,
       handlerFile: 'index',
