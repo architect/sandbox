@@ -72,8 +72,10 @@ module.exports = function getEnv (params) {
 
   // Add ports and URLs if defined (and not an ASAP call)
   if (inv.ws)     env.ARC_WSS_URL     = `ws://localhost:${ports.httpPort}`
+  // TODO: only set ports env vars on local/testing env
   if (inv.events) env.ARC_EVENTS_PORT = ports.eventsPort
   if (inv.tables) env.ARC_TABLES_PORT = ports.tablesPort
+  env.ARC_INTERNAL = ports._arcPort
 
   // Runtime stuff
   if (config.runtime.startsWith('python')) {
