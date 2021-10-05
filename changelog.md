@@ -1,12 +1,18 @@
 # Architect Sandbox changelog
 
-## Unreleased
-
-- Added function context object with `functionName` and `functionVersion`. `functionName` will be similar to staging and production without the unique characters. `functionVersion` will always be `$latest`.
-
 ---
 
 ## [next] 2021-10-05
+
+### Added
+
+- Added Lambda context object with the following properties:
+  - `awsRequestId` (Node.js), `aws_request_id` (Python / Ruby) - random GUID string, does not emulate AWS UUID4 request IDs
+  - `functionName` (Node.js), `function_name` (Python / Ruby) - identifiable function name string prefixed by `sandbox-`; does not use live production AWS CFN GUIDs
+  - `functionVersion` (Node.js), `function_version` (Python / Ruby) - will always be `$LATEST`
+  - `invokedFunctionArn` (Node.js), `invoked_function_arn` (Python / Ruby) - always `sandbox`
+  - `memoryLimitInMB` (Node.js), `memory_limit_in_mb` (Python / Ruby) - your Lambda's configured memory amount
+
 
 ### Fixed
 

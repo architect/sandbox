@@ -6,7 +6,7 @@ index = './' + config['handlerFile']
 require index
 handlerFn = config['handlerFunction']
 
-context = {event: JSON.parse(ENV['__ARC_CONTEXT__'])}
+context = JSON.parse(ENV['__ARC_CONTEXT__'])
 response = '__ARC__ '
 responseEnd = ' __ARC_END__'
 

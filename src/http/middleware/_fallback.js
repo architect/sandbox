@@ -149,7 +149,9 @@ module.exports = function fallback (args, req, res, next) {
       apiType,
       cwd,
       lambda: {
-        method,
+        name: 'get /*',
+        method: 'get',
+        path: '/*',
         src,
         config: inv._project.defaultFunctionConfig,
         arcStaticAssetProxy,
