@@ -2,6 +2,14 @@
 
 ---
 
+## [next] 2021-10-05
+
+### Fixed
+
+- Restore `ARC_INTERNAL` env var in Lambda invocations for Arc Functions
+
+---
+
 ## [4.1.1] 2021-09-30
 
 ### Changed
