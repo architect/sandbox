@@ -38,6 +38,22 @@ function checkHttpResult (t, result, checks) {
     else if (value === '🤷🏽‍♀️') {
       t.ok(has(result, param), `${msgs.returned} ${param}`)
     }
+    else if (param === 'context') {
+      if (checks[param].awsRequestId) {
+        if (!result[param].awsRequestId) t.fail('Missing awsRequestId!')
+        t.deepEqual({
+          ...checks[param],
+          awsRequestId: result[param].awsRequestId
+        }, result[param], 'Got correct Lambda context')
+      }
+      if (checks[param].aws_request_id) {
+        if (!result[param].aws_request_id) t.fail('Missing aws_request_id!')
+        t.deepEqual({
+          ...checks[param],
+          aws_request_id: result[param].aws_request_id
+        }, result[param], 'Got correct Lambda context')
+      }
+    }
     else {
       t.equal(result[param], value, `${msgs.correct} ${param}: ${value}`)
     }
@@ -73,6 +89,22 @@ function checkRestResult (t, result, checks) {
     }
     else if (value === '🤷🏽‍♀️') {
       t.ok(has(result, param), `${msgs.returned} ${param}`)
+    }
+    else if (param === 'context') {
+      if (checks[param].awsRequestId) {
+        if (!result[param].awsRequestId) t.fail('Missing awsRequestId!')
+        t.deepEqual({
+          ...checks[param],
+          awsRequestId: result[param].awsRequestId
+        }, result[param], 'Got correct Lambda context')
+      }
+      if (checks[param].aws_request_id) {
+        if (!result[param].aws_request_id) t.fail('Missing aws_request_id!')
+        t.deepEqual({
+          ...checks[param],
+          aws_request_id: result[param].aws_request_id
+        }, result[param], 'Got correct Lambda context')
+      }
     }
     else {
       t.equal(result[param], value, `${msgs.correct} ${param}: ${value}`)

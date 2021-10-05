@@ -23,7 +23,7 @@ function runTests (runType, t) {
   })
 
   t.test(`${mode} get /`, t => {
-    t.plan(15)
+    t.plan(16)
     tiny.get({
       url
     }, function _got (err, result) {
@@ -40,33 +40,13 @@ function runTests (runType, t) {
           headers: '🤷🏽‍♀️',
           isBase64Encoded: false,
           body: undefined,
-        })
-      }
-    })
-  })
-
-  t.test(`${mode} get /context`, t => {
-    t.plan(16)
-    tiny.get({
-      url: `${url}/context`
-    }, function _got (err, result) {
-      if (err) t.fail(err)
-      else {
-        t.equal(result.body.message, 'Hello from get /context running the default runtime')
-        checkResult(t, result.body.event, {
-          routeKey: 'GET /context',
-          rawPath: '/context',
-          pathParameters: undefined,
-          cookies: undefined,
-          queryStringParameters: undefined,
-          rawQueryString: '',
-          headers: '🤷🏽‍♀️',
-          isBase64Encoded: false,
-          body: undefined,
-        })
-        t.deepEqual(result.body.context, {
-          functionName: 'sandbox-get-contextHTTP',
-          functionVersion: '$LATEST',
+          context: {
+            awsRequestId: true, // Just check for presence
+            functionName: 'sandbox-get-index',
+            functionVersion: '$LATEST',
+            invokedFunctionArn: 'sandbox',
+            memoryLimitInMB: 1152,
+          }
         })
       }
     })
@@ -260,7 +240,7 @@ function runTests (runType, t) {
   })
 
   t.test(`${mode} get /python3.8`, t => {
-    t.plan(15)
+    t.plan(16)
     let rawPath = '/python3.8'
     tiny.get({
       url: url + rawPath
@@ -278,6 +258,13 @@ function runTests (runType, t) {
           headers: '🤷🏽‍♀️',
           isBase64Encoded: false,
           body: undefined,
+          context: {
+            aws_request_id: true, // Just check for presence
+            function_name: 'sandbox-get-python3_8',
+            function_version: '$LATEST',
+            invoked_function_arn: 'sandbox',
+            memory_limit_in_mb: 1152,
+          }
         })
       }
     })
@@ -332,7 +319,7 @@ function runTests (runType, t) {
   })
 
   t.test(`${mode} get /ruby2.5`, t => {
-    t.plan(15)
+    t.plan(16)
     let rawPath = '/ruby2.5'
     tiny.get({
       url: url + rawPath
@@ -350,6 +337,13 @@ function runTests (runType, t) {
           headers: '🤷🏽‍♀️',
           isBase64Encoded: false,
           body: undefined,
+          context: {
+            aws_request_id: true, // Just check for presence
+            function_name: 'sandbox-get-ruby2_5',
+            function_version: '$LATEST',
+            invoked_function_arn: 'sandbox',
+            memory_limit_in_mb: 1152,
+          }
         })
       }
     })
