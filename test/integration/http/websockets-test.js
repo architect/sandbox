@@ -3,7 +3,7 @@ let test = require('tape')
 let Websocket = require('ws')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { makeSideChannel, run, startup, shutdown, wsUrl: url } = require('../../utils')
+let { makeSideChannel, run, startup, shutdown, wsUrl } = require('../../utils')
 
 test('Set up env', async t => {
   t.plan(1)
@@ -22,7 +22,7 @@ function runTests (runType, t) {
 
   let connectWebSocket = async () => {
     if (_ws) throw Error('Only one websocket can be connected at a time, test is not clean')
-    _ws = new Websocket(url)
+    _ws = new Websocket(wsUrl)
     _ws.on('error', err => { throw err })
     _ws.on('close', () => {
       _ws = undefined
