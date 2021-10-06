@@ -21,7 +21,7 @@ let makeSideChannel = async (port = 3433) => {
     })
   })
 
-  await new Promise((resolve, reject) => activeSideChannel.listen(port, (err) => err ? reject(err) : resolve()))
+  await new Promise((resolve, reject) => activeSideChannel.listen(port, err => err ? reject(err) : resolve()))
   console.log('Started test side-channel')
 
   return {
