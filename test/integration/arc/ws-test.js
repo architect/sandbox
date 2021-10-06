@@ -9,19 +9,9 @@ let { credentials, port, run, startup, shutdown, makeSideChannel, wsUrl } = requ
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let { _arcPort } = getPorts(port)
 
-// AWS services to test
-let endpoint = new aws.Endpoint(`http://localhost:${_arcPort}/_arc/ws`)
-let httpOptions = { agent: new http.Agent() }
-let apiGatewayManagementApi = new aws.ApiGatewayManagementApi({ endpoint, region: 'us-west-2', httpOptions, credentials })
-let _events
-let _ws
-let ConnectionId
-
 test('Set up env', async t => {
-  t.plan(2)
+  t.plan(1)
   t.ok(sandbox, 'Got Sandbox')
-  _events = await makeSideChannel()
-  t.ok(_events, 'Got SideChannel')
 })
 
 test('Run internal Arc API Gateway Management service tests', t => {
@@ -29,32 +19,61 @@ test('Run internal Arc API Gateway Management service tests', t => {
   t.end()
 })
 
-test(`Shut down sidechannel`, async t => {
-  t.plan(1)
-  await _events.shutdown()
-  t.pass('Side channel shut down')
-})
-
 function runTests (runType, t) {
   let mode = `[Internal Arc API Gateway Management services / ${runType}]`
+  let _events
+  let _ws
+  let ConnectionId
+
+  // AWS services to test
+  let endpoint = new aws.Endpoint(`http://localhost:${_arcPort}/_arc/ws`)
+  let httpOptions = { agent: new http.Agent() }
+  let apiGatewayManagementApi = new aws.ApiGatewayManagementApi({ endpoint, region: 'us-west-2', httpOptions, credentials })
+
+  let connectWebSocket = async () => {
+    if (_ws) throw Error('Only one websocket can be connected at a time, test is not clean')
+    _ws = new Websocket(wsUrl)
+    _ws.on('error', err => { throw err })
+    _ws.on('close', () => {
+      _ws = undefined
+      console.log('WebSocket disconnected')
+    })
+    await new Promise((resolve) => _ws.on('open', resolve))
+    console.log('WebSocket connected')
+    return _ws
+  }
+
+  let nextEvent = async t => {
+    let request = await _events.nextRequest()
+    t.pass('Got next WebSocket request')
+    return request
+  }
+
+  let startupAndConnect = async () => {
+    _events.reset()
+    await connectWebSocket()
+  }
 
   t.test(`${mode} Start Sandbox ('normal' mock app)`, t => {
     startup[runType](t, 'normal')
-    _events.reset()
+  })
+
+  t.test('Start side channel', async t => {
+    t.plan(1)
+    _events = await makeSideChannel()
+    t.ok(_events, 'Setup side channel')
   })
 
   t.test(`${mode} getConnection info about connection`, async t => {
-    t.plan(2)
-    const beforeConnect = new Date()
-    _ws = new Websocket(wsUrl)
-    await new Promise((resolve) => _ws.on('open', resolve))
-    let connectEvent = await _events.nextRequest()
+    t.plan(3)
+    await startupAndConnect()
 
-    ConnectionId = connectEvent.event.requestContext.connectionId
+    let connectionEvent = await nextEvent(t)
+    ConnectionId = connectionEvent.event.requestContext.connectionId
+    t.ok(ConnectionId, `Got requestContext with connectionId: ${ConnectionId}`)
 
-    let info = await apiGatewayManagementApi.getConnection({ ConnectionId }).promise()
-    t.ok(info.ConnectedAt >= beforeConnect, 'Connection info matches')
-    t.ok(info.ConnectedAt <= new Date(), 'Connection info matches')
+    let connection = await apiGatewayManagementApi.getConnection({ ConnectionId }).promise()
+    t.ok(new Date(Date.parse(connection.ConnectedAt)) < new Date(), `Got back connectedAt string: ${connection.ConnectedAt}`)
   })
 
   t.test(`${mode} postToConnection messages to a websocket`, async t => {
@@ -68,15 +87,22 @@ function runTests (runType, t) {
   })
 
   t.test(`${mode} Disconnect a socket`, async t => {
-    t.plan(1)
+    t.plan(2)
     let closePromise = new Promise(resolve => _ws.on('close', resolve))
     await apiGatewayManagementApi.deleteConnection({ ConnectionId }).promise()
     await closePromise
-    t.pass('connection closed')
+    t.notOk(_ws, 'WebSocket closed')
+    let connection = await apiGatewayManagementApi.getConnection({ ConnectionId }).promise()
+    t.notOk(connection, 'Connection is no longer available')
+  })
+
+  t.test(`${mode} Shut down sidechannel`, async t => {
+    t.plan(1)
+    await _events.shutdown()
+    t.pass('Side channel shut down')
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
 }
-
