@@ -43,20 +43,15 @@ function runTests (runType, t) {
     _events.reset()
   })
 
-  t.test(`${mode} connect websocket`, async () => {
-    t.plan(1)
+  t.test(`${mode} getConnection info about connection`, async t => {
+    t.plan(2)
+    const beforeConnect = new Date()
     _ws = new Websocket(wsUrl)
     await new Promise((resolve) => _ws.on('open', resolve))
     let connectEvent = await _events.nextRequest()
 
     ConnectionId = connectEvent.event.requestContext.connectionId
 
-    t.ok(ConnectionId, `Connected ConnectionId ${ConnectionId}`)
-  })
-
-  t.test(`${mode} getConnection info about connection`, async t => {
-    t.plan(2)
-    const beforeConnect = new Date()
     let info = await apiGatewayManagementApi.getConnection({ ConnectionId }).promise()
     t.ok(info.ConnectedAt >= beforeConnect, 'Connection info matches')
     t.ok(info.ConnectedAt <= new Date(), 'Connection info matches')
