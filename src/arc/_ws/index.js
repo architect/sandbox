@@ -18,9 +18,10 @@ module.exports = function _ws ({ body }, req, res) {
   }
 
   if (req.method === 'GET') {
+    // from https://github.com/aws/aws-sdk-js/blob/307e82673b48577fce4389e4ce03f95064e8fe0d/apis/apigatewaymanagementapi-2018-11-29.normal.json#L132
     const output = {
-      ConnectedAt: new Date(pool.getConnectedAt(connectionId)).toISOString(),
-      // LastActiveAt: 'I wish this was easy to figure out but it is optional',
+      connectedAt: new Date(pool.getConnectedAt(connectionId)).toISOString(),
+      // lastActiveAt: 'I wish this was easy to figure out but it is optional',
     }
     res.end(JSON.stringify(output))
     return
