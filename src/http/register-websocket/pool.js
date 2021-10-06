@@ -1,4 +1,4 @@
-const pool = {
+let pool = {
   connections: {},
   getConnectedAt (connectionId) {
     return pool.connections[connectionId]?.connectedAt
