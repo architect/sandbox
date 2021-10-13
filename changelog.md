@@ -2,7 +2,7 @@
 
 ---
 
-## [next] 2021-10-05
+## [4.2.🍁] 2021-10-05
 
 ### Added
 
@@ -16,7 +16,8 @@
 
 ### Fixed
 
-- Restore `ARC_INTERNAL` env var in Lambda invocations for Arc Functions
+- Restored `ARC_INTERNAL` env var in Lambda invocations for Arc Functions
+- Restored userland env vars to `@sandbox-startup` scripts; thanks @reconbot!
 
 ---
 
