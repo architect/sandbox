@@ -2,7 +2,7 @@ let { exec } = require('child_process')
 let series = require('run-series')
 
 module.exports = function startupScripts (params, callback) {
-  let { cwd, inventory, update } = params
+  let { cwd, inventory, update, userEnv } = params
   let { preferences: prefs } = inventory.inv._project
 
   if (prefs?.['sandbox-startup']) {
@@ -12,7 +12,7 @@ module.exports = function startupScripts (params, callback) {
     update.status('Running startup scripts')
     let ops = prefs['sandbox-startup'].map(cmd => {
       return function (callback) {
-        let env = { ARC_INV, ARC_RAW, ...process.env }
+        let env = { ARC_INV, ARC_RAW, ...userEnv, ...process.env }
         exec(cmd, { cwd, env }, function (err, stdout, stderr) {
           if (err) callback(err)
           else {
