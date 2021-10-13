@@ -132,7 +132,6 @@ function runTests (runType, t) {
     }, function _got (err, result) {
       if (err) t.fail(err)
       else {
-        console.warn(result.headers['set-cookie'])
         t.deepEqual(
           result.headers['set-cookie'],
           [ 'c1=v1', 'c2=v2' ],
