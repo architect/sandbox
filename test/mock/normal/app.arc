@@ -15,9 +15,9 @@ queue-custom
 get     /           # runs default
 get     /multi-cookies-res
 get     /binary
+get     /nodejs14.x
 get     /nodejs12.x
 get     /nodejs10.x
-get     /nodejs8.10
 get     /python3.8
 get     /python3.7
 get     /python3.6

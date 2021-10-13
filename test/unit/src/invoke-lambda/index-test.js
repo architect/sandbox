@@ -58,6 +58,14 @@ test('Test runtime invocations', t => {
     t.equals(request, JSON.stringify(event), 'Default runtime received event')
   })
 
+  lambda = get.http('get /nodejs14.x')
+  invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
+    if (err) t.fail(err)
+    t.equals(options.cwd, lambda.src, 'nodejs14.x passed correct path')
+    t.equals(timeout, 14000, 'nodejs14.x ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'nodejs14.x received event')
+  })
+
   lambda = get.http('get /nodejs12.x')
   invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
@@ -72,14 +80,6 @@ test('Test runtime invocations', t => {
     t.equals(options.cwd, lambda.src, 'nodejs10.x passed correct path')
     t.equals(timeout, 10000, 'nodejs10.x ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'nodejs10.x received event')
-  })
-
-  lambda = get.http('get /nodejs8.10')
-  invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
-    if (err) t.fail(err)
-    t.equals(options.cwd, lambda.src, 'nodejs8.10 passed correct path')
-    t.equals(timeout, 810000, 'nodejs8.10 ran with correct timeout')
-    t.equals(request, JSON.stringify(event), 'nodejs8.10 received event')
   })
 
   lambda = get.http('get /python3.8')
