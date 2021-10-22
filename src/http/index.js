@@ -101,7 +101,22 @@ module.exports = function createHttpServer (inventory) {
           }
 
           if (inv.http) {
-            registerHTTP(app, params)
+            if (process.env.FEATURE_PLUG_HTTP){
+              let pluginRoutes
+              if (inv._project.plugins) {
+                pluginRoutes = Object.values(inv._project.plugins).
+                  map(pluginModule => pluginModule?.sandbox?.http || null).
+                  filter(routes => routes).
+                  map(routes => {
+                    return routes({ inventory })
+                  }).flat()
+              }
+              registerHTTP(app, { pluginRoutes, ...params })
+            }
+            else {
+              registerHTTP(app, params)
+            }
+
           }
 
           callback()

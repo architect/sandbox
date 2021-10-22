@@ -18,7 +18,15 @@ module.exports = function fallback (args, req, res, next) {
   let method = req.method.toLowerCase()
 
   // Read all routes
+  let customRoutes  // FEATURE_PLUG_HTTP
+  if (process.env.FEATURE_PLUG_HTTP){
+    if (inv._project.plugins) {
+      customRoutes = Object.values(inv._project.plugins).map(plugin => plugin?.sandbox?.http({ inventory }))
+        .filter(Boolean).flat()
+    }
+  }
   let routes = inv.http || []
+  if (process.env.FEATURE_PLUG_HTTP && customRoutes) routes = [ ...customRoutes, ...routes ]
   // Establish proxy
   let proxy = httpAPI && get.proxy('testing')
 

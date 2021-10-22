@@ -3,6 +3,26 @@ let invoker = require('../invoke-http')
 module.exports = function reg (app, params) {
   let { apiType, inventory, update } = params
 
+  if (process.env.FEATURE_PLUG_HTTP){
+    if (params.pluginRoutes){
+      params.pluginRoutes.forEach(lambda => {
+        let { method, path } = lambda
+        // Register the route with the Router instance
+        let exec = invoker({ lambda, ...params })
+        if (method !== 'any') {
+          app[method](path, exec)
+        }
+        // In the case of `any`, register all methods
+        else {
+          let methods = [ 'get', 'post', 'put', 'patch', 'head', 'delete', 'options' ]
+          for (let method of methods) {
+            app[method](path, exec)
+          }
+        }
+      })
+    }
+  }
+
   inventory.inv.http.forEach(lambda => {
     // ASAP handled by middleware
     if (lambda.arcStaticAssetProxy) return
