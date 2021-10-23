@@ -114,17 +114,6 @@ module.exports = function spawnChild (params, callback) {
     if (closed) return
     closed = true
     update.debug.status('Raw output:', stdout)
-    // Output any console logging from the child process
-    let tidy = stdout.toString()
-      .split('\n')
-      .filter(line => !line.startsWith('__ARC__'))
-      .join('\n')
-    if (tidy.length > 0) {
-      console.log(tidy)
-    }
-    if (stderr) {
-      console.error(stderr)
-    }
     /**
      * PSA: rarely, the invoked Lambda process has been observed to exit with non-corresponding codes
      * Example: a correct and complete stdout response has in certain circumstances been observed exit non-0 (and vice versa, see #1137)
@@ -212,17 +201,29 @@ module.exports = function spawnChild (params, callback) {
     })
   }
 
+  let midArcOutput = false
   child.stdout.on('data', data => {
     // always capture data piped to stdout
     // python buffers so you might get everything despite our best efforts
     stdout += data
-    if (data.includes('__ARC_END__')) {
-      maybeShutdown('stdout')
+    if (data.includes('__ARC__')) {
+      midArcOutput = true
+      return
     }
+    if (data.includes('__ARC_END__')) {
+      midArcOutput = false
+      maybeShutdown('stdout')
+      return
+    }
+    if (midArcOutput) {
+      return
+    }
+    console.log(data.toString())
   })
 
   child.stderr.on('data', data => {
     stderr += data
+    console.error(data)
     if (data.includes('__ARC_END__')) {
       maybeShutdown('stderr')
     }
