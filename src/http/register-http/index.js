@@ -5,27 +5,30 @@ module.exports = function reg (app, params) {
 
   let sortRoutes =  inventory.inv.http.map((route, index) => {
     let path = route.path
-    let parts = path.split('/')
+    let parts = path.split('/').slice(1)
+    console.log(parts)
     function weight (str) {
       if (str === '*') return 1 // wild
       if (/^\:/.test(str)) return 2 // param
       return 3 // static
     }
     function specificity (arr){
-      let spec
+      let spec = 0
       let place = 1000000
       for (let i = 0; i < arr.length; i++) {
         spec += weight(arr[i]) * place
-        place = place / 10
+        place = Math.round(Number(place) / 10)
       }
       return spec
     }
     return { path: route.path, index, specificity: specificity(parts) }
-  }).sort((a, b) => (a.specificity > b.specificity) ? 1 : -1)
+  }).sort((a, b) => (a.specificity < b.specificity) ? 1 : -1)
+  console.log(sortRoutes)
+    
 
   // inventory.inv.http.forEach(lambda => {
   sortRoutes.forEach(i => {
-    let lambda = inventory.inv.http[i]
+    let lambda = inventory.inv.http[i.index]
     // ASAP handled by middleware
     if (lambda.arcStaticAssetProxy) return
     let { method, path } = lambda
