@@ -223,7 +223,7 @@ module.exports = function spawnChild (params, callback) {
 
   child.stderr.on('data', data => {
     stderr += data
-    console.error(data)
+    console.error(data.toString())
     if (data.includes('__ARC_END__')) {
       maybeShutdown('stderr')
     }
