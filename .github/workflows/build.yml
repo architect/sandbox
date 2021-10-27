@@ -24,7 +24,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Set up Node.js
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
 
@@ -56,6 +56,11 @@ jobs:
         VER=`ruby --version`; echo "Ruby ver:   $VER"
         VER=`deno --version`; echo "Deno ver:   $VER"
         echo "OS ver:     ${{ runner.os }}"
+
+    # Remove this once npm 8.1.1+ is available in Node 16
+    - name: Upgrade npm
+      if: matrix.node-version == '16.x'
+      run: npm i -g npm@latest
 
     - name: Install
       run: npm install
@@ -90,7 +95,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: 14
           registry-url: https://registry.npmjs.org/
@@ -113,7 +118,7 @@ jobs:
 
       # Set up Node again, this time using GitHub as the publish target
       - name: Set up Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: 14
           registry-url: https://npm.pkg.github.com/
