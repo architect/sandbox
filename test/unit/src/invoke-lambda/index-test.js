@@ -47,7 +47,7 @@ test('Get inventory', t => {
 })
 
 test('Test runtime invocations', t => {
-  t.plan(27)
+  t.plan(24)
   let lambda
 
   lambda = get.http('get /')
@@ -74,14 +74,6 @@ test('Test runtime invocations', t => {
     t.equals(request, JSON.stringify(event), 'nodejs12.x received event')
   })
 
-  lambda = get.http('get /nodejs10.x')
-  invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
-    if (err) t.fail(err)
-    t.equals(options.cwd, lambda.src, 'nodejs10.x passed correct path')
-    t.equals(timeout, 10000, 'nodejs10.x ran with correct timeout')
-    t.equals(request, JSON.stringify(event), 'nodejs10.x received event')
-  })
-
   lambda = get.http('get /python3.8')
   invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
@@ -106,12 +98,12 @@ test('Test runtime invocations', t => {
     t.equals(request, JSON.stringify(event), 'python3.6 received event')
   })
 
-  lambda = get.http('get /ruby2.5')
+  lambda = get.http('get /ruby2.7')
   invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
-    t.equals(options.cwd, lambda.src, 'ruby2.5 passed correct path')
-    t.equals(timeout, 25000, 'ruby2.5 ran with correct timeout')
-    t.equals(request, JSON.stringify(event), 'ruby2.5 received event')
+    t.equals(options.cwd, lambda.src, 'ruby2.7 passed correct path')
+    t.equals(timeout, 25000, 'ruby2.7 ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'ruby2.7 received event')
   })
 
   lambda = get.http('get /deno')
@@ -183,7 +175,7 @@ test('Verify call counts from runtime invocations', t => {
   t.plan(5)
   t.equals(runtimes.asap, 1, 'ASAP called correct number of times')
   t.equals(runtimes.deno, 1, 'Deno called correct number of times')
-  t.equals(runtimes.node, 4 + 2, 'Node called correct number of times')
+  t.equals(runtimes.node, 5, 'Node called correct number of times')
   t.equals(runtimes.python, 3, 'Python called correct number of times')
   t.equals(runtimes.ruby, 1, 'Ruby called correct number of times')
   delete process.env.ARC_ENV

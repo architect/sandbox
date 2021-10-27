@@ -214,30 +214,6 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} get /nodejs10.x`, t => {
-    t.plan(15)
-    let rawPath = '/nodejs10.x'
-    tiny.get({
-      url: url + rawPath
-    }, function _got (err, result) {
-      if (err) t.fail(err)
-      else {
-        checkResult(t, result.body, {
-          message: 'Hello from get /nodejs10.x (running nodejs10.x)',
-          routeKey: 'GET /nodejs10.x',
-          rawPath,
-          pathParameters: undefined,
-          cookies: undefined,
-          queryStringParameters: undefined,
-          rawQueryString: '',
-          headers: '🤷🏽‍♀️',
-          isBase64Encoded: false,
-          body: undefined,
-        })
-      }
-    })
-  })
-
   t.test(`${mode} get /python3.8`, t => {
     t.plan(16)
     let rawPath = '/python3.8'
@@ -317,17 +293,17 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} get /ruby2.5`, t => {
+  t.test(`${mode} get /ruby2.7`, t => {
     t.plan(16)
-    let rawPath = '/ruby2.5'
+    let rawPath = '/ruby2.7'
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
       if (err) t.fail(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /ruby2.5 (running ruby2.5)',
-          routeKey: 'GET /ruby2.5',
+          message: 'Hello from get /ruby2.7 (running ruby2.7)',
+          routeKey: 'GET /ruby2.7',
           rawPath,
           pathParameters: undefined,
           cookies: undefined,
@@ -338,7 +314,7 @@ function runTests (runType, t) {
           body: undefined,
           context: {
             aws_request_id: true, // Just check for presence
-            function_name: 'sandbox-get-ruby2_5',
+            function_name: 'sandbox-get-ruby2_7',
             function_version: '$LATEST',
             invoked_function_arn: 'sandbox',
             memory_limit_in_mb: 1152,
