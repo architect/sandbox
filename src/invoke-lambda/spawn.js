@@ -218,12 +218,12 @@ module.exports = function spawnChild (params, callback) {
     if (midArcOutput) {
       return
     }
-    console.log(data.toString().trim())
+    process.stdout.write(data)
   })
 
   child.stderr.on('data', data => {
     stderr += data
-    console.error(data.toString().trim())
+    process.stderr.write(data)
     if (data.includes('__ARC_END__')) {
       maybeShutdown('stderr')
     }
