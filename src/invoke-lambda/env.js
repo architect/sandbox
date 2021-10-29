@@ -5,7 +5,7 @@ let getContext = require('./context')
 // Constructs Lambda execution environment variables
 module.exports = function getEnv (params) {
   let { cwd, lambda, inventory, ports, userEnv } = params
-  let { config, src } = lambda
+  let { config, handlerFile, handlerFunction, src } = lambda
   let { inv } = inventory
   let { ARC_ENV, ARC_LOCAL, ARC_STATIC_SPA, NODE_ENV, PATH, SESSION_TABLE_NAME } = process.env
   let { AWS_ACCESS_KEY_ID, AWS_PROFILE, AWS_REGION, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN } = process.env
@@ -26,8 +26,8 @@ module.exports = function getEnv (params) {
     __ARC_CONTEXT__: JSON.stringify(lambdaContext),
     __ARC_CONFIG__: JSON.stringify({
       projectSrc: cwd,
-      handlerFile: 'index',
-      handlerFunction: 'handler',
+      handlerFile,
+      handlerFunction,
       shared: inv.shared,
       views: inv.views,
     }),

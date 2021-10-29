@@ -2,6 +2,14 @@
 
 ---
 
+## [4.3.0] 2021-10-28
+
+### Added
+
+- Added custom handler file / method support via `config.arc`
+
+---
+
 ## [4.2.2] 2021-10-20
 
 ### Changed

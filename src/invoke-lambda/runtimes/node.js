@@ -9,8 +9,7 @@ let {
 let context = JSON.parse(process.env.__ARC_CONTEXT__);
 let { join, sep } = require('path');
 let { existsSync: exists, readFileSync: read } = require('fs');
-let handler = './' + handlerFile;
-let fn = require(handler)[handlerFunction];
+let fn = require(handlerFile)[handlerFunction];
 let cwd = process.cwd();
 
 function isPromise (obj) {

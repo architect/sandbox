@@ -2,7 +2,7 @@ require 'json'
 request = JSON.parse(STDIN.gets)
 
 config = JSON.parse(ENV['__ARC_CONFIG__'])
-index = './' + config['handlerFile']
+index = config['handlerFile']
 require index
 handlerFn = config['handlerFunction']
 

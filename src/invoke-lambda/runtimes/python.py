@@ -1,12 +1,12 @@
-import os
-import json
-import sys
-import importlib
+import importlib, json, os, sys
 
 config = json.loads(os.environ.get('__ARC_CONFIG__'))
-index = importlib.import_module(config['handlerFile'])
+sys.path.append(os.path.dirname(config['handlerFile']))
+module = os.path.splitext(os.path.basename(config['handlerFile']))[0]
+handlerFile = importlib.import_module(module)
+sys.path.pop()
 handlerFn = config['handlerFunction']
-handler = getattr(index, handlerFn)
+handler = getattr(handlerFile, handlerFn)
 
 req = sys.stdin.readlines()
 con = os.environ.get('__ARC_CONTEXT__')
