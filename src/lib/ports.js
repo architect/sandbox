@@ -1,4 +1,7 @@
 let net = require('net')
+let os = require('os')
+
+let montereyPorts = [5000, 7000]
 
 /**
  * Set up ports for Sandbox services, but does NOT mutate env vars
@@ -45,7 +48,8 @@ function getPorts (port) {
 /**
  * Ensure we have access to the desired HTTP port
  */
-function checkPort (port, callback) {
+function checkPort (port, update, callback) {
+  _warnIfMonterey(port, update)
   let tester = net.createServer()
   tester.listen(port)
   tester.once('error', err => {
@@ -57,6 +61,25 @@ function checkPort (port, callback) {
   tester.once('listening', () => {
     tester.close(callback)
   })
+}
+
+/**
+ * MacOS Monterey Warning
+ *
+ * Warn users that some ports are now used by the Mac Operating System
+ */
+function _warnIfMonterey(port, update) {
+  if (montereyPorts.includes(port) && os.type().toLowerCase() === 'darwin') {
+    const isMonterey = parseInt(os.release().split('.')[0]) >= 21
+    if (isMonterey){
+      update.warn(`
+      You are running a macOS Monterey or later.
+      These versions of macOS are known to run processes on port ${port}.
+
+      If Sandbox is unable to start due to port ${port} already being in use.
+      Please set the ARC_TABLES_PORT environment variable to an unused port number.`)
+    }
+  }
 }
 
 module.exports = {
