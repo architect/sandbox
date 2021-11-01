@@ -1,7 +1,7 @@
 let net = require('net')
 let os = require('os')
 
-let montereyPorts = [5000, 7000]
+let montereyPorts = [ 5000, 7000 ]
 
 /**
  * Set up ports for Sandbox services, but does NOT mutate env vars
@@ -68,7 +68,7 @@ function checkPort (port, update, callback) {
  *
  * Warn users that some ports are now used by the Mac Operating System
  */
-function _warnIfMonterey(port, update) {
+function _warnIfMonterey (port, update) {
   if (montereyPorts.includes(port) && os.type().toLowerCase() === 'darwin') {
     const isMonterey = parseInt(os.release().split('.')[0]) >= 21
     if (isMonterey){
