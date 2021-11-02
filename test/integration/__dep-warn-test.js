@@ -1,5 +1,5 @@
 let { join } = require('path')
-let { existsSync, mkdirSync, rmSync } = require('fs')
+let { existsSync, mkdirSync, readdirSync, rmSync } = require('fs')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
@@ -20,6 +20,7 @@ function prep (t, copying) {
   try {
     rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
     if (existsSync(tmp)) {
+      console.log(`tmp dir contents:`, readdirSync(tmp))
       t.fail(`${tmp} should not exist`)
       process.exit(1)
     }
