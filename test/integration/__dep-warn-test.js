@@ -18,7 +18,7 @@ let stdout = process.stdout.write
 
 function prep (t, copying) {
   try {
-    rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
+    rmSync(tmp, { recursive: true, force: true, maxRetries: 100 })
     if (existsSync(tmp)) {
       console.log(`tmp dir contents:`, readdirSync(tmp))
       t.fail(`${tmp} should not exist`)
