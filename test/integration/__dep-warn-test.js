@@ -19,6 +19,7 @@ let stdout = process.stdout.write
 function prep (t, copying) {
   try {
     removeSync(tmp)
+    removeSync(tmp) // Run it a second time bc Windows, I'm not even kidding rn: https://github.com/jprichardson/node-fs-extra/blob/master/lib/remove/rimraf.js#L281-L298
     if (existsSync(tmp)) {
       t.fail(`${tmp} should not exist`)
       process.exit(1)
