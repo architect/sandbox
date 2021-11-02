@@ -57,6 +57,7 @@
     "@architect/req-res-fixtures": "git+https://github.com/architect/req-res-fixtures.git",
     "cross-env": "~7.0.3",
     "eslint": "~8.1.0",
+    "fs-extra": "~10.0.0",
     "nyc": "~15.1.0",
     "pkg": "~5.4.1",
     "proxyquire": "~2.1.3",

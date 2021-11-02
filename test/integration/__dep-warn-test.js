@@ -1,17 +1,29 @@
 let { join } = require('path')
+let { existsSync, mkdirSync } = require('fs')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let tiny = require('tiny-json-http')
+let { copySync, removeSync } = require('fs-extra')
 let { run, startup, shutdown, url } = require('../utils')
 
 let mock = join(process.cwd(), 'test', 'mock', 'dep-warn')
+let tmp = join(mock, 'tmp')
 let instructions = str => str.match(/Please run:/g)?.length
 let escSlashes = str => str.replace(/\\/g, '\\\\')
 
 let print = true
 let data = ''
 let stdout = process.stdout.write
+
+function prep (t, copying) {
+  removeSync(tmp)
+  if (existsSync(tmp)) t.fail(`${tmp} should not exist`)
+  if (copying) {
+    mkdirSync(join(tmp, copying), { recursive: true })
+    copySync(join(mock, copying), join(tmp, copying))
+  }
+}
 
 function setup () {
   process.stdout.write = write => {
@@ -46,7 +58,8 @@ function runTests (runType, t ) {
   let mode = `/ ${runType}`
 
   t.test(`[Dependency warnings (basic) ${mode}] Start Sandbox`, t => {
-    startup[runType](t, join('dep-warn', 'basic'), { print })
+    prep(t, 'basic')
+    startup[runType](t, join('dep-warn', 'tmp', 'basic'), { print })
   })
 
   t.test(`[Dependency warnings (basic) ${mode}] Lambda has its own deps`, t => {
@@ -58,7 +71,7 @@ function runTests (runType, t ) {
       teardown()
       if (err) t.fail(err)
       else {
-        let dir = escSlashes(join(mock, 'basic', 'src', 'http', 'get-deps_in_lambda'))
+        let dir = escSlashes(join(tmp, 'basic', 'src', 'http', 'get-deps_in_lambda'))
         t.match(data, new RegExp(`Please run: cd ${dir}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
         t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep (`lambda-dep`)')
         t.match(data, /root-dep/, 'Got a dep warning for a root dep (`root-dep`)')
@@ -78,7 +91,7 @@ function runTests (runType, t ) {
       teardown()
       if (err) t.fail(err)
       else {
-        let dir = escSlashes(join(mock, 'basic', 'src', 'http', 'get-deps_in_root'))
+        let dir = escSlashes(join(tmp, 'basic', 'src', 'http', 'get-deps_in_root'))
         t.doesNotMatch(data, new RegExp(dir), 'Got a dep warning for root (with instructions to install into root)')
         t.match(data, /Please run: npm i/, 'Got instructions to install into root')
         t.doesNotMatch(data, /root-dep/, 'Did not get dep warning for a root dep (`root-dep`)')
@@ -98,7 +111,7 @@ function runTests (runType, t ) {
       teardown()
       if (err) t.fail(err)
       else {
-        let dir = escSlashes(join(mock, 'basic', 'src', 'http', 'get-deps_in_shared'))
+        let dir = escSlashes(join(tmp, 'basic', 'src', 'http', 'get-deps_in_shared'))
         t.doesNotMatch(data, new RegExp(dir), 'Got a dep warning for shared (with instructions to install into root)')
         t.match(data, /Please run: npm i/, 'Got instructions to install into root')
         t.doesNotMatch(data, /root-dep/, 'Did not get dep warning for a root dep (`root-dep`)')
@@ -142,7 +155,8 @@ function runTests (runType, t ) {
   })
 
   t.test(`[Dependency warnings (shared - no packages) ${mode}] Start Sandbox`, t => {
-    startup[runType](t, join('dep-warn', 'no-packages'), { print })
+    prep(t, 'no-packages')
+    startup[runType](t, join('dep-warn', 'tmp', 'no-packages'), { print })
   })
 
   t.test(`[Dependency warnings (shared - no packages) ${mode}] Shared deps`, t => {
@@ -180,7 +194,8 @@ function runTests (runType, t ) {
   })
 
   t.test(`[Dependency warnings (shared - packages in shared) ${mode}] Start Sandbox`, t => {
-    startup[runType](t, join('dep-warn', 'shared-packages'), { print })
+    prep(t, 'shared-packages')
+    startup[runType](t, join('dep-warn', 'tmp', 'shared-packages'), { print })
   })
 
   t.test(`[Dependency warnings (shared - packages in shared) ${mode}] Missing shared deps loaded from root`, t => {
@@ -192,7 +207,7 @@ function runTests (runType, t ) {
       teardown()
       if (err) t.fail(err)
       else {
-        let dir = escSlashes(join(mock, 'shared-packages', 'src', 'shared'))
+        let dir = escSlashes(join(tmp, 'shared-packages', 'src', 'shared'))
         t.match(data, new RegExp(`Please run: cd ${dir}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/shared)')
         t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep (`lambda-dep`)')
         t.match(data, /root-dep/, 'Got a dep warning for a root dep (`root-dep`)')
@@ -212,7 +227,7 @@ function runTests (runType, t ) {
       teardown()
       if (err) t.fail(err)
       else {
-        let dir = escSlashes(join(mock, 'shared-packages', 'src', 'views'))
+        let dir = escSlashes(join(tmp, 'shared-packages', 'src', 'views'))
         t.match(data, new RegExp(`Please run: cd ${dir}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/views)')
         t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep (`lambda-dep`)')
         t.match(data, /root-dep/, 'Got a dep warning for a root dep (`root-dep`)')
@@ -228,7 +243,8 @@ function runTests (runType, t ) {
   })
 
   t.test(`[Dependency warnings (shared - packages in Lambdas) ${mode}] Start Sandbox`, t => {
-    startup[runType](t, join('dep-warn', 'lambda-packages'), { print })
+    prep(t, 'lambda-packages')
+    startup[runType](t, join('dep-warn', 'tmp', 'lambda-packages'), { print })
   })
 
   t.test(`[Dependency warnings (shared - packages in Lambdas) ${mode}] Missing shared deps loaded from root`, t => {
@@ -240,7 +256,7 @@ function runTests (runType, t ) {
       teardown()
       if (err) t.fail(err)
       else {
-        let dir = escSlashes(join(mock, 'lambda-packages', 'src', 'http', 'get-shared'))
+        let dir = escSlashes(join(tmp, 'lambda-packages', 'src', 'http', 'get-shared'))
         t.match(data, new RegExp(`Please run: cd ${dir}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
         t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep (`lambda-dep`)')
         t.match(data, /root-dep/, 'Got a dep warning for a root dep (`root-dep`)')
@@ -260,7 +276,7 @@ function runTests (runType, t ) {
       teardown()
       if (err) t.fail(err)
       else {
-        let dir = escSlashes(join(mock, 'lambda-packages', 'src', 'http', 'get-views'))
+        let dir = escSlashes(join(tmp, 'lambda-packages', 'src', 'http', 'get-views'))
         t.match(data, new RegExp(`Please run: cd ${dir}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
         t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep (`lambda-dep`)')
         t.match(data, /root-dep/, 'Got a dep warning for a root dep (`root-dep`)')
@@ -276,7 +292,8 @@ function runTests (runType, t ) {
   })
 
   t.test(`[Dependency warnings (shared - packages in shared + Lambdas) ${mode}] Start Sandbox`, t => {
-    startup[runType](t, join('dep-warn', 'all-packages'), { print })
+    prep(t, 'all-packages')
+    startup[runType](t, join('dep-warn', 'tmp', 'all-packages'), { print })
   })
 
   t.test(`[Dependency warnings (shared - packages in shared + Lambdas) ${mode}] Missing shared deps loaded from root`, t => {
@@ -288,8 +305,8 @@ function runTests (runType, t ) {
       teardown()
       if (err) t.fail(err)
       else {
-        let lambdaDir = escSlashes(join(mock, 'all-packages', 'src', 'http', 'get-shared'))
-        let sharedDir = escSlashes(join(mock, 'all-packages', 'src', 'shared'))
+        let lambdaDir = escSlashes(join(tmp, 'all-packages', 'src', 'http', 'get-shared'))
+        let sharedDir = escSlashes(join(tmp, 'all-packages', 'src', 'shared'))
         t.match(data, new RegExp(`Please run: cd ${lambdaDir}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
         t.match(data, new RegExp(`Please run: cd ${sharedDir}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/shared)')
         t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep (`lambda-dep`)')
@@ -310,8 +327,8 @@ function runTests (runType, t ) {
       teardown()
       if (err) t.fail(err)
       else {
-        let lambdaDir = escSlashes(join(mock, 'all-packages', 'src', 'http', 'get-views'))
-        let viewsDir = escSlashes(join(mock, 'all-packages', 'src', 'views'))
+        let lambdaDir = escSlashes(join(tmp, 'all-packages', 'src', 'http', 'get-views'))
+        let viewsDir = escSlashes(join(tmp, 'all-packages', 'src', 'views'))
         t.match(data, new RegExp(`Please run: cd ${lambdaDir}`), 'Got a dep warning on the correct Lambda (with instructions to install into the Lambda)')
         t.match(data, new RegExp(`Please run: cd ${viewsDir}`), 'Got a dep warning on the correct Lambda (with instructions to install deps into src/views)')
         t.doesNotMatch(data, /lambda-dep/, 'Did not get dep warning for a Lambda dep (`lambda-dep`)')
@@ -324,6 +341,7 @@ function runTests (runType, t ) {
   })
 
   t.test(`[Dependency warnings] Teardown`, t => {
+    prep(t)
     shutdown[runType](t)
   })
 }
