@@ -48,7 +48,7 @@ function runTests (runType, t ) {
   t.test(`[Dependency warnings (basic) ${mode}] Start Sandbox`, t => {
     startup[runType](t, join('dep-warn', 'basic'), { print })
   })
-
+  /*
   t.test(`[Dependency warnings (basic) ${mode}] Lambda has its own deps`, t => {
     t.plan(5)
     setup()
@@ -87,7 +87,7 @@ function runTests (runType, t ) {
         reset()
       }
     })
-  })
+  }) */
 
   t.test(`[Dependency warnings (basic) ${mode}] Deps are in shared`, t => {
     t.plan(5)
@@ -108,7 +108,7 @@ function runTests (runType, t ) {
       }
     })
   })
-
+  /*
   t.test(`[Dependency warnings (basic) ${mode}] All deps were found, no warnings`, t => {
     t.plan(1)
     setup()
@@ -135,12 +135,12 @@ function runTests (runType, t ) {
       }
       else t.fail('Expected an error')
     })
-  })
+  }) */
 
   t.test(`[Dependency warnings (basic) ${mode}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
-
+/*
   t.test(`[Dependency warnings (shared - no packages) ${mode}] Start Sandbox`, t => {
     startup[runType](t, join('dep-warn', 'no-packages'), { print })
   })
@@ -325,5 +325,5 @@ function runTests (runType, t ) {
 
   t.test(`[Dependency warnings] Teardown`, t => {
     shutdown[runType](t)
-  })
+  }) */
 }
