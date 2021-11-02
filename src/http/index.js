@@ -61,7 +61,7 @@ module.exports = function createHttpServer (inventory) {
 
         // Ensure the port is free
         function _checkPort (callback) {
-          checkPort(httpPort, callback)
+          checkPort(httpPort, update, callback)
         },
 
         // Generate public/static.json if `@static fingerprint` is enabled
