@@ -4,9 +4,10 @@
   "description": "Architect dev server: run full Architect projects locally & offline",
   "main": "src/index.js",
   "scripts": {
-    "test": "npm run lint && npm run test:integration && npm run coverage",
+    "test": "npm run test:integration",
+    "test:all": "npm run lint && npm run test:integration && npm run coverage",
     "test:unit": "cross-env tape 'test/unit/**/*-test.js' | tap-spec",
-    "test:integration": "cross-env tape 'test/integration/**/*-test.js' | tap-spec",
+    "test:integration": "cross-env tape 'test/integration/__dep-warn-test.js' | tap-spec",
     "coverage": "nyc --reporter=lcov --reporter=text npm run test:unit",
     "lint": "eslint . --fix",
     "rc": "npm version prerelease --preid RC",
