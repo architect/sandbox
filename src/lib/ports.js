@@ -76,7 +76,7 @@ function _warnIfMonterey (port, update) {
       You are running a macOS Monterey or later.
       These versions of macOS are known to run processes on port ${port}.
 
-      If Sandbox is unable to start due to port ${port} already being in use.
+      Sandbox is unable to start due to port ${port} already being in use.
       Please set the ARC_TABLES_PORT environment variable to an unused port number.`)
     }
   }
