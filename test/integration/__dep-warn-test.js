@@ -1,10 +1,10 @@
 let { join } = require('path')
-let { existsSync, mkdirSync } = require('fs')
+let { existsSync, mkdirSync, rmSync } = require('fs')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let tiny = require('tiny-json-http')
-let { copySync, removeSync } = require('fs-extra')
+let { copySync } = require('fs-extra')
 let { run, startup, shutdown, url } = require('../utils')
 
 let mock = join(process.cwd(), 'test', 'mock', 'dep-warn')
@@ -18,8 +18,7 @@ let stdout = process.stdout.write
 
 function prep (t, copying) {
   try {
-    removeSync(tmp)
-    removeSync(tmp) // Run it a second time bc Windows, I'm not even kidding rn: https://github.com/jprichardson/node-fs-extra/blob/master/lib/remove/rimraf.js#L281-L298
+    rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
     if (existsSync(tmp)) {
       t.fail(`${tmp} should not exist`)
       process.exit(1)
