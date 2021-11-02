@@ -17,11 +17,21 @@ let data = ''
 let stdout = process.stdout.write
 
 function prep (t, copying) {
-  removeSync(tmp)
-  if (existsSync(tmp)) t.fail(`${tmp} should not exist`)
-  if (copying) {
-    mkdirSync(join(tmp, copying), { recursive: true })
-    copySync(join(mock, copying), join(tmp, copying))
+  try {
+    removeSync(tmp)
+    if (existsSync(tmp)) {
+      t.fail(`${tmp} should not exist`)
+      process.exit(1)
+    }
+    if (copying) {
+      mkdirSync(join(tmp, copying), { recursive: true })
+      copySync(join(mock, copying), join(tmp, copying))
+    }
+  }
+  catch (err) {
+    t.fail('Prep failed')
+    console.log(err)
+    process.exit(1)
   }
 }
 
