@@ -39,7 +39,7 @@ module.exports = function createEventBus (inventory) {
 
         // Ensure the port is free
         function _checkPort (callback) {
-          checkPort(eventsPort, callback)
+          checkPort(eventsPort, update, callback)
         },
 
         // Internal Arc services
