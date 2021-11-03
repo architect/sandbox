@@ -20,9 +20,11 @@ let stdout = process.stdout.write
 function prep (t, copying) {
   try {
     // rmSync(tmp, { recursive: true, force: true, maxRetries: 100 })
-    let cmd = process.platform.startsWith('win') ? 'rmdir /s /q tmp' : 'rm -rf tmp'
-    let result = execSync(cmd, { cwd: mock, shell: true })
-    console.log(`result:`, result.toString())
+    if (existsSync(tmp)) {
+      let cmd = process.platform.startsWith('win') ? 'rmdir /s /q tmp' : 'rm -rf tmp'
+      let result = execSync(cmd, { cwd: mock, shell: true })
+      console.log(`result:`, result.toString())
+    }
     if (existsSync(tmp)) {
       console.log(`tmp dir contents:`, readdirSync(tmp))
       t.fail(`${tmp} should not exist`)
@@ -34,7 +36,6 @@ function prep (t, copying) {
     }
   }
   catch (err) {
-    if (err.stderr) console.log(err.stderr.toString())
     t.fail('Prep failed')
     console.log(err)
     process.exit(1)
