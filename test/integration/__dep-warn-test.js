@@ -34,6 +34,7 @@ function prep (t, copying) {
     }
   }
   catch (err) {
+    if (err.stderr) console.log(err.stderr.toString())
     t.fail('Prep failed')
     console.log(err)
     process.exit(1)
