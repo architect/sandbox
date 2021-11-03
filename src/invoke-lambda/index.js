@@ -77,8 +77,9 @@ module.exports = function invokeLambda (params, callback) {
             update.debug.raw(serialize(result.__DEP_DEBUG__))
             delete result.__DEP_DEBUG__
           }
-          warn({ cwd, missing, inventory, src, update })
-          callback(null, result)
+          warn({ cwd, missing, inventory, src, update }, function () {
+            callback(null, result)
+          })
         }
       })
     }
