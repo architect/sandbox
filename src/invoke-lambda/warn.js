@@ -35,4 +35,5 @@ module.exports = function warn (params, callback) {
     }
     callback()
   }
+  else callback()
 }
