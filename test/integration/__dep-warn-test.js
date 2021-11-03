@@ -20,7 +20,7 @@ let stdout = process.stdout.write
 function prep (t, copying) {
   try {
     // rmSync(tmp, { recursive: true, force: true, maxRetries: 100 })
-    let cmd = process.platform.startsWith('win') ? 'rmdir /s tmp' : 'rm -rf tmp'
+    let cmd = process.platform.startsWith('win') ? 'rmdir /s /q tmp' : 'rm -rf tmp'
     let result = execSync(cmd, { cwd: mock, shell: true })
     console.log(`result:`, result.toString())
     if (existsSync(tmp)) {
