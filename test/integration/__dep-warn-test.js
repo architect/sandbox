@@ -1,6 +1,5 @@
 let { join } = require('path')
 let { existsSync, mkdirSync, rmSync } = require('fs')
-// let { execSync } = require('child_process')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
@@ -20,13 +19,7 @@ let stdout = process.stdout.write
 function prep (t, copying) {
   try {
     rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
-    // if (existsSync(tmp)) {
-    //   let cmd = process.platform.startsWith('win') ? 'rmdir /s /q tmp' : 'rm -rf tmp'
-    //   let result = execSync(cmd, { cwd: mock, shell: true })
-    //   console.log(`result:`, result.toString())
-    // }
     if (existsSync(tmp)) {
-      // console.log(`tmp dir contents:`, readdirSync(tmp))
       t.fail(`${tmp} should not exist`)
       process.exit(1)
     }

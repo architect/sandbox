@@ -19,7 +19,6 @@ module.exports = function warn (params, callback) {
 
     // Remove AWS-SDK, that's bundled in Lambda
     missing = missing.filter(dep => !dep.endsWith('::aws-sdk'))
-    console.error('got missing', missing)
     // Do we still have anything left?
     if (missing.length) {
       let plural = missing.length > 1
@@ -30,7 +29,6 @@ module.exports = function warn (params, callback) {
         if (type === 'root') return run(`npm i ${deps.join(' ')}`)
         else return run(`cd ${dirs[type]} && npm i ${deps.join(' ')}`)
       })
-      console.error('got instructions', instructions)
       update.status(null, ...instructions)
     }
     callback()
