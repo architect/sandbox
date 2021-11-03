@@ -60,7 +60,7 @@ test('Set up env', t => {
 })
 
 test('Run dependency warning tests', t => {
-  // FIXME: after dozens of attempts to figure out why binary builds on Windows had intermittent with this test suite, I've given up. Abandon hope all ye who enter here.
+  // FIXME: after dozens of attempts to figure out why binary builds on Windows had intermittent failures in GitHub Actions with this particular test suite (specifically 'Deps are in shared'), I've given up. Abandon hope all ye who enter here.
   let { CI: isCI, BINARY_ONLY: isBin } = process.env
   let isWin = process.platform.startsWith('win')
   if (isCI && isBin && isWin) t.end()
