@@ -19,7 +19,7 @@ let stdout = process.stdout.write
 
 function prep (t, copying) {
   try {
-    rmSync(tmp, { recursive: true, force: true, maxRetries: 100 })
+    rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
     // if (existsSync(tmp)) {
     //   let cmd = process.platform.startsWith('win') ? 'rmdir /s /q tmp' : 'rm -rf tmp'
     //   let result = execSync(cmd, { cwd: mock, shell: true })
@@ -361,7 +361,7 @@ function runTests (runType, t ) {
     shutdown[runType](t)
   })
 
-  t.test(`[Dependency warnings] Teardown`, t => {
+  t.test(`[Dependency warnings ${mode}] Teardown`, t => {
     t.plan(1)
     prep(t)
     t.pass('Done')
