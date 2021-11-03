@@ -11,6 +11,8 @@ module.exports = function spawnChild (params, callback) {
   let functionPath = options.cwd.replace(cwd, '').substr(1)
   let isInLambda = process.env.AWS_LAMBDA_FUNCTION_NAME
   let timedout = false
+  let printed = false
+  let midArcOutput = false
   let headers = {
     'content-type': 'text/html; charset=utf8;',
     'cache-control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
@@ -113,6 +115,7 @@ module.exports = function spawnChild (params, callback) {
     // Only ever run once per execution
     if (closed) return
     closed = true
+    if (printed) console.log() // Break between invocations
     update.debug.status('Raw output:', stdout)
     /**
      * PSA: rarely, the invoked Lambda process has been observed to exit with non-corresponding codes
@@ -201,7 +204,6 @@ module.exports = function spawnChild (params, callback) {
     })
   }
 
-  let midArcOutput = false
   child.stdout.on('data', data => {
     // always capture data piped to stdout
     // python buffers so you might get everything despite our best efforts
@@ -218,11 +220,13 @@ module.exports = function spawnChild (params, callback) {
     if (midArcOutput) {
       return
     }
+    if (data) printed = true
     process.stdout.write(data)
   })
 
   child.stderr.on('data', data => {
     stderr += data
+    if (data) printed = true
     process.stderr.write(data)
     if (data.includes('__ARC_END__')) {
       maybeShutdown('stderr')

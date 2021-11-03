@@ -2,6 +2,14 @@
 
 ---
 
+## [next] 2021-11-03
+
+### Added
+
+- Sandbox now immediately streams Lambda logs to the console instead of printing everything all at once upon completion of execution; thanks @andybee!
+
+---
+
 ## [4.2.3] 2021-11-02
 
 ### Changed
