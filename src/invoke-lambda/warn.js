@@ -1,7 +1,7 @@
 /**
  * Warn the user if node has resolved a dependency outside their function's folder
  */
-module.exports = function warn (params, callback) {
+module.exports = function warn (params) {
   let { missing = [], inventory, src, update } = params
   let { inv } = inventory
   if (missing.length) {
@@ -31,7 +31,5 @@ module.exports = function warn (params, callback) {
       })
       update.status(null, ...instructions)
     }
-    callback()
   }
-  else callback()
 }
