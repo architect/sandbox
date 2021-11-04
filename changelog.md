@@ -7,6 +7,13 @@
 ### Added
 
 - Sandbox now immediately streams Lambda logs to the console instead of printing everything all at once upon completion of execution; thanks @andybee!
+- Added runtime mismatch warnings
+  - Example: Sandbox will warn if your `get /foo` Lambda is configured for Python 3.9 and your local machine uses Python 3.8
+
+
+### Changed
+
+- Sandbox will only ever print a given dependency issue one time, instead of upon each invocation
 
 ---
 

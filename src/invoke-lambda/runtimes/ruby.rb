@@ -7,16 +7,20 @@ require index
 handlerFn = config['handlerFunction']
 
 context = JSON.parse(ENV['__ARC_CONTEXT__'])
-response = '__ARC__ '
-responseEnd = ' __ARC_END__'
-
+result = '__ARC__ '
+resultEnd = ' __ARC_END__'
 begin
-  response += send(handlerFn, request, context).to_json
-  response += responseEnd
+  result += send(handlerFn, request, context).to_json
+  result += resultEnd
 rescue
-  response += send(handlerFn).to_json
-  response += responseEnd
+  result += send(handlerFn).to_json
+  result += resultEnd
 end
+meta = '__ARC_META__ ' + { version: RUBY_VERSION }.to_json + ' __ARC_META_END__'
 
-puts response
+=begin
+Always output __ARC_META__ first
+=end
+puts meta
+puts result
 exit(0)

@@ -37,11 +37,14 @@ async function getHandler () {
 }
 await getHandler();
 
-function callback(err, result) {
+function callback (err, result) {
   if (err) console.log(err);
   let payload = err
     ? { name: err.name, message: err.message, stack: err.stack }
     : result;
+  let meta = { version: Deno.version.deno };
+  /* Always output __ARC_META__ first */
+  console.log('__ARC_META__', JSON.stringify(meta), '__ARC_META_END__');
   console.log('__ARC__', JSON.stringify(payload), '__ARC_END__');
   Deno.exit(err? 1 : 0);
 }
