@@ -1,3 +1,4 @@
+let minimist = require('minimist')
 let flags
 
 /**
@@ -5,39 +6,39 @@ let flags
  */
 module.exports = function getFlags (useCache = true) {
   let { ARC_QUIET, QUIET, PORT } = process.env
+
+  let alias = {
+    debug: [ 'd' ],
+    port: [ 'p' ],
+    quiet: [ 'q' ],
+    verbose: [ 'v' ],
+  }
+  let boolean = [ 'disable-symlinks' ]
+  let args = minimist(process.argv.slice(2), { alias, boolean })
   if (flags && useCache) return flags
 
-  // TODO refactor all this janky custom logic into something like yargs
-  let args = process.argv.slice(2)
-
   // Log levels
+  // TODO [REMOVE]: remove support for bare verbose + debug flags
   let logLevel = 'normal'
-  let findVerbose = option => [ '-v', '--verbose', 'verbose' ].includes(option)
-  let findDebug =   option => [ '-d', '--debug', 'debug' ].includes(option)
-  if (args.some(findVerbose)) logLevel = 'verbose'
-  if (args.some(findDebug)) logLevel = 'debug'
+  let verbose = 'verbose'
+  let debug = 'debug'
+  if (args.verbose || args._.includes(verbose)) logLevel = verbose
+  if (args.debug || args._.includes(debug)) logLevel = debug
 
   // Get the base port for HTTP / WebSockets; tables + events key off this
   // CLI args > env var
-  let port = Number(PORT) || 3333
-  let findPort = option => [ '-p', '--port', 'port' ].includes(option)
-  if (args.some(findPort)) {
-    let thePort = i => args[args.indexOf(i) + 1]
-    if (args.includes('-p'))           port = Number(thePort('-p'))
-    else if (args.includes('--port'))  port = Number(thePort('--port'))
-    else if (args.includes('port'))    port = Number(thePort('port'))
-    if (isNaN(port))                   port = 3333
-  }
+  let port = Number(PORT) || args.port || 3333
+  if (isNaN(port)) port = 3333
 
   // Quiet stdout
-  let findQuiet = option => [ '-q', '--quiet', 'quiet' ].includes(option)
-  let quiet = args.some(findQuiet) ||
+  // TODO [REMOVE]: remove support for bare quiet flag
+  let quiet = args.quiet || args._.includes('quiet') ||
               (ARC_QUIET !== undefined && ARC_QUIET !== 'false') ||
               (QUIET !== undefined && QUIET !== 'false')
 
   // Disable hydration symlinking
   // (pass undefined if not found and let default values take the wheel)
-  let symlink = !args.includes('--disable-symlinks')
+  let symlink = !args['disable-symlinks']
 
   return flags = {
     logLevel,

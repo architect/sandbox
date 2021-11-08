@@ -16,7 +16,7 @@ rescue
   result += send(handlerFn).to_json
   result += resultEnd
 end
-meta = '__ARC_META__ ' + { version: RUBY_VERSION }.to_json + ' __ARC_META_END__'
+meta = '__ARC_META__ ' + {}.to_json + ' __ARC_META_END__'
 
 =begin
 Always output __ARC_META__ first
