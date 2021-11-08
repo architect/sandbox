@@ -167,6 +167,38 @@ function runTests (runType, t) {
     shutdown[runType](t)
   })
 
+  t.test(`[Env vars (env option) / ${runType}] Start Sandbox`, t => {
+    process.env.__TESTING_ENV_VAR__ = 'henlo'
+    startup[runType](t, join('env', 'dot-env'), {
+      env: {
+        DOTENV_USERLAND_ENV_VAR: 'Why hello there from overwritten .env!',
+        ENV_OPTION_USERLAND_ENV_VAR: 'Why hello there from env option!'
+      }
+    })
+  })
+
+  t.test(`[Env vars (env option)] get /env`, t => {
+    t.plan(8)
+    tiny.get({ url }, function _got (err, result) {
+      if (err) t.fail(err)
+      else {
+        t.equal(result.body.DOTENV_USERLAND_ENV_VAR, 'Why hello there from overwritten .env!', 'Received userland env var')
+        t.equal(result.body.ENV_OPTION_USERLAND_ENV_VAR, 'Why hello there from env option!', 'Received userland env var')
+        t.ok(result.body.ARC_ENV, 'Got ARC_ENV env var')
+        t.ok(result.body.ARC_STATIC_BUCKET, 'Got ARC_STATIC_BUCKET env var')
+        t.ok(result.body.NODE_ENV, 'Got NODE_ENV env var')
+        t.ok(result.body.SESSION_TABLE_NAME, 'Got SESSION_TABLE_NAME env var')
+        t.equal(result.body.TZ, 'UTC', 'Got TZ env var')
+        t.notOk(result.body.__TESTING_ENV_VAR__, 'No system env var pollution')
+      }
+    })
+  })
+
+  t.test(`[Env vars (env option) / ${runType}] Shut down Sandbox`, t => {
+    delete process.env.__TESTING_ENV_VAR__
+    shutdown[runType](t)
+  })
+
   t.test(`[Env vars (preferences.arc) / ${runType}] Start Sandbox`, t => {
     process.env.__TESTING_ENV_VAR__ = 'henlo'
     startup[runType](t, join('env', 'preferences'))
