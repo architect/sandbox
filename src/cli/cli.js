@@ -31,6 +31,7 @@ _inventory({}, function (err, inventory) {
     needsValidCreds: false,
     version: `Sandbox ${ver}`,
     inventory,
+    runtimeCheck: 'warn',
     ...flags,
   },
   function _done (err) {

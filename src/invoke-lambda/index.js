@@ -66,13 +66,13 @@ module.exports = function invokeLambda (params, callback) {
       }, function done (err, result, meta = {}) {
         if (err) callback(err)
         else {
-          let { missing, debug, version } = meta
+          let { missing, debug } = meta
           // Dependency warning debugger - handy for introspection during Lambda execution
           if (debug) {
             update.debug.status(`Lambda debug data: ${lambdaPath}`)
             update.debug.raw(serialize(debug))
           }
-          warn({ cwd, lambda, missing, inventory, src, update, version })
+          warn({ missing, inventory, src, update })
           callback(null, result)
         }
       })

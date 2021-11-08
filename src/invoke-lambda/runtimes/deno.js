@@ -1,5 +1,5 @@
 const env = Deno.env.toObject();
-const { sep } = JSON.parse(env.__ARC_META__);
+const { sep } = JSON.parse(env.__ARC_DENO__);
 const event = JSON.parse(env.__ARC_REQ__);
 const context = JSON.parse(env.__ARC_CONTEXT__);
 const root = env.LAMBDA_TASK_ROOT;
@@ -42,7 +42,7 @@ function callback (err, result) {
   let payload = err
     ? { name: err.name, message: err.message, stack: err.stack }
     : result;
-  let meta = { version: Deno.version.deno };
+  let meta = { /* Add execution metadata here */ };
   /* Always output __ARC_META__ first */
   console.log('__ARC_META__', JSON.stringify(meta), '__ARC_META_END__');
   console.log('__ARC__', JSON.stringify(payload), '__ARC_END__');

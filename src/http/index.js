@@ -9,7 +9,7 @@ let destroyer = require('server-destroy')
 
 // Local
 let { fingerprint } = require('@architect/utils')
-let { env, getPorts, checkPort, maybeHydrate } = require('../lib')
+let { checkRuntimes, env, getPorts, checkPort, maybeHydrate } = require('../lib')
 let middleware = require('./middleware')
 let config = require('./_config')
 let hydrate = require('@architect/hydrate')
@@ -137,6 +137,14 @@ module.exports = function createHttpServer (inventory) {
           if (!all) {
             prettyPrint(params)
             callback()
+          }
+          else callback()
+        },
+
+        // Check runtime versions
+        function _checkRuntimes (callback) {
+          if (!all) {
+            checkRuntimes(params, callback)
           }
           else callback()
         },

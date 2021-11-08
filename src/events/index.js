@@ -1,4 +1,4 @@
-let { env, getPorts, checkPort, maybeHydrate } = require('../lib')
+let { checkRuntimes, env, getPorts, checkPort, maybeHydrate } = require('../lib')
 let hydrate = require('@architect/hydrate')
 let _listener = require('./_listener')
 let http = require('http')
@@ -79,6 +79,14 @@ module.exports = function createEventBus (inventory) {
                 callback()
               }
             })
+          }
+          else callback()
+        },
+
+        // Check runtime versions
+        function _checkRuntimes (callback) {
+          if (!all) {
+            checkRuntimes(params, callback)
           }
           else callback()
         },

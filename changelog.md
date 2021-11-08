@@ -14,6 +14,7 @@
 ### Changed
 
 - Sandbox will only ever print a given dependency issue one time, instead of upon each invocation
+- Removed support for bare `port` CLI flag (e.g. `arc sandbox port 12345`); Sandbox now requires either `-p` or `--port` for setting the port from the CLI
 
 ---
 
