@@ -8,7 +8,7 @@ let { existsSync, readFileSync } = require('fs')
  * - e.g. if ARC_ENV=staging the Lambda env is populated by `@staging`, etc.
  */
 module.exports = function populateUserEnv (params, callback) {
-  let { cwd, update, inventory } = params
+  let { cwd, update, inventory, env } = params
   let { inv } = inventory
   let environment = process.env.ARC_ENV
   let setEnv = false // Ignore the second set of env vars if both .env + Arc prefs are found
@@ -82,6 +82,16 @@ module.exports = function populateUserEnv (params, callback) {
       let error = `.arc-env parse error: ${err.stack}`
       return callback(error)
     }
+  }
+  else if (env) {
+    Object.entries(env).forEach(entry => {
+      let [ key, value ] = entry
+      if (typeof value === 'string') userEnv[key] = value
+      else {
+        let error = `env option '${key}' non-string value parse error: ${new Error().stack}`
+        return callback(error)
+      }
+    })
   }
   else if (!setEnv) varsNotFound(environment)
 
