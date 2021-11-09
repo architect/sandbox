@@ -66,13 +66,18 @@ Sandbox is designed to be integrated into your application's test suite. In most
 
 Methods may be passed an options object containing the following parameters:
 - `apigateway` - **String** - Specify the API Gateway API type
-  - Can be one of `http` (aliased to `httpv2`), `httpv1`, `rest`
   - Defaults to `http`
+  - Can be one of `http` (aliased to `httpv2`), `httpv1`, `rest`
 - `cwd` - **String** - Specify a working directory (handy for aiming Sandbox at test mocks)
 - `port` - **String or Number** - Specify HTTP port
   - Defaults to `3333`
 - `quiet` - **Boolean** - Disables (most) logging
-- `runtimeCheck` - **String** - Check for runtime version mismatches; if set to `warn` Sandbox will warn of mismatches in stdout; if set to `error` Sandbox will fail to start up. (Suggested setting for test environments is `error`.)
+- `runStartupCommands` - **Boolean** - Disable `@sandbox-startup` commands
+  - Defaults to `true`
+- `runtimeCheck` - **String** - Check for runtime version mismatches
+  - If set to `warn` Sandbox will warn of mismatches in stdout
+  - If set to `error` (suggested for test environments) Sandbox will fail to start up
+  - Does not run by default
 - `symlink` - **Boolean** - Use symlinking to Architect shared code from within each Lambda's dependencies (e.g. `src/http/get-index/node_modules/@architect/shared` → `src/shared`)
   - Defaults to `true`
   - `false` copies shared code into each Lambda, which can result much slower startup and dependency rehydration speeds

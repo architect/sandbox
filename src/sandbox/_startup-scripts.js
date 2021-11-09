@@ -2,10 +2,10 @@ let { exec } = require('child_process')
 let series = require('run-series')
 
 module.exports = function startupScripts (params, callback) {
-  let { cwd, inventory, update, userEnv } = params
+  let { cwd, inventory, update, userEnv, runStartupCommands = true } = params
   let { preferences: prefs } = inventory.inv._project
 
-  if (prefs?.['sandbox-startup']) {
+  if (prefs?.['sandbox-startup'] && runStartupCommands) {
     let now = Date.now()
     let ARC_INV = JSON.stringify(inventory.inv)
     let ARC_RAW = JSON.stringify(inventory.inv._project.arc)
