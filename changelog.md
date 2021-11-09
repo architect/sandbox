@@ -9,6 +9,8 @@
 - Sandbox now immediately streams Lambda logs to the console instead of printing everything all at once upon completion of execution; thanks @andybee!
 - Added runtime mismatch warnings
   - Example: Sandbox will warn if your `get /foo` Lambda is configured for Python 3.9 and your local machine uses Python 3.8
+- Added `runStartupCommands` setting to API options
+  - Defaults to `true`; setting `false` disables `prefs.arc @sandbox-startup` commands, which may be useful for local testing; thanks @reconbot!
 
 
 ### Changed
