@@ -7,6 +7,7 @@
 ### Added
 
 - Sandbox now immediately streams Lambda logs to the console instead of printing everything all at once upon completion of execution; thanks @andybee!
+- Sandbox env parameter option allowing programmatic control (add, replace, delete) of user environment variables
 
 ---
 
