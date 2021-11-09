@@ -72,7 +72,7 @@ Methods may be passed an options object containing the following parameters:
 - `port` - **String or Number** - Specify HTTP port
   - Defaults to `3333`
 - `quiet` - **Boolean** - Disables (most) logging
-- `runtimeCheck` - **String** - Runtime mismatch warnings; if set to `warn` Sandbox will warn of mismatches in stdout; if set to `error` Sandbox will fail to startup (suggested setting for tests is `error`)
+- `runtimeCheck` - **String** - Check for runtime version mismatches; if set to `warn` Sandbox will warn of mismatches in stdout; if set to `error` Sandbox will fail to start up. (Suggested setting for test environments is `error`.)
 - `symlink` - **Boolean** - Use symlinking to Architect shared code from within each Lambda's dependencies (e.g. `src/http/get-index/node_modules/@architect/shared` → `src/shared`)
   - Defaults to `true`
   - `false` copies shared code into each Lambda, which can result much slower startup and dependency rehydration speeds
