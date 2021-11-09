@@ -87,8 +87,9 @@ module.exports = function populateUserEnv (params, callback) {
     Object.entries(env).forEach(entry => {
       let [ key, value ] = entry
       if (typeof value === 'string') userEnv[key] = value
+      else if (typeof value === 'undefined') delete userEnv[key]
       else {
-        let error = `env option '${key}' non-string value parse error: ${new Error().stack}`
+        let error = `env option '${key}' parse error: ${new Error().stack}`
         return callback(error)
       }
     })
