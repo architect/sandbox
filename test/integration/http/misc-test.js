@@ -171,19 +171,21 @@ function runTests (runType, t) {
     process.env.__TESTING_ENV_VAR__ = 'henlo'
     startup[runType](t, join('env', 'dot-env'), {
       env: {
-        DOTENV_USERLAND_ENV_VAR: 'Why hello there from overwritten .env!',
-        ENV_OPTION_USERLAND_ENV_VAR: 'Why hello there from env option!'
+        dotenv_userland_env_var: 'Why hello there from overwritten .env!',
+        ENV_OPTION_USERLAND_ENV_VAR: 'Why hello there from env option!',
+        env_option_case_test_userland_env_var: 'Userland env var names are uppercased!'
       }
     })
   })
 
   t.test(`[Env vars (env option)] get /env`, t => {
-    t.plan(8)
+    t.plan(9)
     tiny.get({ url }, function _got (err, result) {
       if (err) t.fail(err)
       else {
         t.equal(result.body.DOTENV_USERLAND_ENV_VAR, 'Why hello there from overwritten .env!', 'Received userland env var')
         t.equal(result.body.ENV_OPTION_USERLAND_ENV_VAR, 'Why hello there from env option!', 'Received userland env var')
+        t.equal(result.body.ENV_OPTION_CASE_TEST_USERLAND_ENV_VAR, 'Userland env var names are uppercased!', 'Received userland env var')
         t.ok(result.body.ARC_ENV, 'Got ARC_ENV env var')
         t.ok(result.body.ARC_STATIC_BUCKET, 'Got ARC_STATIC_BUCKET env var')
         t.ok(result.body.NODE_ENV, 'Got NODE_ENV env var')
