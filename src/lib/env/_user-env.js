@@ -21,6 +21,13 @@ module.exports = function populateUserEnv (params, callback) {
   function print (env, file) {
     update.done(`Found ${env} environment variables: ${file}`)
   }
+  function uppercaseVarNames (userEnv) {
+    return Object.keys(userEnv).reduce(function (result, key) {
+      let value = userEnv[key]
+      result[key.toUpperCase()] = value
+      return result
+    }, {})
+  }
 
   let dotEnvPath = join(cwd, '.env')
   let legacyArcEnvPath = join(cwd, '.arc-env')
@@ -83,9 +90,13 @@ module.exports = function populateUserEnv (params, callback) {
       return callback(error)
     }
   }
-  else if (env) {
+  else if (!setEnv && !env) varsNotFound(environment)
+
+  userEnv = uppercaseVarNames(userEnv)
+  if (env) {
     Object.entries(env).forEach(entry => {
       let [ key, value ] = entry
+      key = key.toUpperCase()
       if (typeof value === 'string') userEnv[key] = value
       else if (typeof value === 'undefined') delete userEnv[key]
       else {
@@ -93,8 +104,8 @@ module.exports = function populateUserEnv (params, callback) {
         return callback(error)
       }
     })
+    print('testing', 'env option')
   }
-  else if (!setEnv) varsNotFound(environment)
 
   // Wrap it up
   if (inv._project?.preferences?.sandbox?.useAWS || process.env.ARC_LOCAL) {
