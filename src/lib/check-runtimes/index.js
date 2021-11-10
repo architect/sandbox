@@ -9,6 +9,10 @@ let getVer = /\d+\.\d+.\d+/g
  * Considerations:
  * - Node adheres to semver
  * - Python + Ruby both ship breaking changes to minor
+ *
+ * Note: some mildly funky callback action happening here:
+ * - If we're only warning, call back early and let the runtime checks finish in the background
+ * - However if we're halting on error, do not call back until all checks are complete
  */
 module.exports = function checkRuntimeVersions (params, callback) {
   let { cwd, inventory, runtimeCheck = 'warn', update } = params
@@ -71,5 +75,6 @@ module.exports = function checkRuntimeVersions (params, callback) {
     if (notOk && isError) {
       callback(Error(notOk.join('\n')))
     }
+    else if (isError) callback()
   })
 }

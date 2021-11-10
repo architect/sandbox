@@ -56,8 +56,8 @@ function check (configured, localRuntimes) {
     let runtimeVer = runtimeVersions[runtime].wildcard
     let local = localRuntimes.node
     return {
-      ok: major(runtimeVer) <= major(local),
       local,
+      ok: major(runtimeVer) <= major(local),
       runtime: alias ? `${runtime} (aliased to ${configured})` : runtime
     }
   }
@@ -65,9 +65,9 @@ function check (configured, localRuntimes) {
     let runtimeVer = runtimeVersions[runtime].wildcard
     let local = localRuntimes.python
     return {
+      local,
       ok: major(runtimeVer) === major(local) &&
           minor(runtimeVer) === minor(local),
-      local,
       runtime: alias ? `${runtime} (aliased to ${configured})` : runtime
     }
   }
@@ -75,9 +75,9 @@ function check (configured, localRuntimes) {
     let runtimeVer = runtimeVersions[runtime].wildcard
     let local = localRuntimes.ruby
     return {
+      local,
       ok: major(runtimeVer) === major(local) &&
           minor(runtimeVer) === minor(local),
-      local,
       runtime: alias ? `${runtime} (aliased to ${configured})` : runtime,
     }
   }
