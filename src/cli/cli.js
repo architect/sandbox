@@ -30,6 +30,7 @@ _inventory({}, function (err, inventory) {
   cli({
     needsValidCreds: false,
     version: `Sandbox ${ver}`,
+    runtimeCheck: 'warn',
     inventory,
     ...flags,
   },

@@ -1,4 +1,4 @@
-let { join } = require('path')
+let { join, sep } = require('path')
 let { toLogicalID } = require('@architect/utils')
 let getContext = require('./context')
 
@@ -86,6 +86,10 @@ module.exports = function getEnv (params) {
     env.PYTHONPATH = process.env.PYTHONPATH
       ? `${join(src, 'vendor')}:${process.env.PYTHONPATH}`
       : join(src, 'vendor')
+  }
+  // Deno doesn't have a path.sep builtin, so add this via env var since `\\` breaks stdin
+  if (config.runtime === 'deno') {
+    env.__ARC_DENO__ = JSON.stringify({ sep })
   }
 
   return env

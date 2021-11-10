@@ -4,7 +4,7 @@ let flags = require(sut)
 let test = require('tape')
 let args = process.argv
 let cmd = i => {
-  process.argv = [ '/path/to/node', 'some/file' ].concat(i)
+  process.argv = [ null, null, '/path/to/node', 'some/file' ].concat(i)
   console.log('CLI args set:', process.argv)
 }
 
@@ -47,7 +47,7 @@ test('Test logLevel flags', t => {
 })
 
 test('Test port flags', t => {
-  t.plan(6)
+  t.plan(5)
   let f
 
   delete process.env.PORT
@@ -71,10 +71,6 @@ test('Test port flags', t => {
   cmd([ '--port', '33333' ])
   f = flags(false)
   t.equal(f.port, 33333, `--port flag returned: 33333`)
-
-  cmd([ 'port', '33333' ])
-  f = flags(false)
-  t.equal(f.port, 33333, `port flag returned: 33333`)
 })
 
 test('Test quiet flags', t => {

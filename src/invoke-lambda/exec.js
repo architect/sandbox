@@ -1,39 +1,7 @@
-let { sep } = require('path')
 let _asap = require('@architect/asap')
 let load = require('./_loader')
 let spawn = require('./spawn')
-
-let runtimes = {
-  deno: function (params, bootstrap) {
-    // Add this via env var since `\\` breaks stdin, and Deno doesn't have a path.sep builtin
-    params.options.env.__ARC_META__ = JSON.stringify({ sep })
-    return {
-      command: 'deno',
-      args: [ 'eval', bootstrap ],
-    }
-  },
-  node: function (params, bootstrap) {
-    // process.pkg = binary dist mode, leading space works around pkg#897
-    return {
-      command: process.pkg ? ' ' : 'node',
-      args: process.pkg ? [ 'node', '-e', bootstrap ] : [ '-e', bootstrap ],
-    }
-  },
-  python: function (params, bootstrap) {
-    // Windows `python -c` doesn't like multi-liners, so serialize script
-    let command = process.platform === 'win32' ? 'python' : 'python3'
-    return {
-      command,
-      args: [ '-c', bootstrap ],
-    }
-  },
-  ruby: function (params, bootstrap) {
-    return {
-      command: 'ruby',
-      args: bootstrap,
-    }
-  }
-}
+let { runtimeEval } = require('../lib')
 
 module.exports = function exec (run, params, callback) {
   // ASAP is a special case that doesn't spawn
@@ -53,7 +21,7 @@ module.exports = function exec (run, params, callback) {
   }
   else {
     let bootstrap = load()[run]
-    let { command, args } = runtimes[run](params, bootstrap)
+    let { command, args } = runtimeEval[run](bootstrap)
     spawn({ command, args, ...params }, callback)
   }
 }

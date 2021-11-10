@@ -63,21 +63,16 @@ module.exports = function invokeLambda (params, callback) {
         },
         request: JSON.stringify(event),
         timeout: timeout * 1000,
-      }, function done (err, result) {
+      }, function done (err, result, meta = {}) {
         if (err) callback(err)
         else {
-          let missing
-          if (result?.__DEP_ISSUES__) {
-            missing = result.__DEP_ISSUES__
-            delete result.__DEP_ISSUES__
-          }
+          let { missing, debug } = meta
           // Dependency warning debugger - handy for introspection during Lambda execution
-          if (result?.__DEP_DEBUG__) {
-            update.debug.status(`Lambda dependency tree: ${lambdaPath}`)
-            update.debug.raw(serialize(result.__DEP_DEBUG__))
-            delete result.__DEP_DEBUG__
+          if (debug) {
+            update.debug.status(`Lambda debug data: ${lambdaPath}`)
+            update.debug.raw(serialize(debug))
           }
-          warn({ cwd, missing, inventory, src, update })
+          warn({ missing, inventory, src, update })
           callback(null, result)
         }
       })

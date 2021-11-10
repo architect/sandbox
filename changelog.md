@@ -2,12 +2,22 @@
 
 ---
 
-## [next] 2021-11-03
+## [4.3.0] 2021-11-03
 
 ### Added
 
 - Sandbox now immediately streams Lambda logs to the console instead of printing everything all at once upon completion of execution; thanks @andybee!
-- Sandbox env parameter option allowing programmatic control (add, replace, delete) of user environment variables
+- Added runtime mismatch warnings
+  - Example: Sandbox will warn if your `get /foo` Lambda is configured for Python 3.9 and your local machine uses Python 3.8
+- Added `runStartupCommands` setting to API options
+  - Defaults to `true`; setting `false` disables `prefs.arc @sandbox-startup` commands, which may be useful for local testing; thanks @reconbot!
+- Added `env` option to API allowing programmatic control (add, replace, delete) of user environment variables during automated testing, thanks @actsone8!
+
+
+### Changed
+
+- Sandbox will only ever print a given dependency issue one time, instead of upon each invocation
+- Removed support for bare `port` CLI flag (e.g. `arc sandbox port 12345`); Sandbox now requires either `-p` or `--port` for setting the port from the CLI
 
 ---
 

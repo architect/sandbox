@@ -1,3 +1,5 @@
+let printed = []
+
 /**
  * Warn the user if node has resolved a dependency outside their function's folder
  */
@@ -23,13 +25,17 @@ module.exports = function warn (params) {
     if (missing.length) {
       let plural = missing.length > 1
 
-      update.warn(`You may have ${plural ? 'dependencies' : 'a dependency'} that could be inaccessible in production`)
       let run = msg => `Please run: ${msg}`
       let instructions = Object.entries(deps).map(([ type, deps ]) => {
         if (type === 'root') return run(`npm i ${deps.join(' ')}`)
         else return run(`cd ${dirs[type]} && npm i ${deps.join(' ')}`)
       })
-      update.status(null, ...instructions)
+      if (printed.includes(instructions)) return
+      else {
+        printed.push(instructions)
+        update.warn(`You may have ${plural ? 'dependencies' : 'a dependency'} that could be inaccessible in production`)
+        update.status(null, ...instructions)
+      }
     }
   }
 }
