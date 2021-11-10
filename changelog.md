@@ -11,6 +11,7 @@
   - Example: Sandbox will warn if your `get /foo` Lambda is configured for Python 3.9 and your local machine uses Python 3.8
 - Added `runStartupCommands` setting to API options
   - Defaults to `true`; setting `false` disables `prefs.arc @sandbox-startup` commands, which may be useful for local testing; thanks @reconbot!
+- Added `env` option to API allowing programmatic control (add, replace, delete) of Lambda environment variables during automated testing, thanks @actsone8!
 
 
 ### Changed

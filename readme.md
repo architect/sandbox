@@ -69,6 +69,9 @@ Methods may be passed an options object containing the following parameters:
   - Defaults to `http`
   - Can be one of `http` (aliased to `httpv2`), `httpv1`, `rest`
 - `cwd` - **String** - Specify a working directory (handy for aiming Sandbox at test mocks)
+- `env` - **Object** - Environment variables for Lambda invocations in automated testing
+  - String values overwrite env vars of the same name set via `.env` or `prefs.arc` files
+  - `undefined` values delete any env vars of the same name set via `.env` or `prefs.arc` files
 - `port` - **String or Number** - Specify HTTP port
   - Defaults to `3333`
 - `quiet` - **Boolean** - Disables (most) logging
@@ -81,7 +84,6 @@ Methods may be passed an options object containing the following parameters:
 - `symlink` - **Boolean** - Use symlinking to Architect shared code from within each Lambda's dependencies (e.g. `src/http/get-index/node_modules/@architect/shared` → `src/shared`)
   - Defaults to `true`
   - `false` copies shared code into each Lambda, which can result much slower startup and dependency rehydration speeds
-- `env` - **Object** - environment key/value entries that add/replace user defined ones: string values will add/replace while primitive `undefined` values will delete
 
 ---
 
