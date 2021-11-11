@@ -4,7 +4,7 @@ let aws = require('aws-sdk')
 let http = require('http')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { credentials, port, run, startup, shutdown } = require('../utils')
+let { credentials, port, run, startup, shutdown } = require('../../utils')
 let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 let { _arcPort } = getPorts(port)
 
@@ -33,13 +33,13 @@ test('Set up env', t => {
   t.ok(sandbox, 'Got Sandbox')
 })
 
-test('Run internal Arc service tests', t => {
+test('Run internal Arc SSM service tests', t => {
   run(runTests, t)
   t.end()
 })
 
 function runTests (runType, t) {
-  let mode = `[Internal Arc services / ${runType}]`
+  let mode = `[Internal Arc SSM services / ${runType}]`
   t.test(`${mode} Start Sandbox ('normal' mock app)`, t => {
     startup[runType](t, 'normal')
   })

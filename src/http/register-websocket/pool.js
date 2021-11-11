@@ -1,23 +1,23 @@
-let ledger = {}
-let times = {}
-
-module.exports = {
+let pool = {
+  connections: {},
   getConnectedAt (connectionId) {
-    return times[connectionId]
+    return pool.connections[connectionId]?.connectedAt
   },
   getConnection (connectionId) {
-    return ledger[connectionId]
+    return pool.connections[connectionId]?.ws
   },
   register (connectionId, ws) {
-    ledger[connectionId] = ws
-    times[connectionId] = Date.now()
+    pool.connections[connectionId] = {
+      ws,
+      connectedAt: Date.now()
+    }
   },
   delete (connectionId) {
-    delete ledger[connectionId]
-    delete times[connectionId]
+    delete pool.connections[connectionId]
   },
   reset () {
-    ledger = {}
-    times = {}
+    pool.connections = {}
   }
 }
+
+module.exports = pool
