@@ -48,14 +48,12 @@ module.exports = function connection (params, connectionId, ws) {
   ws.on('close', function close () {
     let lambda = get.ws('disconnect')
     update.status(`ws/disconnect: ${connectionId}`)
+    pool.delete(connectionId)
     invoke({
       connectionId,
       lambda,
       req: { headers: { host: domainName } },
       ...params,
-    }, err => {
-      pool.delete(connectionId)
-      noop(err)
-    })
+    }, noop)
   })
 }

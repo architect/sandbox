@@ -3,7 +3,21 @@ let proxyquire = require('proxyquire')
 let { EventEmitter } = require('events')
 
 let connectionId = 'abcdefg12345'
-let pool = {
+
+let makeFakeSocket = () => {
+  let socket = new EventEmitter()
+  socket.send = function send (body, cb) {
+    pool.didSend = body
+    cb()
+  }
+  socket.close = function close () {
+    pool.closed = true
+    this.emit('close')
+  }
+  return socket
+}
+
+let makePool = () => ({
   getConnection (id){
     console.log({ id, ws: pool.data[id]?.ws })
     return pool.data[id]?.ws
@@ -14,19 +28,15 @@ let pool = {
   },
   data: {
     [connectionId]: {
-      ws: {
-        send (body, cb) {
-          didSend = body
-          cb()
-        },
-        close () {
-          didClose = true
-        }
-      },
+      ws: makeFakeSocket(),
       connectedAt: Date.now(),
     },
-  }
-}
+  },
+  didSend: null,
+  closed: false,
+})
+
+let pool = makePool()
 
 let ws = proxyquire('../../../../../src/arc/_ws', {
   '../../http/register-websocket/pool': pool
@@ -35,12 +45,9 @@ let ws = proxyquire('../../../../../src/arc/_ws', {
 let req
 let res
 let resBody
-let didClose
-let didSend
 function reset (t) {
+  pool = makePool()
   resBody = null
-  didClose = false
-  didSend = false
   req = new EventEmitter()
   req.url = `/_arc/ws/@connections/${connectionId}`
   res = {
@@ -58,7 +65,7 @@ test('ws module should return 404 for an unknown connectionId', t => {
   req.method = 'POST'
   req.url = `/_arc/ws/@connections/nobodyHome`
   ws({ }, req, res)
-  t.equals(res.statusCode, 404, 'response statusCode not set to 404')
+  t.equals(res.statusCode, 410, 'response statusCode not set to 404')
 })
 
 test('ws module GET should return JSON containing connection information', t => {
@@ -69,7 +76,7 @@ test('ws module GET should return JSON containing connection information', t => 
   t.equals(res.statusCode, 200, 'response statusCode set to 200')
   let body = JSON.parse(resBody)
   t.deepEqual(body, {
-    ConnectedAt: new Date(pool.getConnectedAt(connectionId)).toISOString()
+    connectedAt: new Date(pool.getConnectedAt(connectionId)).toISOString()
   }, 'Gets Connected At')
 })
 
@@ -79,7 +86,7 @@ test('ws module delete should close the connection', t => {
   req.method = 'DELETE'
   ws({}, req, res)
   t.equals(res.statusCode, 200, 'response statusCode set to 200')
-  t.true(didClose, 'closed the connection')
+  t.true(pool.closed, 'closed the connection')
 })
 
 test('ws module POST should send data to the connection', t => {
@@ -89,5 +96,5 @@ test('ws module POST should send data to the connection', t => {
   let body = JSON.stringify({ message: 'this is for all you connections out there!' })
   ws({ body }, req, res)
   t.equals(res.statusCode, 200, 'response statusCode set to 200')
-  t.equals(didSend, body, 'Gets Connected At')
+  t.equals(pool.didSend, body, 'Gets Connected At')
 })

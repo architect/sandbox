@@ -6,14 +6,15 @@ module.exports = function _ws ({ body }, req, res) {
 
   let ws = pool.getConnection(connectionId)
   if (!ws) {
-    res.statusCode = 404
+    res.setHeader('x-amzn-ErrorType', 'GoneException')
+    res.statusCode = 410
     res.end()
     return
   }
 
   if (req.method === 'DELETE') {
+    ws.on('close', () => res.end())
     ws.close()
-    res.end()
     return
   }
 
@@ -39,6 +40,6 @@ module.exports = function _ws ({ body }, req, res) {
     return
   }
 
-  res.statusCode = 404
+  res.statusCode = 403
   res.end()
 }
