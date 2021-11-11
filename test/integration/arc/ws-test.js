@@ -73,27 +73,33 @@ function runTests (runType, t) {
     t.ok(ConnectionId, `Got requestContext with connectionId: ${ConnectionId}`)
 
     let connection = await apiGatewayManagementApi.getConnection({ ConnectionId }).promise()
-    t.ok(new Date(Date.parse(connection.ConnectedAt)) < new Date(), `Got back connectedAt string: ${connection.ConnectedAt}`)
+    t.ok(new Date(Date.parse(connection.ConnectedAt)) <= new Date(), `Got back connectedAt string: ${connection.ConnectedAt}`)
   })
 
   t.test(`${mode} postToConnection messages to a websocket`, async t => {
     t.plan(1)
     let Data = JSON.stringify({ message: 'hi' })
-    let messagePromise = new Promise(resolve => _ws.on('message', resolve))
+    let messagePromise = new Promise(resolve => _ws.once('message', resolve))
     await apiGatewayManagementApi.postToConnection({ ConnectionId, Data }).promise()
     const message = (await messagePromise).toString()
-    console.log({ message })
+    // console.log({ message })
     t.equals(message, Data, 'Got message')
   })
 
   t.test(`${mode} Disconnect a socket`, async t => {
-    t.plan(2)
-    let closePromise = new Promise(resolve => _ws.on('close', resolve))
+    t.plan(3)
+    let closePromise = new Promise(resolve => _ws.once('close', resolve))
     await apiGatewayManagementApi.deleteConnection({ ConnectionId }).promise()
     await closePromise
     t.notOk(_ws, 'WebSocket closed')
-    let connection = await apiGatewayManagementApi.getConnection({ ConnectionId }).promise()
-    t.notOk(connection, 'Connection is no longer available')
+    try {
+      await apiGatewayManagementApi.getConnection({ ConnectionId }).promise()
+      t.fail('getConnection should have thrown')
+    }
+    catch (error) {
+      t.equals(error.message, '410', 'Error message matches')
+      t.equals(error.code, 'GoneException', 'Error Code Matches')
+    }
   })
 
   t.test(`${mode} Shut down sidechannel`, async t => {
