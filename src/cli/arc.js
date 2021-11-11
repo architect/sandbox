@@ -16,6 +16,7 @@ module.exports = function arcCalling () {
     cli({
       disableBanner: true,
       needsValidCreds: false,
+      runtimeCheck: 'warn',
       inventory,
       ...flags,
     },
