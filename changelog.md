@@ -12,6 +12,7 @@
 - Added `runStartupCommands` setting to API options
   - Defaults to `true`; setting `false` disables `prefs.arc @sandbox-startup` commands, which may be useful for local testing; thanks @reconbot!
 - Added `env` option to API allowing programmatic control (add, replace, delete) of Lambda environment variables during automated testing, thanks @actsone8!
+- Added internal Arc service mock for API Gateway Management API mock for managing WebSocket connections via `aws-sdk` calls; big thanks to @reconbot!
 
 
 ### Changed
