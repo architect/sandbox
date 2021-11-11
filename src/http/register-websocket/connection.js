@@ -48,8 +48,10 @@ module.exports = function connection (params, connectionId, ws) {
   ws.on('close', function close () {
     let lambda = get.ws('disconnect')
     update.status(`ws/disconnect: ${connectionId}`)
+    let connectedAt = pool.getConnectedAt(connectionId)
     pool.delete(connectionId)
     invoke({
+      connectedAt,
       connectionId,
       lambda,
       req: { headers: { host: domainName } },
