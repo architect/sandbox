@@ -16,7 +16,11 @@ function checkSystemEnvVars (env, t) {
       let sandboxMeta = JSON.parse(env[v])
       let props = [ 'apiType', 'cwd', 'ports', 'staticPath', 'version' ]
       props.forEach(p => {
-        if (!sandboxMeta[p]) t.fail(`Lambda env missing Sandbox meta environment variable property: ${v}.${p}`)
+        let prop = sandboxMeta[p]
+        if (!prop) t.fail(`Lambda env missing Sandbox meta environment variable property: ${v}.${p}`)
+        if (p === 'ports' && (!prop.httpPort || !prop.eventsPort || !prop.tablesPort || !prop._arcPort)) {
+          t.fail(`Lambda env Sandbox meta environment variable does not have all Sandbox ports: ${JSON.stringify(prop, null, 2)}`)
+        }
       })
     }
   })
