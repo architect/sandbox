@@ -3,6 +3,9 @@ const { sep } = JSON.parse(env.__ARC_DENO__);
 const event = JSON.parse(env.__ARC_REQ__);
 const context = JSON.parse(env.__ARC_CONTEXT__);
 const root = env.LAMBDA_TASK_ROOT;
+Deno.env.delete('__ARC_DENO__');
+Deno.env.delete('__ARC_REQ__');
+Deno.env.delete('__ARC_CONTEXT__');
 
 /* look for index.{js,ts,tsx} and fallback to mod.{js,ts,tsx} */
 const getPath = file => root + sep + file;

@@ -2,6 +2,19 @@
 
 ---
 
+## [4.3.1] 2021-11-13
+
+### Added
+
+- Added internal `ARC_SANDBOX` env var for Sandbox metadata in Lambda invocations
+
+
+### Fixed
+
+- Fixed upcasing all userland env vars
+
+---
+
 ## [4.3.0] 2021-11-03
 
 ### Added
