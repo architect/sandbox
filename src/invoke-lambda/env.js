@@ -1,10 +1,12 @@
 let { join, sep } = require('path')
+let { readFileSync } = require('fs')
 let { toLogicalID } = require('@architect/utils')
 let getContext = require('./context')
+let { version } = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json')))
 
 // Constructs Lambda execution environment variables
 module.exports = function getEnv (params) {
-  let { cwd, lambda, inventory, ports, userEnv } = params
+  let { apiType, cwd, lambda, inventory, ports, staticPath, userEnv } = params
   let { config, src } = lambda
   let { inv } = inventory
   let { ARC_ENV, ARC_LOCAL, ARC_STATIC_SPA, NODE_ENV, PATH, SESSION_TABLE_NAME } = process.env
@@ -35,6 +37,13 @@ module.exports = function getEnv (params) {
     ARC_APP_NAME: inv.app,
     ARC_ENV,
     ARC_ROLE: 'SandboxRole',
+    ARC_SANDBOX: JSON.stringify({
+      apiType,
+      cwd,
+      ports,
+      staticPath,
+      version,
+    }),
     SESSION_TABLE_NAME: SESSION_TABLE_NAME || 'jwe',
     // System
     PATH,
