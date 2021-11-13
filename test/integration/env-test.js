@@ -43,12 +43,13 @@ function runTests (runType, t) {
   })
 
   t.test(`[Env vars (.env) / ${runType}] get /`, t => {
-    t.plan(2)
+    t.plan(3)
     tiny.get({ url }, function _got (err, result) {
       if (err) t.fail(err)
       else {
         checkSystemEnvVars(result.body, t)
         t.equal(result.body.DOTENV_USERLAND_ENV_VAR, 'Why hello there from .env!', 'Received userland env var')
+        t.equal(result.body.dotenv_lowcase_env_var, 'Why hello there from .env!', 'Received userland env var')
       }
     })
   })
@@ -63,20 +64,21 @@ function runTests (runType, t) {
       process.env.__TESTING_ENV_VAR__ = 'henlo'
       startup[runType](t, join('env', 'dot-env'), {
         env: {
-          dotenv_userland_env_var: 'Why hello there from overwritten .env!',
+          DOTENV_USERLAND_ENV_VAR: 'Why hello there from overwritten .env!',
           ENV_OPTION_USERLAND_ENV_VAR: 'Why hello there from env option!',
         }
       })
     })
 
     t.test(`[Env vars (env option) / ${runType}] get /`, t => {
-      t.plan(3)
+      t.plan(4)
       tiny.get({ url }, function _got (err, result) {
         if (err) t.fail(err)
         else {
           checkSystemEnvVars(result.body, t)
-          t.equal(result.body.dotenv_userland_env_var, 'Why hello there from overwritten .env!', 'Received userland env var')
+          t.equal(result.body.DOTENV_USERLAND_ENV_VAR, 'Why hello there from overwritten .env!', 'Received userland env var')
           t.equal(result.body.ENV_OPTION_USERLAND_ENV_VAR, 'Why hello there from env option!', 'Received userland env var')
+          t.equal(result.body.dotenv_lowcase_env_var, 'Why hello there from .env!', 'Received userland env var')
         }
       })
     })
@@ -103,13 +105,14 @@ function runTests (runType, t) {
     })
 
     t.test(`[Env vars (env option) remove / ${runType}] get /`, t => {
-      t.plan(3)
+      t.plan(4)
       tiny.get({ url }, function _got (err, result) {
         if (err) t.fail(err)
         else {
           checkSystemEnvVars(result.body, t)
           t.notOk(result.body.DOTENV_USERLAND_ENV_VAR, 'Removed userland env var')
           t.equal(result.body.ENV_OPTION_USERLAND_ENV_VAR, 'Why hello there from env option!', 'Received userland env var')
+          t.equal(result.body.dotenv_lowcase_env_var, 'Why hello there from .env!', 'Received userland env var')
         }
       })
     })
@@ -126,12 +129,13 @@ function runTests (runType, t) {
   })
 
   t.test(`[Env vars (preferences.arc) / ${runType}] get /`, t => {
-    t.plan(2)
+    t.plan(3)
     tiny.get({ url }, function _got (err, result) {
       if (err) t.fail(err)
       else {
         checkSystemEnvVars(result.body, t)
         t.equal(result.body.PREFERENCES_DOT_ARC_USERLAND_ENV_VAR, 'Why hello there from preferences.arc!', 'Received userland env var')
+        t.equal(result.body.preferences_dot_arc_lowcase_env_var, 'Why hello there from preferences.arc!', 'Received userland env var')
       }
     })
   })
@@ -147,12 +151,13 @@ function runTests (runType, t) {
   })
 
   t.test(`[Env vars (.arc-env) / ${runType}] get /`, t => {
-    t.plan(2)
+    t.plan(3)
     tiny.get({ url }, function _got (err, result) {
       if (err) t.fail(err)
       else {
         checkSystemEnvVars(result.body, t)
         t.equal(result.body.DOT_ARC_ENV_USERLAND_ENV_VAR, 'Why hello there from .arc-env!', 'Received userland env var')
+        t.equal(result.body.dot_arc_env_lowcase_env_var, 'Why hello there from .arc-env!', 'Received userland env var')
       }
     })
   })
