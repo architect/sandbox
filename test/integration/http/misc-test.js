@@ -174,19 +174,17 @@ function runTests (runType, t) {
         env: {
           dotenv_userland_env_var: 'Why hello there from overwritten .env!',
           ENV_OPTION_USERLAND_ENV_VAR: 'Why hello there from env option!',
-          env_option_case_test_userland_env_var: 'Userland env var names are uppercased!'
         }
       })
     })
 
     t.test(`[Env vars (env option) / ${runType}] get /env`, t => {
-      t.plan(9)
+      t.plan(8)
       tiny.get({ url }, function _got (err, result) {
         if (err) t.fail(err)
         else {
-          t.equal(result.body.DOTENV_USERLAND_ENV_VAR, 'Why hello there from overwritten .env!', 'Received userland env var')
+          t.equal(result.body.dotenv_userland_env_var, 'Why hello there from overwritten .env!', 'Received userland env var')
           t.equal(result.body.ENV_OPTION_USERLAND_ENV_VAR, 'Why hello there from env option!', 'Received userland env var')
-          t.equal(result.body.ENV_OPTION_CASE_TEST_USERLAND_ENV_VAR, 'Userland env var names are uppercased!', 'Received userland env var')
           t.ok(result.body.ARC_ENV, 'Got ARC_ENV env var')
           t.ok(result.body.ARC_STATIC_BUCKET, 'Got ARC_STATIC_BUCKET env var')
           t.ok(result.body.NODE_ENV, 'Got NODE_ENV env var')
