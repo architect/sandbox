@@ -11,7 +11,8 @@
 
 ### Fixed
 
-- Fixed upcasing all userland env vars
+- Fixed upcasing all userland environment variables
+- Removed extraneous internal `__ARC*` environment variables from Lambda invocation
 
 ---
 
