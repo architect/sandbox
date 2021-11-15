@@ -4,7 +4,9 @@ module.exports = function _getGSI (params) {
 
   // Get all indexes that correspond to the table in question
   let table = get.tables(name)
-  let indexes = table && inv?.indexes?.filter(({ name }) => name === table.name)
+  let indexes = table &&
+    inv?.['tables-indexes']?.filter(({ name }) => name === table.name) ||
+    inv?.indexes?.filter(({ name }) => name === table.name)
 
   if (indexes?.length) {
     return indexes.map(index => {

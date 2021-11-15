@@ -4,7 +4,7 @@ module.exports = function getAttributeDefinitions (params) {
 
   // oob is Sandbox default tables; otherwise it's userland
   let theTable = oob ? [ table ] : [ get.tables(name) ]
-  let indexes = get.indexes(name) || []
+  let indexes = get['tables-indexes'](name) || get.indexes(name) || []
 
   let defs = []
   function hasDef (attrName) {

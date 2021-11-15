@@ -2,6 +2,15 @@
 
 ---
 
+## [4.4.0] 2021-11-15
+
+### Added
+
+- Added support for `@tables-indexes` (which will eventually supersede `@indexes`)
+  - For more see: https://arc.codes/tables-indexes
+
+---
+
 ## [4.3.1] 2021-11-13
 
 ### Added
