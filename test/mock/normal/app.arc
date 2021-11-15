@@ -65,7 +65,7 @@ data
   account *String
   id **String
 
-@indexes
+@tables-indexes
 accounts
   email *String
 

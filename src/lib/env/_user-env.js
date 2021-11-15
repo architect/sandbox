@@ -102,6 +102,7 @@ module.exports = function populateUserEnv (params, callback) {
   if (inv._project?.preferences?.sandbox?.useAWS || process.env.ARC_LOCAL) {
     let live = [
       inv.tables ? '@tables' : '',
+      inv['tables-indexes'] ? '@tables-indexes' : '',
       inv.indexes ? '@indexes' : '',
       inv.events ? '@events' : '',
       inv.queues ? '@queues' : '',
