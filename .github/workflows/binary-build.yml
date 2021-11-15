@@ -37,7 +37,7 @@ jobs:
     - name: Set up Ruby
       uses: actions/setup-ruby@v1
       with:
-        ruby-version: '2.5'
+        ruby-version: '2.7'
 
     - name: Set up Deno
       uses: denolib/setup-deno@v2
