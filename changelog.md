@@ -2,6 +2,14 @@
 
 ---
 
+## [4.4.1] 2021-11-22
+
+### Fixed
+
+- Fixed HTTP route sorting; however you've organized your `@http` pragma, Sandbox should now behave much more like API Gateway; fixes #977
+
+---
+
 ## [4.4.0] 2021-11-16
 
 ### Added
