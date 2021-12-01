@@ -43,6 +43,7 @@ module.exports = function getEnv (params) {
       ports,
       staticPath,
       version,
+      lambdaSrc: src,
     }),
     SESSION_TABLE_NAME: SESSION_TABLE_NAME || 'jwe',
     // System
