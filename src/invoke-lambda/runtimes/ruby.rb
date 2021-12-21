@@ -13,7 +13,7 @@ handlerFn = config['handlerFunction']
 result = '__ARC__ '
 resultEnd = ' __ARC_END__'
 begin
-  result += send(handlerFn, request, context).to_json
+  result += send(handlerFn, **{event:request, context:context}).to_json
   result += resultEnd
 rescue
   result += send(handlerFn).to_json
