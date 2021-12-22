@@ -2,7 +2,7 @@
 #   Slightly modified: `(event:, context:)` → `(event, context)`
 require 'json'
 
-def handler(event, context)
+def handler(event:, context:)
     body = event
     body[:message] = 'Hello from get /ruby2.7 (running ruby2.7)'
     body[:context] = context
