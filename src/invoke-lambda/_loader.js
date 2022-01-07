@@ -6,21 +6,21 @@ let handlers
 module.exports = function () {
   if (handlers) return handlers
   handlers = {}
-  let runtimes = [ 'deno.js', 'node.js', 'python.py', 'ruby.rb' ]
+  let runtimes = [ 'deno.js', 'node.js', 'node-mjs.js', 'python.py', 'ruby.rb' ]
   runtimes.forEach(runtime => {
     try {
       let name = runtime.split('.')[0]
       let path = join(__dirname, 'runtimes', runtime)
-      let boot = readFileSync(path).toString()
+      let bootstrap = readFileSync(path).toString()
       let script
       if (runtime.endsWith('.js')) {
-        script = '"' + boot.replace(/\n/g, '').trim() + '"'
+        script = '"' + bootstrap.replace(/\n/g, '').trim() + '"'
       }
       if (runtime.endsWith('.py')) {
-        script = '"' + boot.split('\n').filter(lTrimm).join(';') + '"'
+        script = '"' + bootstrap.split('\n').filter(lTrimm).join(';') + '"'
       }
       if (runtime.endsWith('.rb')) {
-        script = boot
+        script = bootstrap
           .split('\n')
           .filter(lTrimm)
           .map(line => [ '-e', `"${line}"` ])

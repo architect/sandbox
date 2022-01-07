@@ -145,6 +145,7 @@ function runTests (runType, t) {
     startup[runType](t, 'multihandler')
   })
 
+  // Deno
   t.test(`[Multiple possible handlers / ${runType}] get /deno/index.js`, t => {
     t.plan(6)
     let rawPath = '/deno/index.js'
@@ -230,6 +231,67 @@ function runTests (runType, t) {
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /deno/mod.tsx'
+        })
+      }
+    })
+  })
+
+  // Node.js
+  t.test(`[Multiple possible handlers / ${runType}] get /node/esm/index.js'`, t => {
+    t.plan(6)
+    let rawPath = '/node/esm/index.js'
+    tiny.get({
+      url: url + rawPath
+    }, function _got (err, result) {
+      if (err) t.fail(err)
+      else {
+        checkResult(t, result.body, {
+          message: 'Hello from get /node/esm/index.js'
+        })
+      }
+    })
+  })
+
+  t.test(`[Multiple possible handlers / ${runType}] get /node/esm/index.mjs'`, t => {
+    t.plan(6)
+    let rawPath = '/node/esm/index.mjs'
+    tiny.get({
+      url: url + rawPath
+    }, function _got (err, result) {
+      if (err) t.fail(err)
+      else {
+        checkResult(t, result.body, {
+          message: 'Hello from get /node/esm/index.mjs'
+        })
+      }
+    })
+  })
+
+  t.test(`[Multiple possible handlers / ${runType}] get /node/cjs/index.cjs'`, t => {
+    t.plan(6)
+    let rawPath = '/node/cjs/index.cjs'
+    tiny.get({
+      url: url + rawPath
+    }, function _got (err, result) {
+      if (err) t.fail(err)
+      else {
+        checkResult(t, result.body, {
+          message: 'Hello from get /node/cjs/index.cjs'
+        })
+      }
+    })
+  })
+
+  t.test(`[Multiple possible handlers / ${runType}] get /node/cjs/index.js'`, t => {
+    t.plan(6)
+    let rawPath = '/node/cjs/index.js'
+    tiny.get({
+      url: url + rawPath
+    }, function _got (err, result) {
+      if (err) t.fail(err)
+      else {
+        checkResult(t, result.body, {
+          message: 'Hello from get /node/cjs/index.js'
         })
       }
     })

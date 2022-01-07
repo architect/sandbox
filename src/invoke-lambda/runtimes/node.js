@@ -5,9 +5,12 @@ let { projectSrc, handlerFile, handlerFunction, shared, views } = JSON.parse(__A
 let context = JSON.parse(__ARC_CONTEXT__);
 let { join, sep } = require('path');
 let { existsSync: exists, readFileSync: read } = require('fs');
-let handler = './' + handlerFile;
-let fn = require(handler)[handlerFunction];
 let cwd = process.cwd();
+let cjs = join(cwd, handlerFile + '.cjs');
+let handler = exists(cjs)
+  ? './' + handlerFile + '.cjs'
+  : './' + handlerFile;
+let fn = require(handler)[handlerFunction];
 delete process.env.__ARC_CONFIG__;
 delete process.env.__ARC_CONTEXT__;
 
