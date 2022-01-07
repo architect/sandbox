@@ -1,3 +1,4 @@
 src/invoke-lambda/runtimes/deno.js
+src/invoke-lambda/runtimes/node-mjs.js
 test/mock
 scratch/

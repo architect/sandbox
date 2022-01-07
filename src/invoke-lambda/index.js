@@ -1,5 +1,5 @@
 let { join } = require('path')
-let { existsSync } = require('fs')
+let { existsSync, readFileSync } = require('fs')
 let chalk = require('chalk')
 
 let getEnv = require('./env')
@@ -43,7 +43,25 @@ module.exports = function invokeLambda (params, callback) {
       if (chonky) update.verbose.status('Truncated event payload log at 10KB')
 
       let run
-      if (runtime.startsWith('nodejs')) run = 'node'
+      if (runtime.startsWith('nodejs')) {
+        run = 'node'
+        // TODO This is a hack and needs to live in Inventory
+        if (runtime === 'nodejs14.x') {
+          let mjs = join(src, 'index.mjs')
+          let cjs = join(src, 'index.cjs')
+          if (existsSync(mjs)) {
+            run = 'node-mjs'
+          }
+          else if (existsSync(cjs)) { /* noop */}
+          else {
+            let pkgJson = join(src, 'package.json')
+            if (existsSync(pkgJson)) {
+              let pkg = JSON.parse(readFileSync(pkgJson))
+              if (pkg?.type === 'module') run = 'node-mjs'
+            }
+          }
+        }
+      }
       if (runtime.startsWith('deno'))   run = 'deno'
       if (runtime.startsWith('python')) run = 'python'
       if (runtime.startsWith('ruby'))   run = 'ruby'
@@ -95,6 +113,20 @@ function hasHandler (lambda) {
       join(src, 'mod.ts'),
       join(src, 'index.tsx'),
       join(src, 'mod.tsx'),
+    ]
+    paths.forEach(p => {
+      if (found) return
+      if (existsSync(p)) found = p
+    })
+    return found
+  }
+  // TODO: this hack also needs to live in Inventory
+  else if (runtime === 'nodejs14.x') {
+    let found = false
+    let paths = [
+      join(src, 'index.js'),
+      join(src, 'index.mjs'),
+      join(src, 'index.cjs'),
     ]
     paths.forEach(p => {
       if (found) return

@@ -2,6 +2,19 @@
 
 ---
 
+## [4.5.0] 2022-01-06
+
+### Added
+
+- Added support for Node.js 14 ESM in Lambda!
+
+
+### Fixed
+
+- Properly invoke Ruby with required keyword params; partial fix for #1291
+
+---
+
 ## [4.4.2] 2021-12-01
 
 ### Added
