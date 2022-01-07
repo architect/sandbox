@@ -22,7 +22,7 @@ async function getHandler () {
   for (let path of paths) {
     found = await exists(path);
     if (found) {
-      let mod = await import(path);
+      let mod = await import('file://' + path);
       handler = mod[handlerFunction];
       if (typeof handler !== 'function') {
         found = false;
