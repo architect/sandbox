@@ -28,6 +28,8 @@ module.exports = function runtimeVersionCheck (params) {
   }
 
   Object.values(lambdasBySrcDir).forEach(lambda => {
+    // Multi-tenant Lambda check
+    if (Array.isArray(lambda)) lambda = lambda[0]
     let { arcStaticAssetProxy, config, src } = lambda
     if (arcStaticAssetProxy) return
     let { ok, local, runtime } = check(config.runtime, localRuntimes)
