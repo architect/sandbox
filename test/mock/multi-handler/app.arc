@@ -1,5 +1,5 @@
 @app
-multihandler
+multi-handler
 
 @http
 # Deno
