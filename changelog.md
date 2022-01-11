@@ -2,6 +2,14 @@
 
 ---
 
+## [4.5.2] 2022-01-11
+
+### Fixed
+
+- Fixed bug where multi-tenant Lambdas would error on startup
+
+---
+
 ## [4.5.0 - 4.5.1] 2022-01-06
 
 ### Added
