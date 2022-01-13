@@ -6,9 +6,9 @@ context = JSON.parse(ENV['__ARC_CONTEXT__'])
 ENV.delete('__ARC_CONFIG__')
 ENV.delete('__ARC_CONTEXT__')
 
-index = './' + config['handlerFile']
+index = config['handlerFile']
 require index
-handlerFn = config['handlerFunction']
+handlerFn = config['handlerMethod']
 
 result = '__ARC__ '
 resultEnd = ' __ARC_END__'

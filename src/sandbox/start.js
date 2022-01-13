@@ -7,7 +7,6 @@ let series = require('run-series')
 let create = require('@architect/create')
 let { chars } = require('@architect/utils')
 let { checkRuntimes, env, maybeHydrate } = require('../lib')
-let invokePluginFunction = require('../invoke-lambda/_plugin')
 let httpConfig = require('../http/_config')
 let prettyPrint = require('../http/_pretty-print')
 let startupScripts = require('./_startup-scripts')
@@ -26,7 +25,6 @@ module.exports = function _start (params, callback) {
     http,
     tables,
     _arc,
-    server,
     update,
   } = params
   let { inv } = inventory
@@ -76,35 +74,6 @@ module.exports = function _start (params, callback) {
       http.start(params, callback)
     },
 
-    // Kick off any plugin sandbox services
-    function _plugins (callback) {
-      if (inv._project.plugins) {
-        let pluginServices = Object.values(inv._project.plugins).
-          map(pluginModule => pluginModule?.sandbox?.start || null).
-          filter(start => start).
-          map(start => {
-            // To be compatible with run-series, we can't use async functions.
-            // so if plugin author provides an async function, let's callbackify it
-            if (start.constructor.name === 'AsyncFunction') return callbackify(start)
-            return start
-          })
-        if (pluginServices.length) {
-          let invokeFunction = invokePluginFunction.bind({}, params)
-          series(pluginServices.map(start => start.bind({}, {
-            arc: inv._project.arc,
-            inventory,
-            invokeFunction,
-            services: server
-          })), function (err) {
-            if (err) callback(err)
-            else callback()
-          })
-        }
-        else callback()
-      }
-      else callback()
-    },
-
     // Loop through functions and see if any need dependency hydration
     function _maybeHydrate (callback) {
       maybeHydrate({ cwd, inventory, quiet }, callback)
@@ -144,11 +113,6 @@ module.exports = function _start (params, callback) {
       callback()
     },
 
-    // Run startup scripts (if present)
-    function _runStartupScripts (callback) {
-      startupScripts(params, callback)
-    },
-
     // Check aws-sdk installation status if installed globally
     function _checkAWS_SDK (callback) {
       let dir = __dirname
@@ -164,7 +128,45 @@ module.exports = function _start (params, callback) {
     // Check runtime versions
     function _checkRuntimes (callback) {
       checkRuntimes(params, callback)
-    }
+    },
+
+    // Kick off any Sandbox startup plugins
+    function _plugins (callback) {
+      let startPlugins = inv.plugins?._methods?.sandbox?.start
+      if (startPlugins) {
+        let start = Date.now()
+        let plural = startPlugins.length > 1 ? 's' : ''
+        update.status(`Running ${startPlugins.length} Sandbox startup plugin${plural}`)
+        // To be compatible with run-series, we can't use async functions.
+        let params = { arc: inv._project.arc, inventory }
+        let plugins = startPlugins
+          .map(plugin => plugin.bind({}, params))
+          .map(plugin => {
+            if (plugin.constructor.name === 'AsyncFunction') {
+              return callbackify(plugin)
+            }
+            else return function (callback) {
+              try {
+                plugin()
+                callback()
+              }
+              catch (err) { callback(err) }
+            }
+          })
+        series(plugins, function (err) {
+          let finish = Date.now()
+          update.done(`Ran Sandbox startup plugin${plural} in ${finish - start}ms`)
+          if (err) callback(err)
+          else callback()
+        })
+      }
+      else callback()
+    },
+
+    // Run startup scripts (if present)
+    function _runStartupScripts (callback) {
+      startupScripts(params, callback)
+    },
   ],
   function _done (err) {
     if (err) callback(err)

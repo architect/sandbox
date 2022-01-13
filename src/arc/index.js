@@ -6,6 +6,7 @@ let destroyer = require('server-destroy')
 /**
  * Internal Architect services, including:
  * - SSM-based service discovery mock
+ * - API Gateway v2 Management API
  */
 module.exports = function _internal (inventory) {
   let _arc = {}
@@ -20,7 +21,7 @@ module.exports = function _internal (inventory) {
     _arcServices.listen(_arcPort, err => {
       if (err) callback(err)
       else {
-        update.done('Started service discovery emulator')
+        update.done('Started AWS service emulator')
         destroyer(_arcServices)
         callback()
       }

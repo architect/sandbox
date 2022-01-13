@@ -154,6 +154,8 @@ module.exports = function fallback (args, req, res, next) {
         path: '/*',
         src,
         config: inv._project.defaultFunctionConfig,
+        handlerFile: join(src, 'index.js'),
+        handlerFunction: 'handler',
         arcStaticAssetProxy,
         // In the case of REST greedy root skipping the handler check could lead to broken requests, but it's really legacy now and fixing it isn't worth the trouble
         _skipHandlerCheck: true,

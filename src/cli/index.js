@@ -227,6 +227,15 @@ module.exports = function cli (params = {}, callback) {
           }, 50)
         }
 
+        let sandboxPlugins = inventory.inv.plugins?._methods?.sandbox
+        if (sandboxPlugins?.watcher?.length) {
+          (async function runPlugins () {
+            for (let plugin of sandboxPlugins.watcher) {
+              await plugin({ fileName, event, inventory })
+            }
+          })()
+        }
+
         lastEvent = Date.now()
       })
 

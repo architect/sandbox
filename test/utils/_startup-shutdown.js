@@ -26,7 +26,7 @@ let startup = {
     })
   },
   binary: (t, mockDir, options = {}, callback) => {
-    let { planAdd = 0, print } = options
+    let { planAdd = 0, print, confirmStarted = 'Sandbox Started in' } = options
     t.plan(2 + planAdd)
     if (child) throw Error('Unclean test env, found hanging child process!')
     let cwd = join(mock, mockDir)
@@ -44,7 +44,7 @@ let startup = {
     child.stdout.on('data', chunk => {
       data += chunk.toString()
       if ((print || !quiet) && started) { console.log(chunk.toString()) }
-      if (data.includes('Sandbox Started in') && !started) {
+      if (data.includes(confirmStarted) && !started) {
         started = true
         if (print || !quiet) { console.log(data) }
         t.pass('Sandbox started (binary)')

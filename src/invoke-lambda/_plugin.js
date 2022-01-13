@@ -1,3 +1,4 @@
+/*
 let read = require('@architect/inventory/src/read')
 let defaultFunctionConfig = require('@architect/inventory/src/defaults/function-config')
 let invoker = require('./')
@@ -24,3 +25,4 @@ function getFunctionConfig (dir) {
   }
   return { ...defaults, ...overrides }
 }
+*/

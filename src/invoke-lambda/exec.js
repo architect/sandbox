@@ -3,9 +3,9 @@ let load = require('./_loader')
 let spawn = require('./spawn')
 let { runtimeEval } = require('../lib')
 
-module.exports = function exec (run, params, callback) {
+module.exports = function exec (lambda, params, callback) {
   // ASAP is a special case that doesn't spawn
-  if (run === 'asap') {
+  if (lambda.arcStaticAssetProxy) {
     let { context, request } = params
     let asap = _asap({
       // Runs ASAP in local mode, skipping bucket config / env var checks, etc.
@@ -19,9 +19,24 @@ module.exports = function exec (run, params, callback) {
       .then(result => callback(null, result))
       .catch(callback)
   }
+  // TODO: else if: custom runtimes with a bootstrap
+  // Built-in runtimes or custom runtimes that rely on a `baseRuntime`
   else {
+    let run = getRuntime(lambda)
     let bootstrap = load()[run]
     let { command, args } = runtimeEval[run](bootstrap)
     spawn({ command, args, ...params }, callback)
   }
+}
+
+function getRuntime ({ config, handlerModuleSystem }) {
+  let { runtime, runtimeConfig } = config
+  let run = runtimeConfig?.baseRuntime || runtime
+  if (run.startsWith('node')) {
+    if (handlerModuleSystem === 'esm') return 'node-esm'
+    return 'node'
+  }
+  else if (run.startsWith('deno'))   return 'deno'
+  else if (run.startsWith('ruby'))   return 'ruby'
+  else if (run.startsWith('python')) return 'python'
 }

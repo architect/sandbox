@@ -7,6 +7,7 @@ let { run, startup, shutdown } = require('../utils')
 let mock = join(process.cwd(), 'test', 'mock')
 let syncFile = join(mock, 'plugins-sync', 'syncplugin.test')
 let asyncFile = join(mock, 'plugins-async', 'asyncplugin.test')
+let confirmStarted = 'Ran Sandbox startup plugin'
 
 test('Set up env', t => {
   t.plan(1)
@@ -22,12 +23,14 @@ function runTests (runType, t) {
   let mode = `[Plugins / ${runType}]`
 
   t.test(`${mode} Start Sandbox (sync)`, t => {
-    startup[runType](t, 'plugins-sync', { planAdd: 1 }, () => {
+    t.plan(2)
+    startup[runType](t, 'plugins-sync', { planAdd: 1, confirmStarted }, () => {
       t.ok(existsSync(syncFile), `plugin sandbox service start executed successfully (created ${syncFile})`)
     })
   })
 
   t.test(`${mode} Shut down Sandbox (sync)`, t => {
+    t.plan(2)
     shutdown[runType](t, { planAdd: 1 }, () => {
       t.notOk(existsSync(syncFile), `plugin sandbox service end executed successfully (removed ${syncFile})`)
     })
@@ -35,7 +38,7 @@ function runTests (runType, t) {
 
   t.test(`${mode} Start Sandbox (async)`, async t => {
     t.plan(2)
-    await startup[runType].async(t, 'plugins-async', { planAdd: 1 })
+    await startup[runType].async(t, 'plugins-async', { planAdd: 1, confirmStarted })
     t.ok(existsSync(asyncFile), `plugin sandbox service start executed successfully (created ${asyncFile})`)
   })
 

@@ -5,9 +5,9 @@ context = json.loads(os.environ.get('__ARC_CONTEXT__'))
 del os.environ['__ARC_CONFIG__']
 del os.environ['__ARC_CONTEXT__']
 
-index = importlib.import_module(config['handlerFile'])
-handlerFn = config['handlerFunction']
-handler = getattr(index, handlerFn)
+'''Python does funky stuff with importing absolute paths, hardcoding for now'''
+index = importlib.import_module('index')
+handler = getattr(index, 'handler')
 
 req = sys.stdin.readlines()
 event = json.loads(req[0])

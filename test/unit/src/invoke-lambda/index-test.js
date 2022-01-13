@@ -12,7 +12,15 @@ let runtimes = {
   python: 0,
   ruby: 0
 }
-let exec = (run, params, callback) => {
+let exec = (lambda, params, callback) => {
+  let { arcStaticAssetProxy } = lambda
+  let { runtime } = lambda.config
+  let run
+  if (runtime.startsWith('node')) run = 'node'
+  if (runtime.startsWith('deno')) run = 'deno'
+  if (runtime.startsWith('python')) run = 'python'
+  if (runtime.startsWith('ruby')) run = 'ruby'
+  if (arcStaticAssetProxy) run = 'asap'
   runtimes[run]++
   callback(null, params)
 }
@@ -20,7 +28,7 @@ let invoke = proxyquire('../../../../src/invoke-lambda', {
   './exec': exec,
 })
 let event = { something: 'happened' }
-let inventory = { inv: { app: 'hi' } }
+let inventory = { inv: { _project: {}, app: 'hi' } }
 let ports = {}
 let userEnv = {}
 let params = { event, inventory, update, userEnv, ports }

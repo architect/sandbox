@@ -15,11 +15,13 @@ module.exports = {
       args: process.pkg ? [ 'node', '-e', script ] : [ '-e', script ],
     }
   },
-  'node-mjs': function (script) {
+  'node-esm': function (script) {
     // process.pkg = binary dist mode, leading space works around pkg#897
     return {
       command: process.pkg ? ' ' : 'node',
-      args: process.pkg ? [ 'node', '--input-type=module', '-e', script ] : [ '--input-type=module', '-e', script ],
+      args: process.pkg
+        ? [ 'node', '--input-type=module', '-e', script ]
+        : [ '--input-type=module', '-e', script ],
     }
   },
   python: function (script) {

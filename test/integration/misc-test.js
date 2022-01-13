@@ -112,7 +112,7 @@ function runTests (runType, t) {
   })
 
   // Node.js
-  t.test(`[Multiple possible handlers / ${runType}] get /node/esm/index.js'`, t => {
+  t.test(`[Multiple possible handlers / ${runType}] get /node/esm/index.js`, t => {
     t.plan(6)
     let rawPath = '/node/esm/index.js'
     tiny.get({
@@ -127,7 +127,7 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`[Multiple possible handlers / ${runType}] get /node/esm/index.mjs'`, t => {
+  t.test(`[Multiple possible handlers / ${runType}] get /node/esm/index.mjs`, t => {
     t.plan(6)
     let rawPath = '/node/esm/index.mjs'
     tiny.get({
@@ -142,7 +142,7 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`[Multiple possible handlers / ${runType}] get /node/cjs/index.cjs'`, t => {
+  t.test(`[Multiple possible handlers / ${runType}] get /node/cjs/index.cjs`, t => {
     t.plan(6)
     let rawPath = '/node/cjs/index.cjs'
     tiny.get({
@@ -157,7 +157,7 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`[Multiple possible handlers / ${runType}] get /node/cjs/index.js'`, t => {
+  t.test(`[Multiple possible handlers / ${runType}] get /node/cjs/index.js`, t => {
     t.plan(6)
     let rawPath = '/node/cjs/index.js'
     tiny.get({

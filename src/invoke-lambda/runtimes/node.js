@@ -1,16 +1,11 @@
-/* eslint-enable semi */
 /* eslint semi: [ 'error', 'always' ] */
 let { __ARC_CONFIG__, __ARC_CONTEXT__ } = process.env;
-let { projectSrc, handlerFile, handlerFunction, shared, views } = JSON.parse(__ARC_CONFIG__);
+let { projectSrc, handlerFile, handlerMethod, shared, views } = JSON.parse(__ARC_CONFIG__);
 let context = JSON.parse(__ARC_CONTEXT__);
 let { join, sep } = require('path');
 let { existsSync: exists, readFileSync: read } = require('fs');
+let fn = require(handlerFile)[handlerMethod];
 let cwd = process.cwd();
-let cjs = join(cwd, handlerFile + '.cjs');
-let handler = exists(cjs)
-  ? './' + handlerFile + '.cjs'
-  : './' + handlerFile;
-let fn = require(handler)[handlerFunction];
 delete process.env.__ARC_CONFIG__;
 delete process.env.__ARC_CONTEXT__;
 

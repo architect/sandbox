@@ -7,11 +7,11 @@ let rm = promisify(fs.unlink)
 
 module.exports = {
   sandbox: {
-    start: async function ({ arc, inventory, services }) {
+    start: async function ({ arc, inventory }) {
       console.log('async plugin start hook writing', file)
       await write(file, 'test', { encoding: 'utf-8' })
     },
-    end: async function ({ arc, inventory, services }) {
+    end: async function ({ arc, inventory }) {
       console.log('async plugin end hook unlinking', file)
       await rm(file)
     }

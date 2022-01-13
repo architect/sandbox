@@ -97,7 +97,14 @@ function end (callback) {
     callback(Error('Sandbox already shut down!'))
   }
   else {
-    _end({ events, http, tables, _arc, inventory: params.inventory }, function (err, result) {
+    _end({
+      events,
+      http,
+      tables,
+      _arc,
+      inventory: params.inventory,
+      update,
+    }, function (err, result) {
       if (err) callback(err)
       else {
         params.inventory = null
