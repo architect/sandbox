@@ -1,4 +1,4 @@
-let { join, sep } = require('path')
+let { join } = require('path')
 let { readFileSync } = require('fs')
 let { toLogicalID } = require('@architect/utils')
 let getContext = require('./context')
@@ -7,7 +7,7 @@ let { version } = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.j
 // Constructs Lambda execution environment variables
 module.exports = function getEnv (params) {
   let { apiType, cwd, lambda, inventory, ports, staticPath, userEnv } = params
-  let { config, src } = lambda
+  let { config, src, build, handlerFile } = lambda
   let { inv } = inventory
   let { ARC_ENV, ARC_LOCAL, ARC_STATIC_SPA, NODE_ENV, PATH, SESSION_TABLE_NAME } = process.env
   let { AWS_ACCESS_KEY_ID, AWS_PROFILE, AWS_REGION, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN } = process.env
@@ -28,8 +28,8 @@ module.exports = function getEnv (params) {
     __ARC_CONTEXT__: JSON.stringify(lambdaContext),
     __ARC_CONFIG__: JSON.stringify({
       projectSrc: cwd,
-      handlerFile: 'index',
-      handlerFunction: 'handler',
+      handlerFile,
+      handlerMethod: 'handler',
       shared: inv.shared,
       views: inv.views,
     }),
@@ -44,6 +44,7 @@ module.exports = function getEnv (params) {
       staticPath,
       version,
       lambdaSrc: src,
+      lambdaBuild: build,
     }),
     SESSION_TABLE_NAME: SESSION_TABLE_NAME || 'jwe',
     // System
@@ -96,10 +97,6 @@ module.exports = function getEnv (params) {
     env.PYTHONPATH = process.env.PYTHONPATH
       ? `${join(src, 'vendor')}:${process.env.PYTHONPATH}`
       : join(src, 'vendor')
-  }
-  // Deno doesn't have a path.sep builtin, so add this via env var since `\\` breaks stdin
-  if (config.runtime === 'deno') {
-    env.__ARC_DENO__ = JSON.stringify({ sep })
   }
 
   return env

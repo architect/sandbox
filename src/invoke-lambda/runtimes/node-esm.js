@@ -1,39 +1,13 @@
-/* eslint-enable semi */
 /* eslint semi: [ 'error', 'always' ] */
 let { __ARC_CONFIG__, __ARC_CONTEXT__ } = process.env;
-let { projectSrc, handlerFile, handlerFunction, shared, views } = JSON.parse(__ARC_CONFIG__);
+let { handlerFile, handlerMethod } = JSON.parse(__ARC_CONFIG__);
 let context = JSON.parse(__ARC_CONTEXT__);
-import { join } from 'path';
-import { existsSync as exists, readFileSync as read } from 'fs';
-let cwd = process.cwd();
 delete process.env.__ARC_CONFIG__;
 delete process.env.__ARC_CONTEXT__;
 
-/* This is a hack and should live in Inventory; look for index.{js,mjs} */
-const paths = [
-  join(cwd, 'index.js'),
-  join(cwd, 'index.mjs'),
-];
-
-let found = false;
-let handler;
-
-async function getHandler () {
-  for (let path of paths) {
-    found = await exists(path);
-    if (found) {
-      let mod = await import('file://' + path);
-      handler = mod[handlerFunction];
-      if (typeof handler !== 'function') {
-        found = false;
-      }
-      else {
-        break;
-      }
-    }
-  }
-}
-await getHandler();
+let file = 'file://' + handlerFile;
+let mod = await import(file);
+let handler = mod[handlerMethod];
 
 function isPromise (obj) {
   return obj && typeof obj.then === 'function';
