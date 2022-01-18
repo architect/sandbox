@@ -2,7 +2,7 @@ let { existsSync, unlinkSync } = require('fs')
 let { join, sep } = require('path')
 let { tmpdir } = require('os')
 let _inventory = require('@architect/inventory')
-let { fingerprint, pathToUnix } = require('@architect/utils')
+let { fingerprint } = require('@architect/utils')
 let chokidar = require('chokidar')
 let sandbox = require('../sandbox')
 
@@ -11,7 +11,6 @@ module.exports = function runWatcher (params) {
 
   let { debounce, inventory, rehydrate, symlink, ts, update } = params
   let { cwd } = inventory.inv._project
-  let workingDirectory = pathToUnix(cwd)
 
   try {
     var watcher = chokidar.watch(cwd, {
@@ -93,7 +92,6 @@ module.exports = function runWatcher (params) {
     let fileUpdate = event === 'update'
     let updateOrRemove = event === 'update' || event === 'remove'
     let anyChange = event === 'add' || event === 'update' || event === 'remove'
-    filename = pathToUnix(filename)
     let ran = false // Skips over irrelevant ops after something ran
 
     /**
@@ -174,8 +172,8 @@ module.exports = function runWatcher (params) {
      * Regenerate public/static.json upon changes to public/
      */
     if (!ran && anyChange && inv.static &&
-        filename.includes(`${workingDirectory}/${staticFolder}`) &&
-        !filename.includes(`${workingDirectory}/${staticFolder}/static.json`)) {
+        filename.includes(join(cwd, staticFolder)) &&
+        !filename.includes(join(cwd, staticFolder, 'static.json'))) {
       ran = true
       clearTimeout(timers.fingerprint)
       timers.fingerprint = setTimeout(() => {
