@@ -1,6 +1,5 @@
 let { join } = require('path')
 let { readFileSync } = require('fs')
-let { toLogicalID } = require('@architect/utils')
 let getContext = require('./context')
 let { version } = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json')))
 
@@ -66,11 +65,6 @@ module.exports = function getEnv (params) {
   if (inv._project?.preferences?.sandbox?.useAWS || ARC_LOCAL) {
     env.ARC_LOCAL = true
   }
-
-  // The presence of ARC_CLOUDFORMATION (Arc v6+) is used by Arc libs to key on live S3 infra
-  // TODO [REMOVE]: this is probably no longer necessary after dropping Arc 5 support
-  let capEnv = ARC_ENV.charAt(0).toUpperCase() + ARC_ENV.substr(1)
-  env.ARC_CLOUDFORMATION = `${toLogicalID(inv.app)}${capEnv}`
 
   // Env vars for users manually running ASAP in a Lambda
   if (inv.static) {
