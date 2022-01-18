@@ -15,8 +15,9 @@
 
 ### Changed
 
-- Breaking change: Architect no longer relies on or makes use of the `NODE_ENV` env var
-  - Older versions of Node.js Architect libraries such as `@architect/functions` made use of `NODE_ENV`, so be sure to consult the [upgrade guide](https://arc.codes/docs/en/about/upgrade-guide)
+- Breaking change: Architect no longer relies on or makes use of the `NODE_ENV` or `ARC_CLOUDFORMATION` env vars
+  - Older versions of Node.js Architect libraries such as `@architect/functions` made use of these env vars, so it is wise to upgrade them at this time
+  - Also be sure to consult the Architect [upgrade guide](https://arc.codes/docs/en/about/upgrade-guide)
 - Breaking change: passing env vars in with the module's `env` option no merges those env vars with any found in `.env` or `prefs.arc`
   - The new env var precedence is `env` option > `.env` > `prefs.arc`
 - Breaking change: removed support for legacy `.arc-env` env files
