@@ -1,18 +1,20 @@
-let parse = require('@architect/parser')
-let dotenv = require('dotenv')
 let { join, basename, sep } = require('path')
-let { existsSync, readFileSync } = require('fs')
+let { existsSync } = require('fs')
 
 /**
  * Initialize Lambdas with local environment variable settings
  * - e.g. if ARC_ENV=staging the Lambda env is populated by `@staging`, etc.
  */
 module.exports = function populateUserEnv (params, callback) {
-  let { cwd, update, inventory, env } = params
+  let { cwd, update, inventory, env: envOption } = params
   let { inv } = inventory
+  let { _project: proj } = inv
+
   let environment = process.env.ARC_ENV
-  let setEnv = false // Ignore the second set of env vars if both .env + Arc prefs are found
-  let userEnv = {}
+  let env = proj.env.local
+  let prefs = proj.preferences
+  let dotEnvPath = join(cwd, '.env')
+  let userEnv
 
   function varsNotFound (env, file) {
     let msg = `No ${env} environment variables found` + (file ? ` in ${file}` : '')
@@ -22,84 +24,59 @@ module.exports = function populateUserEnv (params, callback) {
     update.done(`Found ${env} environment variables: ${file}`)
   }
 
-  let dotEnvPath = join(cwd, '.env')
-  let legacyArcEnvPath = join(cwd, '.arc-env')
-  if (existsSync(dotEnvPath)) {
+  // User passed in an `env` object to the module API
+  if (envOption) {
+    userEnv = {}
+    let probs = []
     try {
-      let raw = readFileSync(dotEnvPath).toString()
-      let env = dotenv.parse(raw)
-      userEnv = env
-      setEnv = true
-      print('testing', '.env')
+      Object.entries(envOption).forEach(([ key, value ]) => {
+        if (typeof value === 'string') userEnv[key] = value
+        else probs.push(`- '${key}' must be a string`)
+      })
     }
     catch (err) {
-      let error = `.env parse error: ${err.stack}`
-      return callback(error)
+      return callback(err)
     }
+    if (probs.length) {
+      let msg = `Sandbox \`env\` option parsing error:\n- ${probs.join('\n- ')}`
+      return callback(Error(msg))
+    }
+    print('testing', 'env option')
   }
-  if (inv._project.preferences) {
-    let prefs = inv._project.preferences
 
+  // User has a `.env` file
+  if (!userEnv && existsSync(dotEnvPath)) {
+    userEnv = env.testing
+    print('testing', '.env')
+  }
+
+  // User has a `pref[erence]s.arc` file
+  if (prefs) {
     // Local environment override
     if (prefs?.sandbox?.env) {
       process.env.ARC_ENV = environment = prefs.sandbox.env
     }
     // If useAWS is specified, force an AWS environment name
-    // TODO [REMOVE]: in a future breaking change where we stop relying on NODE_ENV, we can prob drop this; setting ARC_LOCAL is now handled during Lambda invocation
     if (prefs?.sandbox?.useAWS &&
-        ![ 'staging', 'production' ].includes(process.env.NODE_ENV)) {
-      process.env.NODE_ENV = 'staging'
+        ![ 'staging', 'production' ].includes(process.env.ARC_ENV)) {
+      process.env.ARC_ENV = 'staging'
     }
 
     // Populate env vars
-    if (prefs?.env?.[environment] && !setEnv) {
-      let proj =  inv._project
+    if (env[environment] && !userEnv) {
+      userEnv = env[environment]
       let global =  proj?.globalPreferences?.env?.[environment] &&
                     `~${sep}${basename(proj.globalPreferencesFile)}`
       let local =   proj?.localPreferences?.env?.[environment] &&
                     basename(proj.localPreferencesFile)
-      let filepath = local || global || null
-      userEnv = prefs.env[environment]
+      let filepath = local || global
       print(environment, filepath)
     }
-    else if (!setEnv) varsNotFound(environment)
   }
-  else if (existsSync(legacyArcEnvPath)) {
-    try {
-      let raw = readFileSync(legacyArcEnvPath).toString()
-      let env = parse(raw)
-      if (env[environment] && !setEnv) {
-        let legacyArcEnv = {}
-        env[environment].forEach(tuple => {
-          legacyArcEnv[tuple[0]] = tuple[1]
-        })
-        userEnv = legacyArcEnv
-        print(environment, '.arc-env')
-      }
-      else if (!setEnv) varsNotFound(environment, '.arc-env')
-    }
-    catch (err) {
-      let error = `.arc-env parse error: ${err.stack}`
-      return callback(error)
-    }
-  }
-  else if (!setEnv && !env) varsNotFound(environment)
-
-  if (env) {
-    Object.entries(env).forEach(entry => {
-      let [ key, value ] = entry
-      if (typeof value === 'string') userEnv[key] = value
-      else if (typeof value === 'undefined') delete userEnv[key]
-      else {
-        let error = `env option '${key}' parse error: ${new Error().stack}`
-        return callback(error)
-      }
-    })
-    print('testing', 'env option')
-  }
+  if (!userEnv) varsNotFound(environment)
 
   // Wrap it up
-  if (inv._project?.preferences?.sandbox?.useAWS || process.env.ARC_LOCAL) {
+  if (proj?.preferences?.sandbox?.useAWS || process.env.ARC_LOCAL) {
     let live = [
       inv.tables ? '@tables' : '',
       inv['tables-indexes'] ? '@tables-indexes' : '',
@@ -110,5 +87,5 @@ module.exports = function populateUserEnv (params, callback) {
     update.done(`Using ${process.env.ARC_ENV} live AWS infra: ${live.join(', ')}`)
   }
 
-  callback(null, userEnv)
+  callback(null, userEnv ? userEnv : {})
 }

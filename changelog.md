@@ -2,6 +2,32 @@
 
 ---
 
+## [5.0.0] 2022-01-12
+
+### Added
+
+- Architect 10 plugin API support! Specifically:
+  - Added Sandbox watcher API
+  - Added custom runtime support
+  - Added env setter plugin support
+- Added ability to disable Sandbox watcher with `watcher` (boolean) in API
+
+
+### Changed
+
+- Breaking change: Architect no longer relies on or makes use of the `NODE_ENV` env var
+  - Older versions of Node.js Architect libraries such as `@architect/functions` made use of `NODE_ENV`, so be sure to consult the [upgrade guide](https://arc.codes/docs/en/about/upgrade-guide)
+- Breaking change: passing env vars in with the module's `env` option no merges those env vars with any found in `.env` or `prefs.arc`
+  - The new env var precedence is `env` option > `.env` > `prefs.arc`
+- Breaking change: removed support for legacy `.arc-env` env files
+  - Architect deprecated writing to `.arc-env` in late 2020; Sandbox will no longer read and use it for local environment variables
+  - If you are still using a `.arc-env` file, please consider `prefs.arc` or `.env` for your local env vars
+- Internal change: switched to `chokidar` from `node-watch` for file watching
+- Internal change: made Inventory responsible for handling `.env` env vars
+- Internal change: made Inventory responsible for figuring out `nodejs14.x` handler module systems and file names
+
+---
+
 ## [4.5.2] 2022-01-11
 
 ### Fixed

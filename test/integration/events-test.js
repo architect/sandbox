@@ -1,10 +1,9 @@
 let arc = require('@architect/functions')
 let test = require('tape')
 let http = require('http')
-let { existsSync, mkdirSync, readFileSync, statSync } = require('fs')
+let { existsSync, mkdirSync, readFileSync, rmSync, statSync } = require('fs')
 let { join } = require('path')
 let { events } = require('../../src')
-let { sync: rm } = require('rimraf')
 let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
 let { port, quiet, _refreshInventory, run, startup, shutdown } = require('../utils')
@@ -13,7 +12,7 @@ let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
 // Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally
 // That said, to prevent side-effects, destroy that env var immediately after use
 function setup (t) {
-  if (existsSync(tmp)) rm(tmp)
+  if (existsSync(tmp)) rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
   mkdirSync(tmp, { recursive: true })
   t.ok(existsSync(tmp), 'Created tmp dir')
   let { eventsPort } = getPorts(port)
@@ -21,7 +20,7 @@ function setup (t) {
   if (!process.env.ARC_EVENTS_PORT) t.fail('ARC_EVENTS_PORT should be set')
 }
 function teardown (t) {
-  rm(tmp)
+  rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
   t.notOk(existsSync(tmp), 'Destroyed tmp dir')
   delete process.env.ARC_EVENTS_PORT
   if (process.env.ARC_EVENTS_PORT) t.fail('ARC_EVENTS_PORT should not be set')

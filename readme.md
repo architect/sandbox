@@ -84,6 +84,8 @@ Methods may be passed an options object containing the following parameters:
 - `symlink` - **Boolean** - Use symlinking to Architect shared code from within each Lambda's dependencies (e.g. `src/http/get-index/node_modules/@architect/shared` → `src/shared`)
   - Defaults to `true`
   - `false` copies shared code into each Lambda, which can result much slower startup and dependency rehydration speeds
+- `watcher` - **Boolean** - Disable the Sandbox file watcher (and related Sandbox file watcher plugin API)
+  - Defaults to `true`
 
 ---
 

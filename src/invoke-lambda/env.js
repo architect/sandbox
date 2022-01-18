@@ -9,7 +9,7 @@ module.exports = function getEnv (params) {
   let { apiType, cwd, lambda, inventory, ports, staticPath, userEnv } = params
   let { config, src, build, handlerFile } = lambda
   let { inv } = inventory
-  let { ARC_ENV, ARC_LOCAL, ARC_STATIC_SPA, NODE_ENV, PATH, SESSION_TABLE_NAME } = process.env
+  let { ARC_ENV, ARC_LOCAL, ARC_STATIC_SPA, PATH, SESSION_TABLE_NAME } = process.env
   let { AWS_ACCESS_KEY_ID, AWS_PROFILE, AWS_REGION, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN } = process.env
 
   let lambdaContext = getContext(params)
@@ -49,7 +49,6 @@ module.exports = function getEnv (params) {
     SESSION_TABLE_NAME: SESSION_TABLE_NAME || 'jwe',
     // System
     PATH,
-    NODE_ENV,
   }
 
   // Populate userland vars, but don't overwrite internal / system ones

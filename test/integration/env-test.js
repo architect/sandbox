@@ -5,7 +5,7 @@ let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let { run, startup, shutdown, url } = require('../utils')
 
-let systemEnvVars = [ 'LAMBDA_TASK_ROOT', 'TZ', 'ARC_APP_NAME', 'ARC_ENV', 'ARC_ROLE', 'ARC_SANDBOX', 'SESSION_TABLE_NAME', 'PATH', 'NODE_ENV' ]
+let systemEnvVars = [ 'LAMBDA_TASK_ROOT', 'TZ', 'ARC_APP_NAME', 'ARC_ENV', 'ARC_ROLE', 'ARC_SANDBOX', 'SESSION_TABLE_NAME', 'PATH' ]
 let shouldBeFiltered = [
   '__ARC_CONTEXT__', '__ARC_CONFIG__'
 ]
@@ -68,7 +68,7 @@ function runTests (runType, t) {
       process.env.__TESTING_ENV_VAR__ = 'henlo'
       startup[runType](t, join('env', 'dot-env'), {
         env: {
-          DOTENV_USERLAND_ENV_VAR: 'Why hello there from overwritten .env!',
+          DOTENV_USERLAND_ENV_VAR: 'Why hello there from overridden .env!',
           ENV_OPTION_USERLAND_ENV_VAR: 'Why hello there from env option!',
         }
       })
@@ -80,48 +80,14 @@ function runTests (runType, t) {
         if (err) t.fail(err)
         else {
           checkSystemEnvVars(result.body, t)
-          t.equal(result.body.DOTENV_USERLAND_ENV_VAR, 'Why hello there from overwritten .env!', 'Received userland env var')
+          t.equal(result.body.DOTENV_USERLAND_ENV_VAR, 'Why hello there from overridden .env!', 'Received userland env var')
           t.equal(result.body.ENV_OPTION_USERLAND_ENV_VAR, 'Why hello there from env option!', 'Received userland env var')
-          t.equal(result.body.dotenv_lowcase_env_var, 'Why hello there from .env!', 'Received userland env var')
+          t.notOk(result.body.dotenv_lowcase_env_var, 'Did not receive .env env var')
         }
       })
     })
 
     t.test(`[Env vars (env option) / ${runType}] Shut down Sandbox`, t => {
-      delete process.env.__TESTING_ENV_VAR__
-      shutdown[runType](t)
-    })
-
-    t.test(`[Env vars (env option) remove / ${runType}] Start Sandbox`, t => {
-      process.env.__TESTING_ENV_VAR__ = 'henlo'
-      startup[runType](t, join('env', 'dot-env'), {
-        env: {
-          DOTENV_USERLAND_ENV_VAR: undefined,
-          ENV_OPTION_USERLAND_ENV_VAR: 'Why hello there from env option!',
-          ARC_ENV: undefined,
-          ARC_ROLE: undefined,
-          ARC_SANDBOX: undefined,
-          NODE_ENV: undefined,
-          SESSION_TABLE_NAME: undefined,
-          TZ: undefined,
-        }
-      })
-    })
-
-    t.test(`[Env vars (env option) remove / ${runType}] get /`, t => {
-      t.plan(4)
-      tiny.get({ url }, function _got (err, result) {
-        if (err) t.fail(err)
-        else {
-          checkSystemEnvVars(result.body, t)
-          t.notOk(result.body.DOTENV_USERLAND_ENV_VAR, 'Removed userland env var')
-          t.equal(result.body.ENV_OPTION_USERLAND_ENV_VAR, 'Why hello there from env option!', 'Received userland env var')
-          t.equal(result.body.dotenv_lowcase_env_var, 'Why hello there from .env!', 'Received userland env var')
-        }
-      })
-    })
-
-    t.test(`[Env vars (env option) remove / ${runType}] Shut down Sandbox`, t => {
       delete process.env.__TESTING_ENV_VAR__
       shutdown[runType](t)
     })
@@ -145,28 +111,6 @@ function runTests (runType, t) {
   })
 
   t.test(`[Env vars (preferences.arc) / ${runType}] Shut down Sandbox`, t => {
-    delete process.env.__TESTING_ENV_VAR__
-    shutdown[runType](t)
-  })
-
-  t.test(`[Env vars (.arc-env) / ${runType}] Start Sandbox`, t => {
-    process.env.__TESTING_ENV_VAR__ = 'henlo'
-    startup[runType](t, join('env', 'dot-arc-env'))
-  })
-
-  t.test(`[Env vars (.arc-env) / ${runType}] get /`, t => {
-    t.plan(3)
-    tiny.get({ url }, function _got (err, result) {
-      if (err) t.fail(err)
-      else {
-        checkSystemEnvVars(result.body, t)
-        t.equal(result.body.DOT_ARC_ENV_USERLAND_ENV_VAR, 'Why hello there from .arc-env!', 'Received userland env var')
-        t.equal(result.body.dot_arc_env_lowcase_env_var, 'Why hello there from .arc-env!', 'Received userland env var')
-      }
-    })
-  })
-
-  t.test(`[Misc / ${runType}] Shut down Sandbox`, t => {
     delete process.env.__TESTING_ENV_VAR__
     shutdown[runType](t)
   })

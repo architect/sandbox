@@ -1,6 +1,6 @@
-let { join } = require('path')
-let { existsSync } = require('fs')
-let { sync: rm } = require('rimraf')
+let { basename, join } = require('path')
+let { existsSync, mkdirSync, rmSync } = require('fs')
+let { copySync } = require('fs-extra')
 let { NOISY_TESTS, CI } = process.env
 
 let b64dec = i => Buffer.from(i, 'base64').toString()
@@ -26,10 +26,30 @@ if (NOISY_TESTS && CI) {
 let url = `http://localhost:${port}`
 let wsUrl = `ws://localhost:${port}`
 
+function prepTmpDir (t, copying, tmp) {
+  try {
+    rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
+    if (existsSync(tmp)) {
+      t.fail(`${tmp} should not exist`)
+      process.exit(1)
+    }
+    if (copying) {
+      let dest = join(tmp, basename(copying))
+      mkdirSync(dest, { recursive: true })
+      copySync(copying, dest)
+    }
+  }
+  catch (err) {
+    t.fail('Prep failed')
+    console.log(err)
+    process.exit(1)
+  }
+}
+
 function rmPublic (t) {
   try {
     let publicFolder = join(process.cwd(), 'public')
-    rm(publicFolder)
+    rmSync(publicFolder, { recursive: true, force: true, maxRetries: 10 })
     t.notOk(existsSync(publicFolder), 'Destroyed auto-generated ./public folder')
   }
   catch (err) {
@@ -57,6 +77,7 @@ module.exports = {
   data,
   port,
   quiet,
+  prepTmpDir,
   rmPublic,
   run,
   url,
