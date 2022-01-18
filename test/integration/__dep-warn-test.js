@@ -1,11 +1,9 @@
 let { join } = require('path')
-let { existsSync, mkdirSync, rmSync } = require('fs')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let tiny = require('tiny-json-http')
-let { copySync } = require('fs-extra')
-let { run, startup, shutdown, url } = require('../utils')
+let { prepTmpDir, run, startup, shutdown, url } = require('../utils')
 
 let mock = join(process.cwd(), 'test', 'mock', 'dep-warn')
 let tmp = join(mock, 'tmp')
@@ -15,25 +13,6 @@ let escSlashes = str => str.replace(/\\/g, '\\\\')
 let print = true
 let data = ''
 let stdout = process.stdout.write
-
-function prep (t, copying) {
-  try {
-    rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
-    if (existsSync(tmp)) {
-      t.fail(`${tmp} should not exist`)
-      process.exit(1)
-    }
-    if (copying) {
-      mkdirSync(join(tmp, copying), { recursive: true })
-      copySync(join(mock, copying), join(tmp, copying))
-    }
-  }
-  catch (err) {
-    t.fail('Prep failed')
-    console.log(err)
-    process.exit(1)
-  }
-}
 
 function setup () {
   process.stdout.write = write => {
@@ -74,7 +53,7 @@ function runTests (runType, t ) {
   let mode = `/ ${runType}`
 
   t.test(`[Dependency warnings (basic) ${mode}] Start Sandbox`, t => {
-    prep(t, 'basic')
+    prepTmpDir(t, join(mock, 'basic'), join(mock, 'tmp'))
     startup[runType](t, join('dep-warn', 'tmp', 'basic'), { print })
   })
 
@@ -171,7 +150,7 @@ function runTests (runType, t ) {
   })
 
   t.test(`[Dependency warnings (shared - no packages) ${mode}] Start Sandbox`, t => {
-    prep(t, 'no-packages')
+    prepTmpDir(t, join(mock, 'no-packages'), join(mock, 'tmp'))
     startup[runType](t, join('dep-warn', 'tmp', 'no-packages'), { print })
   })
 
@@ -210,7 +189,7 @@ function runTests (runType, t ) {
   })
 
   t.test(`[Dependency warnings (shared - packages in shared) ${mode}] Start Sandbox`, t => {
-    prep(t, 'shared-packages')
+    prepTmpDir(t, join(mock, 'shared-packages'), join(mock, 'tmp'))
     startup[runType](t, join('dep-warn', 'tmp', 'shared-packages'), { print })
   })
 
@@ -259,7 +238,7 @@ function runTests (runType, t ) {
   })
 
   t.test(`[Dependency warnings (shared - packages in Lambdas) ${mode}] Start Sandbox`, t => {
-    prep(t, 'lambda-packages')
+    prepTmpDir(t, join(mock, 'lambda-packages'), join(mock, 'tmp'))
     startup[runType](t, join('dep-warn', 'tmp', 'lambda-packages'), { print })
   })
 
@@ -308,7 +287,7 @@ function runTests (runType, t ) {
   })
 
   t.test(`[Dependency warnings (shared - packages in shared + Lambdas) ${mode}] Start Sandbox`, t => {
-    prep(t, 'all-packages')
+    prepTmpDir(t, join(mock, 'all-packages'), join(mock, 'tmp'))
     startup[runType](t, join('dep-warn', 'tmp', 'all-packages'), { print })
   })
 
@@ -362,7 +341,7 @@ function runTests (runType, t ) {
 
   t.test(`[Dependency warnings ${mode}] Teardown`, t => {
     t.plan(1)
-    prep(t)
+    prepTmpDir(t, null, join(mock, 'tmp'))
     t.pass('Done')
   })
 }

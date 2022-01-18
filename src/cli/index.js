@@ -1,12 +1,10 @@
-let hydrate = require('@architect/hydrate')
-let path = require('path')
-let fs = require('fs')
+let { updater } = require('@architect/utils')
 let { version: pkgVer } = require('../../package.json')
-let watch = require('node-watch')
-let { fingerprint, pathToUnix, updater } = require('@architect/utils')
-let readline = require('readline')
-let { tmpdir } = require('os')
+
 let sandbox = require('../sandbox')
+let rehydrator = require('./_rehydrate')
+let watch = require('./_watcher')
+let stdin = require('./_stdin')
 
 module.exports = function cli (params = {}, callback) {
   let { version, inventory, logLevel, quiet, symlink } = params
@@ -22,230 +20,27 @@ module.exports = function cli (params = {}, callback) {
 
     // Setup
     let update = updater('Sandbox', { logLevel, quiet })
+    let debounce = 100
 
-    let watcher
-    try {
-      watcher = watch(process.cwd(), {
-        recursive: true,
-        filter (file, skip) {
-          // Ignore changes to any node_modules dir + .git
-          if (/node_modules/.test(file) || /\.git/.test(file)) return skip
-          return true
-        }
-      })
-    }
-    catch (e) {
-      update.warn('Automatic rehydration watcher failed: system file watcher limit may have been reached')
-    }
-
-    let workingDirectory = pathToUnix(process.cwd())
-
-    // Arc stuff
-    let { inv } = inventory
-    let manifest = inv._project.manifest
-    let staticFolder = inv?.static?.folder
-
-    // Timers
-    let lastEvent
-    let arcEventTimer
-    let rehydrateSharedTimer
-    let rehydrateStaticTimer
-    let rehydrateViewsTimer
-    let fingerprintTimer
-
-    let ts = () => {
+    // Timestamper
+    let ts = (now) => {
       if (!quiet) {
-        let date = new Date(lastEvent).toLocaleDateString()
-        let time = new Date(lastEvent).toLocaleTimeString()
+        now = now || Date.now()
+        let date = new Date(now).toLocaleDateString()
+        let time = new Date(now).toLocaleTimeString()
         console.log(`\n[${date}, ${time}]`)
       }
     }
+    let rehydrate = rehydrator({ debounce, quiet, symlink, ts, update })
 
-    // Cleanup after any past runs
-    let pauseFile = path.join(tmpdir(), '_pause-architect-sandbox-watcher')
-    if (fs.existsSync(pauseFile)) {
-      fs.unlinkSync(pauseFile)
-    }
-    let paused = false
-
-    // Rehydrator
-    // Only used for file copying, otherwise we rely on symlinking, which is *way* faster
-    function rehydrate ({ timer, only, msg, force }) {
-      lastEvent = Date.now()
-      clearTimeout(timer)
-      if (!symlink || force) {
-        timer = setTimeout(() => {
-          ts()
-          let start = Date.now()
-          if (msg) update.status(msg)
-          hydrate.shared({ only, quiet, symlink }, () => {
-            let end = Date.now()
-            update.done(`${symlink ? 'Symlinks' : 'Files'} rehydrated into functions in ${end - start}ms`)
-          })
-        }, 50)
-      }
-    }
-
-    // Listen for important keystrokes
-    readline.emitKeypressEvents(process.stdin)
-    if (process.stdin.isTTY) {
-      process.stdin.setRawMode(true)
-    }
-    process.stdin.on('keypress', function now (input, key) {
-      if (input === 'H') {
-        rehydrate({
-          timer: arcEventTimer,
-          msg: 'Rehydrating all shared files...',
-          force: true
-        })
-      }
-      if (input === 'S') {
-        rehydrate({
-          timer: rehydrateSharedTimer,
-          only: 'shared',
-          msg: 'Rehydrating src/shared...',
-          force: true
-        })
-      }
-      if (input === 'V') {
-        rehydrate({
-          timer: rehydrateViewsTimer,
-          only: 'views',
-          msg: 'Rehydrating src/views...',
-          force: true
-        })
-      }
-      if (key.sequence === '\u0003') {
-        sandbox.end(function (err) {
-          if (err) {
-            update.err(err)
-            process.exit(1)
-          }
-          if (callback) callback()
-          process.exit(0)
-        })
-      }
-    })
-
-    /**
-     * Watch for pertinent filesystem changes
-     */
+    // Toss a coin to your watcher
+    let enable = params.watcher === false ? false : true
+    let watcher = watch({ debounce, enable, inventory, rehydrate, symlink, ts, update })
     if (watcher) {
-      watcher.on('change', function (event, fileName) {
-
-        if (!paused && fs.existsSync(pauseFile)) {
-          paused = true
-          update.status('Watcher temporarily paused')
-        }
-        if (paused && !fs.existsSync(pauseFile)) {
-          update.status('Watcher no longer paused')
-          paused = false
-          if (symlink) {
-            rehydrate({
-              timer: arcEventTimer,
-              msg: 'Restoring shared file symlinks...',
-              force: true
-            })
-          }
-        }
-
-        // Event criteria
-        let fileUpdate = event === 'update'
-        let updateOrRemove = event === 'update' || event === 'remove'
-        fileName = pathToUnix(fileName)
-
-        /**
-         * Reload routes upon changes to Architect project manifest
-         */
-        if (fileUpdate && (fileName === manifest) && !paused) {
-          clearTimeout(arcEventTimer)
-          arcEventTimer = setTimeout(() => {
-            ts()
-            // Always attempt to close the http server, but only reload if necessary
-            update.status('Architect project manifest changed')
-            sandbox.http.end(err => {
-              if (err) update.err(err)
-              let start = Date.now()
-              sandbox.http.start({ _refreshInventory: true, quiet: true }, function (err, result) {
-                if (err) update.err(err)
-                // HTTP passes back success message if it actually did need to (re)start
-                if (result === 'HTTP successfully started') {
-                  let end = Date.now()
-                  update.done(`HTTP routes reloaded in ${end - start}ms`)
-                }
-              })
-            })
-          }, 50)
-        }
-
-        /**
-         * Rehydrate functions with shared files upon changes to src/shared
-         */
-        let isShared = fileName.includes(`${workingDirectory}/src/shared`)
-        if (updateOrRemove && isShared && !paused) {
-          rehydrate({
-            timer: rehydrateSharedTimer,
-            only: 'shared',
-            msg: 'Shared file changed, rehydrating functions...'
-          })
-        }
-
-        /**
-         * Rehydrate functions with shared files upon changes to src/views
-         */
-        let isViews = fileName.includes(`${workingDirectory}/src/views`)
-        if (updateOrRemove && isViews && !paused) {
-          rehydrate({
-            timer: rehydrateViewsTimer,
-            only: 'views',
-            msg: 'Views file changed, rehydrating views...'
-          })
-        }
-
-        /**
-         * Regenerate public/static.json upon changes to public/
-         */
-        if (updateOrRemove && inv.static && !paused &&
-          fileName.includes(`${workingDirectory}/${staticFolder}`) &&
-          !fileName.includes(`${workingDirectory}/${staticFolder}/static.json`)) {
-          clearTimeout(fingerprintTimer)
-          fingerprintTimer = setTimeout(() => {
-            let start = Date.now()
-            fingerprint({ inventory }, function next (err, result) {
-              if (err) update.error(err)
-              else {
-                if (result) {
-                  let end = Date.now()
-                  update.status(`Regenerated public/static.json in ${end - start}ms`)
-                  rehydrate({
-                    timer: rehydrateStaticTimer,
-                    only: 'staticJson',
-                  })
-                }
-              }
-            })
-          }, 50)
-        }
-
-        let sandboxPlugins = inventory.inv.plugins?._methods?.sandbox
-        if (sandboxPlugins?.watcher?.length) {
-          (async function runPlugins () {
-            for (let plugin of sandboxPlugins.watcher) {
-              await plugin({ fileName, event, inventory })
-            }
-          })()
-        }
-
-        lastEvent = Date.now()
-      })
-
-      /**
-       * Watch for sandbox errors
-       */
-      watcher.on('error', function (err) {
-        update.error(err)
-        process.exit(1)
-      })
+      update.done('Started file watcher')
     }
+
+    // Handle stdin
+    stdin({ rehydrate, update, watcher }, callback)
   })
 }

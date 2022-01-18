@@ -12,7 +12,7 @@ queue-custom
   src src/queues/custom
 
 @http
-get     /           # runs default
+get     / # runs default
 get     /multi-cookies-res
 get     /binary
 get     /nodejs14.x

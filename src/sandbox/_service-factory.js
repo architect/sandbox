@@ -39,10 +39,11 @@ module.exports = function serviceFactory (params, type) {
 
       function go () {
         if (!server[type]) {
-          let service = init(params.inventory)
+          let inventory = options.inventory || params.inventory
+          let service = init(inventory)
           if (service) {
             options.update = update
-            options.inventory = params.inventory
+            options.inventory = inventory
             server[type] = service
             server[type].start(options, callback)
           }

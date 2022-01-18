@@ -1,5 +1,0 @@
-@app
-mockapp
-
-@http
-get /
