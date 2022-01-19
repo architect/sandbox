@@ -7,7 +7,7 @@ module.exports = function registerWebSocket (app, httpServer, params) {
   let { ports, update } = params
 
   let wss = new WebSocket.Server({ noServer: true })
-  let domainName = `localhost:${ports.httpPort}`
+  let domainName = `localhost:${ports.http}`
 
   // Listens for HTTP 101 request
   httpServer.on('upgrade', upgrade(wss, { domainName, ...params }))

@@ -1,6 +1,5 @@
 let http = require('http')
 let _listener = require('./_listener')
-let { getPorts } = require('../lib')
 let destroyer = require('server-destroy')
 
 /**
@@ -12,9 +11,9 @@ module.exports = function _internal (inventory) {
   let _arc = {}
   let _arcServices
 
-  _arc.start = function start (options, callback) {
-    let { update, port } = options
-    let { _arcPort } = getPorts(port)
+  _arc.start = function start (params, callback) {
+    let { update, ports } = params
+    let _arcPort = ports._arc
 
     let listener = _listener.bind({}, { inventory })
     _arcServices = http.createServer(listener)

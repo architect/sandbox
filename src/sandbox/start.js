@@ -1,6 +1,5 @@
 let { existsSync: exists } = require('fs')
 let { join } = require('path')
-let { callbackify } = require('util')
 let chalk = require('chalk')
 let hydrate = require('@architect/hydrate')
 let series = require('run-series')
@@ -28,7 +27,6 @@ module.exports = function _start (params, callback) {
     update,
   } = params
   let { inv } = inventory
-  let { preferences: prefs } = inv._project
 
   // Set `all` to instruct service modules not to hydrate again, etc.
   params.all = true
@@ -36,18 +34,12 @@ module.exports = function _start (params, callback) {
   series([
     // Set up Arc + userland env vars + print the banner
     function _env (callback) {
-      env(params, function (err, userEnv) {
-        if (err) callback(err)
-        else {
-          params.userEnv = userEnv
-          callback()
-        }
-      })
+      env(params, callback)
     },
 
     // Initialize any missing functions on startup
     function _init (callback) {
-      let autocreateEnabled = prefs?.create?.autocreate
+      let autocreateEnabled = inv._project.preferences?.create?.autocreate
       if (autocreateEnabled) {
         create({ inventory }, callback)
       }
@@ -137,28 +129,19 @@ module.exports = function _start (params, callback) {
         let start = Date.now()
         let plural = startPlugins.length > 1 ? 's' : ''
         update.status(`Running ${startPlugins.length} Sandbox startup plugin${plural}`)
-        // To be compatible with run-series, we can't use async functions.
         let params = { arc: inv._project.arc, inventory }
-        let plugins = startPlugins
-          .map(plugin => plugin.bind({}, params))
-          .map(plugin => {
-            if (plugin.constructor.name === 'AsyncFunction') {
-              return callbackify(plugin)
-            }
-            else return function (callback) {
-              try {
-                plugin()
-                callback()
-              }
-              catch (err) { callback(err) }
-            }
+        async function runPlugins () {
+          for (let plugin of startPlugins) {
+            await plugin(params)
+          }
+        }
+        runPlugins()
+          .then(() => {
+            let finish = Date.now()
+            update.done(`Ran Sandbox startup plugin${plural} in ${finish - start}ms`)
+            callback()
           })
-        series(plugins, function (err) {
-          let finish = Date.now()
-          update.done(`Ran Sandbox startup plugin${plural} in ${finish - start}ms`)
-          if (err) callback(err)
-          else callback()
-        })
+          .catch(callback)
       }
       else callback()
     },

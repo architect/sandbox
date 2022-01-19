@@ -87,5 +87,6 @@ module.exports = function populateUserEnv (params, callback) {
     update.done(`Using ${process.env.ARC_ENV} live AWS infra: ${live.join(', ')}`)
   }
 
-  callback(null, userEnv ? userEnv : {})
+  params.userEnv = userEnv || {}
+  callback()
 }

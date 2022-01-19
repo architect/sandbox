@@ -4,9 +4,8 @@ let aws = require('aws-sdk')
 let http = require('http')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { credentials, port, run, startup, shutdown } = require('../../utils')
-let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
-let { _arcPort } = getPorts(port)
+let { credentials, run, startup, shutdown } = require('../../utils')
+let _arcPort = 2222
 
 let app = 'mockapp'
 let tables = [ 'accounts', 'pets', 'places', 'data' ]

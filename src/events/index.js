@@ -1,4 +1,4 @@
-let { checkRuntimes, env, getPorts, checkPort, maybeHydrate } = require('../lib')
+let { checkRuntimes, env, maybeHydrate } = require('../lib')
 let hydrate = require('@architect/hydrate')
 let _listener = require('./_listener')
 let http = require('http')
@@ -15,31 +15,17 @@ module.exports = function createEventBus (inventory) {
     let eventBus
 
     events.start = function start (options, callback) {
-      let { all, cwd, port, quiet, symlink = true, update, userEnv } = options
-
-      // Set up ports and env vars
-      let ports = getPorts(port)
-      let { eventsPort } = ports
+      let { all, cwd, ports, quiet, symlink = true, update, userEnv } = options
 
       // Main parameters needed throughout an invocation
-      let params = { cwd, inventory, ports, update, userEnv }
+      // Note: `env` is passed via module API; userEnv is passed by `events.start`, so both are necessary
+      let params = { cwd, env: options.env, inventory, ports, update, userEnv }
 
       series([
         // Set up Arc + userland env vars
         function _env (callback) {
-          if (!all) env({ ...options, inventory }, function (err, userEnv) {
-            if (err) callback(err)
-            else {
-              params.userEnv = userEnv
-              callback()
-            }
-          })
+          if (!all) env(params, callback)
           else callback()
-        },
-
-        // Ensure the port is free
-        function _checkPort (callback) {
-          checkPort(eventsPort, update, callback)
         },
 
         // Internal Arc services
@@ -47,7 +33,7 @@ module.exports = function createEventBus (inventory) {
           if (!all) {
             // eslint-disable-next-line
             let { _arc } = require('../sandbox')
-            _arc.start(options, callback)
+            _arc.start(params, callback)
           }
           else callback()
         },
@@ -60,6 +46,7 @@ module.exports = function createEventBus (inventory) {
 
         // Let's go!
         function _startServer (callback) {
+          let eventsPort = params.ports.events
           eventBus.listen(eventsPort, callback)
         },
 
