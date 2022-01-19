@@ -9,7 +9,7 @@ let destroyer = require('server-destroy')
 
 // Local
 let { fingerprint } = require('@architect/utils')
-let { checkRuntimes, env, getPorts, checkPort, maybeHydrate } = require('../lib')
+let { checkRuntimes, env, maybeHydrate } = require('../lib')
 let middleware = require('./middleware')
 let config = require('./_config')
 let hydrate = require('@architect/hydrate')
@@ -34,34 +34,20 @@ module.exports = function createHttpServer (inventory) {
 
     // Start the HTTP server
     app.start = function start (options, callback) {
-      let { all, apigateway, cwd, port, quiet, symlink = true, update, userEnv } = options
-
-      // Set up ports and HTTP-specific config
-      let ports = getPorts(port)
-      let { httpPort } = ports
+      let { all, apigateway, cwd, port, ports, quiet, symlink = true, update, userEnv } = options
       let { apiType, staticPath } = config({ apigateway, cwd, inv })
 
       // Main parameters needed throughout an invocation
-      let params = { apiType, cwd, inventory, ports, staticPath, update, userEnv }
+      // Note: `env` is passed via module API; userEnv is passed by `sandbox.start`, so both are necessary
+      let params = { apiType, cwd, env: options.env, inventory, port, ports, staticPath, update, userEnv }
 
       middleware(app, params)
 
       series([
         // Set up Arc + userland env vars
         function _env (callback) {
-          if (!all) env({ ...options, inventory }, function (err, userEnv) {
-            if (err) callback(err)
-            else {
-              params.userEnv = userEnv
-              callback()
-            }
-          })
+          if (!all) env(params, callback)
           else callback()
-        },
-
-        // Ensure the port is free
-        function _checkPort (callback) {
-          checkPort(httpPort, update, callback)
         },
 
         // Generate public/static.json if `@static fingerprint` is enabled
@@ -82,7 +68,7 @@ module.exports = function createHttpServer (inventory) {
           if (!all) {
             // eslint-disable-next-line
             let { _arc } = require('../sandbox')
-            _arc.start(options, callback)
+            _arc.start(params, callback)
           }
           else callback()
         },
@@ -109,6 +95,7 @@ module.exports = function createHttpServer (inventory) {
 
         // Let's go!
         function _startServer (callback) {
+          let httpPort = params.ports.http
           httpServer.listen(httpPort, callback)
         },
 

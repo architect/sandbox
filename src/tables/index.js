@@ -1,4 +1,4 @@
-let { env, getPorts, checkPort } = require('../lib')
+let { env } = require('../lib')
 let init = require('./_init')
 let dynalite = require('dynalite')
 let series = require('run-series')
@@ -18,24 +18,15 @@ module.exports = function createTables (inventory) {
     let dynamo
 
     tables.start = function start (options, callback) {
-      let { all, port, update } = options
+      let { all, cwd, ports, update } = options
 
-      // Set up ports and env vars
-      let ports = getPorts(port)
-      let { tablesPort } = ports
+      // Main parameters needed throughout an invocation
+      let params = { cwd, inventory, ports, update }
 
       series([
         // Set up Arc + userland env vars
         function _env (callback) {
-          if (!all) env({ ...options, inventory }, callback)
-          else callback()
-        },
-
-        // Ensure the port is free
-        function _checkPort (callback) {
-          if (!hasExternalDb) {
-            checkPort(tablesPort, update, callback)
-          }
+          if (!all) env(params, callback)
           else callback()
         },
 
@@ -44,20 +35,21 @@ module.exports = function createTables (inventory) {
           if (!all) {
             // eslint-disable-next-line
             let { _arc } = require('../sandbox')
-            _arc.start(options, callback)
+            _arc.start(params, callback)
           }
           else callback()
         },
 
         function _startDynalite (callback) {
           if (!hasExternalDb) {
+            let tablesPort = params.ports.tables
             dynamo = dynalite({ createTableMs: 0 }).listen(tablesPort, callback)
           }
           else callback()
         },
 
         function _initializeTables (callback) {
-          init({ inventory, ports }, callback)
+          init(params, callback)
         }
       ],
       function _started (err) {

@@ -7,7 +7,7 @@ let { events } = require('../../src')
 let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
 let { port, quiet, _refreshInventory, run, startup, shutdown } = require('../utils')
-let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
+let eventsPort = 4444
 
 // Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally
 // That said, to prevent side-effects, destroy that env var immediately after use
@@ -15,7 +15,6 @@ function setup (t) {
   if (existsSync(tmp)) rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
   mkdirSync(tmp, { recursive: true })
   t.ok(existsSync(tmp), 'Created tmp dir')
-  let { eventsPort } = getPorts(port)
   process.env.ARC_EVENTS_PORT = eventsPort
   if (!process.env.ARC_EVENTS_PORT) t.fail('ARC_EVENTS_PORT should be set')
 }
@@ -134,7 +133,6 @@ function runTests (runType, t) {
 
   t.test(`${mode} Random HTTP request to event bus with malformed JSON should return an HTTP 400 error`, t => {
     t.plan(2)
-    let { eventsPort } = getPorts(port)
     let req = http.request({
       method: 'POST',
       port: eventsPort,

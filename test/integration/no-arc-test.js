@@ -4,9 +4,8 @@ let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let getDBClient = require('../../src/tables/_get-db-client')
-let { port, run, startup, shutdown, url } = require('../utils')
-let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
-let ports = getPorts(port)
+let { run, startup, shutdown, url } = require('../utils')
+let ports = { tables: 5555 }
 
 test('Set up env', t => {
   t.plan(1)
@@ -27,14 +26,13 @@ function runTests (runType, t) {
 
   t.test('get /', t => {
     t.plan(2)
-    tiny.get({ url },
-      function _got (err, data) {
-        if (err) t.fail(err)
-        else {
-          t.ok(data, 'got /')
-          t.ok(data.body.startsWith('Hello from Architect Sandbox running without an Architect file!'), 'is hello world')
-        }
-      })
+    tiny.get({ url }, function _got (err, data) {
+      if (err) t.fail(err)
+      else {
+        t.ok(data, 'got /')
+        t.ok(data.body.startsWith('Hello from Architect Sandbox running without an Architect file!'), 'is hello world')
+      }
+    })
   })
 
   let dynamo

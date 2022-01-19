@@ -6,23 +6,21 @@ let getDBClient = require(join(process.cwd(), 'src', 'tables', '_get-db-client')
 let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
 let mock = join(process.cwd(), 'test', 'mock')
-let { port, _refreshInventory, run, quiet, startup, shutdown } = require('../utils')
-let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
-let ports = getPorts(port)
+let { _refreshInventory, run, quiet, startup, shutdown } = require('../utils')
 let str = s => JSON.stringify(s, null, 2)
 let dynamo
+let tablesPort = 5555
+let ports = { tables: tablesPort }
 let externalDBPort = 4567
 let dynaliteServer
 
 // Because these tests use Arc Functions `tables`, that module needs a `ARC_TABLES_PORT` env var to run locally
 // That said, to prevent side-effects, destroy that env var immediately after use
 function setup (t, provided) {
-  let { tablesPort } = ports
   process.env.ARC_TABLES_PORT = provided || tablesPort
   if (!process.env.ARC_TABLES_PORT) t.fail('ARC_TABLES_PORT should be set')
 }
 function teardown (t) {
-  ports = getPorts(port)
   delete process.env.ARC_TABLES_PORT
   if (process.env.ARC_TABLES_PORT) t.fail('ARC_TABLES_PORT should not be set')
 }
@@ -44,7 +42,7 @@ function runTests (runType, t) {
     if (runType === 'module') {
       t.plan(1)
       try {
-        let result = await tables.start({ cwd: join(mock, 'normal'), port, quiet, _refreshInventory })
+        let result = await tables.start({ cwd: join(mock, 'normal'), quiet, _refreshInventory })
         t.equal(result, 'DynamoDB successfully started', 'Tables started (async)')
       }
       catch (err) {
@@ -93,7 +91,7 @@ function runTests (runType, t) {
   t.test(`${mode} Sync tables.start`, t => {
     if (runType === 'module') {
       t.plan(1)
-      tables.start({ cwd: join(mock, 'normal'), port, quiet, _refreshInventory }, function (err, result) {
+      tables.start({ cwd: join(mock, 'normal'), quiet, _refreshInventory }, function (err, result) {
         if (err) t.fail(err)
         else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
       })
@@ -243,10 +241,9 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} Async tables.start`, async t => {
+  t.test(`${mode} Async tables.start (external DB)`, async t => {
     process.env.ARC_DB_EXTERNAL = true
     setup(t, externalDBPort)
-    ports = getPorts() // Reset those ports
     if (runType === 'module') {
       t.plan(1)
       try {
@@ -261,10 +258,10 @@ function runTests (runType, t) {
     else await startup[runType].async(t, 'external-db')
   })
 
-  t.test(`${mode} Get client`, t => {
+  t.test(`${mode} Get client (external DB)`, t => {
     t.plan(1)
     setup(t, externalDBPort)
-    getDBClient(ports, function _gotDBClient (err, client) {
+    getDBClient({ tables: externalDBPort }, function _gotDBClient (err, client) {
       if (err) console.log(err) // Yes, but actually no
       dynamo = client
       t.ok(dynamo, 'Got Dynamo client')
@@ -272,7 +269,7 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} Can list tables`, t => {
+  t.test(`${mode} Can list tables (external DB)`, t => {
     t.plan(1)
     setup(t, externalDBPort)
     dynamo.listTables({}, function done (err, result) {
@@ -285,7 +282,7 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} Async tables.end`, async t => {
+  t.test(`${mode} Async tables.end (external DB)`, async t => {
     delete process.env.ARC_DB_EXTERNAL
     if (runType === 'module') {
       t.plan(1)
@@ -313,8 +310,7 @@ function runTests (runType, t) {
     // `all:true` option for starting and stopping
     t.test(`${mode} Sync tables.start({ all: true })`, t => {
       t.plan(1)
-      ports = getPorts(port) // Reset the port reset (from external DB tests)
-      tables.start({ cwd: join(mock, 'normal'), port, _refreshInventory, quiet, all: true }, function (err, result) {
+      tables.start({ cwd: join(mock, 'normal'), ports, _refreshInventory, quiet, all: true }, function (err, result) {
         if (err) t.fail(err)
         else t.equal(result, 'DynamoDB successfully started', 'Tables started (sync)')
       })
@@ -331,7 +327,7 @@ function runTests (runType, t) {
     t.test(`${mode} Async tables.start({ all: true })`, async t => {
       t.plan(1)
       try {
-        let result = await tables.start({ cwd: join(mock, 'normal'), port, _refreshInventory, quiet, all: true })
+        let result = await tables.start({ cwd: join(mock, 'normal'), ports, _refreshInventory, quiet, all: true })
         t.equal(result, 'DynamoDB successfully started', 'Tables started (async)')
       }
       catch (err) {

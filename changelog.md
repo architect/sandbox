@@ -10,7 +10,14 @@
   - Added Sandbox watcher API
   - Added custom runtime support
   - Added env setter plugin support
-- Added ability to disable Sandbox watcher with `watcher` (boolean) in API
+- Added ability to disable Sandbox watcher with `watcher` (boolean) in API option
+- Added port configuration via `prefs.arc`
+  - The precedence order is now `prefs.arc` > `port` API option or `--port` CLI flag > environment variables
+  - Also added `ARC_HTTP_PORT` env var for configuring the HTTP port (in addition to `PORT`)
+- Added automatic port selection for internal service port configuration
+  - (Probably) never again will your multiple simultaneous Sandbox instances conflict with each other!
+  - HTTP port selection still defaults to `3333` and will halt Sandbox from starting if it conflicts (since it's presumably what you're expecting to see in your browser)
+  - Any manually specified port conflicts will also halt Sandbox from starting
 
 
 ### Changed
@@ -23,6 +30,10 @@
 - Breaking change: removed support for legacy `.arc-env` env files
   - Architect deprecated writing to `.arc-env` in late 2020; Sandbox will no longer read and use it for local environment variables
   - If you are still using a `.arc-env` file, please consider `prefs.arc` or `.env` for your local env vars
+- Breaking change: removed `ARC_SANDBOX_ENABLE_CORS` env var option
+  - Architect has supported `options` requests since version 8; that is the preferred approach to handling CORS
+- Breaking change: `ARC_INTERNAL` is now `ARC_INTERNAL_PORT`
+- Breaking change: remove `ARC_SANDBOX_ENABLE_CORS` env var option
 - Internal change: switched to `chokidar` from `node-watch` for file watching
 - Internal change: made Inventory responsible for handling `.env` env vars
 - Internal change: made Inventory responsible for figuring out `nodejs14.x` handler module systems and file names

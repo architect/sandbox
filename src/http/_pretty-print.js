@@ -1,11 +1,10 @@
 let { sep } = require('path')
 let chalk = require('chalk')
-let { getPorts } = require('../lib')
 
 /**
  * Pretty print @http + @ws routes
  */
-module.exports = function prettyPrint ({ apiType, cwd, inventory, port, update }) {
+module.exports = function prettyPrint ({ apiType, cwd, inventory, ports, update }) {
   let { http, ws } = inventory.inv
 
   let padL = str => str.padStart(7)
@@ -42,8 +41,7 @@ module.exports = function prettyPrint ({ apiType, cwd, inventory, port, update }
   }
 
   if (http || ws) {
-    let { httpPort } = getPorts(port)
-    let link = chalk.green.bold.underline(`http://localhost:${httpPort}\n`)
+    let link = chalk.green.bold.underline(`http://localhost:${ports.http}\n`)
     update.raw(`\n    ${link}`)
   }
 }

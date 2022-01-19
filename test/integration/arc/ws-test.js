@@ -5,9 +5,8 @@ let http = require('http')
 let Websocket = require('ws')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { credentials, port, run, startup, shutdown, makeSideChannel, wsUrl } = require('../../utils')
-let { getPorts } = require(join(process.cwd(), 'src', 'lib', 'ports'))
-let { _arcPort } = getPorts(port)
+let { credentials, run, startup, shutdown, makeSideChannel, wsUrl } = require('../../utils')
+let _arcPort = 2222
 
 test('Set up env', async t => {
   t.plan(1)

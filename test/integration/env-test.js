@@ -18,7 +18,8 @@ function checkSystemEnvVars (env, t) {
       props.forEach(p => {
         let prop = sandboxMeta[p]
         if (!prop) t.fail(`Lambda env missing Sandbox meta environment variable property: ${v}.${p}`)
-        if (p === 'ports' && (!prop.httpPort || !prop.eventsPort || !prop.tablesPort || !prop._arcPort)) {
+        if (p === 'ports' && (!prop.http || !prop._arc)) {
+          // Note: this also used to check for `!prop.events || !prop.tables`, but now the omission to tacitly demonstrate that only the populated ports actually appear in env vars
           t.fail(`Lambda env Sandbox meta environment variable does not have all Sandbox ports: ${JSON.stringify(prop, null, 2)}`)
         }
       })

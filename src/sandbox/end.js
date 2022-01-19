@@ -1,5 +1,4 @@
 let series = require('run-series')
-let { callbackify } = require('util')
 
 module.exports = function end (server, callback) {
   let { events, http, tables, _arc, inventory, update } = server
@@ -37,28 +36,19 @@ module.exports = function end (server, callback) {
         let start = Date.now()
         let plural = endPlugins.length > 1 ? 's' : ''
         update.status(`Running ${endPlugins.length} Sandbox shutdown plugin${plural}`)
-        // To be compatible with run-series, we can't use async functions.
         let params = { arc: inv._project.arc, inventory }
-        let plugins = endPlugins
-          .map(plugin => plugin.bind({}, params))
-          .map(plugin => {
-            if (plugin.constructor.name === 'AsyncFunction') {
-              return callbackify(plugin)
-            }
-            else return function (callback) {
-              try {
-                plugin()
-                callback()
-              }
-              catch (err) { callback(err) }
-            }
+        async function runPlugins () {
+          for (let plugin of endPlugins) {
+            await plugin(params)
+          }
+        }
+        runPlugins()
+          .then(() => {
+            let finish = Date.now()
+            update.done(`Ran Sandbox shutdown plugin${plural} in ${finish - start}ms`)
+            callback()
           })
-        series(plugins, function (err) {
-          let finish = Date.now()
-          update.done(`Ran Sandbox shutdown plugin${plural} in ${finish - start}ms`)
-          if (err) callback(err)
-          else callback()
-        })
+          .catch(callback)
       }
       else callback()
     }
