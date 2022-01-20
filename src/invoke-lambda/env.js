@@ -81,6 +81,7 @@ module.exports = function getEnv (params) {
   // TODO: only set ports env vars on local/testing env
   if (inv.ws)     env.ARC_WSS_URL     = `ws://localhost:${ports.http}`
   if (inv.events) env.ARC_EVENTS_PORT = ports.events
+  if (inv.queues) env.ARC_EVENTS_PORT = ports.events
   if (inv.tables) env.ARC_TABLES_PORT = ports.tables
   env.ARC_INTERNAL_PORT = ports._arc
 

@@ -38,6 +38,12 @@
 - Internal change: made Inventory responsible for handling `.env` env vars
 - Internal change: made Inventory responsible for figuring out `nodejs14.x` handler module systems and file names
 
+
+### Fixed
+
+- Ensured `ARC_EVENTS_PORT` Lambda env var is also set by `@queues`
+
+
 ---
 
 ## [4.5.2] 2022-01-11
