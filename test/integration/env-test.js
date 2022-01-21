@@ -5,7 +5,7 @@ let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let { run, startup, shutdown, url } = require('../utils')
 
-let systemEnvVars = [ 'LAMBDA_TASK_ROOT', 'TZ', 'ARC_APP_NAME', 'ARC_ENV', 'ARC_ROLE', 'ARC_SANDBOX', 'SESSION_TABLE_NAME', 'PATH' ]
+let systemEnvVars = [ 'LAMBDA_TASK_ROOT', 'TZ', 'ARC_APP_NAME', 'ARC_ENV', 'ARC_ROLE', 'ARC_SANDBOX', 'ARC_SESSION_TABLE_NAME', 'PATH' ]
 let shouldBeFiltered = [
   '__ARC_CONTEXT__', '__ARC_CONFIG__'
 ]

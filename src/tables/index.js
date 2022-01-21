@@ -10,9 +10,8 @@ let series = require('run-series')
  */
 module.exports = function createTables (inventory) {
   let { inv } = inventory
-  let { arc, manifest } = inv._project
 
-  if (arc.tables || !manifest) {
+  if (inv.tables) {
     let hasExternalDb = process.env.ARC_DB_EXTERNAL
     let tables = {}
     let dynamo

@@ -9,10 +9,6 @@ module.exports = function _ssm (params, req, res) {
     return
   }
 
-  // Populate services: a rare inv mutation, necessary because this is an artifact of the current inventory
-  services(inventory)
-  let { _serviceDiscovery } = inventory.inv
-
   let message, stack, serviceType
   let Parameters = []
   try {
@@ -26,7 +22,9 @@ module.exports = function _ssm (params, req, res) {
     res.end('Sandbox service discovery exception parsing request body')
     return
   }
-  Object.entries(_serviceDiscovery).forEach(([ type, map ]) => {
+
+  let serviceDiscovery = services(inventory)
+  Object.entries(serviceDiscovery).forEach(([ type, map ]) => {
     Object.entries(map).forEach(([ key, Value ]) => {
       if (!serviceType || type === serviceType) Parameters.push({
         Name: `/${stack}/${type}/${key}`,
