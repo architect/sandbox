@@ -15,14 +15,14 @@ module.exports = function createTable (params, callback) {
       create({
         name,
         TableName: `${app}-staging-${name}`,
-        ... params
+        ...params
       }, callback)
     },
     function _createProduction (callback) {
       create({
         name,
         TableName: `${app}-production-${name}`,
-        ... params
+        ...params
       }, callback)
     }
   ], callback)

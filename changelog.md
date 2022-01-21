@@ -37,6 +37,8 @@
 - Internal change: switched to `chokidar` from `node-watch` for file watching
 - Internal change: made Inventory responsible for handling `.env` env vars
 - Internal change: made Inventory responsible for figuring out `nodejs14.x` handler module systems and file names
+- Internal change: stopped populating default `arc-sessions` + `data` tables; this was a quirky holdover behavior from early Architect that differed Sandbox from live AWS behavior
+- Prefer `ARC_SESSION_TABLE_NAME` to `SESSION_TABLE_NAME` env var for Architect's built-in sessions management
 
 
 ### Fixed

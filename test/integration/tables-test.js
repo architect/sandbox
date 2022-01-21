@@ -108,24 +108,6 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} Default tables are present`, t => {
-    t.plan(2)
-    setup(t)
-    let defaultTables = [
-      'mockapp-production-arc-sessions',
-      'mockapp-staging-arc-sessions',
-    ]
-    dynamo.listTables({}, function done (err, result) {
-      if (err) t.fail(err)
-      else {
-        for (let table of defaultTables) {
-          t.ok(result.TableNames.includes(table), `Found table: ${table}`)
-        }
-        teardown(t)
-      }
-    })
-  })
-
   t.test(`${mode} Can insert a row`, t => {
     t.plan(1)
     setup(t)
