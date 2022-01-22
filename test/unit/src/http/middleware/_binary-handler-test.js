@@ -135,21 +135,3 @@ test('Skip if content-length is 0', t => {
     t.notOk(stream.isBase64Encoded, 'isBase64Encoded param NOT set')
   })
 })
-
-test('Skip if posting to /__arc (WebSocket endpoint)', t => {
-  t.plan(3)
-  let e = new events()
-  let stream = new Readable()
-  stream.headers = { 'content-length': '8' }
-  stream.body = 'hi there'
-  stream.url = '/___'
-  stream.push(null)
-  let binaryHandler = _binaryHandler.bind({}, {})
-  e.addListener('data', binaryHandler)
-  e.emit('data', stream, {}, () => {
-    let result = stream.body.base64
-    t.notOk(result, 'Did not get base64 body object back')
-    t.notOk(Object.getOwnPropertyNames(stream.body).length, 'Body object is empty')
-    t.notOk(stream.isBase64Encoded, 'isBase64Encoded param NOT set')
-  })
-})
