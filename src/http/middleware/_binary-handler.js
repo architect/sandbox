@@ -10,12 +10,8 @@ module.exports = function binary ({ apiType }, req, res, next) {
   }
 
   let contentLength = headers?.['content-length']
-  let isWebSocket = req.url === '/__arc'
   if (!contentLength || Number(contentLength) === 0) {
     req.body = {}
-    next()
-  }
-  else if (isWebSocket) {
     next()
   }
   else {

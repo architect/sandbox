@@ -1,5 +1,4 @@
 let _binary = require('./_binary-handler')
-let _parse = require('./_parse')
 let _static = require('./_static-path')
 let _fallback = require('./_fallback')
 
@@ -9,9 +8,6 @@ module.exports = function loadMiddleware (app, params) {
   // Binary payload / base64 encoding handler
   let binary = _binary.bind({}, { apiType })
   app.use(binary)
-
-  // Sometimes parse JSON or URL-encoded bodies
-  _parse(app)
 
   // Direct static asset delivery via /_static
   let static_ = _static.bind({}, { staticPath })

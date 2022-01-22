@@ -28,9 +28,6 @@ module.exports = function fallback (args, req, res, next) {
     if (!asap) return [ method ].concat(path.split('/').filter(Boolean))
   }).filter(Boolean)
 
-  // Ensure internal WebSocket bus gets matched
-  if (inv.ws) tokens.push([ 'post', '__arc' ])
-
   // Tokenize the current req: [ 'get', 'foo' ]
   let { pathname } = parse(req.url)
   let current = [ method ].concat(pathname.split('/').filter(Boolean))

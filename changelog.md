@@ -39,6 +39,7 @@
 - Internal change: made Inventory responsible for figuring out `nodejs14.x` handler module systems and file names
 - Internal change: stopped populating default `arc-sessions` + `data` tables; this was a quirky holdover behavior from early Architect that differed Sandbox from live AWS behavior
 - Prefer `ARC_SESSION_TABLE_NAME` to `SESSION_TABLE_NAME` env var for Architect's built-in sessions management
+  - All non-namespaced names will continue to be supported until at least Architect 11; we suggest changing them over to the namespaced equivalents as soon as is convenient
 
 
 ### Fixed
