@@ -34,6 +34,7 @@
   - Architect has supported `options` requests since version 8; that is the preferred approach to handling CORS
 - Breaking change: `ARC_INTERNAL` is now `ARC_INTERNAL_PORT`
 - Breaking change: remove `ARC_SANDBOX_ENABLE_CORS` env var option
+- Breaking change: deprecate `ARC_SANDBOX_PATH_TO_STATIC` in favor of `ARC_STATIC_BUCKET` for use with `@architect/asap`
 - Internal change: switched to `chokidar` from `node-watch` for file watching
 - Internal change: made Inventory responsible for handling `.env` env vars
 - Internal change: made Inventory responsible for figuring out `nodejs14.x` handler module systems and file names
