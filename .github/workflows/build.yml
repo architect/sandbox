@@ -57,11 +57,6 @@ jobs:
         VER=`deno --version`; echo "Deno ver:   $VER"
         echo "OS ver:     ${{ runner.os }}"
 
-    # Remove this once npm 8.1.1+ is available in Node 16
-    - name: Upgrade npm
-      if: matrix.node-version == '16.x'
-      run: npm i -g npm@latest
-
     - name: Install
       run: npm install
 
