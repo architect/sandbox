@@ -13,8 +13,7 @@ queue-custom
 
 @http
 get     / # runs default
-get     /multi-cookies-res
-get     /binary
+# Runtimes
 get     /nodejs14.x
 get     /nodejs12.x
 get     /python3.8
@@ -22,8 +21,13 @@ get     /python3.7
 get     /python3.6
 get     /ruby2.7
 get     /deno
+# Path
 get     /get-p-c/:param/*
 get     /get-c/*
+# Behavior
+get     /binary
+get     /env
+get     /multi-cookies-res
 get     /no-return
 get     /promise-return
 get     /reject-promise
