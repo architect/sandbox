@@ -5,7 +5,13 @@ let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let { run, startup, shutdown, url } = require('../utils')
 
-let systemEnvVars = [ 'LAMBDA_TASK_ROOT', 'TZ', 'ARC_APP_NAME', 'ARC_ENV', 'ARC_ROLE', 'ARC_SANDBOX', 'ARC_SESSION_TABLE_NAME', 'PATH' ]
+let systemEnvVars = [
+  // Arc stuff
+  'ARC_APP_NAME', 'ARC_ENV', 'ARC_ROLE',
+  'ARC_SANDBOX', 'ARC_SESSION_TABLE_NAME',
+  // Lambda + system stuff
+  'LAMBDA_TASK_ROOT', 'PATH', 'TZ'
+]
 let shouldBeFiltered = [
   '__ARC_CONTEXT__', '__ARC_CONFIG__'
 ]
@@ -19,7 +25,7 @@ function checkSystemEnvVars (env, t) {
         let prop = sandboxMeta[p]
         if (!prop) t.fail(`Lambda env missing Sandbox meta environment variable property: ${v}.${p}`)
         if (p === 'ports' && (!prop.http || !prop._arc)) {
-          // Note: this also used to check for `!prop.events || !prop.tables`, but now the omission to tacitly demonstrate that only the populated ports actually appear in env vars
+          // Note: this also used to check for `!prop.events || !prop.tables`, but now the omission to tacitly demonstrate that only the populated ports actually appear in env vars; explicit tests for all ports below
           t.fail(`Lambda env Sandbox meta environment variable does not have all Sandbox ports: ${JSON.stringify(prop, null, 2)}`)
         }
       })
@@ -36,12 +42,37 @@ test('Set up env', t => {
   t.ok(sandbox, 'Got Sandbox')
 })
 
-test('Run misc HTTP tests', t => {
+test('Run misc environment variable tests', t => {
   run(runTests, t)
   t.end()
 })
 
 function runTests (runType, t) {
+  t.test(`[Ports / ${runType}] Start Sandbox`, t => {
+    startup[runType](t, 'normal')
+  })
+
+  t.test(`[Ports / ${runType}] get /`, t => {
+    t.plan(5)
+    tiny.get({ url: url + '/env' }, function _got (err, result) {
+      if (err) t.fail(err)
+      else {
+        checkSystemEnvVars(result.body, t)
+        // Check for all ports
+        let ARC_SANDBOX = JSON.parse(result.body.ARC_SANDBOX)
+        let { ports } = ARC_SANDBOX
+        t.ok(ports.http, `Got @http port ${ports.http}`)
+        t.ok(ports.events, `Got @events port ${ports.events}`)
+        t.ok(ports.tables, `Got @tables port ${ports.tables}`)
+        t.ok(ports._arc, `Got @_arc port ${ports._arc}`)
+      }
+    })
+  })
+
+  t.test(`[Ports / ${runType}] Shut down Sandbox`, t => {
+    shutdown[runType](t)
+  })
+
   t.test(`[Env vars (.env) / ${runType}] Start Sandbox`, t => {
     process.env.__TESTING_ENV_VAR__ = 'henlo'
     startup[runType](t, join('env', 'dot-env'))

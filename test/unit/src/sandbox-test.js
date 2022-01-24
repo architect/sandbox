@@ -92,7 +92,6 @@ let envVars = [
   'AWS_PROFILE',
   'AWS_REGION',
   'AWS_SECRET_ACCESS_KEY',
-  'NODE_ENV',
 ]
 
 function cleanEnv (t) {
@@ -118,7 +117,7 @@ test('Sandbox only minimally mutates env vars', async t => {
 
   // Architect 6+ (staging/prod)
   before = copy(process.env)
-  process.env.NODE_ENV = 'staging'
+  process.env.ARC_ENV = 'staging'
   await sandbox.start({ cwd: join(mock, 'normal'), port, quiet })
   after = copy(process.env)
   envVars.forEach(v => delete after[v])
