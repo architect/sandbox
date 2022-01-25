@@ -14,7 +14,7 @@ test('Set up env', t => {
 })
 
 test('Test logLevel flags', t => {
-  t.plan(7)
+  t.plan(5)
   let f
 
   cmd([])
@@ -27,11 +27,7 @@ test('Test logLevel flags', t => {
 
   cmd('--verbose')
   f = flags(false)
-  t.equal(f.logLevel, 'verbose', `-verbose flag returned: verbose`)
-
-  cmd('verbose')
-  f = flags(false)
-  t.equal(f.logLevel, 'verbose', `verbose flag returned: verbose`)
+  t.equal(f.logLevel, 'verbose', `--verbose flag returned: verbose`)
 
   cmd('-d')
   f = flags(false)
@@ -40,29 +36,24 @@ test('Test logLevel flags', t => {
   cmd('--debug')
   f = flags(false)
   t.equal(f.logLevel, 'debug', `-debug flag returned: debug`)
-
-  cmd('debug')
-  f = flags(false)
-  t.equal(f.logLevel, 'debug', `debug flag returned: debug`)
 })
 
 test('Test port flags', t => {
   t.plan(5)
   let f
 
-  delete process.env.PORT
   cmd([])
   f = flags(false)
-  t.equal(f.port, 3333, `No port flags returned: 3333`)
+  t.equal(f.port, undefined, `No port flags returned: undefined`)
 
   process.env.PORT = 1234
   f = flags(false)
-  t.equal(f.port, 1234, `PORT env var returned: 1234`)
+  t.equal(f.port, undefined, `PORT env var does not influence flags`)
   delete process.env.PORT
 
   cmd([ '-p', 'foo' ])
   f = flags(false)
-  t.equal(f.port, 3333, `-p without specified port returned: 3333`)
+  t.equal(f.port, undefined, `-p without specified port returned: undefined`)
 
   cmd([ '-p', '33333' ])
   f = flags(false)
@@ -74,7 +65,7 @@ test('Test port flags', t => {
 })
 
 test('Test quiet flags', t => {
-  t.plan(4)
+  t.plan(3)
   let f
 
   cmd([])
@@ -87,11 +78,7 @@ test('Test quiet flags', t => {
 
   cmd([ '--quiet' ])
   f = flags(false)
-  t.equal(f.quiet, true, `-quiet flag returned: true`)
-
-  cmd([ 'quiet' ])
-  f = flags(false)
-  t.equal(f.quiet, true, `quiet flag returned: true`)
+  t.equal(f.quiet, true, `--quiet flag returned: true`)
 })
 
 test('Test hydration symlinking flag', t => {

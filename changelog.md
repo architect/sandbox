@@ -32,6 +32,7 @@
   - If you are still using a `.arc-env` file, please consider `prefs.arc` or `.env` for your local env vars
 - Breaking change: removed `ARC_SANDBOX_ENABLE_CORS` env var option
   - Architect has supported `options` requests since version 8; that is the preferred approach to handling CORS
+- Breaking change: bare CLI arguments related to logging (e.g. `sandbox quiet`) as aliases to flags are now discarded, please use CLI flags (e.g. `sandbox --quiet`, or `sandbox --debug`)
 - Breaking change: `ARC_INTERNAL` is now `ARC_INTERNAL_PORT`
 - Breaking change: remove `ARC_SANDBOX_ENABLE_CORS` env var option
 - Breaking change: deprecate `ARC_SANDBOX_PATH_TO_STATIC` in favor of `ARC_STATIC_BUCKET` for use with `@architect/asap`
