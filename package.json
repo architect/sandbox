@@ -24,6 +24,9 @@
   "bin": {
     "sandbox": "src/cli/cli.js"
   },
+  "files": [
+    "src/*"
+  ],
   "dependencies": {
     "@architect/asap": "~5.0.0-RC.0",
     "@architect/create": "~3.2.0-RC.0",

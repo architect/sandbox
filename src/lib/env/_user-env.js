@@ -13,7 +13,6 @@ module.exports = function populateUserEnv (params, callback) {
   let environment = process.env.ARC_ENV
   let env = proj.env.local
   let prefs = proj.preferences
-  let dotEnvPath = join(cwd, '.env')
   let userEnv
 
   function varsNotFound (env, file) {
@@ -44,11 +43,21 @@ module.exports = function populateUserEnv (params, callback) {
     print('testing', 'env option')
   }
 
-  // User has a `.env` file
-  if (!userEnv && existsSync(dotEnvPath)) {
-    userEnv = env.testing
-    print('testing', '.env')
+  // Populate env vars
+  if (!userEnv && env?.[environment]) {
+    let dotEnvPath = join(cwd, '.env')
+    let dotEnv =    existsSync(dotEnvPath) && dotEnvPath
+    let local =     proj?.localPreferences?.env?.[environment] && proj.localPreferencesFile
+    let global =    proj?.globalPreferences?.env?.[environment] && proj.globalPreferencesFile
+    let filepath =  (dotEnv) && basename(dotEnv) ||
+                    (local && basename(local)) ||
+                    (global && `~${sep}${basename(global)}`)
+
+    if (dotEnv) userEnv = env.testing
+    else userEnv = env[environment]
+    print(environment, filepath)
   }
+  if (!userEnv) varsNotFound(environment)
 
   // User has a `pref[erence]s.arc` file
   if (prefs) {
@@ -61,19 +70,7 @@ module.exports = function populateUserEnv (params, callback) {
         ![ 'staging', 'production' ].includes(process.env.ARC_ENV)) {
       process.env.ARC_ENV = 'staging'
     }
-
-    // Populate env vars
-    if (env[environment] && !userEnv) {
-      userEnv = env[environment]
-      let global =  proj?.globalPreferences?.env?.[environment] &&
-                    `~${sep}${basename(proj.globalPreferencesFile)}`
-      let local =   proj?.localPreferences?.env?.[environment] &&
-                    basename(proj.localPreferencesFile)
-      let filepath = local || global
-      print(environment, filepath)
-    }
   }
-  if (!userEnv) varsNotFound(environment)
 
   // Wrap it up
   if (proj?.preferences?.sandbox?.useAWS || process.env.ARC_LOCAL) {
