@@ -39,7 +39,7 @@ module.exports = function createHttpServer (inventory) {
 
       // Main parameters needed throughout an invocation
       // Note: `env` is passed via module API; userEnv is passed by `sandbox.start`, so both are necessary
-      let params = { apiType, cwd, env: options.env, inventory, port, ports, staticPath, update, userEnv }
+      let params = { apiType, cwd, env: options.env, inventory, port, ports, quiet, staticPath, update, userEnv }
 
       middleware(app, params)
 

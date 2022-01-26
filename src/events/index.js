@@ -19,7 +19,7 @@ module.exports = function createEventBus (inventory) {
 
       // Main parameters needed throughout an invocation
       // Note: `env` is passed via module API; userEnv is passed by `events.start`, so both are necessary
-      let params = { cwd, env: options.env, inventory, ports, update, userEnv }
+      let params = { cwd, env: options.env, inventory, ports, quiet, update, userEnv }
 
       series([
         // Set up Arc + userland env vars
