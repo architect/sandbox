@@ -25,7 +25,7 @@
 - Breaking change: Architect no longer relies on or makes use of the `NODE_ENV` or `ARC_CLOUDFORMATION` env vars
   - Older versions of Node.js Architect libraries such as `@architect/functions` made use of these env vars, so it is wise to upgrade them at this time
   - Also be sure to consult the Architect [upgrade guide](https://arc.codes/docs/en/about/upgrade-guide)
-- Breaking change: passing env vars in with the module's `env` option no merges those env vars with any found in `.env` or `prefs.arc`
+- Breaking change: passing env vars in with the module's `env` option no longer merges those env vars with any found in `.env` or `prefs.arc`
   - The new env var precedence is `env` option > `.env` > `prefs.arc`
 - Breaking change: removed support for legacy `.arc-env` env files
   - Architect deprecated writing to `.arc-env` in late 2020; Sandbox will no longer read and use it for local environment variables
@@ -33,8 +33,6 @@
 - Breaking change: removed `ARC_SANDBOX_ENABLE_CORS` env var option
   - Architect has supported `options` requests since version 8; that is the preferred approach to handling CORS
 - Breaking change: bare CLI arguments related to logging (e.g. `sandbox quiet`) as aliases to flags are now discarded, please use CLI flags (e.g. `sandbox --quiet`, or `sandbox --debug`)
-- Breaking change: `ARC_INTERNAL` is now `ARC_INTERNAL_PORT`
-- Breaking change: remove `ARC_SANDBOX_ENABLE_CORS` env var option
 - Breaking change: deprecate `ARC_SANDBOX_PATH_TO_STATIC` in favor of `ARC_STATIC_BUCKET` for use with `@architect/asap`
 - Internal change: switched to `chokidar` from `node-watch` for file watching
 - Internal change: made Inventory responsible for handling `.env` env vars
@@ -42,12 +40,6 @@
 - Internal change: stopped populating default `arc-sessions` + `data` tables; this was a quirky holdover behavior from early Architect that differed Sandbox from live AWS behavior
 - Prefer `ARC_SESSION_TABLE_NAME` to `SESSION_TABLE_NAME` env var for Architect's built-in sessions management
   - All non-namespaced names will continue to be supported until at least Architect 11; we suggest changing them over to the namespaced equivalents as soon as is convenient
-
-
-### Fixed
-
-- Ensured `ARC_EVENTS_PORT` Lambda env var is also set by `@queues`
-
 
 ---
 
