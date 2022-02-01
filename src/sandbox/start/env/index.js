@@ -37,18 +37,7 @@ module.exports = function populateEnv (params, callback) {
       userEnv(params, callback)
     },
     function (callback) {
-      ports(params, (err, ports) => {
-        if (err) callback(err)
-        else {
-          params.ports = ports
-          update.verbose.done(`Using ports: ` +
-                              `http: ${ports.http || 'n/a'}, ` +
-                              `events/queues: ${ports.events || 'n/a'}, ` +
-                              `tables: ${ports.tables || 'n/a'}, ` +
-                              `_arc: ${ports._arc || 'n/a'}`)
-          callback()
-        }
-      })
+      ports(params, callback)
     },
   ], callback)
 }

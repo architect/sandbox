@@ -28,7 +28,7 @@ let invoke = proxyquire('../../../../src/invoke-lambda', {
   './exec': exec,
 })
 let event = { something: 'happened' }
-let inventory = { inv: { _project: {}, app: 'hi' } }
+let inventory = { inv: { _project: { env: { local: { testing: null, staging: null, production: null } } }, app: 'hi' } }
 let ports = {}
 let userEnv = {}
 let params = { event, inventory, update, userEnv, ports }

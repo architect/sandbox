@@ -5,7 +5,7 @@ let { version } = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.j
 
 // Constructs Lambda execution environment variables
 module.exports = function getEnv (params) {
-  let { apiType, cwd, lambda, inventory, ports, staticPath, userEnv } = params
+  let { apiType, cwd, env: envOption, lambda, inventory, ports, staticPath } = params
   let { config, src, build, handlerFile } = lambda
   let { inv } = inventory
   let { ARC_ENV, ARC_LOCAL, ARC_STATIC_SPA, PATH, ARC_SESSION_TABLE_NAME, SESSION_TABLE_NAME } = process.env
@@ -55,10 +55,13 @@ module.exports = function getEnv (params) {
     env.ARC_DISABLE_ENV_VARS = true
   }
   else {
-    let reserved = Object.keys(env)
-    Object.entries(userEnv).forEach(([ n, v ]) => {
-      if (!reserved.includes(n)) env[n] = v
-    })
+    let userEnv = envOption || inv._project.env.local?.[ARC_ENV]
+    if (userEnv) {
+      let reserved = Object.keys(env)
+      Object.entries(userEnv).forEach(([ n, v ]) => {
+        if (!reserved.includes(n)) env[n] = v
+      })
+    }
   }
 
   // Sandbox useAWS pref forces ARC_LOCAL

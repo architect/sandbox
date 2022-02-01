@@ -6,7 +6,7 @@ let series = require('run-series')
 let create = require('@architect/create')
 let { chars } = require('@architect/utils')
 
-let _env = require('./env')
+let env = require('./env')
 let checkRuntimes = require('./check-runtimes')
 let maybeHydrate = require('./maybe-hydrate')
 let _arc = require('../../arc')
@@ -23,9 +23,9 @@ module.exports = function _start (params, callback) {
   let { inv } = params.inventory
 
   series([
-    // Set up Arc + userland env vars + print the banner
+    // Set up + validate env vars, print the banner
     function (callback) {
-      _env(params, callback)
+      env(params, callback)
     },
 
     // Initialize any missing functions on startup
@@ -139,8 +139,7 @@ module.exports = function _start (params, callback) {
 
     // Run startup scripts (if present)
     function (callback) {
-      if (!restart) startupScripts(params, callback)
-      else callback()
+      startupScripts(params, callback)
     },
   ],
   function (err) {
