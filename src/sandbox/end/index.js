@@ -1,8 +1,8 @@
 let series = require('run-series')
-let _arc = require('../arc')
-let http = require('../http')
-let events = require('../events')
-let tables = require('../tables')
+let _arc = require('../../arc')
+let http = require('../../http')
+let events = require('../../events')
+let tables = require('../../tables')
 
 module.exports = function end (params, callback) {
   let { inventory, update } = params

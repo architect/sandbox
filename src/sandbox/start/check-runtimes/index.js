@@ -1,5 +1,5 @@
 let { exec } = require('child_process')
-let runtimeEval = require('../runtime-eval')
+let { runtimeEval } = require('../../../lib')
 let versionCheck = require('./version-check')
 let parallel = require('run-parallel')
 let getVer = /\d+\.\d+.\d+/g

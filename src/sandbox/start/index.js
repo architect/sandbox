@@ -6,15 +6,17 @@ let series = require('run-series')
 let create = require('@architect/create')
 let { chars } = require('@architect/utils')
 
-let { checkRuntimes, env: _env, maybeHydrate } = require('../lib')
-let _arc = require('../arc')
-let http = require('../http')
-let events = require('../events')
-let tables = require('../tables')
+let _env = require('./env')
+let checkRuntimes = require('./check-runtimes')
+let maybeHydrate = require('./maybe-hydrate')
+let _arc = require('../../arc')
+let http = require('../../http')
+let events = require('../../events')
+let tables = require('../../tables')
 
-let httpConfig = require('../http/_config')
-let prettyPrint = require('../http/_pretty-print')
-let startupScripts = require('./_startup-scripts')
+let httpConfig = require('../../http/_config')
+let httpPrint = require('./http-print')
+let startupScripts = require('./startup-scripts')
 
 module.exports = function _start (params, callback) {
   let start = Date.now()
@@ -80,7 +82,7 @@ module.exports = function _start (params, callback) {
         let { http, ws } = inv
         if (http || ws) {
           let { apiType } = httpConfig(params)
-          prettyPrint({ apiType, ...params })
+          httpPrint({ apiType, ...params })
         }
       }
       callback()
