@@ -2,7 +2,11 @@ let { exec } = require('child_process')
 let series = require('run-series')
 
 module.exports = function startupScripts (params, callback) {
-  let { cwd, inventory, update, userEnv, runStartupCommands = true } = params
+  let { cwd, inventory, update, userEnv, restart, runStartupCommands = true } = params
+  if (restart) {
+    return callback()
+  }
+
   let { preferences: prefs } = inventory.inv._project
 
   if (prefs?.['sandbox-startup'] && runStartupCommands) {

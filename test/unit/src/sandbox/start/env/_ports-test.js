@@ -6,9 +6,9 @@ let sut = join(process.cwd(), 'src', 'sandbox', 'start', 'env', '_ports')
 let _getPorts = require(sut)
 let getPorts = promisify(_getPorts)
 let always = { _arc: 2222 }
-let tester
+let update = { verbose: { done: () => {} } }
+let inventory, params, tester
 
-let freshInv = () => ({ inv: { _project: { manifest: 'idk', preferences: { sandbox: null } } } })
 async function listen (t, port) {
   return new Promise((res, rej) => {
     tester = net.createServer()
@@ -33,6 +33,11 @@ async function stopListening (t) {
   })
 }
 
+function reset () {
+  inventory = { inv: { _project: { manifest: 'idk', preferences: { sandbox: null } } } }
+  params = undefined
+}
+
 test('Set up env', t => {
   t.plan(1)
   t.ok(getPorts, 'Port module is present')
@@ -40,58 +45,67 @@ test('Set up env', t => {
 
 test('Ports do (almost) nothing', async t => {
   t.plan(1)
-  let result = await getPorts({ inventory: freshInv() })
-  t.deepEqual(result, always, 'Got back internal _arc services port')
+  reset()
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, always, 'Got back internal _arc services port')
 })
 
 test('HTTP port selection', async t => {
   t.plan(8)
-  let inventory, result
   let http = 3333
 
-  inventory = freshInv()
+  reset()
   inventory.inv.http = []
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { http, ...always }, 'Got back default HTTP port')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { http, ...always }, 'Got back default HTTP port')
 
   let port = 1234
-  inventory = freshInv()
+  reset()
   inventory.inv.http = []
   inventory.inv._project.preferences.sandbox = { ports: { http: port } }
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { http: port, ...always }, 'Got back HTTP port from prefs.arc')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { http: port, ...always }, 'Got back HTTP port from prefs.arc')
 
-  inventory = freshInv()
+  reset()
   inventory.inv.http = []
-  result = await getPorts({ port, inventory })
-  t.deepEqual(result, { http: port, ...always }, 'Got back default port API option')
+  params = { port, inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { http: port, ...always }, 'Got back default port API option')
 
   let envVar = 2345
   process.env.ARC_HTTP_PORT = envVar
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { http: envVar, ...always }, 'Got back HTTP from ARC_HTTP_PORT env var')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { http: envVar, ...always }, 'Got back HTTP from ARC_HTTP_PORT env var')
   delete process.env.ARC_HTTP_PORT
 
   process.env.PORT = envVar
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { http: envVar, ...always }, 'Got back HTTP from PORT env var')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { http: envVar, ...always }, 'Got back HTTP from PORT env var')
   delete process.env.PORT
 
-  inventory = freshInv()
+  reset()
   inventory.inv.static = {}
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { http, ...always }, 'Got back default HTTP port for @static')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { http, ...always }, 'Got back default HTTP port for @static')
 
-  inventory = freshInv()
+  reset()
   inventory.inv.ws = []
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { http, ...always }, 'Got back default HTTP port for @ws')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { http, ...always }, 'Got back default HTTP port for @ws')
 
   try {
     await listen(t, 3333)
-    inventory = freshInv()
+    reset()
     inventory.inv.http = []
-    await getPorts({ inventory })
+    params = { inventory, update }
+    await getPorts(params)
   }
   catch (err) {
     t.match(err.message, /Port 3333 \(http\) is already in use/, 'Got error: ' + err.message)
@@ -101,44 +115,49 @@ test('HTTP port selection', async t => {
 
 test('Events port selection', async t => {
   t.plan(6)
-  let inventory, result
   let events = 4444
 
-  inventory = freshInv()
+  reset()
   inventory.inv.events = []
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { events, ...always }, 'Got back default events port')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { events, ...always }, 'Got back default events port')
 
   let port = 1234
-  inventory = freshInv()
+  reset()
   inventory.inv.events = []
   inventory.inv._project.preferences.sandbox = { ports: { events: port } }
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { events: port, ...always }, 'Got back events port from prefs.arc')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { events: port, ...always }, 'Got back events port from prefs.arc')
 
-  inventory = freshInv()
+  reset()
   inventory.inv.queues = []
   inventory.inv._project.preferences.sandbox = { ports: { queues: port } }
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { events: port, ...always }, 'Got back queues port from prefs.arc')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { events: port, ...always }, 'Got back queues port from prefs.arc')
 
-  inventory = freshInv()
+  reset()
   inventory.inv.queues = []
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { events, ...always }, 'Got back default queues port')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { events, ...always }, 'Got back default queues port')
 
   await listen(t, events)
 
   // Automatic selection
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { events: 4445, ...always }, 'Automatically found port when default events port was occupied')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { events: 4445, ...always }, 'Automatically found port when default events port was occupied')
 
   // Blow up when specified
   try {
-    inventory = freshInv()
+    reset()
     inventory.inv.events = []
     inventory.inv._project.preferences.sandbox = { ports: { events } }
-    await getPorts({ inventory })
+    params = { inventory, update }
+    await getPorts(params)
   }
   catch (err) {
     t.match(err.message, /Port 4444 \(events\) is already in use/, 'Got error: ' + err.message)
@@ -149,33 +168,36 @@ test('Events port selection', async t => {
 
 test('Tables port selection', async t => {
   t.plan(6)
-  let inventory, result
   let tables = 5555
 
-  inventory = freshInv()
+  reset()
   inventory.inv.tables = []
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { tables, ...always }, 'Got back default tables port')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { tables, ...always }, 'Got back default tables port')
 
-  inventory = freshInv()
+  reset()
   inventory.inv._project.manifest = null
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { tables, ...always }, 'Got back default tables port when default manifest is used')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { tables, ...always }, 'Got back default tables port when default manifest is used')
 
   let port = 1234
-  inventory = freshInv()
+  reset()
   inventory.inv.tables = []
   inventory.inv._project.preferences.sandbox = { ports: { tables: port } }
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { tables: port, ...always }, 'Got back tables port from prefs.arc')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { tables: port, ...always }, 'Got back tables port from prefs.arc')
 
   let envVar = 2345
   process.env.ARC_DB_EXTERNAL = true
   process.env.ARC_TABLES_PORT = envVar
   await listen(t, envVar)
-  inventory = freshInv()
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { tables: envVar, ...always }, 'Got back occupied tables port for external DB')
+  reset()
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { tables: envVar, ...always }, 'Got back occupied tables port for external DB')
   await stopListening(t)
   delete process.env.ARC_DB_EXTERNAL
   delete process.env.ARC_TABLES_PORT
@@ -183,17 +205,19 @@ test('Tables port selection', async t => {
   await listen(t, tables)
 
   // Automatic selection
-  inventory = freshInv()
+  reset()
   inventory.inv.tables = []
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { tables: 5556, ...always }, 'Automatically found port when default tables port was occupied')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { tables: 5556, ...always }, 'Automatically found port when default tables port was occupied')
 
   // Blow up when specified
   try {
-    inventory = freshInv()
+    reset()
     inventory.inv.tables = []
     inventory.inv._project.preferences.sandbox = { ports: { tables } }
-    await getPorts({ inventory })
+    params = { inventory, update }
+    await getPorts(params)
   }
   catch (err) {
     t.match(err.message, /Port 5555 \(tables\) is already in use/, 'Got error: ' + err.message)
@@ -204,29 +228,30 @@ test('Tables port selection', async t => {
 
 test('_arc port selection', async t => {
   t.plan(2)
-  let inventory, result
   let _arc = 2222
 
-  inventory = freshInv()
-  result = await getPorts({ inventory })
-  t.deepEqual(result, always, 'Got back default _arc port')
+  reset()
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, always, 'Got back default _arc port')
 
   await listen(t, _arc)
-  result = await getPorts({ inventory })
-  t.deepEqual(result, { _arc: 2223 }, 'Automatically found port when default _arc port was occupied')
+  params = { inventory, update }
+  await getPorts(params)
+  t.deepEqual(params.ports, { _arc: 2223 }, 'Automatically found port when default _arc port was occupied')
   await stopListening(t)
 })
 
 test('Specified port conflict', async t => {
   t.plan(1)
-  let inventory, http, tables
-  http = tables = 1234
+  let http = 1234, tables = 1234
   try {
-    inventory = freshInv()
+    reset()
     inventory.inv.http = []
     inventory.inv.tables = []
     inventory.inv._project.preferences.sandbox = { ports: { http, tables } }
-    await getPorts({ inventory })
+    params = { inventory, update }
+    await getPorts(params)
   }
   catch (err) {
     t.match(err.message, /Port conflict found on 1234/, 'Got error: ' + err.message)

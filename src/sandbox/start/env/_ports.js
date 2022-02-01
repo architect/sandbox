@@ -7,7 +7,7 @@ let n = idk => Number(idk)
  * Default HTTP port of 3333 should be considered fixed, while all others can change as necessary
  */
 module.exports = function getPorts (params, callback) {
-  let { port, /* ports, */ inventory } = params
+  let { port, /* ports, */ inventory, update } = params
   let { inv } = inventory
   let { manifest, preferences } = inv._project
   let prefs = preferences?.sandbox?.ports
@@ -54,7 +54,15 @@ module.exports = function getPorts (params, callback) {
     },
   ], function done (err) {
     if (err) callback(err)
-    else callback(null, ports)
+    else {
+      params.ports = ports
+      update.verbose.done(`Using ports: ` +
+                          `http: ${ports.http || 'n/a'}, ` +
+                          `events/queues: ${ports.events || 'n/a'}, ` +
+                          `tables: ${ports.tables || 'n/a'}, ` +
+                          `_arc: ${ports._arc || 'n/a'}`)
+      callback()
+    }
   })
 }
 

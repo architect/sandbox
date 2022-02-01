@@ -5,63 +5,27 @@ let { existsSync } = require('fs')
  * Initialize Lambdas with local environment variable settings
  * - e.g. if ARC_ENV=staging the Lambda env is populated by `@staging`, etc.
  */
-module.exports = function populateUserEnv (params, callback) {
+module.exports = function validateUserEnv (params, callback) {
   let { cwd, env: envOption, inventory, restart, update } = params
   let { inv } = inventory
   let { _project: proj } = inv
 
   let environment = process.env.ARC_ENV
-  let env = proj.env.local
+  let localEnv = proj.env.local
   let prefs = proj.preferences
-  let userEnv
+  let validName = /^[a-zA-Z0-9_]+$/
+  let foundEnv
 
-  function varsNotFound (env, file) {
+  function varsNotFound (env) {
     if (restart) return
-    let msg = `No ${env} environment variables found` + (file ? ` in ${file}` : '')
-    update.done(msg)
+    update.done(`No custom ${env} environment variables found`)
   }
   function print (env, file) {
     if (restart) return
     update.done(`Found ${env} environment variables: ${file}`)
   }
 
-  // User passed in an `env` object to the module API
-  if (envOption) {
-    userEnv = {}
-    let probs = []
-    try {
-      Object.entries(envOption).forEach(([ key, value ]) => {
-        if (typeof value === 'string') userEnv[key] = value
-        else probs.push(`- '${key}' must be a string`)
-      })
-    }
-    catch (err) {
-      return callback(err)
-    }
-    if (probs.length) {
-      let msg = `Sandbox \`env\` option parsing error:\n- ${probs.join('\n- ')}`
-      return callback(Error(msg))
-    }
-    print('testing', 'env option')
-  }
-
-  // Populate env vars
-  if (!userEnv && env?.[environment]) {
-    let dotEnvPath = join(cwd, '.env')
-    let dotEnv =    existsSync(dotEnvPath) && dotEnvPath
-    let local =     proj?.localPreferences?.env?.[environment] && proj.localPreferencesFile
-    let global =    proj?.globalPreferences?.env?.[environment] && proj.globalPreferencesFile
-    let filepath =  (dotEnv) && basename(dotEnv) ||
-                    (local && basename(local)) ||
-                    (global && `~${sep}${basename(global)}`)
-
-    if (dotEnv) userEnv = env.testing
-    else userEnv = env[environment]
-    print(environment, filepath)
-  }
-  if (!userEnv) varsNotFound(environment)
-
-  // User has a `pref[erence]s.arc` file
+  // Users may change ARC_ENV via preferences
   if (prefs) {
     // Local environment override
     if (prefs?.sandbox?.env) {
@@ -73,6 +37,42 @@ module.exports = function populateUserEnv (params, callback) {
       process.env.ARC_ENV = 'staging'
     }
   }
+
+  // User passed in an `env` object to the module API
+  if (envOption) {
+    let probs = []
+    try {
+      Object.entries(envOption).forEach(([ key, /* value */ ]) => {
+        if (!validName.test(key)) {
+          probs.push(`- Env var '${key}' is invalid, must be [a-zA-Z0-9_]`)
+        }
+        // TODO add value validation
+      })
+    }
+    catch (err) {
+      return callback(err)
+    }
+    if (probs.length) {
+      let msg = `Sandbox \`env\` option parsing error:\n- ${probs.join('\n- ')}`
+      return callback(Error(msg))
+    }
+    foundEnv = true
+    print(environment, 'env option')
+  }
+
+  // Populate env vars
+  if (!foundEnv && localEnv?.[environment]) {
+    let dotEnvPath = join(cwd, '.env')
+    let dotEnv =    existsSync(dotEnvPath) && dotEnvPath
+    let local =     proj?.localPreferences?.env?.[environment] && proj.localPreferencesFile
+    let global =    proj?.globalPreferences?.env?.[environment] && proj.globalPreferencesFile
+    let filepath =  (dotEnv) && basename(dotEnv) ||
+                    (local && basename(local)) ||
+                    (global && `~${sep}${basename(global)}`)
+    foundEnv = true
+    print(environment, filepath)
+  }
+  if (!foundEnv) varsNotFound(environment)
 
   // Wrap it up
   if (proj?.preferences?.sandbox?.useAWS || process.env.ARC_LOCAL) {
@@ -86,6 +86,5 @@ module.exports = function populateUserEnv (params, callback) {
     update.done(`Using ${process.env.ARC_ENV} live AWS infra: ${live.join(', ')}`)
   }
 
-  params.userEnv = userEnv || {}
   callback()
 }
