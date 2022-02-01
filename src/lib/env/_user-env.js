@@ -6,7 +6,7 @@ let { existsSync } = require('fs')
  * - e.g. if ARC_ENV=staging the Lambda env is populated by `@staging`, etc.
  */
 module.exports = function populateUserEnv (params, callback) {
-  let { cwd, update, inventory, env: envOption } = params
+  let { cwd, env: envOption, inventory, restart, update } = params
   let { inv } = inventory
   let { _project: proj } = inv
 
@@ -16,10 +16,12 @@ module.exports = function populateUserEnv (params, callback) {
   let userEnv
 
   function varsNotFound (env, file) {
+    if (restart) return
     let msg = `No ${env} environment variables found` + (file ? ` in ${file}` : '')
     update.done(msg)
   }
   function print (env, file) {
+    if (restart) return
     update.done(`Found ${env} environment variables: ${file}`)
   }
 

@@ -107,13 +107,10 @@ module.exports = function runWatcher (params) {
           // If the new Inventory is valid, stop here and let them fix it
           if (err) update.error(err)
           else {
-            inventory = result
+            params.inventory = inventory = result
             refreshInventory()
             update.status('Loaded latest Architect project manifest')
-
-            restart({ inventory, text: 'HTTP routes', type: 'http', update })
-            restart({ inventory, text: 'Events', type: 'events', update })
-            // TODO: run startup scripts
+            restart({ cwd, inventory, update })
           }
         })
       }, debounce)
@@ -136,7 +133,7 @@ module.exports = function runWatcher (params) {
         _inventory({ cwd }, (err, result) => {
           if (err) update.error(err)
           else {
-            inventory = result
+            params.inventory = inventory = result
             refreshInventory()
             update.status('Loaded latest project preferences')
           }
@@ -208,19 +205,17 @@ module.exports = function runWatcher (params) {
   return watcher
 }
 
-function restart ({ inventory, text, type, update }) {
+function restart ({ cwd, inventory, update }) {
   // Always attempt to close the http server, but only reload if necessary
-  sandbox[type].end(err => {
+  let start = Date.now()
+  sandbox.end(err => {
     if (err) update.error(err)
-    let start = Date.now()
-    if (inventory.inv[type]?.length) {
-      sandbox[type].start({ inventory, quiet: true }, (err) => {
-        if (err) update.error(err)
-        else {
-          let end = Date.now()
-          update.done(`${text} reloaded in ${end - start}ms`)
-        }
-      })
-    }
+    sandbox.start({ cwd, inventory, restart: true, update }, err => {
+      if (err) update.error(err)
+      else {
+        let end = Date.now()
+        update.done(`Sandbox reloaded in ${end - start}ms`)
+      }
+    })
   })
 }

@@ -124,31 +124,19 @@ test('Start, pause, and unpause the watcher', t => {
 })
 
 test('Watcher restarts services on manifest updates', t => {
-  t.plan(7)
+  t.plan(5)
   watcher = proxyquire(sut, {
     chokidar,
     '../sandbox': {
-      events: {
-        start: (params, cb) => {
-          t.pass('Restarted events')
-          t.ok(params.inventory._restarted, 'Passed updated Inventory to events.start')
-          cb()
-        },
-        end: (cb) => {
-          t.pass('Ended events')
-          cb()
-        },
+      start: (params, cb) => {
+        t.pass('Restarted Sandbox')
+        t.ok(params.restart, 'Passed restart option sandbox.start')
+        t.ok(params.inventory._restarted, 'Passed updated Inventory to sandbox.start')
+        cb()
       },
-      http: {
-        start: (params, cb) => {
-          t.pass('Restarted HTTP')
-          t.ok(params.inventory._restarted, 'Passed updated Inventory to http.start')
-          cb()
-        },
-        end: (cb) => {
-          t.pass('Ended HTTP')
-          cb()
-        },
+      end: (cb) => {
+        t.pass('Ended Sandbox')
+        cb()
       },
     },
     '@architect/inventory': (params, callback) => {

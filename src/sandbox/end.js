@@ -1,36 +1,27 @@
 let series = require('run-series')
+let _arc = require('../arc')
+let http = require('../http')
+let events = require('../events')
+let tables = require('../tables')
 
-module.exports = function end (server, callback) {
-  let { events, http, tables, _arc, inventory, update } = server
+module.exports = function end (params, callback) {
+  let { inventory, update } = params
   let { inv } = inventory
 
-  // Set up promise if there is no callback
-  let promise
-  if (!callback) {
-    promise = new Promise(function (res, rej) {
-      callback = function (err, result) {
-        err ? rej(err) : res(result)
-      }
-    })
-  }
-
   series([
-    function _httpServer (callback) {
-      if (http) http.end(callback)
-      else callback()
+    function (callback) {
+      http.end(callback)
     },
-    function _eventBus (callback) {
-      if (events) events.end(callback)
-      else callback()
+    function (callback) {
+      events.end(callback)
     },
-    function _dynamo (callback) {
-      if (tables) tables.end(callback)
-      else callback()
+    function (callback) {
+      tables.end(callback)
     },
-    function _internal (callback) {
+    function (callback) {
       _arc.end(callback)
     },
-    function _plugins (callback) {
+    function (callback) {
       let endPlugins = inv.plugins?._methods?.sandbox?.end
       if (endPlugins) {
         let start = Date.now()
@@ -52,13 +43,11 @@ module.exports = function end (server, callback) {
       }
       else callback()
     }
-  ], function closed (err) {
+  ], function (err) {
     if (err) callback(err)
     else {
       let msg = 'Sandbox successfully shut down'
       callback(null, msg)
     }
   })
-
-  return promise
 }

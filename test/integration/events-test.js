@@ -3,10 +3,10 @@ let test = require('tape')
 let http = require('http')
 let { existsSync, mkdirSync, readFileSync, rmSync, statSync } = require('fs')
 let { join } = require('path')
-let { events } = require('../../src')
+let sandbox = require('../../src')
 let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
-let { port, quiet, _refreshInventory, run, startup, shutdown } = require('../utils')
+let { run, startup, shutdown } = require('../utils')
 let eventsPort = 4444
 
 // Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally
@@ -52,7 +52,7 @@ function checkFile (t, file, message) {
 
 test('Set up env', t => {
   t.plan(1)
-  t.ok(events, 'Events module is present')
+  t.ok(sandbox, 'Got Sandbox')
 })
 
 test('Run events tests', t => {
@@ -63,18 +63,8 @@ test('Run events tests', t => {
 function runTests (runType, t) {
   let mode = `[Events / ${runType}]`
 
-  t.test(`${mode} Async events.start`, async t => {
-    if (runType === 'module') {
-      t.plan(1)
-      try {
-        let result = await events.start({ cwd: join(mock, 'normal'), port, quiet, _refreshInventory })
-        t.equal(result, 'Event bus successfully started', 'Events started (async)')
-      }
-      catch (err) {
-        t.fail(err)
-      }
-    }
-    else await startup[runType].async(t, 'normal')
+  t.test(`${mode} Start Sandbox`, t => {
+    startup[runType](t, 'normal')
   })
 
   t.test(`${mode} arc.events.publish (normal)`, t => {
@@ -150,31 +140,6 @@ function runTests (runType, t) {
     req.end('\n')
   })
 
-  t.test(`${mode} Async events.end`, async t => {
-    if (runType === 'module') {
-      t.plan(1)
-      try {
-        let ended = await events.end()
-        t.equal(ended, 'Event bus successfully shut down', 'Events ended')
-      }
-      catch (err) {
-        t.fail(err)
-      }
-    }
-    else await shutdown[runType].async(t)
-  })
-
-  t.test(`${mode} Sync events.start`, t => {
-    if (runType === 'module') {
-      t.plan(1)
-      events.start({ cwd: join(mock, 'normal'), port, quiet, _refreshInventory }, function (err, result) {
-        if (err) t.fail(err)
-        else t.equal(result, 'Event bus successfully started', 'Events started (sync)')
-      })
-    }
-    else startup[runType](t, 'normal')
-  })
-
   t.test(`${mode} arc.queues.publish (normal)`, t => {
     t.plan(5)
     setup(t)
@@ -229,14 +194,7 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} Sync events.end`, t => {
-    if (runType === 'module') {
-      t.plan(1)
-      events.end(function (err, result) {
-        if (err) t.fail(err)
-        else t.equal(result, 'Event bus successfully shut down', 'Events ended')
-      })
-    }
-    else shutdown[runType](t)
+  t.test(`${mode} Shut down Sandbox`, t => {
+    shutdown[runType](t)
   })
 }

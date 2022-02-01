@@ -1,7 +1,7 @@
 let invoker = require('../invoke-http')
 
 module.exports = function reg (app, params) {
-  let { apiType, inventory, update } = params
+  let { apiType, inventory, restart, update } = params
 
   inventory.inv.http.forEach(lambda => {
     // ASAP handled by middleware
@@ -33,5 +33,5 @@ module.exports = function reg (app, params) {
     }
   })
 
-  update.done(`@http server started`)
+  if (!restart) update.done(`@http server started`)
 }
