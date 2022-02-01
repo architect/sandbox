@@ -1,7 +1,5 @@
-let series = require('run-series')
 let { banner } = require('@architect/utils')
 let userEnv = require('./_user-env')
-let ports = require('./_ports')
 
 let allowed = [ 'testing', 'staging', 'production' ]
 
@@ -32,12 +30,6 @@ module.exports = function populateEnv (params, callback) {
     banner(params)
   }
 
-  series([
-    function (callback) {
-      userEnv(params, callback)
-    },
-    function (callback) {
-      ports(params, callback)
-    },
-  ], callback)
+  // Validate / print status of userland env vars
+  userEnv(params, callback)
 }
