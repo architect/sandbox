@@ -7,6 +7,7 @@ let create = require('@architect/create')
 let { chars } = require('@architect/utils')
 
 let env = require('./env')
+let ports = require('./ports')
 let checkRuntimes = require('./check-runtimes')
 let maybeHydrate = require('./maybe-hydrate')
 let _arc = require('../../arc')
@@ -26,6 +27,11 @@ module.exports = function _start (params, callback) {
     // Set up + validate env vars, print the banner
     function (callback) {
       env(params, callback)
+    },
+
+    // Get the ports for services
+    function (callback) {
+      ports(params, callback)
     },
 
     // Initialize any missing functions on startup
