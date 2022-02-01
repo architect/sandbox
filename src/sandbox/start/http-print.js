@@ -1,12 +1,19 @@
 let { sep } = require('path')
 let chalk = require('chalk')
+let httpConfig = require('../../http/_config')
 
 /**
  * Pretty print @http + @ws routes
  */
-module.exports = function prettyPrint ({ apiType, cwd, inventory, ports, update }) {
+module.exports = function prettyPrint (params, callback) {
+  let { cwd, inventory, ports, restart, update } = params
   let { http, ws } = inventory.inv
 
+  if (restart || (!http && !ws)) {
+    return callback()
+  }
+
+  let { apiType } = httpConfig(params)
   let padL = str => str.padStart(7)
   let padR = str => str.padEnd(45, '.')
   let strip = str => str.replace(cwd, '').substr(1)
@@ -44,4 +51,5 @@ module.exports = function prettyPrint ({ apiType, cwd, inventory, ports, update 
     let link = chalk.green.bold.underline(`http://localhost:${ports.http}\n`)
     update.raw(`\n    ${link}`)
   }
+  callback()
 }

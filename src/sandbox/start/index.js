@@ -14,7 +14,6 @@ let http = require('../../http')
 let events = require('../../events')
 let tables = require('../../tables')
 
-let httpConfig = require('../../http/_config')
 let httpPrint = require('./http-print')
 let startupScripts = require('./startup-scripts')
 
@@ -78,14 +77,7 @@ module.exports = function _start (params, callback) {
 
     // Pretty print routes
     function (callback) {
-      if (!restart) {
-        let { http, ws } = inv
-        if (http || ws) {
-          let { apiType } = httpConfig(params)
-          httpPrint({ apiType, ...params })
-        }
-      }
-      callback()
+      httpPrint(params, callback)
     },
 
     // Print startup time
