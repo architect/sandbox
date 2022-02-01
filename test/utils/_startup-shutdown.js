@@ -16,7 +16,6 @@ let startup = {
       port,
       quiet: print !== undefined ? false : quiet,
       ...options,
-      _refreshInventory: true,
     }, (err, result) => {
       if (err) t.fail(err)
       else {

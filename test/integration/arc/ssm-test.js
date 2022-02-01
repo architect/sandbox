@@ -39,6 +39,7 @@ test('Run internal Arc SSM service tests', t => {
 
 function runTests (runType, t) {
   let mode = `[Internal Arc SSM services / ${runType}]`
+
   t.test(`${mode} Start Sandbox ('normal' mock app)`, t => {
     startup[runType](t, 'normal')
   })

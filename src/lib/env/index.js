@@ -6,7 +6,7 @@ let ports = require('./_ports')
 let allowed = [ 'testing', 'staging', 'production' ]
 
 module.exports = function populateEnv (params, callback) {
-  let { cwd, inventory, update } = params
+  let { cwd, inventory, restart, update } = params
   let { inv } = inventory
   let { ARC_ENV } = process.env
 
@@ -19,16 +19,18 @@ module.exports = function populateEnv (params, callback) {
   }
 
   // Warn about a missing manifest (if appropriate)
-  if (!inv._project.manifest) {
+  if (!inv._project.manifest && !restart) {
     update.warn('No Architect project manifest found, using default project')
   }
-  else {
+  else if (!restart) {
     let file = inv._project.manifest.replace(cwd, '').substr(1)
     update.done(`Found Architect project manifest: ${file}`)
   }
 
   // Print the banner
-  banner(params)
+  if (!restart) {
+    banner(params)
+  }
 
   series([
     function (callback) {

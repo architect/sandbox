@@ -1,43 +1,27 @@
-// Services + start/end
-let service = require('./_service-factory')
 let _start = require('./start')
 let _end = require('./end')
 
-let inv = require('@architect/inventory')
+let _inventory = require('@architect/inventory')
 let { getFlags } = require('../lib')
 let { updater } = require('@architect/utils')
-let { logLevel, quiet } = getFlags()
-let update = updater('Sandbox', { logLevel, quiet })
+let update
 
-/**
- * Server - contains Sandbox service singletons that can operate independently
- */
-let server = {
-  events: undefined,
-  http:   undefined,
-  tables: undefined,
-  _arc:   undefined,
-}
-
-/**
- * Core Sandbox services
- */
-let params = { inventory: null, logLevel, quiet, server, update }
-let events = service(params, 'events')
-let http =   service(params, 'http')
-let tables = service(params, 'tables')
-let _arc =   service(params, '_arc')
+// We can't reinventory on shutdown as the state of the project may have changed, so we'll stash it in global scope until the next start or refresh
+let runningInventory = null
 
 /**
  * Run startup routines and start all services
  */
 function start (options, callback) {
   options = options || {}
+  let { logLevel, quiet } = getFlags()
   options.cwd = options.cwd || process.cwd()
+  options.quiet = options?.quiet !== undefined ? options.quiet : quiet
+  options.symlink = options?.symlink !== undefined ? options.symlink : true
 
   update = updater('Sandbox', {
     logLevel: options?.logLevel || logLevel,
-    quiet: options?.quiet !== undefined ? options.quiet : quiet,
+    quiet: options.quiet,
   })
 
   // Set up promise if there's no callback
@@ -51,26 +35,17 @@ function start (options, callback) {
   }
 
   function go () {
-    _start({
-      inventory: params.inventory,
-      update,
-      events,
-      http,
-      tables,
-      _arc,
-      server,
-      ...options,
-    }, callback)
+    _start({ update, ...options }, callback)
   }
   if (options.inventory) {
-    params.inventory = options.inventory
+    runningInventory = options.inventory
     go()
   }
   else {
-    inv({ cwd: options.cwd }, function (err, result) {
+    _inventory({ cwd: options.cwd }, function (err, result) {
       if (err) callback(err)
       else {
-        params.inventory = result
+        options.inventory = runningInventory = result
         go()
       }
     })
@@ -93,21 +68,14 @@ function end (callback) {
     })
   }
 
-  if (!params.inventory) {
+  if (!runningInventory) {
     callback(Error('Sandbox already shut down!'))
   }
   else {
-    _end({
-      events,
-      http,
-      tables,
-      _arc,
-      inventory: params.inventory,
-      update,
-    }, function (err, result) {
+    _end({ update, inventory: runningInventory }, function (err, result) {
       if (err) callback(err)
       else {
-        params.inventory = null
+        runningInventory = null
         callback(null, result)
       }
     })
@@ -116,4 +84,4 @@ function end (callback) {
   return promise
 }
 
-module.exports = { events, http, tables, _arc, start, end }
+module.exports = { start, end }

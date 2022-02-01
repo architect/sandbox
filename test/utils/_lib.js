@@ -68,8 +68,6 @@ let run = (runTests, t) => {
   }
 }
 
-let _refreshInventory = true
-
 module.exports = {
   b64dec,
   copy,
@@ -82,5 +80,4 @@ module.exports = {
   run,
   url,
   wsUrl,
-  _refreshInventory
 }

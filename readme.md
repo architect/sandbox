@@ -5,7 +5,6 @@
 > Architect local development environment: run full Architect projects locally & offline in an in-memory sandbox
 
 [![GitHub CI status](https://github.com/architect/sandbox/workflows/Node%20CI/badge.svg)](https://github.com/architect/sandbox/actions?query=workflow%3A%22Node+CI%22)
-<!-- [![codecov](https://codecov.io/gh/architect/sandbox/branch/master/graph/badge.svg)](https://codecov.io/gh/architect/sandbox) -->
 
 ## Install
 
@@ -104,56 +103,6 @@ Invokes `callback` once everything is ready, or returns a `promise` if `callback
 ### `sandbox.end([callback]) → [Promise]`
 
 Shuts down anything started by `sandbox.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
-
----
-
-### Individual Sandbox services
-
-> Useful for starting a subset of Sandbox's service functionality in your tests, either for increased isolation, or to enhance throughput
-
-
-### Events (`@events`, `@queues`)
-
-### `sandbox.events.start(options[, callback]) → [Promise]`
-
-Starts up a local event bus, enabling interprocess communication for [`@queues`][queues] and [`@events`][events] functions (if defined in your Architect project manifest).
-
-Invokes `callback` once everything is ready, or returns a `promise` if `callback` is falsy.
-
-
-### `sandbox.events.end([callback]) → [Promise]`
-
-Shuts down anything started by `sandbox.events.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
-
----
-
-### HTTP (`@http`, `@static`, `@ws`)
-
-### `sandbox.http.start(options[, callback]) → [Promise]`
-
-Starts up a local HTTP and WebSocket servers, enabling [`@http`][http] or [`@websocket`][websocket] functions (if defined in your Architect project manifest).
-
-Invokes `callback` once everything is ready, or returns a `promise` if `callback` is falsy.
-
-
-### `sandbox.http.end([callback]) → [Promise]`
-
-Shuts down anything started by `sandbox.http.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
-
----
-
-### Tables (`@tables`, `@indexes`)
-
-### `sandbox.tables.start(options[, callback]) → [Promise]`
-
-Starts up a [local in-memory DynamoDB server](https://www.npmjs.com/package/dynalite), enabling [`@tables`][tables] or [`@indexes`][indexes] functions (if defined in your Architect project manifest).
-
-Invokes `callback` once everything is ready, or returns a `promise` if `callback` is falsy.
-
-
-### `sandbox.tables.end([callback]) → [Promise]`
-
-Shuts down anything started by `sandbox.tables.start()`. Invokes `callback` once shut down, or returns a `promise` if `callback` is falsy.
 
 ---
 

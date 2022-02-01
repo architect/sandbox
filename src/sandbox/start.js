@@ -5,110 +5,106 @@ let hydrate = require('@architect/hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
 let { chars } = require('@architect/utils')
-let { checkRuntimes, env, maybeHydrate } = require('../lib')
+
+let { checkRuntimes, env: _env, maybeHydrate } = require('../lib')
+let _arc = require('../arc')
+let http = require('../http')
+let events = require('../events')
+let tables = require('../tables')
+
 let httpConfig = require('../http/_config')
 let prettyPrint = require('../http/_pretty-print')
 let startupScripts = require('./_startup-scripts')
 
 module.exports = function _start (params, callback) {
   let start = Date.now()
-  let {
-    inventory,
-    // Settings
-    apigateway,
-    cwd,
-    quiet,
-    symlink = true,
-    // Everything else
-    events,
-    http,
-    tables,
-    _arc,
-    update,
-  } = params
-  let { inv } = inventory
-
-  // Set `all` to instruct service modules not to hydrate again, etc.
-  params.all = true
+  let { cwd, inventory, restart, symlink, update } = params
+  let { inv } = params.inventory
 
   series([
     // Set up Arc + userland env vars + print the banner
-    function _env (callback) {
-      env(params, callback)
+    function (callback) {
+      _env(params, callback)
     },
 
     // Initialize any missing functions on startup
-    function _init (callback) {
+    function (callback) {
       let autocreateEnabled = inv._project.preferences?.create?.autocreate
       if (autocreateEnabled) {
-        create({ inventory }, callback)
+        create(params, callback)
       }
       else callback()
     },
 
     // Internal Arc services
-    function _internal (callback) {
+    function (callback) {
       _arc.start(params, callback)
     },
 
     // Start DynamoDB (@tables)
-    function _tables (callback) {
+    function (callback) {
       tables.start(params, callback)
     },
 
     // Start event bus (@events) listening for `arc.event.publish` events
-    function _events (callback) {
+    function (callback) {
       events.start(params, callback)
     },
 
     // Start HTTP + WebSocket (@http, @ws) server
-    function _http (callback) {
+    function (callback) {
       http.start(params, callback)
     },
 
     // Loop through functions and see if any need dependency hydration
-    function _maybeHydrate (callback) {
-      maybeHydrate({ cwd, inventory, quiet }, callback)
+    function (callback) {
+      maybeHydrate(params, callback)
     },
 
     // ... then hydrate Architect project files into functions
-    function _hydrateShared (callback) {
-      hydrate.shared({ cwd, inventory, quiet, symlink }, function next (err) {
+    function (callback) {
+      let quiet = params.quiet
+      if (restart) quiet = true
+      hydrate.shared({ inventory, quiet, symlink }, function next (err) {
         if (err) callback(err)
         else {
-          update.done('Project files hydrated into functions')
+          if (!restart) update.done('Project files hydrated into functions')
           callback()
         }
       })
     },
 
     // Pretty print routes
-    function _printRoutes (callback) {
-      let { http, ws } = inventory.inv
-      if (http || ws) {
-        let { apiType } = httpConfig({ apigateway, cwd, inv })
-        prettyPrint({ apiType, ...params })
+    function (callback) {
+      if (!restart) {
+        let { http, ws } = inv
+        if (http || ws) {
+          let { apiType } = httpConfig(params)
+          prettyPrint({ apiType, ...params })
+        }
       }
       callback()
     },
 
     // Print startup time
-    function _ready (callback) {
-      let finish = Date.now()
-      update.done(`Started in ${finish - start}ms`)
-      let isWin = process.platform.startsWith('win')
-      let ready = isWin
-        ? chars.done
-        : chalk.green.dim('❤︎')
-      let readyMsg = chalk.white('Local environment ready!')
-      update.raw(`${ready} ${readyMsg}\n`)
+    function (callback) {
+      if (!restart) {
+        let finish = Date.now()
+        update.done(`Started in ${finish - start}ms`)
+        let isWin = process.platform.startsWith('win')
+        let ready = isWin
+          ? chars.done
+          : chalk.green.dim('❤︎')
+        let readyMsg = chalk.white('Local environment ready!')
+        update.raw(`${ready} ${readyMsg}\n`)
+      }
       callback()
     },
 
     // Check aws-sdk installation status if installed globally
-    function _checkAWS_SDK (callback) {
+    function (callback) {
       let dir = __dirname
-      if (!dir.startsWith(cwd) && !process.pkg) {
+      if (!dir.startsWith(cwd) && !process.pkg && !restart) {
         let awsDir = join(dir.split('@architect')[0], 'aws-sdk', 'package.json')
         if (!exists(awsDir)) {
           update.warn(`Possible global install of Architect without a global install of AWS-SDK, please run: npm i -g aws-sdk`)
@@ -118,12 +114,13 @@ module.exports = function _start (params, callback) {
     },
 
     // Check runtime versions
-    function _checkRuntimes (callback) {
-      checkRuntimes(params, callback)
+    function (callback) {
+      if (!restart) checkRuntimes(params, callback)
+      else callback()
     },
 
     // Kick off any Sandbox startup plugins
-    function _plugins (callback) {
+    function (callback) {
       let startPlugins = inv.plugins?._methods?.sandbox?.start
       if (startPlugins) {
         let start = Date.now()
@@ -147,14 +144,15 @@ module.exports = function _start (params, callback) {
     },
 
     // Run startup scripts (if present)
-    function _runStartupScripts (callback) {
-      startupScripts(params, callback)
+    function (callback) {
+      if (!restart) startupScripts(params, callback)
+      else callback()
     },
   ],
-  function _done (err) {
+  function (err) {
     if (err) callback(err)
     else {
-      if (process.env.ARC_AWS_CREDS === 'dummy') {
+      if (process.env.ARC_AWS_CREDS === 'dummy' && !restart) {
         update.verbose.warn('Missing or invalid AWS credentials or credentials file, using dummy credentials (this is probably ok)')
       }
       callback(null, 'Sandbox successfully started')
