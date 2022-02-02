@@ -16,6 +16,7 @@ let events = require('../../events')
 let tables = require('../../tables')
 
 let httpPrint = require('./http-print')
+let plugins = require('../_plugins')
 let startupScripts = require('./startup-scripts')
 
 module.exports = function _start (params, callback) {
@@ -115,32 +116,13 @@ module.exports = function _start (params, callback) {
 
     // Check runtime versions
     function (callback) {
-      if (!restart) checkRuntimes(params, callback)
-      else callback()
+      checkRuntimes(params, callback)
     },
 
     // Kick off any Sandbox startup plugins
     function (callback) {
-      let startPlugins = inv.plugins?._methods?.sandbox?.start
-      if (startPlugins) {
-        let start = Date.now()
-        let plural = startPlugins.length > 1 ? 's' : ''
-        update.status(`Running ${startPlugins.length} Sandbox startup plugin${plural}`)
-        let params = { arc: inv._project.arc, inventory }
-        async function runPlugins () {
-          for (let plugin of startPlugins) {
-            await plugin(params)
-          }
-        }
-        runPlugins()
-          .then(() => {
-            let finish = Date.now()
-            update.done(`Ran Sandbox startup plugin${plural} in ${finish - start}ms`)
-            callback()
-          })
-          .catch(callback)
-      }
-      else callback()
+      let options = { method: 'start', name: 'startup' }
+      plugins(params, options, callback)
     },
 
     // Run startup scripts (if present)
@@ -154,7 +136,7 @@ module.exports = function _start (params, callback) {
       if (process.env.ARC_AWS_CREDS === 'dummy' && !restart) {
         update.verbose.warn('Missing or invalid AWS credentials or credentials file, using dummy credentials (this is probably ok)')
       }
-      callback(null, 'Sandbox successfully started')
+      callback(null, params.ports)
     }
   })
 }

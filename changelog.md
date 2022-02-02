@@ -18,6 +18,7 @@
   - (Probably) never again will your multiple simultaneous Sandbox instances conflict with each other!
   - HTTP port selection still defaults to `3333` and will halt Sandbox from starting if it conflicts (since it's presumably what you're expecting to see in your browser)
   - Any manually specified port conflicts will also halt Sandbox from starting
+- Added Architect + userland env vars to startup scripts
 
 
 ### Changed
@@ -40,6 +41,7 @@
 - Internal change: stopped populating default `arc-sessions` + `data` tables; this was a quirky holdover behavior from early Architect that differed Sandbox from live AWS behavior
 - Prefer `ARC_SESSION_TABLE_NAME` to `SESSION_TABLE_NAME` env var for Architect's built-in sessions management
   - All non-namespaced names will continue to be supported until at least Architect 11; we suggest changing them over to the namespaced equivalents as soon as is convenient
+- Watcher now restarts Sandbox on preference file changes to ensure port changes and env vars are repopulated
 
 ---
 

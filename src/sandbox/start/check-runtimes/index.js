@@ -15,6 +15,9 @@ let getVer = /\d+\.\d+.\d+/g
  * - However if we're halting on error, do not call back until all checks are complete
  */
 module.exports = function checkRuntimeVersions (params, callback) {
+  if (!params.restart) {
+    return callback()
+  }
   let { cwd, inventory, runtimeCheck = 'warn', update } = params
   let { aws, lambdasBySrcDir } = inventory.inv
 
