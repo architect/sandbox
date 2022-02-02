@@ -7,7 +7,7 @@ let { updater } = require('@architect/utils')
 let update
 
 // We can't reinventory on shutdown as the state of the project may have changed, so we'll stash it in global scope until the next start or refresh
-let runningInventory = null
+let running = {}
 
 /**
  * Run startup routines and start all services
@@ -35,17 +35,23 @@ function start (options, callback) {
   }
 
   function go () {
-    _start({ update, ...options }, callback)
+    _start({ update, ...options }, function (err, ports) {
+      if (err) callback(err)
+      else {
+        running.ports = ports
+        callback(null, 'Sandbox successfully started')
+      }
+    })
   }
   if (options.inventory) {
-    runningInventory = options.inventory
+    running.inventory = options.inventory
     go()
   }
   else {
     _inventory({ cwd: options.cwd }, function (err, result) {
       if (err) callback(err)
       else {
-        options.inventory = runningInventory = result
+        options.inventory = running.inventory = result
         go()
       }
     })
@@ -68,15 +74,16 @@ function end (callback) {
     })
   }
 
-  if (!runningInventory) {
-    callback(Error('Sandbox already shut down!'))
+  let { inventory, ports } = running
+  if (!inventory || !ports) {
+    callback(Error('Sandbox is not running'))
   }
   else {
-    _end({ update, inventory: runningInventory }, function (err, result) {
+    _end({ update, inventory, ports }, function (err) {
       if (err) callback(err)
       else {
-        runningInventory = null
-        callback(null, result)
+        running = {}
+        callback(null, 'Sandbox successfully shut down')
       }
     })
   }

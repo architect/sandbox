@@ -1,8 +1,9 @@
 let { exec } = require('child_process')
 let series = require('run-series')
+let { userEnvVars } = require('../../lib')
 
 module.exports = function startupScripts (params, callback) {
-  let { cwd, inventory, update, userEnv, restart, runStartupCommands = true } = params
+  let { cwd, inventory, update, restart, runStartupCommands = true } = params
   if (restart) {
     return callback()
   }
@@ -13,10 +14,11 @@ module.exports = function startupScripts (params, callback) {
     let now = Date.now()
     let ARC_INV = JSON.stringify(inventory.inv)
     let ARC_RAW = JSON.stringify(inventory.inv._project.arc)
+    let envVars = userEnvVars(params)
     update.status('Running startup scripts')
     let ops = prefs['sandbox-startup'].map(cmd => {
       return function (callback) {
-        let env = { ARC_INV, ARC_RAW, ...userEnv, ...process.env }
+        let env = { ...process.env, ARC_INV, ARC_RAW, ...envVars }
         exec(cmd, { cwd, env }, function (err, stdout, stderr) {
           if (err) callback(err)
           else {

@@ -157,47 +157,66 @@ test('Watcher reinventories on preference file changes', t => {
   function reinventory (t) {
     return (params, callback) => {
       t.equal(params.cwd, cwd, 'Called Inventory')
+      inventory._restarted = true
       callback(null, inventory)
-      t.equal(log, 'Loaded latest project preferences', 'Reinventoried')
+      t.match(log, /Loaded latest project preferences/, 'Reinventoried')
       log = ''
+    }
+  }
+  function restartSandbox (t) {
+    return {
+      start: (params, cb) => {
+        t.pass('Restarted Sandbox')
+        t.ok(params.restart, 'Passed restart option sandbox.start')
+        t.ok(params.inventory._restarted, 'Passed updated Inventory to sandbox.start')
+        cb()
+      },
+      end: (cb) => {
+        t.pass('Ended Sandbox')
+        cb()
+      },
     }
   }
 
   t.test('.env', t => {
-    t.plan(2)
+    t.plan(6)
     watcher = proxyquire(sut, {
       chokidar,
-      '@architect/inventory': reinventory(t)
+      '@architect/inventory': reinventory(t),
+      '../sandbox': restartSandbox(t),
     })
     let watch = watcher({ ...basicParams, inventory })
     watch.emit('all', 'update', join(cwd, '.env'))
   })
 
   t.test('prefs.arc', t => {
-    t.plan(2)
+    t.plan(6)
     watcher = proxyquire(sut, {
       chokidar,
-      '@architect/inventory': reinventory(t)
+      '@architect/inventory': reinventory(t),
+      '../sandbox': restartSandbox(t),
     })
     let watch = watcher({ ...basicParams, inventory })
     watch.emit('all', 'update', join(cwd, 'prefs.arc'))
   })
 
   t.test('preferences.arc', t => {
-    t.plan(2)
+    t.plan(6)
     watcher = proxyquire(sut, {
       chokidar,
-      '@architect/inventory': reinventory(t)
+      '@architect/inventory': reinventory(t),
+      '../sandbox': restartSandbox(t),
     })
     let watch = watcher({ ...basicParams, inventory })
     watch.emit('all', 'update', join(cwd, 'preferences.arc'))
   })
 
   t.test('Global preferences', t => {
-    t.plan(2)
+    t.plan(6)
     watcher = proxyquire(sut, {
       chokidar,
-      '@architect/inventory': reinventory(t)
+      '@architect/inventory': reinventory(t),
+      '../sandbox': restartSandbox(t),
     })
     let watch = watcher({ ...basicParams, inventory })
     let globalPrefs = join(cwd, 'lolidk')

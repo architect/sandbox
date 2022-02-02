@@ -136,6 +136,7 @@ module.exports = function runWatcher (params) {
             params.inventory = inventory = result
             refreshInventory()
             update.status('Loaded latest project preferences')
+            restart({ cwd, inventory, update })
           }
         })
       }, debounce)
