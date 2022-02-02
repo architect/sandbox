@@ -5,7 +5,7 @@ let http = require('../../http')
 let events = require('../../events')
 let tables = require('../../tables')
 
-module.exports = function end (params, callback) {
+module.exports = function _end (params, callback) {
   series([
     function (callback) {
       let options = { method: 'end', name: 'shutdown' }

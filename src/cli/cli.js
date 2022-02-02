@@ -1,8 +1,5 @@
 #!/usr/bin/env node
-let _inventory = require('@architect/inventory')
 let cli = require('./index.js')
-let { getFlags } = require('../lib')
-let flags = getFlags()
 let pkg = require('../../package.json')
 let update = require('update-notifier')
 let ver = pkg.version
@@ -12,32 +9,26 @@ let ver = pkg.version
  *   Same as the @architect/architect caller, but calls update notifier + sets own version
  */
 update({ pkg, shouldNotifyInNpmScript: true })
-  .notify({ boxenOpts: {
-    padding: 1,
-    margin: 1,
-    align: 'center',
-    borderColor: 'green',
-    borderStyle: 'round',
-    dimBorder: true
-  } })
+  .notify({
+    boxenOpts: {
+      padding: 1,
+      margin: 1,
+      align: 'center',
+      borderColor: 'green',
+      borderStyle: 'round',
+      dimBorder: true
+    }
+  })
 
 // Hit it
-_inventory({}, function (err, inventory) {
+cli({
+  needsValidCreds: false,
+  runtimeCheck: 'warn',
+  version: `Sandbox ${ver}`,
+},
+function _done (err) {
   if (err) {
     console.log(err)
     process.exit(1)
   }
-  cli({
-    needsValidCreds: false,
-    version: `Sandbox ${ver}`,
-    runtimeCheck: 'warn',
-    inventory,
-    ...flags,
-  },
-  function _done (err) {
-    if (err) {
-      console.log(err)
-      process.exit(1)
-    }
-  })
 })

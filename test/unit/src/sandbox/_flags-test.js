@@ -1,5 +1,5 @@
 let { join } = require('path')
-let sut = join(process.cwd(), 'src', 'lib', 'flags')
+let sut = join(process.cwd(), 'src', 'sandbox', '_flags')
 let flags = require(sut)
 let test = require('tape')
 let args = process.argv

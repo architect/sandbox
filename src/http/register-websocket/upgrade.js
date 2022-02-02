@@ -1,5 +1,5 @@
 let http = require('http')
-let makeRequestId = require('../../lib/request-id')
+let { makeRequestId } = require('../../lib')
 let invoke = require('../invoke-ws')
 
 /**

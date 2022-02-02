@@ -1,5 +1,5 @@
 let URL = require('url')
-let makeRequestId = require('../../lib/request-id')
+let { makeRequestId } = require('../../lib')
 let pool = require('../register-websocket/pool')
 
 /**
