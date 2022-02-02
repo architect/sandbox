@@ -22,12 +22,12 @@ test('Sandbox CLI interface', t => {
     data += chunk.toString()
     if (data.includes('Sandbox Started in') && !started) {
       started = true
-      t.pass('Sandbox started (binary)')
+      t.pass('Sandbox started')
     }
     // This is not an adequate fully-integrated file watcher test, but it is massively easier to test the watcher via its own interface than via the CLI, so here we are
     if (data.includes('Started file watcher') && !watcher) {
       watcher = true
-      t.pass('Sandbox file watcher started (binary)')
+      t.pass('Sandbox file watcher started')
       // Windows doesn't terminate child processes nicely, so yet another special case for that very special OS
       if (process.platform.startsWith('win')) {
         child.kill('SIGINT')

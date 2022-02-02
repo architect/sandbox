@@ -1,9 +1,8 @@
+let _inventory = require('@architect/inventory')
+let { updater } = require('@architect/utils')
+let getFlags = require('./_flags')
 let _start = require('./start')
 let _end = require('./end')
-
-let _inventory = require('@architect/inventory')
-let { getFlags } = require('../lib')
-let { updater } = require('@architect/utils')
 let update
 
 // We can't reinventory on shutdown as the state of the project may have changed, so we'll stash it in global scope until the next start or refresh
@@ -14,14 +13,11 @@ let running = {}
  */
 function start (options, callback) {
   options = options || {}
-  let { logLevel, quiet } = getFlags()
+  let flags = getFlags()
   options.cwd = options.cwd || process.cwd()
-  options.quiet = options?.quiet !== undefined ? options.quiet : quiet
-  options.symlink = options?.symlink !== undefined ? options.symlink : true
-
-  update = updater('Sandbox', {
-    logLevel: options?.logLevel || logLevel,
-    quiet: options.quiet,
+  options.update = update = updater('Sandbox', {
+    logLevel: options?.logLevel !== undefined ? options.logLevel : flags.logLevel,
+    quiet: options?.quiet !== undefined ? options.quiet : flags.quiet,
   })
 
   // Set up promise if there's no callback
@@ -35,7 +31,8 @@ function start (options, callback) {
   }
 
   function go () {
-    _start({ update, ...options }, function (err, ports) {
+    // TODO we should probably add some passed option sanitization here
+    _start({ ...flags, ...options }, function (err, ports) {
       if (err) callback(err)
       else {
         running.ports = ports

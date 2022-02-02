@@ -1,5 +1,5 @@
 let { getLambdaName } = require('@architect/utils')
-let makeRequestId = require('../lib/request-id')
+let { makeRequestId } = require('../lib')
 
 // See: https://docs.aws.amazon.com/lambda/latest/dg/ + nodejs|python|ruby + -context.html
 module.exports = function createLambdaContext (params) {

@@ -1,15 +1,9 @@
-let { updater } = require('@architect/utils')
-let { version: pkgVer } = require('../../package.json')
-
 let sandbox = require('../sandbox')
 let rehydrator = require('./_rehydrate')
 let watch = require('./_watcher')
 let stdin = require('./_stdin')
 
-module.exports = function cli (params = {}, callback) {
-  let { version, inventory, logLevel, quiet, symlink } = params
-  if (!version) version = `Sandbox ${pkgVer}`
-
+module.exports = function cli (params, callback) {
   sandbox.start(params, function watching (err) {
     if (err) {
       sandbox.end()
@@ -19,7 +13,7 @@ module.exports = function cli (params = {}, callback) {
     else if (callback) callback()
 
     // Setup
-    let update = updater('Sandbox', { logLevel, quiet })
+    let { inventory, quiet, symlink, update } = params
     let debounce = 100
 
     // Timestamper
