@@ -1,7 +1,7 @@
 let { spawn } = require('child_process')
 let { readdirSync } = require('fs')
 let kill = require('tree-kill')
-let { template } = require('../lib')
+let { template } = require('../../lib')
 let { head } = template
 const SIG = 'SIGINT'
 const arcStart = '__ARC__'
