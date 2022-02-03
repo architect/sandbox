@@ -1,10 +1,6 @@
-let { existsSync: exists } = require('fs')
-let { join } = require('path')
-let chalk = require('chalk')
 let hydrate = require('@architect/hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
-let { chars } = require('@architect/utils')
 
 let env = require('./env')
 let ports = require('./ports')
@@ -15,13 +11,13 @@ let http = require('../http')
 let events = require('../events')
 let tables = require('../tables')
 
-let httpPrint = require('./http-print')
+let printStatus = require('./print-status')
 let plugins = require('./plugins')
 let startupScripts = require('./startup-scripts')
 
 function _start (params, callback) {
   let start = Date.now()
-  let { cwd, inventory, restart, symlink, update } = params
+  let { inventory, restart, symlink, update } = params
   let { inv } = params.inventory
 
   series([
@@ -82,36 +78,9 @@ function _start (params, callback) {
       })
     },
 
-    // Pretty print routes
+    // Pretty print routes, startup time, aws-sdk installatation status, etc.
     function (callback) {
-      httpPrint(params, callback)
-    },
-
-    // Print startup time
-    function (callback) {
-      if (!restart) {
-        let finish = Date.now()
-        update.done(`Started in ${finish - start}ms`)
-        let isWin = process.platform.startsWith('win')
-        let ready = isWin
-          ? chars.done
-          : chalk.green.dim('❤︎')
-        let readyMsg = chalk.white('Local environment ready!')
-        update.raw(`${ready} ${readyMsg}\n`)
-      }
-      callback()
-    },
-
-    // Check aws-sdk installation status if installed globally
-    function (callback) {
-      let dir = __dirname
-      if (!dir.startsWith(cwd) && !process.pkg && !restart) {
-        let awsDir = join(dir.split('@architect')[0], 'aws-sdk', 'package.json')
-        if (!exists(awsDir)) {
-          update.warn(`Possible global install of Architect without a global install of AWS-SDK, please run: npm i -g aws-sdk`)
-        }
-      }
-      callback()
+      printStatus(params, start, callback)
     },
 
     // Check runtime versions
