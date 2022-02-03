@@ -1,7 +1,7 @@
 let _ssm = require('./_ssm')
 let _ws = require('./_ws')
 
-module.exports = function _arcListener ({ inventory }, req, res) {
+module.exports = function _arcListener (services, req, res) {
   let body = ''
 
   req.on('data', chunk => {
@@ -10,11 +10,11 @@ module.exports = function _arcListener ({ inventory }, req, res) {
 
   req.on('end', () => {
     if (req.url === '/_arc/ssm') {
-      _ssm({ inventory, body }, req, res)
+      _ssm({ body, services }, req, res)
       return
     }
     if (req.url.startsWith('/_arc/ws')) {
-      _ws({ inventory, body }, req, res)
+      _ws({ body }, req, res)
       return
     }
     res.statusCode = 404

@@ -2,8 +2,11 @@ let sandbox = require('../')
 let rehydrator = require('./_rehydrate')
 let watch = require('./_watcher')
 let stdin = require('./_stdin')
+let getFlags = require('./_flags')
 
-module.exports = function cli (params, callback) {
+module.exports = function cli (options, callback) {
+  let flags = getFlags()
+  let params = Object.assign(options, flags)
   sandbox.start(params, function watching (err) {
     if (err) {
       sandbox.end()
@@ -13,7 +16,7 @@ module.exports = function cli (params, callback) {
     else if (callback) callback()
 
     // Setup
-    let { inventory, quiet, symlink, update } = params
+    let { quiet, update } = params
     let debounce = 100
 
     // Timestamper
@@ -25,11 +28,11 @@ module.exports = function cli (params, callback) {
         console.log(`\n[${date}, ${time}]`)
       }
     }
-    let rehydrate = rehydrator({ debounce, quiet, symlink, ts, update })
+    let rehydrate = rehydrator({ debounce, ts, update })
 
     // Toss a coin to your watcher
     let enable = params.watcher === false ? false : true
-    let watcher = watch({ debounce, enable, inventory, rehydrate, symlink, ts, update })
+    let watcher = watch({ debounce, enable, rehydrate, ts }, params)
     if (watcher) {
       update.done('Started file watcher')
     }

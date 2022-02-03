@@ -4,12 +4,14 @@ let { tmpdir } = require('os')
 let _inventory = require('@architect/inventory')
 let { fingerprint } = require('@architect/utils')
 let chokidar = require('chokidar')
+let _invoke = require('../invoke-lambda/_plugin')
 let sandbox = require('../')
 
-module.exports = function runWatcher (params) {
-  if (!params.enable) return
+module.exports = function runWatcher (args, params) {
+  if (!args.enable) return
 
-  let { debounce, inventory, rehydrate, symlink, ts, update } = params
+  let { debounce, rehydrate, ts } = args
+  let { inventory, symlink, update } = params
   let { cwd } = inventory.inv._project
 
   try {
@@ -51,7 +53,10 @@ module.exports = function runWatcher (params) {
     arcEvent: null,
     fingerprint: null,
   }
+  // Watcher may be paused by another workflow (like Deploy) placing a file on the filesystem
   let paused = false
+  // Userland plugins may mutate the filesystem, so pause the watcher until they complete
+  let pluginsRunning = false
 
   /**
    * Watch for pertinent filesystem changes
@@ -61,7 +66,7 @@ module.exports = function runWatcher (params) {
       update.debug.status(`Watcher: ignored '${event}' on ${filename}`)
       return
     }
-    if (paused && existsSync(pauseFile)) {
+    if (pluginsRunning || paused && existsSync(pauseFile)) {
       return
     }
     if (!paused && existsSync(pauseFile)) {
@@ -93,12 +98,13 @@ module.exports = function runWatcher (params) {
     let updateOrRemove = event === 'update' || event === 'remove'
     let anyChange = event === 'add' || event === 'update' || event === 'remove'
     let ran = false // Skips over irrelevant ops after something ran
+    let restarting = false // Don't run watcher plugins if we're restarting Sandbox
 
     /**
      * Reload routes upon changes to Architect project manifest
      */
     if (fileUpdate && (filename === manifest)) {
-      ran = true
+      ran = restarting = true
       clearTimeout(timers.arcEvent)
       timers.arcEvent = setTimeout(() => {
         ts()
@@ -122,10 +128,9 @@ module.exports = function runWatcher (params) {
      */
     if (!ran && anyChange &&
         (filename === join(cwd, '.env') ||
-         filename === join(cwd, 'prefs.arc') ||
-         filename === join(cwd, 'preferences.arc') ||
+         filename === inv._project.localPreferencesFile ||
          filename === inv._project.globalPreferencesFile)) {
-      ran = true
+      ran = restarting = true
       clearTimeout(timers.arcEvent)
       timers.arcEvent = setTimeout(() => {
         ts()
@@ -169,9 +174,11 @@ module.exports = function runWatcher (params) {
     /**
      * Regenerate public/static.json upon changes to public/
      */
-    if (!ran && anyChange && inv.static &&
-        filename.includes(join(cwd, staticFolder)) &&
-        !filename.includes(join(cwd, staticFolder, 'static.json'))) {
+    let isStaticAsset = inv.static && filename.includes(join(cwd, staticFolder))
+    let isStaticJson = inv.static &&
+                       (filename.includes(join(cwd, staticFolder, 'static.json')) ||
+                        filename.includes(join(shared, 'static.json')))
+    if (!ran && anyChange && isStaticAsset && !isStaticJson) {
       ran = true
       clearTimeout(timers.fingerprint)
       timers.fingerprint = setTimeout(() => {
@@ -192,11 +199,21 @@ module.exports = function runWatcher (params) {
       }, debounce)
     }
 
-    if (watcherPlugins?.length && pluginEvents.includes(event)) {
+    if (!pluginsRunning && !isStaticJson && !restarting &&
+        watcherPlugins?.length && pluginEvents.includes(event)) {
       (async function runPlugins () {
+        pluginsRunning = true
+        let invoke = _invoke.bind({}, params)
+        let args = { filename, event, inventory, invoke }
         for (let plugin of watcherPlugins) {
-          await plugin({ filename, event, inventory })
+          try {
+            await plugin(args)
+          }
+          catch (err) {
+            update.warn(`Watcher plugin ${plugin.plugin} failed: ${err.message}`)
+          }
         }
+        pluginsRunning = false
       })()
     }
   })

@@ -4,9 +4,11 @@ let { join } = require('path')
 let file = join(__dirname, '..', '..', 'syncplugin.test')
 
 module.exports = {
-  variables: function ({ arc, stage, inventory }) {
-    return {
-      varOne: 'valueOne'
+  deploy: {
+    services: function ({ arc, stage, inventory }) {
+      return {
+        varOne: 'valueOne'
+      }
     }
   },
   sandbox: {

@@ -1,23 +1,28 @@
-// TODO fix plugin service discovery
-/* let test = require('tape')
-let services = require('../../../../../src/arc/_ssm/_services')
+let { join } = require('path')
+let test = require('tape')
+let sut = join(process.cwd(), 'src', 'arc', '_services')
+let services = require(sut)
 
-test('should not mutate inventory if serviceDiscovery property already exists', t => {
-  t.plan(1)
-  let inventory = { inv: { _serviceDiscovery: {} } }
-  let invFingerprint = JSON.stringify(inventory)
-  services(inventory)
-  t.equals(JSON.stringify(inventory), invFingerprint, 'inventory not modified')
-})
-test('should populate serviceDiscovery property with plugin variables', t => {
+test('Services should populate with plugin variables', t => {
   t.plan(3)
-  let inventory = { inv: { app: 'testapp', _project: { plugins: {
-    pluginOne: { variables: () => ({ oneVar: 'yep' }) },
-    pluginTwo: { variables: () => ({ twoVar: 'yup' }) }
-  } } } }
-  services(inventory)
-  let svcs = inventory.inv._serviceDiscovery
-  t.ok(svcs, '_serviceDiscovery property created')
-  t.equals(svcs.pluginOne.oneVar, 'yep', 'first plugin variable created')
-  t.equals(svcs.pluginTwo.twoVar, 'yup', 'second plugin variable created')
-}) */
+  let pluginOne = () => ({ oneVar: 'yep' })
+  let pluginTwo = () => ({ twoVar: 'yup' })
+  pluginOne.plugin = 'pluginOne'
+  pluginTwo.plugin = 'pluginTwo'
+  let inventory = { inv: {
+    app: 'testapp',
+    _project: { arc: {} },
+    plugins: { _methods: { deploy: { services: [
+      pluginOne,
+      pluginTwo,
+    ]
+    } } } } }
+  services({ inventory }, (err, services) => {
+    if (err) t.fail(err)
+    else {
+      t.equal(Object.keys(services).length, 2, 'Got back two services')
+      t.equal(services.pluginOne.oneVar, 'yep', 'First plugin variable created')
+      t.equal(services.pluginTwo.twoVar, 'yup', 'Second plugin variable created')
+    }
+  })
+})
