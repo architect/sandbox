@@ -4,7 +4,7 @@ let getFlags = require('./_flags')
 let { _start, _end } = require('./sandbox')
 let update
 
-// We can't reinventory on shutdown as the state of the project may have changed, so we'll stash it in global scope until the next start or refresh
+// We can't reinventory on end as the state of the project may have changed (and this may be a restart), so stash inv + ports in global scope until the next start or refresh
 let running = {}
 
 /**
@@ -39,6 +39,7 @@ function start (options, callback) {
       }
     })
   }
+
   if (options.inventory) {
     running.inventory = options.inventory
     go()
@@ -47,7 +48,7 @@ function start (options, callback) {
     _inventory({ cwd: options.cwd }, function (err, result) {
       if (err) callback(err)
       else {
-        options.inventory = running.inventory = result
+        running.inventory = options.inventory = result
         go()
       }
     })
