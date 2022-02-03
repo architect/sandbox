@@ -1,5 +1,5 @@
 let { emitKeypressEvents } = require('readline')
-let sandbox = require('../sandbox')
+let sandbox = require('../')
 
 module.exports = function handleStdin (params, callback) {
   let { rehydrate, update, watcher } = params
