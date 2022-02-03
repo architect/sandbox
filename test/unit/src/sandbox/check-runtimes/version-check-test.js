@@ -1,5 +1,5 @@
 let { join } = require('path')
-let sut = join(process.cwd(), 'src', 'sandbox', 'start', 'check-runtimes', 'version-check')
+let sut = join(process.cwd(), 'src', 'sandbox', 'check-runtimes', 'version-check')
 let _inventory = require('@architect/inventory')
 let versionCheck = require(sut)
 let test = require('tape')
