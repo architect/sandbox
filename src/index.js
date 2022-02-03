@@ -1,8 +1,7 @@
 let _inventory = require('@architect/inventory')
 let { updater } = require('@architect/utils')
 let getFlags = require('./_flags')
-let _start = require('./sandbox/start')
-let _end = require('./sandbox/end')
+let { _start, _end } = require('./sandbox')
 let update
 
 // We can't reinventory on shutdown as the state of the project may have changed, so we'll stash it in global scope until the next start or refresh
