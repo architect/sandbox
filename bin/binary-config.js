@@ -22,7 +22,7 @@ let config = {
       '../node_modules/**/@architect/inventory/**/*.js',
     ],
     assets: [
-      '../src/invoke-lambda/runtimes/*'
+      '../src/invoke-lambda/exec/runtimes/*'
     ],
     targets: [],
     outputPath: 'bin'

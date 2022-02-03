@@ -1,7 +1,7 @@
 let _asap = require('@architect/asap')
-let load = require('./_loader')
+let load = require('./loader')
 let spawn = require('./spawn')
-let { runtimeEval } = require('../lib')
+let { runtimeEval } = require('../../lib')
 
 module.exports = function exec (lambda, params, callback) {
   // ASAP is a special case that doesn't spawn
