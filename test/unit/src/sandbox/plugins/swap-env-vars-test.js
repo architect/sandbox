@@ -1,5 +1,5 @@
 let { join } = require('path')
-let sut = join(process.cwd(), 'src', 'sandbox', '_plugins', 'swap-env-vars')
+let sut = join(process.cwd(), 'src', 'sandbox', 'plugins', 'swap-env-vars')
 let swapEnvVars = require(sut)
 let test = require('tape')
 
