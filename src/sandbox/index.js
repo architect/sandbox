@@ -10,16 +10,16 @@ let env = require('./env')
 let ports = require('./ports')
 let checkRuntimes = require('./check-runtimes')
 let maybeHydrate = require('./maybe-hydrate')
-let _arc = require('../../arc')
-let http = require('../../http')
-let events = require('../../events')
-let tables = require('../../tables')
+let _arc = require('../arc')
+let http = require('../http')
+let events = require('../events')
+let tables = require('../tables')
 
 let httpPrint = require('./http-print')
-let plugins = require('../_plugins')
+let plugins = require('./plugins')
 let startupScripts = require('./startup-scripts')
 
-module.exports = function _start (params, callback) {
+function _start (params, callback) {
   let start = Date.now()
   let { cwd, inventory, restart, symlink, update } = params
   let { inv } = params.inventory
@@ -140,3 +140,26 @@ module.exports = function _start (params, callback) {
     }
   })
 }
+
+function _end (params, callback) {
+  series([
+    function (callback) {
+      let options = { method: 'end', name: 'shutdown' }
+      plugins(params, options, callback)
+    },
+    function (callback) {
+      http.end(callback)
+    },
+    function (callback) {
+      events.end(callback)
+    },
+    function (callback) {
+      tables.end(callback)
+    },
+    function (callback) {
+      _arc.end(callback)
+    },
+  ], callback)
+}
+
+module.exports = { _start, _end }

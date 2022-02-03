@@ -1,6 +1,6 @@
 let { sep } = require('path')
 let chalk = require('chalk')
-let httpConfig = require('../../http/_config')
+let httpConfig = require('../http/_config')
 
 /**
  * Pretty print @http + @ws routes
