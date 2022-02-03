@@ -16,6 +16,11 @@ module.exports = function populateEnv (params, callback) {
     process.env.ARC_ENV = 'testing'
   }
 
+  // Print the banner
+  if (!restart) {
+    banner(params)
+  }
+
   // Warn about a missing manifest (if appropriate)
   if (!inv._project.manifest && !restart) {
     update.warn('No Architect project manifest found, using default project')
@@ -23,11 +28,6 @@ module.exports = function populateEnv (params, callback) {
   else if (!restart) {
     let file = inv._project.manifest.replace(cwd, '').substr(1)
     update.done(`Found Architect project manifest: ${file}`)
-  }
-
-  // Print the banner
-  if (!restart) {
-    banner(params)
   }
 
   // Validate / print status of userland env vars
