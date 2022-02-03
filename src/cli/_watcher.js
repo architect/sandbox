@@ -16,7 +16,7 @@ module.exports = function runWatcher (args, params) {
 
   try {
     var watcher = chokidar.watch(cwd, {
-      ignored: /(node_modules)|(\.git)|([\\\/]vendor[\\\/])/,
+      ignored: /(node_modules)|(\.git)|([\\\/]vendor[\\\/])|(__pycache__)/,
       persistent: true,
       ignoreInitial: true,
       awaitWriteFinish: {
