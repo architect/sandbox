@@ -1,6 +1,5 @@
 let _inventory = require('@architect/inventory')
 let { updater } = require('@architect/utils')
-let getFlags = require('./_flags')
 let { _start, _end } = require('./sandbox')
 let update
 
@@ -10,14 +9,13 @@ let running = {}
 /**
  * Run startup routines and start all services
  */
-function start (options, callback) {
-  options = options || {}
-  let flags = getFlags()
-  options.cwd = options.cwd || process.cwd()
-  options.update = update = updater('Sandbox', {
-    logLevel: options?.logLevel !== undefined ? options.logLevel : flags.logLevel,
-    quiet: options?.quiet !== undefined ? options.quiet : flags.quiet,
-  })
+function start (params, callback) {
+  params = params || {}
+  // TODO we should probably add some passed option sanitization
+  let { logLevel, quiet } = params
+  params.cwd = params.cwd || process.cwd()
+  params.symlink = params.symlink !== undefined ? params.symlink : true
+  params.update = update = updater('Sandbox', { logLevel, quiet })
 
   // Set up promise if there's no callback
   let promise
@@ -30,8 +28,7 @@ function start (options, callback) {
   }
 
   function go () {
-    // TODO we should probably add some passed option sanitization here
-    _start({ ...flags, ...options }, function (err, ports) {
+    _start(params, function (err, ports) {
       if (err) callback(err)
       else {
         running.ports = ports
@@ -40,15 +37,15 @@ function start (options, callback) {
     })
   }
 
-  if (options.inventory) {
-    running.inventory = options.inventory
+  if (params.inventory) {
+    running.inventory = params.inventory
     go()
   }
   else {
-    _inventory({ cwd: options.cwd }, function (err, result) {
+    _inventory({ cwd: params.cwd }, function (err, result) {
       if (err) callback(err)
       else {
-        running.inventory = options.inventory = result
+        running.inventory = params.inventory = result
         go()
       }
     })

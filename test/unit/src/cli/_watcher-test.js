@@ -38,8 +38,8 @@ let basicParams = {
   debounce: 10, // Set lower than in production because Tape won't wait around forever
   rehydrate,
   ts: noop,
-  update: { done: l, warn: l, debug: { status: d }, status: l, error: l }
 }
+let update = { done: l, warn: l, debug: { status: d }, status: l, error: l }
 
 /**
  * Ok, this is an interesting test case! Some notes:
@@ -68,7 +68,7 @@ test('Disabled watcher does nothing', t => {
 
 test('Watcher ignores certain events', t => {
   t.plan(2)
-  let watch = watcher({ ...basicParams, inventory })
+  let watch = watcher(basicParams, { inventory, update })
   watch.emit('all', 'addDir', 'foo')
   t.equal(debug, `Watcher: ignored 'addDir' on foo`, 'Watcher ignored event')
   t.notOk(log, 'Watcher did nothing else')
@@ -82,7 +82,7 @@ test('Start, pause, and unpause the watcher', t => {
 
   writeFileSync(pauseFile, 'hi')
   t.ok(existsSync(pauseFile), 'Wrote pause file to disk')
-  watch = watcher({ ...basicParams, inventory })
+  watch = watcher(basicParams, { inventory, update })
   t.notOk(existsSync(pauseFile), 'Watcher cleaned up old pause file on startup')
 
   writeFileSync(pauseFile, 'hi')
@@ -102,7 +102,7 @@ test('Start, pause, and unpause the watcher', t => {
   reset()
 
   // Rehydrate after being paused, restoring symlinks
-  watch = watcher({ ...basicParams, inventory, symlink: true })
+  watch = watcher(basicParams, { inventory, symlink: true, update })
   writeFileSync(pauseFile, 'hi')
 
   watch.emit('all', '', '')
@@ -145,7 +145,7 @@ test('Watcher restarts services on manifest updates', t => {
       callback(null, inventory)
     },
   })
-  let watch = watcher({ ...basicParams, inventory })
+  let watch = watcher(basicParams, { inventory, update })
   watch.emit('all', 'update', join(cwd, 'app.arc'))
   t.teardown(() => {
     delete inventory._restarted
@@ -185,7 +185,7 @@ test('Watcher reinventories on preference file changes', t => {
       '@architect/inventory': reinventory(t),
       '../': restartSandbox(t),
     })
-    let watch = watcher({ ...basicParams, inventory })
+    let watch = watcher(basicParams, { inventory, update })
     watch.emit('all', 'update', join(cwd, '.env'))
   })
 
@@ -196,8 +196,11 @@ test('Watcher reinventories on preference file changes', t => {
       '@architect/inventory': reinventory(t),
       '../': restartSandbox(t),
     })
-    let watch = watcher({ ...basicParams, inventory })
-    watch.emit('all', 'update', join(cwd, 'prefs.arc'))
+    let watch = watcher(basicParams, { inventory, update })
+    let filepath = join(cwd, 'prefs.arc')
+    inventory.inv._project.localPreferencesFile = filepath
+    watch.emit('all', 'update', filepath)
+    inventory.inv._project.localPreferencesFile = null
   })
 
   t.test('preferences.arc', t => {
@@ -207,8 +210,11 @@ test('Watcher reinventories on preference file changes', t => {
       '@architect/inventory': reinventory(t),
       '../': restartSandbox(t),
     })
-    let watch = watcher({ ...basicParams, inventory })
-    watch.emit('all', 'update', join(cwd, 'preferences.arc'))
+    let watch = watcher(basicParams, { inventory, update })
+    let filepath = join(cwd, 'preferences.arc')
+    inventory.inv._project.localPreferencesFile = filepath
+    watch.emit('all', 'update', filepath)
+    inventory.inv._project.localPreferencesFile = null
   })
 
   t.test('Global preferences', t => {
@@ -218,21 +224,19 @@ test('Watcher reinventories on preference file changes', t => {
       '@architect/inventory': reinventory(t),
       '../': restartSandbox(t),
     })
-    let watch = watcher({ ...basicParams, inventory })
+    let watch = watcher(basicParams, { inventory, update })
     let globalPrefs = join(cwd, 'lolidk')
     inventory.inv._project.globalPreferencesFile = globalPrefs
     watch.emit('all', 'update', globalPrefs)
+    inventory.inv._project.globalPreferencesFile = null
   })
 
-  t.teardown(() => {
-    inventory.inv._project.globalPreferencesFile = null
-    reset()
-  })
+  t.teardown(reset)
 })
 
 test('Rehydrate views / views', t => {
   t.plan(6)
-  let watch = watcher({ ...basicParams, inventory })
+  let watch = watcher(basicParams, { inventory, update })
 
   let sharedFile = join(cwd, 'src', 'shared', 'index.js')
   watch.emit('all', 'update', sharedFile)
@@ -261,7 +265,7 @@ test('Regenerate static.json', t => {
       t.equal(rehydrateParams.only, 'staticJson', 'Scoped to staticJson')
     } }
   })
-  let watch = watcher({ ...basicParams, inventory })
+  let watch = watcher(basicParams, { inventory, update })
 
   let asset = join(cwd, 'public', 'index.html')
   watch.emit('all', 'update', asset)
@@ -274,10 +278,16 @@ test('Watcher plugins', t => {
     filename: 'some-file',
     event: 'update',
     inventory,
+    // invoke goes here, see below
   }
-  let one = async params => t.deepEqual(params, expected, 'Plugin one called with correct params')
-  let two = async params => t.deepEqual(params, expected, 'Plugin two called with correct params')
+  // Deep equality comparison doesn't run against the bound invoker ref, so extract it from the plugin params and inject it into the comparison
+  let compare = ({ invoke }) => {
+    if (!invoke) t.fail('Expected invoke method')
+    return { ...expected, invoke }
+  }
+  let one = async params => t.deepEqual(params, compare(params), 'Plugin one called with correct params')
+  let two = async params => t.deepEqual(params, compare(params), 'Plugin two called with correct params')
   inventory.inv.plugins = { _methods: { sandbox: { watcher: [ one, two ] } } }
-  let watch = watcher({ ...basicParams, inventory })
+  let watch = watcher(basicParams, { inventory, update })
   watch.emit('all', 'update', 'some-file')
 })

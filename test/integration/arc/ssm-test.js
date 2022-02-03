@@ -73,9 +73,6 @@ function runTests (runType, t) {
     shutdown[runType](t)
   })
 
-  // TODO fix plugin service discovery
-  // restore once final env var plugin API settles
-/*
   t.test(`${mode} Start Sandbox ('plugins-sync' mock app)`, t => {
     startup[runType](t, 'plugins-sync')
   })
@@ -96,5 +93,4 @@ function runTests (runType, t) {
   t.test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
-*/
 }

@@ -1,3 +1,4 @@
+let _invoke = require('../../invoke-lambda/_plugin')
 let { userEnvVars } = require('../../lib')
 let swapEnvVars = require('./swap-env-vars')
 
@@ -14,10 +15,11 @@ module.exports = function sandboxStartPlugins (params, options, callback) {
     swap()
     let plural = plugins.length > 1 ? 's' : ''
     update.status(`Running ${plugins.length} Sandbox ${name} plugin${plural}`)
-    let params = { arc: inv._project.arc, inventory }
+    let invoke = _invoke.bind({}, params)
+    let args = { arc: inv._project.arc, inventory, invoke }
     async function runPlugins () {
       for (let plugin of plugins) {
-        await plugin(params)
+        await plugin(args)
       }
     }
     runPlugins()

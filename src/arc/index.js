@@ -1,5 +1,6 @@
 let http = require('http')
 let _listener = require('./_listener')
+let _services = require('./_services')
 let destroyer = require('server-destroy')
 
 // Global ref for .end
@@ -13,14 +14,19 @@ let _arcServices
 function start (params, callback) {
   let { ports, restart, update } = params
 
-  let listener = _listener.bind({}, params)
-  _arcServices = http.createServer(listener)
-  _arcServices.listen(ports._arc, err => {
+  _services(params, function (err, services) {
     if (err) callback(err)
     else {
-      if (!restart) update.done('Started AWS service emulator')
-      destroyer(_arcServices)
-      callback()
+      let listener = _listener.bind({}, services)
+      _arcServices = http.createServer(listener)
+      _arcServices.listen(ports._arc, err => {
+        if (err) callback(err)
+        else {
+          if (!restart) update.done('Started AWS service emulator')
+          destroyer(_arcServices)
+          callback()
+        }
+      })
     }
   })
 }

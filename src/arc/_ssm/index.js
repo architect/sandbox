@@ -1,7 +1,5 @@
-let services = require('./_services')
-
 module.exports = function _ssm (params, req, res) {
-  let { body, inventory } = params
+  let { body, services } = params
 
   if (req.method !== 'POST') {
     res.statusCode = 404
@@ -23,8 +21,7 @@ module.exports = function _ssm (params, req, res) {
     return
   }
 
-  let serviceDiscovery = services(inventory)
-  Object.entries(serviceDiscovery).forEach(([ type, map ]) => {
+  Object.entries(services).forEach(([ type, map ]) => {
     Object.entries(map).forEach(([ key, Value ]) => {
       if (!serviceType || type === serviceType) Parameters.push({
         Name: `/${stack}/${type}/${key}`,
