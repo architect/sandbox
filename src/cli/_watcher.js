@@ -4,7 +4,7 @@ let { tmpdir } = require('os')
 let _inventory = require('@architect/inventory')
 let { fingerprint } = require('@architect/utils')
 let chokidar = require('chokidar')
-let sandbox = require('../sandbox')
+let sandbox = require('../')
 
 module.exports = function runWatcher (params) {
   if (!params.enable) return

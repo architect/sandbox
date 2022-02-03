@@ -1,4 +1,4 @@
-let sandbox = require('../sandbox')
+let sandbox = require('../')
 let rehydrator = require('./_rehydrate')
 let watch = require('./_watcher')
 let stdin = require('./_stdin')

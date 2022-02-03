@@ -127,7 +127,7 @@ test('Watcher restarts services on manifest updates', t => {
   t.plan(5)
   watcher = proxyquire(sut, {
     chokidar,
-    '../sandbox': {
+    '../': {
       start: (params, cb) => {
         t.pass('Restarted Sandbox')
         t.ok(params.restart, 'Passed restart option sandbox.start')
@@ -183,7 +183,7 @@ test('Watcher reinventories on preference file changes', t => {
     watcher = proxyquire(sut, {
       chokidar,
       '@architect/inventory': reinventory(t),
-      '../sandbox': restartSandbox(t),
+      '../': restartSandbox(t),
     })
     let watch = watcher({ ...basicParams, inventory })
     watch.emit('all', 'update', join(cwd, '.env'))
@@ -194,7 +194,7 @@ test('Watcher reinventories on preference file changes', t => {
     watcher = proxyquire(sut, {
       chokidar,
       '@architect/inventory': reinventory(t),
-      '../sandbox': restartSandbox(t),
+      '../': restartSandbox(t),
     })
     let watch = watcher({ ...basicParams, inventory })
     watch.emit('all', 'update', join(cwd, 'prefs.arc'))
@@ -205,7 +205,7 @@ test('Watcher reinventories on preference file changes', t => {
     watcher = proxyquire(sut, {
       chokidar,
       '@architect/inventory': reinventory(t),
-      '../sandbox': restartSandbox(t),
+      '../': restartSandbox(t),
     })
     let watch = watcher({ ...basicParams, inventory })
     watch.emit('all', 'update', join(cwd, 'preferences.arc'))
@@ -216,7 +216,7 @@ test('Watcher reinventories on preference file changes', t => {
     watcher = proxyquire(sut, {
       chokidar,
       '@architect/inventory': reinventory(t),
-      '../sandbox': restartSandbox(t),
+      '../': restartSandbox(t),
     })
     let watch = watcher({ ...basicParams, inventory })
     let globalPrefs = join(cwd, 'lolidk')
