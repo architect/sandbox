@@ -1,10 +1,9 @@
 let minimist = require('minimist')
-let flags
 
 /**
  * Read CLI flags and populate userland options
  */
-module.exports = function getFlags (useCache = true) {
+module.exports = function getFlags () {
   let { ARC_QUIET, QUIET } = process.env
 
   let alias = {
@@ -15,10 +14,9 @@ module.exports = function getFlags (useCache = true) {
   }
   let boolean = [ 'disable-symlinks' ]
   let args = minimist(process.argv.slice(2), { alias, boolean })
-  if (flags && useCache) return flags
 
-  // Log levels
-  let logLevel = 'normal'
+  // Log levels (defaults to `normal` in the updater)
+  let logLevel
   if (args.verbose) logLevel = 'verbose'
   if (args.debug) logLevel = 'debug'
 
@@ -32,10 +30,11 @@ module.exports = function getFlags (useCache = true) {
   // (pass undefined if not found and let default values take the wheel)
   let symlink = !args['disable-symlinks']
 
-  return flags = {
-    logLevel,
+  let flags = {
     port,
     quiet,
     symlink,
   }
+  if (logLevel) flags.logLevel = logLevel
+  return flags
 }
