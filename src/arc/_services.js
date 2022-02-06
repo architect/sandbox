@@ -1,5 +1,3 @@
-let { getLambdaName } = require('@architect/utils')
-
 module.exports = function enumerateServices (params, callback) {
   let { inventory } = params
   let { inv } = inventory
@@ -22,12 +20,12 @@ module.exports = function enumerateServices (params, callback) {
     let { arc } = inv._project
     async function runPlugins () {
       for (let plugin of servicesPlugins) {
-        let pluginName = getLambdaName(plugin.plugin)
-        if (!services[pluginName]) services[pluginName] = {}
+        let name = plugin.plugin
+        if (!services[name]) services[name] = {}
         let result = await plugin({ arc, cloudformation: null, inventory, stage: 'testing' })
         if (result && Object.keys(result).length) {
           Object.entries(result).forEach(([ k, v ]) => {
-            services[pluginName][k] = v
+            services[name][k] = v
           })
         }
       }
