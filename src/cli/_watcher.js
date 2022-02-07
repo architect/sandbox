@@ -177,7 +177,7 @@ module.exports = function runWatcher (args, params) {
     let isStaticAsset = inv.static && filename.includes(join(cwd, staticFolder))
     let isStaticJson = inv.static &&
                        (filename.includes(join(cwd, staticFolder, 'static.json')) ||
-                        filename.includes(join(shared, 'static.json')))
+                        shared && filename.includes(join(shared, 'static.json')))
     if (!ran && anyChange && isStaticAsset && !isStaticJson) {
       ran = true
       clearTimeout(timers.fingerprint)
