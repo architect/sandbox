@@ -1,4 +1,3 @@
-let arc = require('@architect/functions')
 let test = require('tape')
 let { existsSync, mkdirSync, readdirSync, rmSync } = require('fs')
 let { join } = require('path')
@@ -10,6 +9,7 @@ let fileThatShouldNotBeWritten = join(tmp, 'do-not-write-me')
 let payload = { path: fileThatShouldNotBeWritten }
 let eventsPort = 4444
 let timeout = 1250
+let arc
 
 // Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally
 // That said, to prevent side-effects, destroy that env var immediately after use
@@ -17,14 +17,14 @@ function setup (t) {
   if (existsSync(tmp)) rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
   mkdirSync(tmp, { recursive: true })
   t.ok(existsSync(tmp), 'Created tmp dir')
-  process.env.ARC_EVENTS_PORT = eventsPort
-  if (!process.env.ARC_EVENTS_PORT) t.fail('ARC_EVENTS_PORT should be set')
+  process.env.ARC_ENV = 'testing'
+  process.env.ARC_SANDBOX = JSON.stringify({ ports: { events: eventsPort } })
 }
 function reset (t) {
   rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
   t.notOk(existsSync(tmp), 'Destroyed tmp dir')
-  delete process.env.ARC_EVENTS_PORT
-  if (process.env.ARC_EVENTS_PORT) t.fail('ARC_EVENTS_PORT should not be set')
+  delete process.env.ARC_ENV
+  delete process.env.ARC_SANDBOX
 }
 function check (t) {
   setTimeout(() => {
@@ -35,7 +35,10 @@ function check (t) {
 }
 
 test('Set up env', t => {
-  t.plan(1)
+  t.plan(2)
+  setup(t)
+  // eslint-disable-next-line
+  arc = require('@architect/functions')
   t.ok(sandbox, 'Sandbox is present')
 })
 

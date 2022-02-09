@@ -16,7 +16,7 @@ module.exports = function cli (options, callback) {
     else if (callback) callback()
 
     // Setup
-    let { quiet, update } = params
+    let { quiet, symlink, update } = params
     let debounce = 100
 
     // Timestamper
@@ -28,7 +28,7 @@ module.exports = function cli (options, callback) {
         console.log(`\n[${date}, ${time}]`)
       }
     }
-    let rehydrate = rehydrator({ debounce, ts, update })
+    let rehydrate = rehydrator({ debounce, symlink, ts, update })
 
     // Toss a coin to your watcher
     let enable = params.watcher === false ? false : true

@@ -1,4 +1,3 @@
-let arc = require('@architect/functions')
 let test = require('tape')
 let http = require('http')
 let { existsSync, mkdirSync, readFileSync, rmSync, statSync } = require('fs')
@@ -7,7 +6,7 @@ let sandbox = require('../../src')
 let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
 let { run, startup, shutdown } = require('../utils')
-let eventsPort = 4444
+let arc, eventsPort = 4444
 
 // Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally
 // That said, to prevent side-effects, destroy that env var immediately after use
@@ -15,14 +14,14 @@ function setup (t) {
   if (existsSync(tmp)) rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
   mkdirSync(tmp, { recursive: true })
   t.ok(existsSync(tmp), 'Created tmp dir')
-  process.env.ARC_EVENTS_PORT = eventsPort
-  if (!process.env.ARC_EVENTS_PORT) t.fail('ARC_EVENTS_PORT should be set')
+  process.env.ARC_ENV = 'testing'
+  process.env.ARC_SANDBOX = JSON.stringify({ ports: { events: eventsPort } })
 }
 function teardown (t) {
   rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
   t.notOk(existsSync(tmp), 'Destroyed tmp dir')
-  delete process.env.ARC_EVENTS_PORT
-  if (process.env.ARC_EVENTS_PORT) t.fail('ARC_EVENTS_PORT should not be set')
+  delete process.env.ARC_ENV
+  delete process.env.ARC_SANDBOX
 }
 
 // Check for the event artifact up to 10 times over 1 second or fail
@@ -51,7 +50,10 @@ function checkFile (t, file, message) {
 }
 
 test('Set up env', t => {
-  t.plan(1)
+  t.plan(2)
+  setup(t)
+  // eslint-disable-next-line
+  arc = require('@architect/functions')
   t.ok(sandbox, 'Got Sandbox')
 })
 

@@ -10,6 +10,9 @@
   - Added Sandbox watcher API
   - Added custom runtime support
   - Added env setter plugin support
+- Added live reload support!
+  - Add `@sandbox livereload true` to your preferences to enable
+  - Your browser will automatically refresh any time a `get` or `any` HTTP handler changes, or when any file in `src/shared`, `src/views`, or `public` changes
 - Added ability to disable Sandbox watcher with `watcher` (boolean) in API option
 - Added port configuration via `prefs.arc`
   - The precedence order is now `prefs.arc` > `port` API option or `--port` CLI flag > environment variables
