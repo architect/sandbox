@@ -16,7 +16,7 @@ let timers = {
 module.exports = function rehydrator (params) {
   let { debounce, quiet, symlink, ts, update } = params
 
-  return function rehydrate ({ timer, only, msg, force }) {
+  return function rehydrate ({ timer, only, msg, force }, callback) {
     let now = Date.now()
     clearTimeout(timers[timer])
     // Forcing enables restoration of symlinks after a deploy
@@ -28,8 +28,10 @@ module.exports = function rehydrator (params) {
         hydrate.shared({ only, quiet, symlink }, () => {
           let end = Date.now()
           update.done(`${symlink ? 'Symlinks' : 'Files'} rehydrated into functions in ${end - start}ms`)
+          if (callback) callback()
         })
       }, debounce)
     }
+    else if (callback) callback()
   }
 }

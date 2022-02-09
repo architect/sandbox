@@ -11,12 +11,18 @@ module.exports = function runWatcher (args, params) {
   if (!args.enable) return
 
   let { debounce, rehydrate, ts } = args
-  let { inventory, symlink, update } = params
+  let { inventory, logLevel, symlink, update } = params
   let { cwd } = inventory.inv._project
+  let verbose = logLevel === 'verbose'
+
+  // Live reload starts within Sandbox, so we can only load it within the watcher
+  let livereload
+  // eslint-disable-next-line
+  livereload = require('../arc').livereload
 
   try {
     var watcher = chokidar.watch(cwd, {
-      ignored: /(node_modules)|(\.git)|([\\\/]vendor[\\\/])|(__pycache__)/,
+      ignored: /(node_modules)|(\.git)|([\\\/]vendor[\\\/])|(__pycache__)|(static\.json)/,
       persistent: true,
       ignoreInitial: true,
       awaitWriteFinish: {
@@ -30,6 +36,24 @@ module.exports = function runWatcher (args, params) {
     return
   }
 
+  function restart ({ cwd, inventory, update }) {
+  // Always attempt to close the http server, but only reload if necessary
+    let start = Date.now()
+    sandbox.end(err => {
+      if (err) update.error(err)
+      sandbox.start({ cwd, inventory, restart: true, update }, err => {
+        if (err) update.error(err)
+        else {
+          let end = Date.now()
+          update.done(`Sandbox reloaded in ${end - start}ms`)
+          // Rewrite the livereload WS server, or connected clients will be orphaned
+          // eslint-disable-next-line
+          livereload = require('../arc').livereload
+        }
+      })
+    })
+  }
+
   let inv, manifest, staticFolder, shared, views, watcherPlugins
   function refreshInventory () {
     inv = inventory.inv
@@ -41,6 +65,22 @@ module.exports = function runWatcher (args, params) {
   }
   refreshInventory()
 
+  function liveReloadClients () {
+    if (livereload) {
+      let count = 0
+      livereload.clients.forEach(client => {
+        if (client.readyState) {
+          client.send('reload')
+          count++
+        }
+      })
+      if (verbose) {
+        let plural = count === 0 || count > 1 ? 's' : ''
+        update.verbose.status(`Refreshed ${count} livereload client${plural}`)
+      }
+    }
+  }
+
   // Cleanup after any past runs
   let pauseFile = join(tmpdir(), '_pause-architect-sandbox-watcher')
   if (existsSync(pauseFile)) {
@@ -49,6 +89,7 @@ module.exports = function runWatcher (args, params) {
 
   let ignoredEvents = [ 'addDir', 'unlinkDir', 'ready', 'raw' ]
   let pluginEvents = [ 'add', 'update', 'remove' ]
+  let livereloadMethods = [ 'get', 'any' ]
   let timers = {
     arcEvent: null,
     fingerprint: null,
@@ -84,14 +125,14 @@ module.exports = function runWatcher (args, params) {
           timer: 'rehydrateAll',
           msg: 'Restoring shared file symlinks...',
           force: true
-        })
+        }, liveReloadClients)
       }
     }
 
     // Renormalize events to more be friendlier (or at least RESTier)
     /**/ if (event === 'change') event = 'update'
     else if (event === 'unlink') event = 'remove'
-    update.debug.status(`Watcher: '${event}' on ${filename}`)
+    update.verbose.status(`Watcher: '${event}' on ${filename}`)
 
     // Event criteria
     let fileUpdate = event === 'update'
@@ -99,6 +140,9 @@ module.exports = function runWatcher (args, params) {
     let anyChange = event === 'add' || event === 'update' || event === 'remove'
     let ran = false // Skips over irrelevant ops after something ran
     let restarting = false // Don't run watcher plugins if we're restarting Sandbox
+
+    // Bail early if it's not a change the watcher cares about
+    if (!anyChange) return
 
     /**
      * Reload routes upon changes to Architect project manifest
@@ -126,7 +170,7 @@ module.exports = function runWatcher (args, params) {
      * Refresh inventory if preferences or env vars may have changed
      * Note: enumerate both prefs.arc filename in case it is being added for the first time
      */
-    if (!ran && anyChange &&
+    if (!ran &&
         (filename === join(cwd, '.env') ||
          filename === inv._project.localPreferencesFile ||
          filename === inv._project.globalPreferencesFile)) {
@@ -156,7 +200,7 @@ module.exports = function runWatcher (args, params) {
         timer: 'rehydrateShared',
         only: 'shared',
         msg: 'Shared file changed, rehydrating functions...'
-      })
+      }, liveReloadClients)
     }
 
     /**
@@ -168,17 +212,14 @@ module.exports = function runWatcher (args, params) {
         timer: 'rehydrateViews',
         only: 'views',
         msg: 'Views file changed, rehydrating views...'
-      })
+      }, liveReloadClients)
     }
 
     /**
      * Regenerate public/static.json upon changes to public/
      */
     let isStaticAsset = inv.static && filename.includes(join(cwd, staticFolder))
-    let isStaticJson = inv.static &&
-                       (filename.includes(join(cwd, staticFolder, 'static.json')) ||
-                        shared && filename.includes(join(shared, 'static.json')))
-    if (!ran && anyChange && isStaticAsset && !isStaticJson) {
+    if (!ran && isStaticAsset) {
       ran = true
       clearTimeout(timers.fingerprint)
       timers.fingerprint = setTimeout(() => {
@@ -192,14 +233,24 @@ module.exports = function runWatcher (args, params) {
               rehydrate({
                 timer: 'rehydrateStatic',
                 only: 'staticJson',
-              })
+              }, liveReloadClients)
             }
           }
         })
       }, debounce)
     }
 
-    if (!pluginsRunning && !isStaticJson && !restarting &&
+    /**
+     * Live reload any + get functions;
+     */
+    if (!ran && livereload) {
+      let lambda = Object.values(inv.lambdasBySrcDir).find(({ src }) => filename.includes(src))
+      if (lambda?.pragma === 'http' && livereloadMethods.includes(lambda?.method)) {
+        liveReloadClients()
+      }
+    }
+
+    if (!pluginsRunning && !restarting &&
         watcherPlugins?.length && pluginEvents.includes(event)) {
       (async function runPlugins () {
         pluginsRunning = true
@@ -221,19 +272,4 @@ module.exports = function runWatcher (args, params) {
   watcher.on('error', update.error)
 
   return watcher
-}
-
-function restart ({ cwd, inventory, update }) {
-  // Always attempt to close the http server, but only reload if necessary
-  let start = Date.now()
-  sandbox.end(err => {
-    if (err) update.error(err)
-    sandbox.start({ cwd, inventory, restart: true, update }, err => {
-      if (err) update.error(err)
-      else {
-        let end = Date.now()
-        update.done(`Sandbox reloaded in ${end - start}ms`)
-      }
-    })
-  })
 }

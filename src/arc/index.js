@@ -1,6 +1,7 @@
 let http = require('http')
 let _listener = require('./_listener')
 let _services = require('./_services')
+let _livereload = require('./_livereload')
 let destroyer = require('server-destroy')
 
 // Global ref for .end
@@ -19,6 +20,7 @@ function start (params, callback) {
     else {
       let listener = _listener.bind({}, services)
       _arcServices = http.createServer(listener)
+      arc.livereload = _livereload(_arcServices, params)
       _arcServices.listen(ports._arc, err => {
         if (err) callback(err)
         else {
@@ -36,4 +38,5 @@ function end (callback) {
   else callback()
 }
 
-module.exports = { start, end }
+let arc = { start, end }
+module.exports = arc

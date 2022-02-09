@@ -14,6 +14,7 @@ let b64dec = i => Buffer.from(i, 'base64').toString()
 let b64enc = i => Buffer.from(i).toString('base64')
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${item}`
+let inventory = { inv: { _project: { preferences: null } } }
 let json = 'application/json'
 let utf8 = '; charset=utf-8'
 let jsonUtf8 = json + utf8
@@ -77,7 +78,7 @@ function teardown () {
 test('Unknown invocation error', t => {
   t.plan(2)
   let lambda = { method: 'GET', route: '/' }
-  let params = { lambda, apiType: 'http' }
+  let params = { lambda, apiType: 'http', inventory }
   let run = getInvoker.bind({}, params)
   let mock
   let msg = 'Some invocation error'
@@ -95,7 +96,7 @@ test('Unknown invocation error', t => {
 test('Architect v7 dependency-free responses (HTTP API mode)', t => {
   t.plan(46)
   let lambda = { method: 'GET', route: '/' }
-  let params = { lambda, apiType: 'http' }
+  let params = { lambda, apiType: 'http', inventory }
   let run = getInvoker.bind({}, params)
   let mock
 
@@ -212,7 +213,7 @@ test('Architect v7 dependency-free responses (HTTP API mode)', t => {
 test('Architect v7 dependency-free responses (HTTP API + Lambda v1.0)', t => {
   t.plan(30)
   let lambda = { method: 'GET', route: '/' }
-  let params = { lambda, apiType: 'httpv1' }
+  let params = { lambda, apiType: 'httpv1', inventory }
   let run = getInvoker.bind({}, params)
   let mock
 
@@ -288,7 +289,7 @@ test('Architect v7 dependency-free responses (HTTP API + Lambda v1.0)', t => {
 test('Architect v6 dependency-free responses (REST API mode)', t => {
   t.plan(30)
   let lambda = { method: 'GET', route: '/' }
-  let params = { lambda, apiType: 'rest' }
+  let params = { lambda, apiType: 'rest', inventory }
   let run = getInvoker.bind({}, params)
   let mock
 

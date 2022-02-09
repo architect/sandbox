@@ -11,12 +11,13 @@ let responseValidatorHttp = require('./http/_res-validate')
 // Etc.
 let invoke = require('../../invoke-lambda')
 let { errors, invalid } = require('./utils/validate')
+let _livereload = require('./utils/livereload')
 
 /**
  * Formats and validates HTTP request and response event objects
  */
 module.exports = function invokeHTTP (params) {
-  let { apiType, lambda } = params
+  let { apiType, inventory, lambda, ports } = params
   let { method, path } = lambda
 
   method = method.toUpperCase()
@@ -45,26 +46,29 @@ module.exports = function invokeHTTP (params) {
         res.end(body)
       }
       else {
+        let livereload = inventory.inv._project.preferences?.sandbox?.livereload
+        let opts = { livereload, ports }
+
         // Totally separate out response validation paths to ensure type checks don't inadvertently blow everything up
         let resty = restApi || httpApiV1
         if (resty) {
           let { body, valid } = responseValidatorRest({ res, result }, httpApiV1)
           if (!valid) {
-            end(res, body)
+            end(res, body, opts)
           }
           else {
             let body = responseFormatterRest({ res, result }, httpApiV1)
-            end(res, body)
+            end(res, body, opts)
           }
         }
         else {
           let { body, valid } = responseValidatorHttp({ res, result })
           if (!valid) {
-            end(res, body)
+            end(res, body, opts)
           }
           else {
             let body = responseFormatterHttp({ res, result })
-            end(res, body)
+            end(res, body, opts)
           }
         }
       }
@@ -72,7 +76,8 @@ module.exports = function invokeHTTP (params) {
   }
 }
 
-function end (res, body = '') {
+function end (res, body = '', opts) {
+  let { livereload, ports } = opts
   let MB = 1000 * 1000
   let itBeChonky = 6 * MB // Max Lambda payload size
   if (body.length > itBeChonky) {
@@ -81,5 +86,6 @@ function end (res, body = '') {
     invalid(res, body)
     res.end(body)
   }
+  else if (livereload) _livereload(res, body, ports)
   else res.end(body)
 }

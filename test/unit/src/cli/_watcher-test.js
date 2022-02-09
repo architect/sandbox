@@ -7,17 +7,21 @@ let _inventory = require('@architect/inventory')
 let proxyquire = require('proxyquire')
 let sut = join(process.cwd(), 'src', 'cli', '_watcher')
 
+let sent
+let livereload = { clients: [ { readyState: 1, send: e => sent = e } ] }
+let _arc = { livereload: undefined }
 let chokidar = { watch: () => new events() }
 let watcher
-let setupWatcher = () => watcher = proxyquire(sut, { chokidar })
+let setupWatcher = () => watcher = proxyquire(sut, { chokidar, '../arc': _arc })
 setupWatcher()
 let cwd = join(process.cwd(), 'test', 'mock', 'watcher')
 
 let rehydrateCalled = 0
 let rehydrateParams
-function rehydrate (params) {
+function rehydrate (params, cb) {
   rehydrateCalled++
   rehydrateParams = params
+  if (cb) cb()
 }
 function reset () {
   setupWatcher()
@@ -25,13 +29,18 @@ function reset () {
   rehydrateParams = undefined
   log = ''
   debug = ''
+  verbose = ''
+  sent = undefined
+  _arc = { livereload: undefined }
 }
 
 let inventory
 let log = ''
 let debug = ''
+let verbose = ''
 let l = str => log += str
 let d = str => debug += str
+let v = str => verbose += str
 let noop = () => {}
 let basicParams = {
   enable: true,
@@ -39,7 +48,14 @@ let basicParams = {
   rehydrate,
   ts: noop,
 }
-let update = { done: l, warn: l, debug: { status: d }, status: l, error: l }
+let update = {
+  debug: { status: d },
+  done: l,
+  error: l,
+  status: l,
+  verbose: { status: v },
+  warn: l,
+}
 
 /**
  * Ok, this is an interesting test case! Some notes:
@@ -76,7 +92,7 @@ test('Watcher ignores certain events', t => {
 })
 
 test('Start, pause, and unpause the watcher', t => {
-  t.plan(14)
+  t.plan(17)
   let watch
   let pauseFile = join(tmpdir(), '_pause-architect-sandbox-watcher')
 
@@ -102,16 +118,20 @@ test('Start, pause, and unpause the watcher', t => {
   reset()
 
   // Rehydrate after being paused, restoring symlinks
+  _arc.livereload = livereload
+  reset() // Reset again because we just mutated _arc
   watch = watcher(basicParams, { inventory, symlink: true, update })
   writeFileSync(pauseFile, 'hi')
 
   watch.emit('all', '', '')
   t.equal(log, 'Watcher temporarily paused', 'Watcher paused')
+  t.notOk(sent, 'Livereload did not fire')
   reset()
 
   watch.emit('all', '', '')
   t.equal(rehydrateCalled, 0, 'Rehydrate not called')
   t.notOk(log, 'Watcher did nothing while paused')
+  t.notOk(sent, 'Livereload did not fire')
   reset()
 
   rmSync(pauseFile)
@@ -120,9 +140,11 @@ test('Start, pause, and unpause the watcher', t => {
   t.equal(rehydrateParams.timer, 'rehydrateAll', 'Set rehydrateAll timer')
   t.ok(rehydrateParams.force, 'Set force: true')
   t.equal(log, 'Watcher no longer paused', 'Watcher taken off pause')
+  t.equal(sent, 'reload', 'Livereload fired')
   reset()
 })
 
+// Ideally we'd do live reloader testing in the next few test blocks, but seeing as how Sandbox start/end simulation doesn't follow naturally concern itself with what's in its callbacks, that's not super practical
 test('Watcher restarts services on manifest updates', t => {
   t.plan(5)
   watcher = proxyquire(sut, {
@@ -234,8 +256,10 @@ test('Watcher reinventories on preference file changes', t => {
   t.teardown(reset)
 })
 
-test('Rehydrate views / views', t => {
-  t.plan(6)
+test('Rehydrate shared / views', t => {
+  t.plan(8)
+  _arc.livereload = livereload
+  reset() // Reset again because we just mutated _arc
   let watch = watcher(basicParams, { inventory, update })
 
   let sharedFile = join(cwd, 'src', 'shared', 'index.js')
@@ -243,6 +267,7 @@ test('Rehydrate views / views', t => {
   t.equal(rehydrateCalled, 1, 'Rehydrate called')
   t.equal(rehydrateParams.timer, 'rehydrateShared', 'Set rehydrateShared timer')
   t.equal(rehydrateParams.only, 'shared', 'Scoped to share')
+  t.equal(sent, 'reload', 'Livereload fired')
   reset()
 
   let viewsFile = join(cwd, 'src', 'views', 'index.js')
@@ -250,11 +275,33 @@ test('Rehydrate views / views', t => {
   t.equal(rehydrateCalled, 1, 'Rehydrate called')
   t.equal(rehydrateParams.timer, 'rehydrateViews', 'Set rehydrateViews timer')
   t.equal(rehydrateParams.only, 'views', 'Scoped to views')
+  t.equal(sent, 'reload', 'Livereload fired')
+  reset()
+})
+
+test('Livereload fires for certain HTTP Lambdas', t => {
+  t.plan(3)
+  _arc.livereload = livereload
+  reset() // Reset again because we just mutated _arc
+  let watch = watcher(basicParams, { inventory, update })
+
+  let postHandler = join(cwd, 'src', 'http', 'post-index', 'index.js')
+  watch.emit('all', 'update', postHandler)
+  t.equal(sent, undefined, 'Livereload did not fire')
+
+  let eventsHandler = join(cwd, 'src', 'events', 'an-event', 'index.js')
+  watch.emit('all', 'update', eventsHandler)
+  t.equal(sent, undefined, 'Livereload did not fire')
+
+  let getHandler = join(cwd, 'src', 'http', 'get-index', 'index.js')
+  watch.emit('all', 'update', getHandler)
+  t.equal(sent, 'reload', 'Livereload fired')
   reset()
 })
 
 test('Regenerate static.json', t => {
-  t.plan(4)
+  t.plan(5)
+  _arc.livereload = livereload
   watcher = proxyquire(sut, {
     chokidar,
     '@architect/utils': { fingerprint: (params, callback) => {
@@ -263,7 +310,9 @@ test('Regenerate static.json', t => {
       t.equal(rehydrateCalled, 1, 'Rehydrate was called')
       t.equal(rehydrateParams.timer, 'rehydrateStatic', 'Set rehydrateStatic timer')
       t.equal(rehydrateParams.only, 'staticJson', 'Scoped to staticJson')
-    } }
+      t.equal(sent, 'reload', 'Livereload fired')
+    } },
+    '../arc': _arc,
   })
   let watch = watcher(basicParams, { inventory, update })
 

@@ -35,9 +35,9 @@ module.exports = function invokeLambda (params, callback) {
   let max = 10000
   let output = serialize(event).substr(0, max)
   let chonky = output.length === 10000
-  update.verbose.status(`Lambda event payload: ${lambdaPath}`)
-  update.verbose.raw(output + '...')
-  if (chonky) update.verbose.status('Truncated event payload log at 10KB')
+  update.debug.status(`Lambda event payload: ${lambdaPath}`)
+  update.debug.raw(output + '...')
+  if (chonky) update.debug.status('Truncated event payload log at 10KB')
 
   exec(lambda, {
     // Internal execution context

@@ -9,7 +9,7 @@ let invoke = proxyquire(sut, {
 })
 let { arc7, arc6, headers } = require('@architect/req-res-fixtures').http.req
 
-let inventory = { inv: {} }
+let inventory = { inv: { _project: { preferences: null } } }
 lambdaStub.yields(null, {})
 
 function apiGwHeaders (headers, v5) {
