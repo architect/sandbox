@@ -6,7 +6,8 @@ let sandbox = require('../../src')
 let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
 let { run, startup, shutdown } = require('../utils')
-let arc, eventsPort = 4444
+let eventsPort = 4444
+let arc
 
 // Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally
 // That said, to prevent side-effects, destroy that env var immediately after use
