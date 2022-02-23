@@ -24,7 +24,7 @@ let _script = port => /* html */`<script>
     socket.addEventListener('message', message => {
       if (message.data === 'reload') location.reload()
     })
-    socket.addEventListener('close', () => {
+    socket.addEventListener('close', ({ wasClean }) => {
       const retryMs = 1000
       const cancelMs = 5000
       const maxAttempts = Math.round(cancelMs / retryMs)
@@ -40,7 +40,9 @@ let _script = port => /* html */`<script>
           setTimeout(reloadIfCanConnect, retryMs)
         })
         socket.addEventListener('open', () => {
-          location.reload()
+          if (!wasClean) {
+            location.reload()
+          }
         })
       }
       reloadIfCanConnect()

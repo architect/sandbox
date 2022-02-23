@@ -2,6 +2,14 @@
 
 ---
 
+## [5.0.1] 2022-02-22
+
+### Fixed
+
+- Fixed live reload behavior in Firefox where Firefox would reload the wrong path, preventing links from being accessed
+
+---
+
 ## [5.0.0] 2022-01-12
 
 ### Added
