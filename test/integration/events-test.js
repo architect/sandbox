@@ -16,7 +16,7 @@ function setup (t) {
   mkdirSync(tmp, { recursive: true })
   t.ok(existsSync(tmp), 'Created tmp dir')
   process.env.ARC_ENV = 'testing'
-  process.env.ARC_SANDBOX = JSON.stringify({ ports: { events: eventsPort } })
+  process.env.ARC_SANDBOX = JSON.stringify({ ports: { events: eventsPort }, version: '5.0.0' })
 }
 function teardown (t) {
   rmSync(tmp, { recursive: true, force: true, maxRetries: 10 })
