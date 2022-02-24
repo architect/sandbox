@@ -16,7 +16,8 @@ let httpOptions = { agent: new http.Agent() }
 let ssm = new aws.SSM({ endpoint, region: 'us-west-2', httpOptions, credentials })
 
 function check ({ result, type, items, t }) {
-  t.equal(result.Parameters.length, items.length, 'Got correct number of params')
+  let internal = result.Parameters?.[0]?.Name?.includes('ARC_SANDBOX') ? 1 : 0
+  t.equal(result.Parameters.length - internal, items.length, 'Got correct number of params')
   items.forEach(i => {
     let key = `/${app}/${type}/${i}`
     let value = `${app}-staging-${i}`
@@ -78,14 +79,16 @@ function runTests (runType, t) {
   })
 
   t.test(`${mode} Get & check params provided by plugin (without specifying a type)`, t => {
-    t.plan(3)
+    t.plan(5)
     // Should get all tables params back
     ssm.getParametersByPath({ Path: '/plugins-sandbox' }, function (err, result) {
       if (err) t.fail(err)
       else {
-        t.equals(result.Parameters.length, 1, 'one parameter returned')
-        t.equals(result.Parameters[0].Name, '/plugins-sandbox/myplugin/varOne', 'plugin parameter name correct')
-        t.equals(result.Parameters[0].Value, 'valueOne', 'plugin parameter value correct')
+        t.equal(result.Parameters.length, 2, 'One parameter returned')
+        t.equal(result.Parameters[0].Name, '/plugins-sandbox/ARC_SANDBOX/ports', 'Plugin parameter name correct')
+        t.match(result.Parameters[0].Value, /\"_arc\":/, 'Plugin parameter value correct')
+        t.equal(result.Parameters[1].Name, '/plugins-sandbox/myplugin/varOne', 'Plugin parameter name correct')
+        t.equal(result.Parameters[1].Value, 'valueOne', 'Plugin parameter value correct')
       }
     })
   })

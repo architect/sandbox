@@ -1,4 +1,5 @@
 let { join } = require('path')
+let { version } = require('../../package.json')
 
 // Assemble Architect + userland env vars
 module.exports = function userEnvVars (params) {
@@ -10,7 +11,7 @@ module.exports = function userEnvVars (params) {
     ARC_APP_NAME: inv.app,
     ARC_ENV,
     ARC_ROLE: 'SandboxRole',
-    ARC_SANDBOX: JSON.stringify({ cwd, ports }),
+    ARC_SANDBOX: JSON.stringify({ cwd, ports, version }),
     ARC_SESSION_TABLE_NAME: ARC_SESSION_TABLE_NAME || SESSION_TABLE_NAME || 'jwe',
   }
 
