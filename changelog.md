@@ -2,6 +2,19 @@
 
 ---
 
+## [5.0.3] 2022-02-24
+
+### Added
+
+- Enable `@architect/functions` to retrieve port configuration when run as a bare module and not within a Lambda
+
+
+### Fixed
+
+- Fix missing `ARC_SANDBOX` env var `version` property in `sandbox.start` plugins + `@sandbox-startup` scripts
+
+---
+
 ## [5.0.2] 2022-02-22
 
 ### Fixed

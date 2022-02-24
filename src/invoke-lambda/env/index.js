@@ -1,8 +1,7 @@
 let { join } = require('path')
-let { readFileSync } = require('fs')
 let getContext = require('./context')
 let { userEnvVars } = require('../../lib')
-let { version } = JSON.parse(readFileSync(join(__dirname, '..', '..', '..', 'package.json')))
+let { version } = require('../../../package.json')
 
 // Assemble Lambda-specific execution environment variables
 module.exports = function getEnv (params) {

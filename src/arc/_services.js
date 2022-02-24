@@ -1,8 +1,11 @@
 module.exports = function enumerateServices (params, callback) {
-  let { inventory } = params
+  let { inventory, ports } = params
   let { inv } = inventory
   let { app } = inv
   let services = {}
+
+  // Internal data for Arc Functions bare module fallbacks
+  services.ARC_SANDBOX = { ports: JSON.stringify(ports) }
 
   // Tables
   if (inv.tables) {
