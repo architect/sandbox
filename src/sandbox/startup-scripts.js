@@ -9,14 +9,16 @@ module.exports = function startupScripts (params, callback) {
   }
 
   let { preferences: prefs } = inventory.inv._project
+  // TODO [deprecate]: remove 'sandbox-startup' eventually
+  let startupCommands = prefs?.['sandbox-start'] || prefs?.['sandbox-startup']
 
-  if (prefs?.['sandbox-startup'] && runStartupCommands) {
+  if (startupCommands && runStartupCommands) {
     let now = Date.now()
     let ARC_INV = JSON.stringify(inventory.inv)
     let ARC_RAW = JSON.stringify(inventory.inv._project.arc)
     let envVars = userEnvVars(params)
     update.status('Running startup scripts')
-    let ops = prefs['sandbox-startup'].map(cmd => {
+    let ops = startupCommands.map(cmd => {
       return function (callback) {
         let env = { ...process.env, ARC_INV, ARC_RAW, ...envVars }
         exec(cmd, { cwd, env }, function (err, stdout, stderr) {

@@ -7,6 +7,8 @@
 ### Added
 
 - Enable `@architect/functions` to retrieve port configuration when run as a bare module and not within a Lambda
+- Run startup commands via `@sandbox-start` preferences pragma
+  - This is a bit closer to `plugins.sandbox.start` than the existing `@sandbox-startup` preferences pragma
 
 
 ### Fixed
