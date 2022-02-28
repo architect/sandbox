@@ -2,6 +2,21 @@
 
 ---
 
+## [5.1.0] 2022-02-28
+
+### Added
+
+- Added SSM `ssm.getParameter()` support (in addition to `ssm.getParametersByPath()`)
+- Hardened Sandbox SSM emulation to have tighter query behavior, output valid errors, etc.
+
+
+### Fixed
+
+- Fixed Sandbox responding to all SSM requests indiscriminately
+  - Sandbox now only fulfills requests for the app that it's running (or for `@architect/functions` running as a bare module)
+
+---
+
 ## [5.0.3] 2022-02-24
 
 ### Added

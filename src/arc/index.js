@@ -18,7 +18,7 @@ function start (params, callback) {
   _services(params, function (err, services) {
     if (err) callback(err)
     else {
-      let listener = _listener.bind({}, services)
+      let listener = _listener.bind({}, services, params)
       _arcServices = http.createServer(listener)
       arc.livereload = _livereload(_arcServices, params)
       _arcServices.listen(ports._arc, err => {
