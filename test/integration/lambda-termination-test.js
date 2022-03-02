@@ -139,6 +139,19 @@ function runTests (runType, t) {
     })
   })
 
+  t.test(`${mode} Should terminate after return when process does not auto exit`, t => {
+    t.plan(3)
+    setup(t)
+    arc.events.publish({
+      name: 'event-no-exit-after-return',
+      payload
+    },
+    function done (err) {
+      if (err) t.fail(err)
+      else check(t)
+    })
+  })
+
   t.test(`${mode} Respect timeout for sync functions and kill process + spawned children (inside a Lambda via Linux /proc)`, t => {
     let isLinux = process.platform === 'linux'
     if (isLinux) {
