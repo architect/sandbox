@@ -1,6 +1,13 @@
 # Architect Sandbox changelog
 
 ---
+## [5.1.1] 2022-03-02
+### Fixed
+
+- Fixed sandbox not detecting lambda function return when process does not exit automatically
+  https://github.com/architect/architect/issues/1319
+
+---
 
 ## [5.1.0] 2022-02-28
 
