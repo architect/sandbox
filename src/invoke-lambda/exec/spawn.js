@@ -231,7 +231,6 @@ module.exports = function spawnChild (params, callback) {
         process.stdout.write(out[0])
       }
       midArcOutput = true
-      return
     }
     if (data.includes(arcEnd)) {
       midArcOutput = false
