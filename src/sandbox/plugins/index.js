@@ -1,3 +1,4 @@
+let { deepFrozenCopy } = require('@architect/utils')
 let _invoke = require('../../invoke-lambda/_plugin')
 let { userEnvVars } = require('../../lib')
 let swapEnvVars = require('./swap-env-vars')
@@ -16,7 +17,9 @@ module.exports = function sandboxStartPlugins (params, options, callback) {
     let plural = plugins.length > 1 ? 's' : ''
     update.status(`Running ${plugins.length} Sandbox ${name} plugin${plural}`)
     let invoke = _invoke.bind({}, params)
-    let args = { arc: inv._project.arc, inventory, invoke }
+    let frozen = deepFrozenCopy(inventory)
+    let { arc } = frozen.inv._project
+    let args = { arc, inventory: frozen, invoke }
     async function runPlugins () {
       for (let plugin of plugins) {
         await plugin(args)
