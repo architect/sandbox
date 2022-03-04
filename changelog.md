@@ -2,6 +2,15 @@
 
 ---
 
+## [5.1.2] 2022-03-04
+
+### Fixed
+
+- Added `arc` property to plugin API calls, which should have been there
+- Froze `inventory` property in plugin API calls
+
+---
+
 ## [5.1.1] 2022-03-02
 
 ### Fixed
