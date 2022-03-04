@@ -327,6 +327,7 @@ test('Watcher plugins', t => {
     filename: 'some-file',
     event: 'update',
     inventory,
+    arc: inventory.inv._project.arc,
     // invoke goes here, see below
   }
   // Deep equality comparison doesn't run against the bound invoker ref, so extract it from the plugin params and inject it into the comparison

@@ -2,7 +2,7 @@ let { existsSync, unlinkSync } = require('fs')
 let { join, sep } = require('path')
 let { tmpdir } = require('os')
 let _inventory = require('@architect/inventory')
-let { fingerprint } = require('@architect/utils')
+let { deepFrozenCopy, fingerprint } = require('@architect/utils')
 let chokidar = require('chokidar')
 let _invoke = require('../invoke-lambda/_plugin')
 let sandbox = require('../')
@@ -255,7 +255,9 @@ module.exports = function runWatcher (args, params) {
       (async function runPlugins () {
         pluginsRunning = true
         let invoke = _invoke.bind({}, params)
-        let args = { filename, event, inventory, invoke }
+        let frozen = deepFrozenCopy(inventory)
+        let { arc } = frozen.inv._project
+        let args = { arc, filename, event, inventory: frozen, invoke }
         for (let plugin of watcherPlugins) {
           try {
             await plugin(args)

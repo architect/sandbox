@@ -28,8 +28,8 @@
     "src/*"
   ],
   "dependencies": {
-    "@architect/asap": "~5.0.0",
-    "@architect/create": "~4.0.0",
+    "@architect/asap": "~5.0.1",
+    "@architect/create": "~4.0.2",
     "@architect/hydrate": "~3.0.1",
     "@architect/inventory": "~3.0.0",
     "@architect/utils": "~3.1.0",
@@ -55,10 +55,10 @@
   },
   "devDependencies": {
     "@architect/eslint-config": "~2.0.1",
-    "@architect/functions": "~5.0.2",
+    "@architect/functions": "~5.0.4",
     "@architect/req-res-fixtures": "git+https://github.com/architect/req-res-fixtures.git",
     "cross-env": "~7.0.3",
-    "eslint": "~8.9.0",
+    "eslint": "~8.10.0",
     "fs-extra": "~10.0.1",
     "nyc": "~15.1.0",
     "pkg": "~5.5.2",
