@@ -54,12 +54,13 @@ module.exports = function startupSeedData (params, callback) {
       if (err) callback(err)
       else {
         dynamo = doc
+        let start = Date.now()
         series(seeds, (err) => {
           if (err) callback(err)
           else {
             let rel = file.replace(cwd, '').substr(1)
             let plural = arr => arr.length === 1 ? '' : 's'
-            update.done(`Seeded ${Object.keys(data).length} table${plural(tables)} with ${seeds.length} row${plural(seeds)} from ${rel}`)
+            update.done(`Seeded ${Object.keys(data).length} table${plural(tables)} with ${seeds.length} row${plural(seeds)} from ${rel} in ${Date.now() - start}ms`)
             callback()
           }
         })
