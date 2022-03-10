@@ -13,6 +13,7 @@ let tablesPort = 5555
 let ports = { tables: tablesPort }
 let externalDBPort = 4567
 let dynaliteServer
+let confirmStarted = 'Seeded 2 tables with 4 rows'
 
 // Because these tests use Arc Functions `tables`, that module needs a `ARC_TABLES_PORT` env var to run locally
 // That said, to prevent side-effects, destroy that env var immediately after use
@@ -157,6 +158,160 @@ function runTests (runType, t) {
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
+    shutdown[runType](t)
+  })
+
+  /**
+   * Seed data
+   */
+  t.test(`${mode} Start Sandbox`, t => {
+    startup[runType](t, join('seed-data', 'js'), { confirmStarted })
+  })
+
+  t.test(`${mode} Scan seeded rows from first table`, t => {
+    t.plan(3)
+    setup(t)
+    dynamo.scan({ TableName: 'seed-data-staging-stuff' },
+      function _desc (err, result) {
+        if (err) t.fail(err)
+        else {
+          console.log(str(result))
+          t.equal(result.Count, 2, 'Got two results')
+          t.equal(result.Items[0].id.S, 'fiz', `Got expected row`)
+          t.equal(result.Items[1].id.S, 'foo', `Got expected row`)
+          teardown(t)
+        }
+      }
+    )
+  })
+
+  t.test(`${mode} Scan seeded rows from second table`, t => {
+    t.plan(3)
+    setup(t)
+    dynamo.scan({ TableName: 'seed-data-staging-things' },
+      function _desc (err, result) {
+        if (err) t.fail(err)
+        else {
+          console.log(str(result))
+          t.equal(result.Count, 2, 'Got two results')
+          t.equal(result.Items[0].id.S, 'foo', `Got expected row`)
+          t.equal(result.Items[1].id.S, 'foo', `Got expected row`)
+          teardown(t)
+        }
+      }
+    )
+  })
+
+  t.test(`${mode} Shut down Sandbox`, t => {
+    shutdown[runType](t)
+  })
+
+  t.test(`${mode} Start Sandbox`, t => {
+    startup[runType](t, join('seed-data', 'json'), { confirmStarted })
+  })
+
+  t.test(`${mode} Scan seeded rows from first table`, t => {
+    t.plan(3)
+    setup(t)
+    dynamo.scan({ TableName: 'seed-data-staging-stuff' },
+      function _desc (err, result) {
+        if (err) t.fail(err)
+        else {
+          console.log(str(result))
+          t.equal(result.Count, 2, 'Got two results')
+          t.equal(result.Items[0].id.S, 'fiz', `Got expected row`)
+          t.equal(result.Items[1].id.S, 'foo', `Got expected row`)
+          teardown(t)
+        }
+      }
+    )
+  })
+
+  t.test(`${mode} Scan seeded rows from second table`, t => {
+    t.plan(3)
+    setup(t)
+    dynamo.scan({ TableName: 'seed-data-staging-things' },
+      function _desc (err, result) {
+        if (err) t.fail(err)
+        else {
+          console.log(str(result))
+          t.equal(result.Count, 2, 'Got two results')
+          t.equal(result.Items[0].id.S, 'foo', `Got expected row`)
+          t.equal(result.Items[1].id.S, 'foo', `Got expected row`)
+          teardown(t)
+        }
+      }
+    )
+  })
+
+  t.test(`${mode} Shut down Sandbox`, t => {
+    shutdown[runType](t)
+  })
+
+  t.test(`${mode} Start Sandbox`, t => {
+    startup[runType](t, join('seed-data', 'custom'), { confirmStarted })
+  })
+
+  t.test(`${mode} Scan seeded rows from first table`, t => {
+    t.plan(3)
+    setup(t)
+    dynamo.scan({ TableName: 'seed-data-staging-stuff' },
+      function _desc (err, result) {
+        if (err) t.fail(err)
+        else {
+          console.log(str(result))
+          t.equal(result.Count, 2, 'Got two results')
+          t.equal(result.Items[0].id.S, 'fiz', `Got expected row`)
+          t.equal(result.Items[1].id.S, 'foo', `Got expected row`)
+          teardown(t)
+        }
+      }
+    )
+  })
+
+  t.test(`${mode} Scan seeded rows from second table`, t => {
+    t.plan(3)
+    setup(t)
+    dynamo.scan({ TableName: 'seed-data-staging-things' },
+      function _desc (err, result) {
+        if (err) t.fail(err)
+        else {
+          console.log(str(result))
+          t.equal(result.Count, 2, 'Got two results')
+          t.equal(result.Items[0].id.S, 'foo', `Got expected row`)
+          t.equal(result.Items[1].id.S, 'foo', `Got expected row`)
+          teardown(t)
+        }
+      }
+    )
+  })
+
+  t.test(`${mode} Shut down Sandbox`, t => {
+    shutdown[runType](t)
+  })
+
+  t.test(`${mode} Start Sandbox`, t => {
+    process.env.ARC_ENV = 'staging'
+    startup[runType](t, join('seed-data', 'js'))
+  })
+
+  t.test(`${mode} Data is not seeded when in !testing env`, t => {
+    t.plan(1)
+    setup(t)
+    dynamo.scan({ TableName: 'seed-data-staging-stuff' },
+      function _desc (err, result) {
+        if (err) t.fail(err)
+        else {
+          console.log(str(result))
+          t.equal(result.Count, 0, 'Got zero results')
+          teardown(t)
+        }
+      }
+    )
+  })
+
+  t.test(`${mode} Shut down Sandbox`, t => {
+    delete process.env.ARC_ENV
     shutdown[runType](t)
   })
 

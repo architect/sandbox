@@ -13,6 +13,7 @@ let tables = require('../tables')
 
 let printStatus = require('./print-status')
 let plugins = require('./plugins')
+let seed = require('./seed')
 let startupScripts = require('./startup-scripts')
 
 function _start (params, callback) {
@@ -92,6 +93,11 @@ function _start (params, callback) {
     function (callback) {
       let options = { method: 'start', name: 'startup' }
       plugins(params, options, callback)
+    },
+
+    // Seed the database
+    function (callback) {
+      seed(params, callback)
     },
 
     // Run startup scripts (if present)
