@@ -2,6 +2,14 @@
 
 ---
 
+## [5.2.0] 2022-03-09
+
+### Added
+
+- Added support for seed data via `sandbox-seed.js[on]` (or custom) file
+
+---
+
 ## [5.1.2] 2022-03-04
 
 ### Fixed
