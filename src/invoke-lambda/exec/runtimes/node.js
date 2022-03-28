@@ -4,7 +4,9 @@ let { projectSrc, handlerFile, handlerMethod, shared, views } = JSON.parse(__ARC
 let context = JSON.parse(__ARC_CONTEXT__);
 let { join, sep } = require('path');
 let { existsSync: exists, readFileSync: read } = require('fs');
+let requireStart = Date.now();
 let fn = require(handlerFile)[handlerMethod];
+let timeToLoadDeps = Date.now() - requireStart;
 let cwd = process.cwd();
 delete process.env.__ARC_CONFIG__;
 delete process.env.__ARC_CONTEXT__;
@@ -31,7 +33,7 @@ process.stdin.on('close', () => {
     lambda: name => missing.push('lambda::' + name),
     root: name => missing.push('root::' + name),
   };
-  let debug = [ { note: 'Execution metadata', cwd, lambdaPackage, shared, sharedPackage, views, viewsPackage } ];
+  let debug = [ { note: 'Execution metadata', cwd, lambdaPackage, timeToLoadDeps, shared, sharedPackage, views, viewsPackage } ];
 
   /* Iterate through the require cache looking for dependency issues */
   Object.keys(require.cache).forEach(mod => {

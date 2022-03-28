@@ -6,7 +6,10 @@ delete process.env.__ARC_CONFIG__;
 delete process.env.__ARC_CONTEXT__;
 
 let file = 'file://' + handlerFile;
+
+let importStart = Date.now();
 let mod = await import(file);
+let timeToLoadDeps = Date.now() - importStart;
 let handler = mod[handlerMethod];
 
 function isPromise (obj) {
@@ -20,11 +23,12 @@ process.stdin.on('close', () => {
 
   function callback (err, result) {
     if (err) console.log(err);
+    let debug = [ { note: 'Execution metadata', timeToLoadDeps } ];
     let payload = err
       ? { name: err.name, message: err.message, stack: err.stack }
       : result;
     /* Always output __ARC_META__ first */
-    console.log('__ARC_META__', JSON.stringify({}), '__ARC_META_END__');
+    console.log('__ARC_META__', JSON.stringify({ debug }), '__ARC_META_END__');
     console.log('__ARC__', JSON.stringify(payload), '__ARC_END__');
   }
 
