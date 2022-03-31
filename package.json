@@ -29,8 +29,8 @@
   ],
   "dependencies": {
     "@architect/asap": "~5.0.1",
-    "@architect/create": "~4.0.2",
-    "@architect/hydrate": "~3.0.1",
+    "@architect/create": "~4.0.3",
+    "@architect/hydrate": "~3.0.2",
     "@architect/inventory": "~3.1.0",
     "@architect/utils": "~3.1.0",
     "@begin/hashid": "~1.0.0",
