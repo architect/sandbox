@@ -9,6 +9,13 @@ module.exports = function initDynamoClient (ports, callback) {
    * - Only AWS_SECRET_ACCESS_KEY + AWS_ACCESS_KEY_ID are technically required to mock Lambda
    */
   let creds = aws.config.credentials
+
+  // Fail loudly and early if a creds file is present without a default profile
+  if (Array.isArray(creds) && !creds.length) {
+    let msg = `AWS credentials file found without a 'default' profile; you must add a default profile, specify a different profile, or remove your credentials file`
+    return callback(ReferenceError(msg))
+  }
+
   if (!process.env.AWS_ACCESS_KEY_ID && creds?.accessKeyId) {
     process.env.AWS_ACCESS_KEY_ID = creds.accessKeyId
   }
