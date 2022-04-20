@@ -7,6 +7,7 @@
 ### Fixed
 
 - Fail loudly when AWS-SDK finds a credentials file without default profile; thanks @stuartlangridge!
+- Fixed Sandbox possibly hanging when it fails to start up in tests
 
 ---
 

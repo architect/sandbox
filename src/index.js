@@ -22,7 +22,13 @@ function start (params, callback) {
   if (!callback) {
     promise = new Promise(function (res, rej) {
       callback = function (err, result) {
-        err ? rej(err) : res(result)
+        // Try terminating services in the event of a failed startup, or Sandbox may hang tests
+        if (err) {
+          running._startupFailed = true
+          try { end(() => rej(err)) }
+          catch (e) { rej(err) }
+        }
+        else res(result)
       }
     })
   }
@@ -68,8 +74,8 @@ function end (callback) {
     })
   }
 
-  let { inventory, ports } = running
-  if (!inventory || !ports) {
+  let { inventory, ports, _startupFailed } = running
+  if ((!inventory || !ports) && !_startupFailed) {
     callback(Error('Sandbox is not running'))
   }
   else {
