@@ -4,7 +4,9 @@ let series = require('run-series')
 
 module.exports = function init ({ inventory, ports }, callback) {
   getDBClient(ports, function _gotDBClient (err, dynamo) {
-    if (err) console.log(err) // Yes, but actually no 🏴‍☠️
+    if (err) {
+      return callback(err)
+    }
 
     let { inv } = inventory
     let app = inv.app
@@ -16,12 +18,6 @@ module.exports = function init ({ inventory, ports }, callback) {
       }
     })
 
-    series(plans, function (err) {
-      if (err) {
-        console.log(err)
-        throw err
-      }
-      callback()
-    })
+    series(plans, callback)
   })
 }

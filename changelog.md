@@ -2,6 +2,14 @@
 
 ---
 
+## [5.2.3] 2022-04-19
+
+### Fixed
+
+- Fail loudly when AWS-SDK finds a credentials file without default profile; thanks @stuartlangridge!
+
+---
+
 ## [5.2.1 - 5.2.2] 2022-03-31
 
 ### Changed
