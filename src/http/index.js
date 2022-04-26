@@ -70,7 +70,7 @@ function start (params, callback) {
       }
 
       let httpPort = params.ports.http
-      httpServer.listen(httpPort, callback)
+      httpServer.listen(httpPort, 'localhost', callback)
     }
   ], callback)
 }

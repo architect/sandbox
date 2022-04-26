@@ -17,7 +17,7 @@ function start (params, callback) {
 
   let listener = _listener.bind({}, params)
   eventBus = http.createServer(listener)
-  eventBus.listen(ports.events, err => {
+  eventBus.listen(ports.events, 'localhost', err => {
     if (err) callback(err)
     else {
       update.done('@events and @queues ready on local event bus')
