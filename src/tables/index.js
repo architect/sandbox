@@ -25,7 +25,7 @@ function start (params, callback) {
   series([
     function (callback) {
       if (!hasExternalDb) {
-        dynamo = dynalite({ createTableMs: 0 }).listen(ports.tables, callback)
+        dynamo = dynalite({ createTableMs: 0 }).listen(ports.tables, 'localhost', callback)
       }
       else callback()
     },

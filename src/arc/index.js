@@ -21,7 +21,7 @@ function start (params, callback) {
       let listener = _listener.bind({}, services, params)
       _arcServices = http.createServer(listener)
       arc.livereload = _livereload(_arcServices, params)
-      _arcServices.listen(ports._arc, err => {
+      _arcServices.listen(ports._arc, 'localhost', err => {
         if (err) callback(err)
         else {
           if (!restart) update.done('Started AWS service emulator')
