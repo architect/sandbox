@@ -2,12 +2,17 @@
 
 ---
 
-## [5.2.4] unreleased
+## [5.2.4] 2022-04-28
+
+### Changed
+
+- Updated dependencies
+
 
 ### Fixed
 
 - Sandbox servers will now only listen to the loopback interface and will not
-  listen for inbound connections from the network.
+  listen for inbound connections from the network; thanks @lpsinger!
 
 ---
 
