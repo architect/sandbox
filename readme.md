@@ -33,6 +33,7 @@ npx arc sandbox
 
 - `-p`, `--port`, `port` - Manually specify HTTP port
   - Defaults to `3333`
+- `-h`, `--host`, `host`  Specify which IP addresses the server should listen on. Set this to 0.0.0.0 or true to listen on all addresses, including LAN and public addresses.
 - `-v`, `--verbose`, `verbose` - Enable verbose logging
 - `-d`, `--debug`, `debug` - Enable debose logging
 - `-q`, `--quiet`, `quiet` - Disable (most) logging
@@ -48,6 +49,7 @@ npx arc sandbox
 - `ARC_QUIET` - If present, disable (most) logging
 - `PORT` - Manually specify HTTP port
   - Defaults to `3333`
+- `HOST` - Manually specify which IP address the server should listen on.
 - `ARC_EVENTS_PORT`- Manually specify event bus port
   - Defaults to `3334`
 - `ARC_TABLES_PORT`- Manually specify local DynamoDB port

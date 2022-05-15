@@ -13,7 +13,7 @@ let hasExternalDb
  */
 
 function start (params, callback) {
-  let { inventory, ports, restart, update } = params
+  let { inventory, ports, restart, update, host } = params
   let { inv } = inventory
 
   if (!inv.tables) {
@@ -25,7 +25,7 @@ function start (params, callback) {
   series([
     function (callback) {
       if (!hasExternalDb) {
-        dynamo = dynalite({ createTableMs: 0 }).listen(ports.tables, 'localhost', callback)
+        dynamo = dynalite({ createTableMs: 0 }).listen(ports.tables, host || 'localhost', callback)
       }
       else callback()
     },
