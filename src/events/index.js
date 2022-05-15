@@ -8,7 +8,7 @@ let eventBus
  * Creates an event bus that emulates SNS + SQS and listens for `arc.event.publish` events
  */
 function start (params, callback) {
-  let { inventory, ports, update } = params
+  let { inventory, ports, host, update } = params
   let { inv } = inventory
 
   if (!inv.events && !inv.queues) {
@@ -17,7 +17,7 @@ function start (params, callback) {
 
   let listener = _listener.bind({}, params)
   eventBus = http.createServer(listener)
-  eventBus.listen(ports.events, 'localhost', err => {
+  eventBus.listen(ports.events, host || 'localhost', err => {
     if (err) callback(err)
     else {
       update.done('@events and @queues ready on local event bus')

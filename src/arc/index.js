@@ -13,7 +13,7 @@ let _arcServices
  * - API Gateway v2 Management API
  */
 function start (params, callback) {
-  let { ports, restart, update } = params
+  let { ports, host, restart, update } = params
 
   _services(params, function (err, services) {
     if (err) callback(err)
@@ -21,7 +21,7 @@ function start (params, callback) {
       let listener = _listener.bind({}, services, params)
       _arcServices = http.createServer(listener)
       arc.livereload = _livereload(_arcServices, params)
-      _arcServices.listen(ports._arc, 'localhost', err => {
+      _arcServices.listen(ports._arc, host || 'localhost', err => {
         if (err) callback(err)
         else {
           if (!restart) update.done('Started AWS service emulator')

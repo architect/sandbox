@@ -23,7 +23,7 @@ let websocketServer
  * Creates an HTTP + WebSocket server that emulates API Gateway
  */
 function start (params, callback) {
-  let { inventory, restart, update } = params
+  let { inventory, restart, update, host } = params
   let { inv } = inventory
 
   if (!inv.http && !inv.static && !inv.ws) {
@@ -70,7 +70,7 @@ function start (params, callback) {
       }
 
       let httpPort = params.ports.http
-      httpServer.listen(httpPort, 'localhost', callback)
+      httpServer.listen(httpPort, host || 'localhost', callback)
     }
   ], callback)
 }

@@ -64,6 +64,33 @@ test('Test port flags', t => {
   t.equal(f.port, 33333, `--port flag returned: 33333`)
 })
 
+
+test('Test host flags', t => {
+  t.plan(5)
+  let f
+
+  cmd([])
+  f = flags()
+  t.equal(f.host, 'localhost', `No host flags returned: localhost`)
+
+  process.env.HOST = '0.0.0.0'
+  f = flags()
+  t.equal(f.host, '0.0.0.0', `HOST env var does not influence flags`)
+  delete process.env.HOST
+
+  cmd([ '-h', 'localhost' ])
+  f = flags()
+  t.equal(f.host, 'localhost', `-h without specified host returned: localhost`)
+
+  cmd([ '-h', '0.0.0.0' ])
+  f = flags()
+  t.equal(f.host, '0.0.0.0', `-h flag returned: 0.0.0.0`)
+
+  cmd([ '--host', '0.0.0.0' ])
+  f = flags()
+  t.equal(f.host, '0.0.0.0', `--host flag returned: 0.0.0.0`)
+})
+
 test('Test quiet flags', t => {
   t.plan(3)
   let f
