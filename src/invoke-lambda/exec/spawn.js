@@ -263,11 +263,6 @@ module.exports = function spawnChild (params, callback) {
     }
   })
 
-  child.on('exit', (code, signal) => {
-    update.debug.status(`${functionPath} (pid ${pid}) emitted 'exit' (code '${code}', signal '${signal}')`)
-    done(code)
-  })
-
   child.on('close', (code, signal) => {
     update.debug.status(`${functionPath} (pid ${pid}) emitted 'close' (code '${code}', signal '${signal}')`)
     done(code)
