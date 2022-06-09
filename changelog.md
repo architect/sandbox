@@ -22,6 +22,10 @@
 
 - Added a host flag to specify the address to listen on.
 
+### Fixed
+
+- Fixed race condition where execution happening too fast may result in false `null` API Gateway responses
+
 ---
 
 ## [5.2.5] 2022-05-09
