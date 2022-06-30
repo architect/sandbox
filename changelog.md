@@ -2,12 +2,11 @@
 
 ---
 
-## [5.3.0] 2022-05-15
+## [5.3.0] 2022-06-29
 
 ### Changed
 
 - Added a host flag to specify the address to listen on.
-
 
 ---
 
