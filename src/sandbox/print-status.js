@@ -8,7 +8,7 @@ let httpConfig = require('../http/_config')
  * Pretty print all the things
  */
 module.exports = function prettyPrint (params, start, callback) {
-  let { cwd, inventory, ports, restart, update } = params
+  let { cwd, host, inventory, ports, restart, update } = params
   let { http, ws } = inventory.inv
 
   if (restart) {
@@ -54,7 +54,7 @@ module.exports = function prettyPrint (params, start, callback) {
     }
 
     if (http || ws) {
-      let link = chalk.green.bold.underline(`http://localhost:${ports.http}\n`)
+      let link = chalk.green.bold.underline(`http://${host || 'localhost'}:${ports.http}\n`)
       update.raw(`\n    ${link}`)
     }
   }
