@@ -2,6 +2,14 @@
 
 ---
 
+## [5.3.1] 2022-07-01
+
+### Changed
+
+- Updated `pretty-print` to show which host the sandbox is listening on
+
+---
+
 ## [5.3.0] 2022-06-29
 
 ### Changed
