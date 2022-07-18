@@ -4,7 +4,7 @@ let minimist = require('minimist')
  * Read CLI flags and populate userland options
  */
 module.exports = function getFlags () {
-  let { ARC_QUIET, QUIET, HOST } = process.env
+  let { ARC_QUIET, QUIET, ARC_HOST } = process.env
 
   let alias = {
     debug: [ 'd' ],
@@ -25,7 +25,7 @@ module.exports = function getFlags () {
   let port = Number(args.port) || undefined
 
   // which IP addresses the server should listen on
-  let host = args.host || HOST || 'localhost'
+  let host = args.host || ARC_HOST || 'localhost'
 
   // Quiet stdout
   let quiet = args.quiet || (ARC_QUIET && ARC_QUIET !== 'false') || (QUIET && QUIET !== 'false') || false

@@ -12,6 +12,7 @@
 ### Fixed
 
 - Fixed live reload when in use with `@architect/functions` brotli compression; fixes `@architect/functions` #525
+- Properly namespace `ARC_HOST` env var from host flag setting
 
 ---
 
