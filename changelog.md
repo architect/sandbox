@@ -7,10 +7,12 @@
 ### Changed
 
 - Updated `pretty-print` to show which host Sandbox is listening on
+- Updated dependencies
 
 
 ### Fixed
 
+- Fixed race condition where execution happening too fast may result in false `null` API Gateway responses
 - Fixed live reload when in use with `@architect/functions` brotli compression; fixes `@architect/functions` #525
 - Properly namespace `ARC_HOST` env var from host flag setting
 
@@ -21,10 +23,6 @@
 ### Changed
 
 - Added a host flag to specify the address to listen on.
-
-### Fixed
-
-- Fixed race condition where execution happening too fast may result in false `null` API Gateway responses
 
 ---
 
