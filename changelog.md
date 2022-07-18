@@ -2,11 +2,16 @@
 
 ---
 
-## [Unreleased] 2022-07-01
+## [5.3.1] 2022-07-01
 
 ### Changed
 
-- Updated `pretty-print` to show which host the sandbox is listening on
+- Updated `pretty-print` to show which host Sandbox is listening on
+
+
+### Fixed
+
+- Fixed live reload when in use with `@architect/functions` brotli compression; fixes `@architect/functions` #525
 
 ---
 

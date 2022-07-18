@@ -1,17 +1,32 @@
 let { Buffer } = require('buffer')
+let {
+  gzipSync,
+  gunzipSync,
+  brotliCompressSync,
+  brotliDecompressSync,
+  deflateSync,
+  inflateSync,
+} = require('zlib')
 
 module.exports = function autoreloadifier (res, body, ports) {
   let headers = res.getHeaders()
   let type = headers['content-type'] || headers['Content-Type']
-  if (!type?.includes('text/html') || !body?.includes(head)) {
-    return res.end(body)
-  }
-  let script = _script(ports._arc)
+
+  // We only care about HTML
+  if (!type?.includes('text/html')) return res.end(body)
+
+  // Maybe decompress
+  let encoding = headers['content-encoding'] || headers['Content-Encoding']
+  let compression = checkEncoding(encoding)
+  body = decompress(compression, body)
   // HTML via ASAP passes base64-encoded string -> buffer
   if (Buffer.isBuffer(body)) {
     body = body.toString()
   }
+  let script = _script(ports._arc)
   body = body.replace(head, script)
+  // Maybe recompress on the way out
+  body = compress(compression, body)
   // We don't have to update 'content-length' as API Gateway always drops it
   res.end(body)
 }
@@ -50,3 +65,19 @@ let _script = port => /* html */`<script>
   })();
 </script>
 </head>`
+
+let checkEncoding = enc => enc && [ 'gzip', 'deflate', 'br' ].includes(enc) ? enc : 'none'
+// ASAP's (de)compressor
+function compressor (direction, type, body) {
+  let compress = direction === 'compress'
+  let exec = {
+    gzip: compress ? gzipSync : gunzipSync,
+    br: compress ? brotliCompressSync : brotliDecompressSync,
+    deflate: compress ? deflateSync : inflateSync
+  }
+  if (!exec[type]) return body
+
+  return exec[type](body)
+}
+let compress = compressor.bind({}, 'compress')
+let decompress = compressor.bind({}, 'decompress')
