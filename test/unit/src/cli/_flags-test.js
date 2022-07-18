@@ -73,10 +73,10 @@ test('Test host flags', t => {
   f = flags()
   t.equal(f.host, 'localhost', `No host flags returned: localhost`)
 
-  process.env.HOST = '0.0.0.0'
+  process.env.ARC_HOST = '0.0.0.0'
   f = flags()
-  t.equal(f.host, '0.0.0.0', `HOST env var does not influence flags`)
-  delete process.env.HOST
+  t.equal(f.host, '0.0.0.0', `ARC_HOST env var does not influence flags`)
+  delete process.env.ARC_HOST
 
   cmd([ '-h', 'localhost' ])
   f = flags()
