@@ -29,9 +29,9 @@
   ],
   "dependencies": {
     "@architect/asap": "~5.0.1",
-    "@architect/create": "~4.0.4",
-    "@architect/hydrate": "~3.0.3",
-    "@architect/inventory": "~3.1.1",
+    "@architect/create": "~4.0.5-RC.0",
+    "@architect/hydrate": "~3.0.4-RC.0",
+    "@architect/inventory": "~3.2.0-RC.0",
     "@architect/utils": "~3.1.2",
     "@begin/hashid": "~1.0.0",
     "aws-sdk": "2.1001.0",
