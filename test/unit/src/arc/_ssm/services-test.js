@@ -7,8 +7,8 @@ test('Services should populate with plugin variables', t => {
   t.plan(4)
   let pluginOne = () => ({ oneVar: 'yep' })
   let pluginTwo = () => ({ twoVar: 'yup' })
-  pluginOne.plugin = 'pluginOne'
-  pluginTwo.plugin = 'pluginTwo'
+  pluginOne._plugin = 'pluginOne'
+  pluginTwo._plugin = 'pluginTwo'
   let inventory = { inv: {
     app: 'testapp',
     _project: { arc: {} },
