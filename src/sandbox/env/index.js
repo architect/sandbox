@@ -27,7 +27,7 @@ module.exports = function populateEnv (params, callback) {
   }
   else if (!restart) {
     let file = inv._project.manifest.replace(cwd, '').substr(1)
-    update.done(`Found Architect project manifest: ${file}`)
+    update.verbose.done(`Found Architect project manifest: ${file}`)
   }
 
   // Validate / print status of userland env vars

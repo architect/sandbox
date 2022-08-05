@@ -33,5 +33,5 @@ module.exports = function reg (app, params) {
     }
   })
 
-  if (!restart) update.done(`@http server started`)
+  if (!restart) update.verbose.done(`@http server started`)
 }

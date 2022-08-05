@@ -34,7 +34,7 @@ module.exports = function cli (options, callback) {
     let enable = params.watcher === false ? false : true
     let watcher = watch({ debounce, enable, rehydrate, ts }, params)
     if (watcher) {
-      update.done('Started file watcher')
+      update.done('File watcher now looking for project changes')
     }
 
     // Handle stdin

@@ -6,7 +6,7 @@ module.exports = function livereload (_arcServices, params) {
   if (!enabled) return
 
   let ws = new _ws.WebSocketServer({ server: _arcServices })
-  if (!restart) update.done('Live reload started')
+  if (!restart) update.verbose.done('Live reload started')
 
   return ws
 }

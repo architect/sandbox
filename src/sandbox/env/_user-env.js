@@ -18,11 +18,11 @@ module.exports = function validateUserEnv (params, callback) {
 
   function varsNotFound (env) {
     if (restart) return
-    update.done(`No custom ${env} environment variables found`)
+    update.verbose.done(`No custom ${env} environment variables found`)
   }
   function print (env, file) {
     if (restart) return
-    update.done(`Found ${env} environment variables: ${file}`)
+    update.verbose.done(`Found ${env} environment variables: ${file}`)
   }
 
   // Users may change ARC_ENV via preferences
