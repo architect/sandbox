@@ -46,7 +46,7 @@ function start (params, callback) {
         if (err) callback(err)
         else {
           let msg = 'Static asset fingerprinting enabled, public/static.json generated'
-          if (result && !restart) update.done(msg)
+          if (result && !restart) update.verbose.done(msg)
           callback()
         }
       })

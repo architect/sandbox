@@ -24,7 +24,7 @@ function start (params, callback) {
       _arcServices.listen(ports._arc, host || 'localhost', err => {
         if (err) callback(err)
         else {
-          if (!restart) update.done('Started AWS service emulator')
+          if (!restart) update.verbose.done('Started AWS service emulator')
           destroyer(_arcServices)
           callback()
         }

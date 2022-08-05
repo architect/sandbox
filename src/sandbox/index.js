@@ -18,7 +18,7 @@ let startupScripts = require('./startup-scripts')
 
 function _start (params, callback) {
   let start = Date.now()
-  let { inventory, restart, symlink, update } = params
+  let { inventory, logLevel, restart, symlink, update } = params
   let { inv } = params.inventory
 
   series([
@@ -68,12 +68,12 @@ function _start (params, callback) {
 
     // ... then hydrate Architect project files into functions
     function (callback) {
-      let quiet = params.quiet
+      let quiet = logLevel ? false : true
       if (restart) quiet = true
       hydrate.shared({ inventory, quiet, symlink }, function next (err) {
         if (err) callback(err)
         else {
-          if (!restart) update.done('Project files hydrated into functions')
+          if (!restart) update.verbose.done('Project files hydrated into functions')
           callback()
         }
       })

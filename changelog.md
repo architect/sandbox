@@ -2,6 +2,14 @@
 
 ---
 
+## [5.3.3] 2022-08-04
+
+### Changed
+
+- Chill out Sandbox startup logging, moving more verbose status into `--verbose|-v` flag
+
+---
+
 ## [5.3.2] 2022-07-26
 
 ### Changed

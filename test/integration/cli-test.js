@@ -25,7 +25,7 @@ test('Sandbox CLI interface', t => {
       t.pass('Sandbox started')
     }
     // This is not an adequate fully-integrated file watcher test, but it is massively easier to test the watcher via its own interface than via the CLI, so here we are
-    if (data.includes('Started file watcher') && !watcher) {
+    if (data.includes('File watcher now looking for project changes') && !watcher) {
       watcher = true
       t.pass('Sandbox file watcher started')
       // Windows doesn't terminate child processes nicely, so yet another special case for that very special OS
