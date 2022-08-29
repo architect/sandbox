@@ -7,6 +7,7 @@
 ### Changed
 
 - Chill out Sandbox startup logging, moving more verbose status into `--verbose|-v` flag
+- Updated dependencies
 
 ---
 
