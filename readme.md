@@ -114,7 +114,7 @@ Shuts down anything started by `sandbox.start()`. Invokes `callback` once shut d
 
 ```javascript
 let sandbox = require('@architect/sandbox')
-let test = require('tape)
+let test = require('tape')
 
 test('Start the Sandbox', async t => {
   t.plan(1)
