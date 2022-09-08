@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 let cli = require('./index.js')
 let pkg = require('../../package.json')
-let update = require('update-notifier')
+let update = require('update-notifier-cjs')
 let ver = pkg.version
 
 /**
