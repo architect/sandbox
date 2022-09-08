@@ -10,6 +10,7 @@ package-lock.json
 scratch/
 test/mock/*/.db
 test/mock/*/src/*/*/vendor/
+test/mock/*/*.test
 test/mock/*/tmp
 test/mock/tmp
 
