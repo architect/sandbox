@@ -2,6 +2,24 @@
 
 ---
 
+## [5.3.5] 2022-11-09
+
+### Added
+
+- Added Node.js 18.x to test matrix
+
+
+### Changed
+
+- Updated dependencies
+
+
+### Fixed
+
+- Ensure CLI interface can be called with `quiet` option
+
+---
+
 ## [5.3.4] 2022-09-07
 
 ### Changed
