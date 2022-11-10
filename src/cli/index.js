@@ -6,7 +6,8 @@ let getFlags = require('./_flags')
 
 module.exports = function cli (options, callback) {
   let flags = getFlags()
-  let params = Object.assign(options, flags)
+  let params = { ...options, ...flags }
+  params.quiet = options.quiet || flags.quiet
   sandbox.start(params, function watching (err) {
     if (err) {
       sandbox.end()
