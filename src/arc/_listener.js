@@ -9,7 +9,7 @@ module.exports = function _arcListener (services, params, req, res) {
   })
 
   req.on('end', () => {
-    if (req.url === '/_arc/ssm') {
+    if (req.url.startsWith('/_arc/ssm')) {
       _ssm({ body, services }, params, req, res)
       return
     }
