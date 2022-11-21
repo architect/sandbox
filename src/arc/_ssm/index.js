@@ -58,7 +58,6 @@ module.exports = function _ssm ({ body, services }, params, req, res) {
       Type: 'String',
       Value,
       Version: 1,
-      LastModifiedDate: new Date().toISOString(),
       ARN: 'Architect Sandbox'
     })
 
