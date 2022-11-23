@@ -78,7 +78,7 @@ function checkPort (checking, ports, name, single, callback) {
       let msg = `Could not find open port after 50 tries, please close some applications and try again`
       return callback(Error(msg))
     }
-    tester.listen(checking, 'localhost')
+    tester.listen(checking)
     tester.once('error', err => {
       if (err.message.includes('EADDRINUSE')) {
         if (single) {

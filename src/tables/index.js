@@ -25,7 +25,8 @@ function start (params, callback) {
   series([
     function (callback) {
       if (!hasExternalDb) {
-        dynamo = dynalite({ createTableMs: 0 }).listen(ports.tables, host || 'localhost', callback)
+        // Node.js 17+ changed DNS lookup behavior for host binding; prefer host to be undefined unless manually specified
+        dynamo = dynalite({ createTableMs: 0 }).listen(ports.tables, host, callback)
       }
       else callback()
     },

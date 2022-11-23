@@ -2,6 +2,24 @@
 
 ---
 
+## [5.4.0] 2022-11-22
+
+### Added
+
+- Added support for `nodejs18.x` and AWS SDK v3 (`@aws-sdk/*`) calls to Architect services
+
+
+### Changed
+
+- Bump binary runtime to Node.js 18.x
+
+
+### Fixed
+
+- Fixed issue where Sandbox, running via Node.js 18.x, may fail to respond to local requests from the same host in Node.js <= 16.x
+
+---
+
 ## [5.3.5] 2022-11-09
 
 ### Added

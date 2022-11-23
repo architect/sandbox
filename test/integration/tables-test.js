@@ -321,7 +321,7 @@ function runTests (runType, t) {
   t.test(`${mode} Start external DB`, t => {
     t.plan(1)
     dynaliteServer = dynalite({ path: join(mock, 'normal', '.db'), createTableMs: 0 })
-    dynaliteServer.listen(externalDBPort, 'localhost', err => {
+    dynaliteServer.listen(externalDBPort, err => {
       if (err) t.fail(err)
       else t.pass('External DB successfully started')
     })

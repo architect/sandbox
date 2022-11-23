@@ -71,7 +71,7 @@ test('Test host flags', t => {
 
   cmd([])
   f = flags()
-  t.equal(f.host, 'localhost', `No host flags returned: localhost`)
+  t.equal(f.host, undefined, `No host flags returned: undefined`)
 
   process.env.ARC_HOST = '0.0.0.0'
   f = flags()

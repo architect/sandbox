@@ -29,7 +29,7 @@ let config = {
   }
 }
 
-let nodeVer = `node14`
+let nodeVer = `node18`
 let arc = 'x64' // TODO: 'arm64'
 
 let platforms = {

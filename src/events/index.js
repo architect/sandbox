@@ -17,7 +17,8 @@ function start (params, callback) {
 
   let listener = _listener.bind({}, params)
   eventBus = http.createServer(listener)
-  eventBus.listen(ports.events, host || 'localhost', err => {
+  // Node.js 17+ changed DNS lookup behavior for host binding; prefer host to be undefined unless manually specified
+  eventBus.listen(ports.events, host, err => {
     if (err) callback(err)
     else {
       update.done('@events and @queues ready on local event bus')
