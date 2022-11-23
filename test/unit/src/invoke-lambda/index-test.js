@@ -54,7 +54,7 @@ test('Get inventory', t => {
 })
 
 test('Test runtime invocations', t => {
-  t.plan(24)
+  t.plan(21)
   let lambda
 
   lambda = get.http('get /')
@@ -65,20 +65,20 @@ test('Test runtime invocations', t => {
     t.equals(request, JSON.stringify(event), 'Default runtime received event')
   })
 
+  lambda = get.http('get /nodejs18.x')
+  invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
+    if (err) t.fail(err)
+    t.equals(options.cwd, lambda.src, 'nodejs18.x passed correct path')
+    t.equals(timeout, 12000, 'nodejs18.x ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'nodejs18.x received event')
+  })
+
   lambda = get.http('get /nodejs14.x')
   invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
     t.equals(options.cwd, lambda.src, 'nodejs14.x passed correct path')
     t.equals(timeout, 14000, 'nodejs14.x ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'nodejs14.x received event')
-  })
-
-  lambda = get.http('get /nodejs12.x')
-  invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
-    if (err) t.fail(err)
-    t.equals(options.cwd, lambda.src, 'nodejs12.x passed correct path')
-    t.equals(timeout, 12000, 'nodejs12.x ran with correct timeout')
-    t.equals(request, JSON.stringify(event), 'nodejs12.x received event')
   })
 
   lambda = get.http('get /python3.8')
@@ -95,14 +95,6 @@ test('Test runtime invocations', t => {
     t.equals(options.cwd, lambda.src, 'python3.7 passed correct path')
     t.equals(timeout, 37000, 'python3.7 ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'python3.7 received event')
-  })
-
-  lambda = get.http('get /python3.6')
-  invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
-    if (err) t.fail(err)
-    t.equals(options.cwd, lambda.src, 'python3.6 passed correct path')
-    t.equals(timeout, 36000, 'python3.6 ran with correct timeout')
-    t.equals(request, JSON.stringify(event), 'python3.6 received event')
   })
 
   lambda = get.http('get /ruby2.7')
@@ -183,6 +175,6 @@ test('Verify call counts from runtime invocations', t => {
   t.equals(runtimes.asap, 1, 'ASAP called correct number of times')
   t.equals(runtimes.deno, 1, 'Deno called correct number of times')
   t.equals(runtimes.node, 5, 'Node called correct number of times')
-  t.equals(runtimes.python, 3, 'Python called correct number of times')
+  t.equals(runtimes.python, 2, 'Python called correct number of times')
   t.equals(runtimes.ruby, 1, 'Ruby called correct number of times')
 })

@@ -166,17 +166,17 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} get /nodejs14.x`, t => {
+  t.test(`${mode} get /nodejs18.x`, t => {
     t.plan(15)
-    let rawPath = '/nodejs14.x'
+    let rawPath = '/nodejs18.x'
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
       if (err) t.fail(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /nodejs14.x (running nodejs14.x)',
-          routeKey: 'GET /nodejs14.x',
+          message: 'Hello from get /nodejs18.x (running nodejs18.x)',
+          routeKey: 'GET /nodejs18.x',
           rawPath,
           pathParameters: undefined,
           cookies: undefined,
@@ -190,17 +190,17 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} get /nodejs12.x`, t => {
+  t.test(`${mode} get /nodejs14.x`, t => {
     t.plan(15)
-    let rawPath = '/nodejs12.x'
+    let rawPath = '/nodejs14.x'
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
       if (err) t.fail(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /nodejs12.x (running nodejs12.x)',
-          routeKey: 'GET /nodejs12.x',
+          message: 'Hello from get /nodejs14.x (running nodejs14.x)',
+          routeKey: 'GET /nodejs14.x',
           rawPath,
           pathParameters: undefined,
           cookies: undefined,
@@ -256,30 +256,6 @@ function runTests (runType, t) {
         checkResult(t, result.body, {
           message: 'Hello from get /python3.7 (running python3.7)',
           routeKey: 'GET /python3.7',
-          rawPath,
-          pathParameters: undefined,
-          cookies: undefined,
-          queryStringParameters: undefined,
-          rawQueryString: '',
-          headers: '🤷🏽‍♀️',
-          isBase64Encoded: false,
-          body: undefined,
-        })
-      }
-    })
-  })
-
-  t.test(`${mode} get /python3.6`, t => {
-    t.plan(15)
-    let rawPath = '/python3.6'
-    tiny.get({
-      url: url + rawPath
-    }, function _got (err, result) {
-      if (err) t.fail(err)
-      else {
-        checkResult(t, result.body, {
-          message: 'Hello from get /python3.6 (running python3.6)',
-          routeKey: 'GET /python3.6',
           rawPath,
           pathParameters: undefined,
           cookies: undefined,

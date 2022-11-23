@@ -12,7 +12,7 @@ let inventory, params, tester
 async function listen (t, port) {
   return new Promise((res, rej) => {
     tester = net.createServer()
-    tester.listen(port, 'localhost')
+    tester.listen(port)
     tester.once('error', err => {
       t.fail(err)
       rej()

@@ -21,7 +21,8 @@ function start (params, callback) {
       let listener = _listener.bind({}, services, params)
       _arcServices = http.createServer(listener)
       arc.livereload = _livereload(_arcServices, params)
-      _arcServices.listen(ports._arc, host || 'localhost', err => {
+      // Node.js 17+ changed DNS lookup behavior for host binding; prefer host to be undefined unless manually specified
+      _arcServices.listen(ports._arc, host, err => {
         if (err) callback(err)
         else {
           if (!restart) update.verbose.done('Started AWS service emulator')

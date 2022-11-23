@@ -24,8 +24,11 @@ module.exports = function getFlags () {
   // Main user-facing @http port
   let port = Number(args.port) || undefined
 
-  // which IP addresses the server should listen on
-  let host = args.host || ARC_HOST || 'localhost'
+  // Host setting the server listens on
+  // Node.js 17+ changed DNS lookup behavior for host binding, which may unpredictably bind to IPv6 loopback (::1) instead of IPv4 (127.0.0.1)
+  // Host must be undefined unless manually specified
+  // See: https://github.com/nodejs/node/pull/39987
+  let host = args.host || ARC_HOST || undefined
 
   // Quiet stdout
   let quiet = args.quiet || (ARC_QUIET && ARC_QUIET !== 'false') || (QUIET && QUIET !== 'false') || false
