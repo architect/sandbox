@@ -118,7 +118,7 @@ let verifyShutdown = (t, type, callback) => {
   tiny.get({ url }, err => {
     if (err) {
       let errs = [ 'ECONNREFUSED', 'ECONNRESET' ]
-      t.ok(errs.includes(err.code), `Sandbox succssfully shut down (${type})`)
+      t.ok(errs.includes(err.code), `Sandbox successfully shut down (${type})`)
       if (callback) callback()
     }
     else t.fail('Sandbox did not shut down')
