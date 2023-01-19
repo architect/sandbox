@@ -2,6 +2,14 @@
 
 ---
 
+## [5.4.2] 2023-01-18
+
+### Changed
+
+- Updated dependencies
+
+---
+
 ## [5.4.1] 2022-11-24
 
 ### Changed
