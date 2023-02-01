@@ -26,7 +26,8 @@ module.exports = function prettyPrint (params, start, callback) {
 
     if (http) {
       let folder = `${inventory.inv.static.folder}${sep}`
-      let liveReload = inventory.inv._project.preferences?.sandbox?.livereload
+      let livereloadSetting = inventory.inv._project.preferences?.sandbox?.livereload
+      let livereload = typeof livereloadSetting === 'undefined' ? true : livereloadSetting
       let msgs = {
         rest: 'REST API mode / Lambda proxy',
         http: 'HTTP API mode / Lambda proxy v2.0 format',
@@ -34,7 +35,7 @@ module.exports = function prettyPrint (params, start, callback) {
         httpv1: 'HTTP API mode / Lambda proxy v1.0 format',
       }
       let msg = msgs[apiType]
-      if (liveReload) msg += ' / live reload'
+      if (livereload) msg += ' / live reload'
       let andWs = ws ? '& @ws ' : ''
       update.done(`@http (${msg}) ${andWs}routes`)
       http.forEach(({ method, path, src, arcStaticAssetProxy }) => {

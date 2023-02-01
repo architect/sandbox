@@ -2,6 +2,14 @@
 
 ---
 
+## [5.5.0] 2023-02-01
+
+### Added
+
+- Promotes livereload feature to being enabled by default
+
+---
+
 ## [5.4.2] 2023-01-18
 
 ### Changed

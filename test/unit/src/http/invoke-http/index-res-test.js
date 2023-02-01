@@ -52,11 +52,7 @@ function getInvoker (params, response, callback) {
   }
   // Mocked res object
   let output = {
-    getHeader: sinon.fake(h => {
-      let header = h && h.toLowerCase()
-      if (header === 'cache-control') return undefined
-      if (header === 'content-type') return 'application/json; charset=utf-8'
-    }),
+    getHeaders: () => ({ 'content-type': 'application/json; charset=utf-8' }),
     statusCode: sinon.fake.returns(),
     setHeader: sinon.fake.returns(),
     end: sinon.fake.returns()

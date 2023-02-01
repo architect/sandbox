@@ -46,7 +46,8 @@ module.exports = function invokeHTTP (params) {
         res.end(body)
       }
       else {
-        let livereload = inventory.inv._project.preferences?.sandbox?.livereload
+        let livereloadSetting = inventory.inv._project.preferences?.sandbox?.livereload
+        let livereload = typeof livereloadSetting === 'undefined' ? true : livereloadSetting
         let opts = { livereload, ports }
 
         // Totally separate out response validation paths to ensure type checks don't inadvertently blow everything up
