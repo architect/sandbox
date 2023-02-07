@@ -3,6 +3,6 @@ exports.handler = async (event) => {
   return {
     statusCode: 200,
     headers: { 'content-type': 'text/html' },
-    body: [...Array(invalidSize)].map(() => `.`).join('')
+    body: '.'.repeat(invalidSize)
   }
 }
