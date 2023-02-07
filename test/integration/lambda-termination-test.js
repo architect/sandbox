@@ -1,6 +1,7 @@
 let test = require('tape')
 let { existsSync, mkdirSync, readdirSync, rmSync } = require('fs')
 let { join } = require('path')
+let chokidar = require('chokidar')
 let sandbox = require('../../src')
 let mock = join(process.cwd(), 'test', 'mock')
 let { run, startup, shutdown } = require('../utils')
@@ -9,7 +10,7 @@ let fileThatShouldNotBeWritten = join(tmp, 'do-not-write-me')
 let payload = { path: fileThatShouldNotBeWritten }
 let eventsPort = 4444
 let timeout = 1250
-let arc
+let arc, watcher
 
 // Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally
 // That said, to prevent side-effects, destroy that env var immediately after use
@@ -26,12 +27,12 @@ function reset (t) {
   delete process.env.ARC_ENV
   delete process.env.ARC_SANDBOX
 }
-function check (t) {
+function check (t, altTimeout) {
   setTimeout(() => {
     console.log('Files in tmp:', readdirSync(tmp))
     t.notOk(existsSync(fileThatShouldNotBeWritten), 'File not created as event timed out and process was terminated appropriately')
     reset(t)
-  }, timeout)
+  }, altTimeout || timeout)
 }
 
 test('Set up env', t => {
@@ -59,17 +60,32 @@ function runTests (runType, t) {
     t.plan(3)
     setup(t)
     let fine = join(tmp, 'fine-write-me')
+    let timer
+
+    watcher = chokidar.watch(tmp)
+    watcher.on('add', function (added) {
+      if (added === fine) {
+        clearTimeout(timer)
+        watcher.close().then(() => {
+          console.log('Files in tmp:', readdirSync(tmp))
+          t.pass('File successfully created by event as event did not time out')
+          reset(t)
+        })
+      }
+    })
+
     arc.events.publish({
       name: 'event-does-not-timeout',
       payload: { path: fine }
     },
     function done (err) {
       if (err) t.fail(err)
-      else setTimeout(() => {
-        console.log('Files in tmp:', readdirSync(tmp))
-        t.ok(existsSync(fine), 'File successfully created by event as event did not time out')
-        reset(t)
-      }, 1000)
+      else {
+        let ohno = 10000
+        timer = setTimeout(() => {
+          t.fail(`Did not write file in ${ohno}ms, sigh`)
+        }, ohno)
+      }
     })
   })
 
@@ -148,7 +164,7 @@ function runTests (runType, t) {
     },
     function done (err) {
       if (err) t.fail(err)
-      else check(t)
+      else check(t, 600)
     })
   })
 

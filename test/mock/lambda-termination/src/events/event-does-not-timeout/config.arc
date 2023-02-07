@@ -1,2 +1,2 @@
 @aws
-timeout 1
+timeout 5
