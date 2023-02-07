@@ -2,6 +2,20 @@
 
 ---
 
+## [5.5.1] 2023-02-07
+
+### Added
+
+- Allow ctrl+d keypress to quit Sandbox
+
+
+### Fixed
+
+- Fixed issue where Sandbox watcher would lose a specified port setting; fixes #1395
+- Fixed issue where caller to Arc's CLI interface would unnecessarily execute a callback upon quitting
+
+---
+
 ## [5.5.0] 2023-02-01
 
 ### Added
