@@ -9,8 +9,12 @@ let tmp = join(mock, 'tmp')
 let fileThatShouldNotBeWritten = join(tmp, 'do-not-write-me')
 let payload = { path: fileThatShouldNotBeWritten }
 let eventsPort = 4444
-let timeout = 1250
 let arc, watcher
+
+// Generally we shouldn't need this long to test for a successfully timed-out Lambda
+// However, lower-end CI VMs can take a while to do things like spawning the child processes needed to run tree-kill during Lambda termination
+// In practice on modern dev machines Sandbox will terminate in a very timely fashion, but these tests must reliably run in CI, so we'll give it more time than is otherwise necessary
+let timeout = 1250
 
 // Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally
 // That said, to prevent side-effects, destroy that env var immediately after use
