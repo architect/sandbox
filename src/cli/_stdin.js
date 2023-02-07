@@ -33,7 +33,7 @@ module.exports = function handleStdin (params, callback) {
         force: true
       })
     }
-    if (key.sequence === '\u0003') {
+    if (key.sequence === '\u0003' || key.sequence === '\u0004') {
       if (watcher) {
         watcher.close().then(end)
       }
