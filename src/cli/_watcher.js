@@ -36,12 +36,12 @@ module.exports = function runWatcher (args, params) {
     return
   }
 
-  function restart ({ cwd, inventory, update }) {
+  function restart () {
   // Always attempt to close the http server, but only reload if necessary
     let start = Date.now()
     sandbox.end(err => {
       if (err) update.error(err)
-      sandbox.start({ cwd, inventory, restart: true, update }, err => {
+      sandbox.start({ ...params, restart: true }, err => {
         if (err) update.error(err)
         else {
           let end = Date.now()
@@ -160,7 +160,7 @@ module.exports = function runWatcher (args, params) {
             params.inventory = inventory = result
             refreshInventory()
             update.status('Loaded latest Architect project manifest')
-            restart({ cwd, inventory, update })
+            restart()
           }
         })
       }, debounce)
@@ -185,7 +185,7 @@ module.exports = function runWatcher (args, params) {
             params.inventory = inventory = result
             refreshInventory()
             update.status('Loaded latest project preferences')
-            restart({ cwd, inventory, update })
+            restart()
           }
         })
       }, debounce)
