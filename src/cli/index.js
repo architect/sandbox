@@ -39,6 +39,6 @@ module.exports = function cli (options, callback) {
     }
 
     // Handle stdin
-    stdin({ rehydrate, update, watcher }, callback)
+    stdin({ rehydrate, update, watcher })
   })
 }
