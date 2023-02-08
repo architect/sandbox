@@ -31,12 +31,14 @@ npx arc sandbox
 
 ### CLI options
 
-- `-p`, `--port`, `port` - Manually specify HTTP port
+- `-p`, `--port` - Manually specify HTTP port
   - Defaults to `3333`
-- `-h`, `--host`, `host`  Specify which IP addresses the server should listen on. Set this to 0.0.0.0 or true to listen on all addresses, including LAN and public addresses.
-- `-v`, `--verbose`, `verbose` - Enable verbose logging
-- `-d`, `--debug`, `debug` - Enable debose logging
-- `-q`, `--quiet`, `quiet` - Disable (most) logging
+- `-h`, `--host` - Specify the host interface for Sandbox to listen on
+  - Defaults to `0.0.0.0` (all available interfaces on your machine)
+  - To accept local connections only, specify `localhost`
+- `-v`, `--verbose` - Enable verbose logging
+- `-d`, `--debug` - Enable debose logging
+- `-q`, `--quiet` - Disable (most) logging
 - `--disable-symlinks` - Disable symlinking `src/shared` into all functions and
     use file copying instead
 
@@ -49,7 +51,9 @@ npx arc sandbox
 - `ARC_QUIET` - If present, disable (most) logging
 - `PORT` - Manually specify HTTP port
   - Defaults to `3333`
-- `HOST` - Manually specify which IP address the server should listen on.
+- `HOST` - Specify the host interface for Sandbox to listen on
+  - Defaults to `0.0.0.0` (all available interfaces on your machine)
+  - To accept local connections only, specify `localhost`
 - `ARC_EVENTS_PORT`- Manually specify event bus port
   - Defaults to `3334`
 - `ARC_TABLES_PORT`- Manually specify local DynamoDB port
