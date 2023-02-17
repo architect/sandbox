@@ -32,7 +32,12 @@ function verifyPublish ({ t, pragma, event, file, message }) {
   let filename = join(tmp, file)
   let timer
   let now = new Date()
-  let watcher = chokidar.watch(tmp)
+  let watcher = chokidar.watch(tmp, {
+    awaitWriteFinish: {
+      stabilityThreshold: 150,
+      pollInterval: 50,
+    },
+  })
   watcher.on('add', function (added) {
     if (added === filename) {
       clearTimeout(timer)
