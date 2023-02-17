@@ -2,6 +2,16 @@
 
 ---
 
+## [5.5.2] 2023-02-17
+
+### Changed
+
+- Improve printing env var and live AWS resource configuration
+- Improve readme docs relating to which interfaces Sandbox binds to; thanks @lpsinger!
+- Updated dependencies
+
+---
+
 ## [5.5.1] 2023-02-07
 
 ### Added
