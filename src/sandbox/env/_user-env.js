@@ -2,8 +2,8 @@ let { join, basename, sep } = require('path')
 let { existsSync } = require('fs')
 
 /**
- * Initialize Lambdas with local environment variable settings
- * - e.g. if ARC_ENV=staging the Lambda env is populated by `@staging`, etc.
+ * Validate / print status of userland env vars
+ * e.g. if ARC_ENV=staging the Lambda env is populated by `@staging`, etc.
  */
 module.exports = function validateUserEnv (params, callback) {
   let { cwd, env: envOption, inventory, restart, update } = params
@@ -34,7 +34,7 @@ module.exports = function validateUserEnv (params, callback) {
     // If useAWS is specified, force an AWS environment name
     if (prefs?.sandbox?.useAWS &&
         ![ 'staging', 'production' ].includes(process.env.ARC_ENV)) {
-      process.env.ARC_ENV = 'staging'
+      process.env.ARC_ENV = environment = 'staging'
     }
   }
 
@@ -74,8 +74,10 @@ module.exports = function validateUserEnv (params, callback) {
   }
   if (!foundEnv) varsNotFound(environment)
 
-  // Wrap it up
-  if (proj?.preferences?.sandbox?.useAWS || process.env.ARC_LOCAL) {
+  // Summarize live AWS resources
+  let useAWS = [ 'staging', 'production' ].includes(process.env.ARC_ENV) &&
+               process.env.ARC_LOCAL
+  if (proj?.preferences?.sandbox?.useAWS || useAWS) {
     let live = [
       inv.tables ? '@tables' : '',
       inv['tables-indexes'] ? '@tables-indexes' : '',
