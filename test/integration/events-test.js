@@ -1,12 +1,14 @@
 let test = require('tape')
 let http = require('http')
-let { existsSync, mkdirSync, readFileSync, rmSync, statSync } = require('fs')
+let { existsSync, mkdirSync, readFileSync, rmSync } = require('fs')
 let { join } = require('path')
+let chokidar = require('chokidar')
 let sandbox = require('../../src')
 let mock = join(process.cwd(), 'test', 'mock')
 let tmp = join(mock, 'tmp')
 let { run, startup, shutdown } = require('../utils')
 let eventsPort = 4444
+let ohno = 10000
 let arc
 
 // Because these tests are firing Arc Functions events, that module needs a `ARC_EVENTS_PORT` env var to run locally
@@ -25,29 +27,35 @@ function teardown (t) {
   delete process.env.ARC_SANDBOX
 }
 
-// Check for the event artifact up to 10 times over 1 second or fail
-function checkFile (t, file, message) {
-  let found = false
+// Wait for the event artifact to appear or fail after 10 seconds
+function verifyPublish ({ t, pragma, event, file, message }) {
+  let filename = join(tmp, file)
+  let timer
   let now = new Date()
-  for (let i = 0; i < 10; i++) {
-    setTimeout(() => {
-      let exists = existsSync(file)
-      if (i === 9 && !found && !exists) {
-        t.fail('Failed to find file proving event ran')
-      }
-      else if (found) return
-      else if (exists) {
-        let stats = statSync(file)
-        if (stats.size > 0) {
-          found = true
-          t.pass('Found file proving event ran')
-          let contents = readFileSync(file).toString()
-          t.equal(contents, message, `Found correct file contents in ${new Date() - now}ms`)
-          teardown(t)
-        }
-      }
-    }, i * 100)
-  }
+  let watcher = chokidar.watch(tmp)
+  watcher.on('add', function (added) {
+    if (added === filename) {
+      clearTimeout(timer)
+      watcher.close().then(() => {
+        let contents = readFileSync(filename).toString()
+        t.equal(contents, message, `Found correct file contents in ${new Date() - now}ms`)
+        teardown(t)
+      })
+    }
+  })
+
+  arc[pragma].publish({
+    name: event,
+    payload: { filename: file, message },
+  }, function done (err) {
+    if (err) t.fail(err)
+    else {
+      t.pass('Successfully published event')
+      timer = setTimeout(() => {
+        t.fail(`Did not write file in ${ohno}ms, sigh`)
+      }, ohno)
+    }
+  })
 }
 
 test('Set up env', t => {
@@ -71,40 +79,26 @@ function runTests (runType, t) {
   })
 
   t.test(`${mode} arc.events.publish (normal)`, t => {
-    t.plan(5)
+    t.plan(4)
     setup(t)
-    let filename = 'event-file-normal'
-    let message = 'Event completed (normal)'
-    arc.events.publish({
-      name: 'event-normal',
-      payload: { filename, message }
-    },
-    function done (err) {
-      if (err) t.fail(err)
-      else {
-        t.pass('Successfully published event')
-        let file = join(tmp, filename)
-        checkFile(t, file, message)
-      }
+    verifyPublish({
+      t,
+      pragma: 'events',
+      event: 'event-normal',
+      file: 'event-file-normal',
+      message: 'Event completed (normal)',
     })
   })
 
   t.test(`${mode} arc.events.publish (custom)`, t => {
-    t.plan(5)
+    t.plan(4)
     setup(t)
-    let filename = 'event-file-custom'
-    let message = 'Event completed (custom)'
-    arc.events.publish({
-      name: 'event-custom',
-      payload: { filename, message }
-    },
-    function done (err) {
-      if (err) t.fail(err)
-      else {
-        t.pass('Successfully published event')
-        let file = join(tmp, filename)
-        checkFile(t, file, message)
-      }
+    verifyPublish({
+      t,
+      pragma: 'events',
+      event: 'event-custom',
+      file: 'event-file-custom',
+      message: 'Event completed (custom)',
     })
   })
 
@@ -144,40 +138,26 @@ function runTests (runType, t) {
   })
 
   t.test(`${mode} arc.queues.publish (normal)`, t => {
-    t.plan(5)
+    t.plan(4)
     setup(t)
-    let filename = 'queue-file-normal'
-    let message = 'Queue completed (normal)'
-    arc.queues.publish({
-      name: 'queue-normal',
-      payload: { filename, message }
-    },
-    function done (err) {
-      if (err) t.fail(err)
-      else {
-        t.pass('Successfully published queue')
-        let file = join(tmp, filename)
-        checkFile(t, file, message)
-      }
+    verifyPublish({
+      t,
+      pragma: 'queues',
+      event: 'queue-normal',
+      file: 'event-file-normal',
+      message: 'Queue completed (normal)',
     })
   })
 
   t.test(`${mode} arc.queues.publish (custom)`, t => {
-    t.plan(5)
+    t.plan(4)
     setup(t)
-    let filename = 'queue-file-custom'
-    let message = 'Queue completed (custom)'
-    arc.queues.publish({
-      name: 'queue-custom',
-      payload: { filename, message }
-    },
-    function done (err) {
-      if (err) t.fail(err)
-      else {
-        t.pass('Successfully published queue')
-        let file = join(tmp, filename)
-        checkFile(t, file, message)
-      }
+    verifyPublish({
+      t,
+      pragma: 'queues',
+      event: 'queue-custom',
+      file: 'queue-file-custom',
+      message: 'Queue completed (custom)',
     })
   })
 
