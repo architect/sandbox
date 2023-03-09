@@ -1,7 +1,7 @@
 let chalk = require('chalk')
 let depStatus = require('depstatus')
 let { existsSync: exists } = require('fs')
-let glob = require('glob')
+let { globSync } = require('glob')
 let { join } = require('path')
 let hydrate = require('@architect/hydrate')
 let series = require('run-series')
@@ -72,7 +72,7 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet }, callback) {
             if (requirementsTxt) {
               let pattern = join(path, 'vendor', '*')
               let arcDir = join(path, 'vendor', 'architect-functions')
-              let hydrated = glob.sync(pattern).some(file => !file.includes(arcDir))
+              let hydrated = globSync(pattern).some(file => !file.includes(arcDir))
               if (!hydrated) {
                 install(callback)
               }
@@ -85,7 +85,7 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet }, callback) {
             if (gemfile) {
               let pattern = join(path, 'vendor', 'bundle', '*')
               let arcDir = join(path, 'vendor', 'bundle', 'architect-functions')
-              let hydrated = glob.sync(pattern).some(file => !file.includes(arcDir))
+              let hydrated = globSync(pattern).some(file => !file.includes(arcDir))
               if (!hydrated) {
                 install(callback)
               }
