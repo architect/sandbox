@@ -1,4 +1,4 @@
-let { deepFrozenCopy } = require('@architect/utils')
+let { deepFrozenCopy, getLambdaName } = require('@architect/utils')
 
 module.exports = function enumerateServices (params, callback) {
   let { inventory, ports } = params
@@ -26,7 +26,7 @@ module.exports = function enumerateServices (params, callback) {
     let { arc } = frozen.inv._project
     async function runPlugins () {
       for (let plugin of servicesPlugins) {
-        let name = plugin._plugin
+        let name = getLambdaName(plugin._plugin)
         if (!services[name]) services[name] = {}
         let result = await plugin({ arc, cloudformation: null, inventory: frozen, stage: 'testing' })
         if (result && Object.keys(result).length) {
