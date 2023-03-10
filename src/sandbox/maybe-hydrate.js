@@ -5,7 +5,7 @@ let { globSync } = require('glob')
 let { join } = require('path')
 let hydrate = require('@architect/hydrate')
 let series = require('run-series')
-let { chars } = require('@architect/utils')
+let { chars, pathToUnix } = require('@architect/utils')
 
 /**
  * Checks for the existence of supported dependency manifests, and auto-hydrates each function's dependencies as necessary
@@ -70,7 +70,7 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet }, callback) {
           function _requirementsTxt (callback) {
             let requirementsTxt = exists(join(path, 'requirements.txt'))
             if (requirementsTxt) {
-              let pattern = join(path, 'vendor', '*')
+              let pattern = pathToUnix(path + '/vendor/*')
               let arcDir = join(path, 'vendor', 'architect-functions')
               let hydrated = globSync(pattern).some(file => !file.includes(arcDir))
               if (!hydrated) {
@@ -83,7 +83,7 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet }, callback) {
           function _gemfile (callback) {
             let gemfile = exists(join(path, 'Gemfile'))
             if (gemfile) {
-              let pattern = join(path, 'vendor', 'bundle', '*')
+              let pattern = pathToUnix(path + '/vendor/bundle/*')
               let arcDir = join(path, 'vendor', 'bundle', 'architect-functions')
               let hydrated = globSync(pattern).some(file => !file.includes(arcDir))
               if (!hydrated) {
