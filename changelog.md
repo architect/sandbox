@@ -2,7 +2,12 @@
 
 ---
 
-## [5.5.3] 2023-03-09
+## [5.5.3 - 5.5.4] 2023-03-09
+
+### Changed
+
+- Update deps, fix minor Glob v9 path issue
+
 
 ### Fixed
 
