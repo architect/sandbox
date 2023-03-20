@@ -31,7 +31,7 @@ function runTests (runType, t) {
         t.equal(err.statusCode, 403, 'Errors with 403')
         t.match(err.body, new RegExp(message), `Errors with message instructing to add '${message}' handler`)
       }
-      else t.fail(result)
+      else t.end(result)
     })
   })
 
@@ -112,7 +112,7 @@ function runTests (runType, t) {
         t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
         t.match(err.body, new RegExp(time), `Timed out set to ${time}`)
       }
-      else t.fail(result)
+      else t.end(result)
     })
   })
 
@@ -126,7 +126,7 @@ function runTests (runType, t) {
         t.equal(err.statusCode, 502, 'Errors with 502')
         t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
       }
-      else t.fail(result)
+      else t.end(result)
     })
   })
 

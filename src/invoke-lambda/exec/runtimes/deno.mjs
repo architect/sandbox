@@ -4,59 +4,62 @@ const { __ARC_CONFIG__, __ARC_CONTEXT__, AWS_LAMBDA_RUNTIME_API: runtimeAPI } = 
 const url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
 const headers = { 'content-type': 'application/json' };
 
-try {
-  const { handlerFile, handlerMethod } = JSON.parse(__ARC_CONFIG__);
-  const context = JSON.parse(__ARC_CONTEXT__);
-  Deno.env.delete('__ARC_CONFIG__');
-  Deno.env.delete('__ARC_CONTEXT__');
+(async function main () {
+  try {
+    const { handlerFile, handlerMethod } = JSON.parse(__ARC_CONFIG__);
+    const context = JSON.parse(__ARC_CONTEXT__);
+    Deno.env.delete('__ARC_CONFIG__');
+    Deno.env.delete('__ARC_CONTEXT__');
 
-  let isPromise = obj => obj && typeof obj.then === 'function';
+    let isPromise = obj => obj && typeof obj.then === 'function';
 
-  (async function main () {
-    const next = url('invocation/next');
-    const response = await fetch(next);
-    const event = await response.json();
+    async function run () {
+      const next = url('invocation/next');
+      const response = await fetch(next);
+      const event = await response.json();
 
-    const requestID = response.headers.get('Lambda-Runtime-Aws-Request-Id') || response.headers.get('lambda-runtime-aws-request-id');
-    const errorEndpoint = url('invocation/' + requestID + '/error');
-    const responseEndpoint = url('invocation/' + requestID + '/response');
+      const requestID = response.headers.get('Lambda-Runtime-Aws-Request-Id') || response.headers.get('lambda-runtime-aws-request-id');
+      const errorEndpoint = url('invocation/' + requestID + '/error');
+      const responseEndpoint = url('invocation/' + requestID + '/response');
 
-    const file = 'file://' + handlerFile;
-    const mod = await import(file);
-    const handler = mod[handlerMethod];
+      const file = 'file://' + handlerFile;
+      const mod = await import(file);
+      const handler = mod[handlerMethod];
 
-    async function callback (err, result) {
-      if (err) {
-        console.log(err);
-        const errorMessage = err.message || '(unknown error)';
-        const errorType = err.name || '(unknown error type)';
-        const stackTrace = err.stack ? err.stack.split('\n') : undefined;
-        const body = JSON.stringify({ errorMessage, errorType, stackTrace });
-        await fetch(errorEndpoint, { method: 'POST', headers, body });
+      async function callback (err, result) {
+        if (err) {
+          console.log(err);
+          const errorMessage = err.message || '(unknown error)';
+          const errorType = err.name || '(unknown error type)';
+          const stackTrace = err.stack ? err.stack.split('\n') : undefined;
+          const body = JSON.stringify({ errorMessage, errorType, stackTrace });
+          await fetch(errorEndpoint, { method: 'POST', headers, body });
+        }
+        const options = { method: 'POST', headers };
+        if (result) options.body = JSON.stringify(result);
+        await fetch(responseEndpoint, options);
       }
-      const options = { method: 'POST', headers };
-      if (result) options.body = JSON.stringify(result);
-      await fetch(responseEndpoint, options);
-    }
-    try {
-      const response = handler(event, context, callback);
-      if (isPromise(response)) {
-        response.then(result => callback(null, result)).catch(callback);
+      try {
+        const response = handler(event, context, callback);
+        if (isPromise(response)) {
+          response.then(result => callback(null, result)).catch(callback);
+        }
+      }
+      catch (err) {
+        callback(err);
       }
     }
-    catch (err) {
-      callback(err);
-    }
-  })();
-}
-catch (err) {
-  (async function initError () {
-    console.log(err);
-    const initErrorEndpoint = url(`init/error'`);
-    const errorMessage = err.message || 'Unknown init error';
-    const errorType = err.name || 'Unknown init error type';
-    const stackTrace = err.stack ? err.stack.split('\n') : undefined;
-    const body = JSON.stringify({ errorMessage, errorType, stackTrace });
-    await fetch(initErrorEndpoint, { method: 'POST', headers, body });
-  })();
-}
+    await run();
+  }
+  catch (err) {
+    (async function initError () {
+      console.log(err);
+      const initErrorEndpoint = url(`init/error`);
+      const errorMessage = err.message || 'Unknown init error';
+      const errorType = err.name || 'Unknown init error type';
+      const stackTrace = err.stack ? err.stack.split('\n') : undefined;
+      const body = JSON.stringify({ errorMessage, errorType, stackTrace });
+      await fetch(initErrorEndpoint, { method: 'POST', headers, body });
+    })();
+  }
+})();

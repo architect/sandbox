@@ -121,7 +121,7 @@ let verifyShutdown = (t, type, callback) => {
       t.ok(errs.includes(err.code), `Sandbox successfully shut down (${type})`)
       if (callback) callback()
     }
-    else t.fail('Sandbox did not shut down')
+    else t.end('Sandbox did not shut down')
   })
 }
 verifyShutdown.async = (...params) => new Promise((resolve, reject) => {

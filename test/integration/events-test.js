@@ -119,7 +119,7 @@ function runTests (runType, t) {
         t.match(err.message, /404/, 'Event not found')
         teardown(t)
       }
-      else t.fail('Publish should have failed')
+      else t.end('Publish should have failed')
     })
   })
 
@@ -178,7 +178,7 @@ function runTests (runType, t) {
         t.match(err.message, /404/, 'Event not found')
         teardown(t)
       }
-      else t.fail('Publish should have failed')
+      else t.end('Publish should have failed')
     })
   })
 

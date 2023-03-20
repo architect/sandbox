@@ -140,7 +140,7 @@ function runTests (runType, t) {
         if (Name === key && Value === `mockapp-staging-accounts`) {
           t.pass(`Found param: ${key}`)
         }
-        else t.fail(`Could not find param: ${key}`)
+        else t.end(`Could not find param: ${key}`)
       }
     })
   })
@@ -155,7 +155,7 @@ function runTests (runType, t) {
         if (Name === key && Value === `mockapp-staging-accounts`) {
           t.pass(`Found param: ${key}`)
         }
-        else t.fail(`Could not find param: ${key}`)
+        else t.end(`Could not find param: ${key}`)
       }
     })
   })

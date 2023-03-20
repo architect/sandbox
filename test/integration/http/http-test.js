@@ -906,7 +906,7 @@ function runTests (runType, t) {
         t.equal(err.statusCode, 403, 'Errors with 403')
         t.match(err.body, new RegExp(message), `Errors with message instructing to add '${message}' handler`)
       }
-      else t.fail(result)
+      else t.end(result)
     })
   })
 
@@ -920,7 +920,7 @@ function runTests (runType, t) {
         t.equal(err.statusCode, 403, 'Errors with 403')
         t.match(err.body, new RegExp(message), `Errors with message instructing to add '${message}' handler`)
       }
-      else t.fail(result)
+      else t.end(result)
     })
   })
 
@@ -942,7 +942,7 @@ function runTests (runType, t) {
       url
     }, function _got (err, result) {
       if (err) t.equal(err.statusCode, 404, 'Got 404 for missing file')
-      else t.fail(result)
+      else t.end(result)
     })
   })
 
@@ -991,7 +991,7 @@ function runTests (runType, t) {
         t.equal(err.statusCode, 502, 'Got 502 for missing file')
         t.match(err.body, /Lambda handler not found/, 'Got correct error')
       }
-      else t.fail(result)
+      else t.end(result)
     })
   })
 

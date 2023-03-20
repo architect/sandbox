@@ -1,4 +1,3 @@
-/*
 let { join } = require('path')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
@@ -30,11 +29,11 @@ function teardown () {
 function reset () {
   data = ''
 }
- */
+
 /**
  * Hello! Because this test deals in node module loading it must be run before all other tests.
  */
-/*
+
 test('Set up env', t => {
   t.plan(1)
   t.ok(sandbox, 'Got Sandbox')
@@ -143,7 +142,7 @@ function runTests (runType, t ) {
         t.ok(err, 'Got a failure')
         t.match(err.body, /Cannot find module 'foo'/, 'Could not find dependency (`foo`)')
       }
-      else t.fail('Expected an error')
+      else t.end('Expected an error')
     })
   })
 
@@ -347,4 +346,3 @@ function runTests (runType, t ) {
     t.pass('Done')
   })
 }
- */

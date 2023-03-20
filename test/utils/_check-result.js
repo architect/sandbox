@@ -20,7 +20,7 @@ function checkHttpResult (t, result, checks) {
   if (has(result, 'version')) {
     t.equal(version, '2.0', 'Got Lambda v2.0 payload')
   }
-  else t.fail('No Lambda payload version specified')
+  else t.end('No Lambda payload version specified')
   Object.entries(checks).forEach(([ param, value ]) => {
     if (param.startsWith('_')) { /* noop */ }
     else if (param === 'body' && value) {
