@@ -116,7 +116,7 @@ function apiError ({ invocations, endpoint, update, req, requestID }) {
 }
 
 function getPort (callback) {
-  // Reset the port pool
+  // Reset the port pool if necessary
   if (lastUsed > 65000) lastUsed = 50000
 
   let checking = lastUsed + 1
@@ -141,6 +141,7 @@ function getPort (callback) {
         // Tester close emits multiple events, so only call back once
         if (!done) {
           done = true
+          lastUsed = checking
           callback(null, checking)
         }
       })
