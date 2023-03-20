@@ -54,7 +54,7 @@ const headers = { 'content-type': 'application/json' };
   catch (err) {
     (async function initError () {
       console.log(err);
-      const initErrorEndpoint = url(`init/error`);
+      const initErrorEndpoint = url('init/error');
       const errorMessage = err.message || 'Unknown init error';
       const errorType = err.name || 'Unknown init error type';
       const stackTrace = err.stack ? err.stack.split('\n') : undefined;

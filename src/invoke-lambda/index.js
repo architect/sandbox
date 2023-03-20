@@ -59,7 +59,7 @@ module.exports = function invokeLambda (params, callback) {
     timeout: config.timeout * 1000,
     update,
   }, function done (err) {
-    update.debug.status(`Final invocation state for requestID ${requestID}: ${invocations[requestID]}`)
+    update.debug.status(`Final invocation state for requestID ${requestID}: ${JSON.stringify(invocations[requestID], null, 2)}`)
     if (err) {
       delete invocations[requestID]
       callback(err)

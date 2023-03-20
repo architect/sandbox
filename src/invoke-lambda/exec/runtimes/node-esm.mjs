@@ -59,7 +59,7 @@ let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
       let _tiny = await import('tiny-json-http');
       let tiny = _tiny.default;
       console.log(err);
-      let initErrorEndpoint = url(`init/error`);
+      let initErrorEndpoint = url('init/error');
       let errorMessage = err.message || 'Unknown init error';
       let errorType = err.name || 'Unknown init error type';
       let stackTrace = err.stack ? err.stack.split('\n') : undefined;

@@ -16,7 +16,6 @@ module.exports = function () {
       if (runtime.endsWith('.js') || runtime.endsWith('.mjs')) {
         script = '"' + bootstrap
           .replace(/\n/g, '')
-          .replace(/\`/g, '\\\`')
           .trim() + '"'
       }
       if (runtime.endsWith('.py')) {
