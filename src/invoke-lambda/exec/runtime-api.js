@@ -33,6 +33,11 @@ module.exports = function startRuntimeAPI (lambda, params, callback) {
           body = body.toString()
 
           if (req.url === nextEndpoint) {
+            if (!invocations[requestID]) {
+              apiError({ invocations, endpoint: 'next', update, req, requestID })
+              res.statusCode = 500
+              return res.end()
+            }
             let { request } = invocations[requestID]
             // Lambda docs specify old school HTTP header format; expect Node to normalize to lowcase per HTTP 2.0
             res.setHeader('Lambda-Runtime-Aws-Request-Id', requestID)
@@ -40,7 +45,11 @@ module.exports = function startRuntimeAPI (lambda, params, callback) {
             res.end(JSON.stringify(request))
           }
           else if (req.url === initErrorEndpoint) {
-            // TODO blow up loudly if no requestID is found or if it doesn't match the startRuntimeAPI run?
+            if (!invocations[requestID]) {
+              apiError({ invocations, endpoint: 'init error', update, req, requestID })
+              res.statusCode = 500
+              return res.end()
+            }
             invocations[requestID].initError = errors({
               lambdaError: JSON.parse(body),
               lambda,
@@ -50,13 +59,21 @@ module.exports = function startRuntimeAPI (lambda, params, callback) {
           }
           else if (isInvoke() === 'response') {
             let requestID = pathParts[3]
-            // TODO blow up loudly if no requestID is found or if it doesn't match the startRuntimeAPI run?
+            if (!invocations[requestID]) {
+              apiError({ invocations, endpoint: 'response', update, req, requestID })
+              res.statusCode = 500
+              return res.end()
+            }
             invocations[requestID].response = JSON.parse(body)
             res.end()
           }
           else if (isInvoke() === 'error') {
             let requestID = pathParts[3]
-            // TODO blow up loudly if no requestID is found or if it doesn't match the startRuntimeAPI run?
+            if (!invocations[requestID]) {
+              apiError({ invocations, endpoint: 'error', update, req, requestID })
+              res.statusCode = 500
+              return res.end()
+            }
             invocations[requestID].error = errors({
               lambdaError: JSON.parse(body),
               lambda,
@@ -64,7 +81,11 @@ module.exports = function startRuntimeAPI (lambda, params, callback) {
             res.end()
           }
           else if (isInvoke() === 'arc_meta') {
-            // TODO blow up loudly if no requestID is found or if it doesn't match the startRuntimeAPI run?
+            if (!invocations[requestID]) {
+              apiError({ invocations, endpoint: 'arc_meta', update, req, requestID })
+              res.statusCode = 500
+              return res.end()
+            }
             invocations[requestID].meta = JSON.parse(body)
             res.end()
           }
@@ -85,6 +106,13 @@ module.exports = function startRuntimeAPI (lambda, params, callback) {
 
     }
   })
+}
+
+function apiError ({ invocations, endpoint, update, req, requestID }) {
+  update.error(`Runtime API error: invocation missing from ${endpoint} endpoint
+- Endpoint URL: ${req.url}
+- Request ID: ${requestID}
+- Current invocations: ${JSON.stringify(invocations, null, 2)}`)
 }
 
 function getPort (callback) {
