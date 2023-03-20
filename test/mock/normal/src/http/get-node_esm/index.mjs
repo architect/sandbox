@@ -1,10 +1,11 @@
-exports.handler = async (event, context) => {
+async function handler (event) {
   const body = event
-  body.message = 'Hello from a multi-tenant Lambda!'
-  body.context = context
+  body.message = 'Hello from get /node-esm (running in ESM mode)'
   return {
     statusCode: 200,
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body)
   }
 }
+
+export { handler }

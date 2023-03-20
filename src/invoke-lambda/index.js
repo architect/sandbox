@@ -1,9 +1,12 @@
 let { existsSync } = require('fs')
+let { randomUUID } = require('crypto')
 let chalk = require('chalk')
 
 let getEnv = require('./env')
 let exec = require('./exec')
 let warn = require('./warn')
+
+let invocations = {}
 
 let serialize = i => chalk.dim(JSON.stringify(i, null, 2))
 
@@ -39,6 +42,9 @@ module.exports = function invokeLambda (params, callback) {
   update.debug.raw(output + '...')
   if (chonky) update.debug.status('Truncated event payload log at 10KB')
 
+  let requestID = randomUUID()
+  invocations[requestID] = { request: event }
+
   exec(lambda, {
     // Internal execution context
     context: { apiType, inventory, staticPath, update },
@@ -48,18 +54,29 @@ module.exports = function invokeLambda (params, callback) {
       env: getEnv(params),
       shell: true,
     },
-    request: JSON.stringify(event),
+    invocations,
+    requestID,
     timeout: config.timeout * 1000,
-  }, function done (err, result, meta = {}) {
-    if (err) callback(err)
+    update,
+  }, function done (err) {
+    update.debug.status(`Final invocation state for requestID ${requestID}: ${invocations[requestID]}`)
+    if (err) {
+      delete invocations[requestID]
+      callback(err)
+    }
     else {
-      let { missing, debug } = meta
+      let { error, initError, response, meta = {} } = invocations[requestID]
+      delete invocations[requestID]
+
       // Dependency warning debugger - handy for introspection during Lambda execution
+      let { missing, debug } = meta
+      warn({ missing, inventory, src, update })
       if (debug) {
         update.debug.status(`Lambda debug data: ${lambdaPath}`)
         update.debug.raw(serialize(debug))
       }
-      warn({ missing, inventory, src, update })
+
+      let result = initError || error || response
       callback(null, result)
     }
   })

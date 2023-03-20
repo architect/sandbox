@@ -18,7 +18,7 @@ test('Services should populate with plugin variables', t => {
     ]
     } } } } }
   services({ inventory }, (err, services) => {
-    if (err) t.fail(err)
+    if (err) t.end(err)
     else {
       t.equal(Object.keys(services).length, 3, 'Got back two services (and one internal)')
       t.ok(services.ARC_SANDBOX, 'Got back internal SSM property')

@@ -80,11 +80,11 @@ test('Double check', t => {
 test('Sync sandbox.start (with cwd param)', t => {
   t.plan(2)
   sandbox.start({ cwd: mock, port, quiet }, function (err) {
-    if (err) t.fail('Sandbox failed (sync)')
+    if (err) t.end('Sandbox failed (sync)')
     else {
       t.pass('Sandbox started (sync)')
       tiny.get({ url }, function (err, result) {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         else t.equal(msg, result.body.message, 'Got back get / handler')
       })
     }
@@ -103,11 +103,11 @@ test('Sync sandbox.start (from process.cwd)', t => {
   process.chdir(mock)
   t.equal(process.cwd(), mock, 'Process changed to mock dir')
   sandbox.start({ port, quiet }, function (err) {
-    if (err) t.fail('Sandbox failed (sync)')
+    if (err) t.end('Sandbox failed (sync)')
     else {
       t.pass('Sandbox started (sync)')
       tiny.get({ url }, function (err, result) {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         else t.equal(msg, result.body.message, 'Got back get / handler')
       })
     }

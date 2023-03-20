@@ -53,11 +53,11 @@ function verifyPublish ({ t, pragma, event, file, message }) {
     name: event,
     payload: { filename: file, message },
   }, function done (err) {
-    if (err) t.fail(err)
+    if (err) t.end(err)
     else {
       t.pass('Successfully published event')
       timer = setTimeout(() => {
-        t.fail(`Did not write file in ${ohno}ms, sigh`)
+        t.end(`Did not write file in ${ohno}ms, sigh`)
       }, ohno)
     }
   })

@@ -1,4 +1,2 @@
-src/invoke-lambda/exec/runtimes/deno.js
-src/invoke-lambda/exec/runtimes/node-esm.js
 test/mock
 scratch/

@@ -27,7 +27,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /deno/index.js'
@@ -42,7 +42,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /deno/index.ts'
@@ -57,7 +57,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /deno/index.tsx'
@@ -72,7 +72,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /deno/mod.js'
@@ -87,7 +87,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /deno/mod.ts'
@@ -102,7 +102,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /deno/mod.tsx'
@@ -118,7 +118,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /node/esm/index.js'
@@ -133,7 +133,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /node/esm/index.mjs'
@@ -148,7 +148,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /node/cjs/index.cjs'
@@ -163,7 +163,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /node/cjs/index.js'
@@ -185,7 +185,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + '/hello'
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from a multi-tenant Lambda!',
@@ -215,7 +215,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + '/hi'
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from a multi-tenant Lambda!',

@@ -6,15 +6,18 @@ let handlers
 module.exports = function () {
   if (handlers) return handlers
   handlers = {}
-  let runtimes = [ 'deno.js', 'node.js', 'node-esm.js', 'python.py', 'ruby.rb' ]
+  let runtimes = [ 'deno.mjs', 'node.js', 'node-esm.mjs', 'python.py', 'ruby.rb' ]
   runtimes.forEach(runtime => {
     try {
       let name = runtime.split('.')[0]
       let path = join(__dirname, 'runtimes', runtime)
       let bootstrap = readFileSync(path).toString()
       let script
-      if (runtime.endsWith('.js')) {
-        script = '"' + bootstrap.replace(/\n/g, '').trim() + '"'
+      if (runtime.endsWith('.js') || runtime.endsWith('.mjs')) {
+        script = '"' + bootstrap
+          .replace(/\n/g, '')
+          .replace(/\`/g, '\\\`')
+          .trim() + '"'
       }
       if (runtime.endsWith('.py')) {
         script = '"' + bootstrap.split('\n').filter(lTrimm).join(';') + '"'

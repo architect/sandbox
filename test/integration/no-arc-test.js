@@ -25,7 +25,7 @@ function runTests (runType, t) {
   t.test('get /', t => {
     t.plan(2)
     tiny.get({ url }, function _got (err, data) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         t.ok(data, 'got /')
         t.ok(data.body.startsWith('Hello from Architect Sandbox running without an Architect file!'), 'is hello world')

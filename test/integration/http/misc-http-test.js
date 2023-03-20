@@ -41,7 +41,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         let { message, pathParameters, rawPath } = result.body
         t.equal(rawPath, path, `got ${rawPath}`)
@@ -57,7 +57,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         let { message, pathParameters, rawPath } = result.body
         t.equal(rawPath, path, `got ${rawPath}`)
@@ -73,7 +73,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         let { message, pathParameters, rawPath } = result.body
         t.equal(rawPath, path, `got ${rawPath}`)
@@ -89,7 +89,7 @@ function runTests (runType, t) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         let { message, pathParameters, rawPath } = result.body
         t.equal(rawPath, path, `got ${rawPath}`)
@@ -106,7 +106,7 @@ function runTests (runType, t) {
       url: url + '/times-out'
     }, function _got (err, result) {
       if (err) {
-        let message = 'Timeout Error'
+        let message = 'Timeout error'
         let time = '1 second'
         t.equal(err.statusCode, 500, 'Errors with 500')
         t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)

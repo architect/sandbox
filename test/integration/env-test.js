@@ -55,7 +55,7 @@ function runTests (runType, t) {
   t.test(`[Ports / ${runType}] get /`, t => {
     t.plan(5)
     tiny.get({ url: url + '/env' }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkSystemEnvVars(result.body, t)
         // Check for all ports
@@ -81,7 +81,7 @@ function runTests (runType, t) {
   t.test(`[Env vars (.env) / ${runType}] get /`, t => {
     t.plan(3)
     tiny.get({ url }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkSystemEnvVars(result.body, t)
         t.equal(result.body.DOTENV_USERLAND_ENV_VAR, 'Why hello there from .env!', 'Received userland env var')
@@ -109,7 +109,7 @@ function runTests (runType, t) {
     t.test(`[Env vars (env option) / ${runType}] get /`, t => {
       t.plan(4)
       tiny.get({ url }, function _got (err, result) {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         else {
           checkSystemEnvVars(result.body, t)
           t.equal(result.body.DOTENV_USERLAND_ENV_VAR, 'Why hello there from overridden .env!', 'Received userland env var')
@@ -133,7 +133,7 @@ function runTests (runType, t) {
   t.test(`[Env vars (preferences.arc) / ${runType}] get /`, t => {
     t.plan(3)
     tiny.get({ url }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkSystemEnvVars(result.body, t)
         t.equal(result.body.PREFERENCES_DOT_ARC_USERLAND_ENV_VAR, 'Why hello there from preferences.arc!', 'Received userland env var')

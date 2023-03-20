@@ -26,6 +26,7 @@ module.exports = function getEnv (params) {
     // Internal for handler bootstrap
     __ARC_CONTEXT__: JSON.stringify(lambdaContext),
     __ARC_CONFIG__: JSON.stringify({
+      apiType,
       projectSrc: cwd,
       handlerFile,
       handlerMethod: 'handler',

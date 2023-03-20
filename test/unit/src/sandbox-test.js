@@ -53,7 +53,7 @@ test('Sandbox uses continuation passing', t => {
   series([
     callback => {
       sandbox.start(null, err => {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         t.pass('sandbox.start executed callback (null params)')
         callback()
       })
@@ -68,7 +68,7 @@ test('Sandbox uses continuation passing', t => {
 
     callback => {
       sandbox.start(undefined, err => {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         t.pass('sandbox.start executed callback (with params)')
         callback()
       })

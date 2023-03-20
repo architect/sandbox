@@ -83,7 +83,7 @@ function runTests (runType, t) {
       payload: { path: fine }
     },
     function done (err) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         let ohno = 10000
         timer = setTimeout(() => {
@@ -101,7 +101,7 @@ function runTests (runType, t) {
       payload
     },
     function done (err) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else check(t)
     })
   })
@@ -114,7 +114,7 @@ function runTests (runType, t) {
       payload
     },
     function done (err) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else check(t)
     })
   })
@@ -128,7 +128,7 @@ function runTests (runType, t) {
       payload
     },
     function done (err) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else check(t)
     })
   })
@@ -141,7 +141,7 @@ function runTests (runType, t) {
       payload
     },
     function done (err) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else check(t)
     })
   })
@@ -154,7 +154,7 @@ function runTests (runType, t) {
       payload
     },
     function done (err) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else check(t)
     })
   })
@@ -167,7 +167,7 @@ function runTests (runType, t) {
       payload
     },
     function done (err) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else check(t, 600)
     })
   })
@@ -183,7 +183,7 @@ function runTests (runType, t) {
         payload
       },
       function done (err) {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         else check(t)
       })
     }

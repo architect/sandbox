@@ -22,7 +22,7 @@ test('Get inventory', t => {
   t.plan(1)
   let cwd =  join(process.cwd(), 'test', 'mock', 'normal')
   inv({ cwd }, function (err, result) {
-    if (err) t.fail(err)
+    if (err) t.end(err)
     else {
       inventory = result
       t.ok(inv, 'Got inventory')

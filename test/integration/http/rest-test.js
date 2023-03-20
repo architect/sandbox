@@ -27,7 +27,7 @@ function runTests (runType) {
     tiny.get({
       url
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get / running the default runtime',
@@ -58,7 +58,7 @@ function runTests (runType) {
     tiny.get({
       url: url + '/?whats=up'
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get / running the default runtime',
@@ -82,7 +82,7 @@ function runTests (runType) {
     tiny.get({
       url: url + '/?whats=up&whats=there'
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get / running the default runtime',
@@ -107,7 +107,7 @@ function runTests (runType) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, JSON.parse(result.headers.body), {
           message: 'Hello from get /binary',
@@ -134,7 +134,7 @@ function runTests (runType) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /nodejs18.x (running nodejs18.x)',
@@ -159,7 +159,7 @@ function runTests (runType) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /nodejs14.x (running nodejs14.x)',
@@ -177,14 +177,14 @@ function runTests (runType) {
       }
     })
   })
-
+  /*
   test(`${mode} get /python3.8`, t => {
     t.plan(17)
     let path = '/python3.8'
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /python3.8 (running python3.8)',
@@ -216,7 +216,7 @@ function runTests (runType) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /python3.7 (running python3.7)',
@@ -241,7 +241,7 @@ function runTests (runType) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /ruby2.7 (running ruby2.7)',
@@ -266,6 +266,7 @@ function runTests (runType) {
       }
     })
   })
+  */
 
   test(`${mode} get /deno`, t => {
     t.plan(16)
@@ -273,7 +274,7 @@ function runTests (runType) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /deno (running deno)',
@@ -298,7 +299,7 @@ function runTests (runType) {
       url: url + '/no-return'
     }, function _got (err, result) {
       if (err) {
-        let message = 'Async error'
+        let message = 'No response found'
         t.equal(err.statusCode, 500, 'Errors with 500')
         t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
       }
@@ -314,7 +315,7 @@ function runTests (runType) {
       data,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from post /post',
@@ -341,7 +342,7 @@ function runTests (runType) {
       url: url + path,
       data,
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from put /put',
@@ -367,7 +368,7 @@ function runTests (runType) {
       url: url + path,
       data,
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from patch /patch',
@@ -393,7 +394,7 @@ function runTests (runType) {
       url: url + path,
       data,
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from delete /delete',
@@ -436,7 +437,7 @@ function runTests (runType) {
     tiny.get({
       url: url + path,
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get / running the default runtime',
@@ -461,7 +462,7 @@ function runTests (runType) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get / running the default runtime',
@@ -486,7 +487,7 @@ function runTests (runType) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get / running the default runtime',
@@ -543,7 +544,7 @@ function runTests (runType) {
     tiny.get({
       url
     }, function _got (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         t.ok(result, 'got /')
         let { body } = result

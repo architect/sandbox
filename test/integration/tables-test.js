@@ -56,7 +56,7 @@ function runTests (runType, t) {
     t.plan(1)
     setup(t)
     dynamo.listTables({}, function done (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         let { TableNames } = result
         t.ok(Array.isArray(TableNames), `Got tables back from the DB: ${TableNames}`)
@@ -76,7 +76,7 @@ function runTests (runType, t) {
       }
     },
     function _put (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         t.ok(result, `Got result: ${str(result)}`)
         teardown(t)
@@ -91,7 +91,7 @@ function runTests (runType, t) {
       TableName
     },
     function _desc (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         t.equal(result.Table.GlobalSecondaryIndexes[0].IndexName, 'email-index', 'Got index: email-index')
         teardown(t)
@@ -106,7 +106,7 @@ function runTests (runType, t) {
       TableName: TableName2
     },
     function _desc (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         let indexes = result.Table.GlobalSecondaryIndexes
         t.equal(indexes.length, 2, 'Got back two indexes')
@@ -127,7 +127,7 @@ function runTests (runType, t) {
       }
     },
     function _desc (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         t.ok(result, `Got result: ${str(result)}`)
         teardown(t)
@@ -149,7 +149,7 @@ function runTests (runType, t) {
       }
     },
     function _desc (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         t.ok(result, `Got result: ${str(result)}`)
         teardown(t)
@@ -173,7 +173,7 @@ function runTests (runType, t) {
     setup(t)
     dynamo.scan({ TableName: 'seed-data-staging-stuff' },
       function _desc (err, result) {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         else {
           console.log(str(result))
           t.equal(result.Count, 2, 'Got two results')
@@ -190,7 +190,7 @@ function runTests (runType, t) {
     setup(t)
     dynamo.scan({ TableName: 'seed-data-staging-things' },
       function _desc (err, result) {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         else {
           console.log(str(result))
           t.equal(result.Count, 2, 'Got two results')
@@ -215,7 +215,7 @@ function runTests (runType, t) {
     setup(t)
     dynamo.scan({ TableName: 'seed-data-staging-stuff' },
       function _desc (err, result) {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         else {
           console.log(str(result))
           t.equal(result.Count, 2, 'Got two results')
@@ -232,7 +232,7 @@ function runTests (runType, t) {
     setup(t)
     dynamo.scan({ TableName: 'seed-data-staging-things' },
       function _desc (err, result) {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         else {
           console.log(str(result))
           t.equal(result.Count, 2, 'Got two results')
@@ -257,7 +257,7 @@ function runTests (runType, t) {
     setup(t)
     dynamo.scan({ TableName: 'seed-data-staging-stuff' },
       function _desc (err, result) {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         else {
           console.log(str(result))
           t.equal(result.Count, 2, 'Got two results')
@@ -274,7 +274,7 @@ function runTests (runType, t) {
     setup(t)
     dynamo.scan({ TableName: 'seed-data-staging-things' },
       function _desc (err, result) {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         else {
           console.log(str(result))
           t.equal(result.Count, 2, 'Got two results')
@@ -300,7 +300,7 @@ function runTests (runType, t) {
     setup(t)
     dynamo.scan({ TableName: 'seed-data-staging-stuff' },
       function _desc (err, result) {
-        if (err) t.fail(err)
+        if (err) t.end(err)
         else {
           console.log(str(result))
           t.equal(result.Count, 0, 'Got zero results')
@@ -322,7 +322,7 @@ function runTests (runType, t) {
     t.plan(1)
     dynaliteServer = dynalite({ path: join(mock, 'normal', '.db'), createTableMs: 0 })
     dynaliteServer.listen(externalDBPort, err => {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else t.pass('External DB successfully started')
     })
   })
@@ -348,7 +348,7 @@ function runTests (runType, t) {
     t.plan(1)
     setup(t, externalDBPort)
     dynamo.listTables({}, function done (err, result) {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else {
         let { TableNames } = result
         t.ok(Array.isArray(TableNames), `Got tables back from the DB: ${TableNames}`)
@@ -365,7 +365,7 @@ function runTests (runType, t) {
   t.test(`${mode} Stop external DB`, t => {
     t.plan(1)
     dynaliteServer.close(err => {
-      if (err) t.fail(err)
+      if (err) t.end(err)
       else t.pass('External DB successfully shut down')
     })
   })
