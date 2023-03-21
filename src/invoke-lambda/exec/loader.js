@@ -1,5 +1,6 @@
-let { readFileSync } = require('fs')
+let { copyFileSync, readFileSync } = require('fs')
 let { join } = require('path')
+let tmp = require('tmp')
 let lTrimm = l => l.trim() !== '' // boom
 let handlers
 
@@ -19,7 +20,22 @@ module.exports = function () {
           .trim() + '"'
       }
       if (runtime.endsWith('.py')) {
-        script = '"' + bootstrap + '"'
+        // Windows + Python + indents (`try/except`) as a `python -c` arg = no bueno
+        // PowerShell spawns windows, doesn't log stdio, etc.
+        // So here comes the hacks!
+        if (process.platform.startsWith('win')) {
+          // Binary dist mode
+          if (process.pkg) {
+            let tmpDir = tmp.dirSync()
+            let dest = join(tmpDir.name, runtime)
+            copyFileSync(path, dest)
+            script = dest
+          }
+          else script = path
+        }
+        else {
+          script = '"' + bootstrap + '"'
+        }
       }
       if (runtime.endsWith('.rb')) {
         script = bootstrap

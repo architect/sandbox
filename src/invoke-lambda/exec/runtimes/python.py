@@ -1,4 +1,5 @@
-import importlib, json, os, traceback
+import json, os, traceback
+from importlib import util
 from urllib.request import urlopen, Request
 
 config = json.loads(os.environ.get('__ARC_CONFIG__'))
@@ -21,9 +22,12 @@ try:
   responseEndpoint = url('invocation/' + requestID + '/response')
 
   try:
-    # Python does funky stuff with importing absolute paths, hardcoding for now
-    index = importlib.import_module('index')
-    handler = getattr(index, 'handler')
+    handler_file = config['handlerFile']
+    handler_method = config['handlerMethod']
+    module_dir, module_file = os.path.split(handler_file)
+    spec = util.spec_from_file_location(module_file, handler_file)
+    module = spec.loader.load_module()
+    handler = getattr(module, handler_method)
     result = handler(event, context)
     data = json.dumps(result).encode('utf-8')
     request = Request(responseEndpoint, data=data, headers=headers)

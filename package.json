@@ -56,6 +56,7 @@
     "run-series": "~1.1.9",
     "send": "~0.18.0",
     "server-destroy": "~1.0.1",
+    "tmp": "~0.2.1",
     "tree-kill": "~1.2.2",
     "update-notifier-cjs": "~5.1.6",
     "ws": "~8.13.0"

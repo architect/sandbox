@@ -25,11 +25,12 @@ module.exports = {
     }
   },
   python: function (script) {
-    // Windows `python -c` doesn't like multi-liners, so serialize script
-    let command = process.platform === 'win32' ? 'python' : 'python3'
+    // Windows can't feed `python -c` multi-liners, and indents (`try/except`) = no bueno
+    // Here comes the hacks!
+    let isWin = process.platform.startsWith('win')
     return {
-      command,
-      args: [ '-c', script ],
+      command: isWin ? 'python' : 'python3',
+      args: isWin ? [ script ] : [ '-c', script ],
     }
   },
   ruby: function (script) {
