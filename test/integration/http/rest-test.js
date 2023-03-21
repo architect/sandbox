@@ -177,7 +177,7 @@ function runTests (runType) {
       }
     })
   })
-  /*
+
   test(`${mode} get /python3.8`, t => {
     t.plan(17)
     let path = '/python3.8'
@@ -234,7 +234,7 @@ function runTests (runType) {
       }
     })
   })
-
+  /*
   test(`${mode} get /ruby2.7`, t => {
     t.plan(17)
     let path = '/ruby2.7'

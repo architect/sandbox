@@ -53,7 +53,7 @@ module.exports = function startRuntimeAPI (lambda, params, callback) {
             invocations[requestID].initError = errors({
               lambdaError: JSON.parse(body),
               lambda,
-              type: 'initError',
+              type: 'init error',
             })
             res.end()
           }

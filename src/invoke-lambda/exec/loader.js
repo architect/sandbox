@@ -19,7 +19,7 @@ module.exports = function () {
           .trim() + '"'
       }
       if (runtime.endsWith('.py')) {
-        script = '"' + bootstrap.split('\n').filter(lTrimm).join(';') + '"'
+        script = '"' + bootstrap + '"'
       }
       if (runtime.endsWith('.rb')) {
         script = bootstrap
