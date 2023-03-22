@@ -1,5 +1,8 @@
+let { execSync } = require('child_process')
+let pyCommandCache
+
 /**
- * Provides platform-specific child_process evals for each runtime
+ * Provides platform-specific runtime-specific commands for child_process spawns
  */
 module.exports = {
   deno: function (script) {
@@ -28,8 +31,20 @@ module.exports = {
     // Windows can't feed `python -c` multi-liners, and indents (`try/except`) = no bueno
     // Here comes the hacks!
     let isWin = process.platform.startsWith('win')
+    let command = 'python3'
+    // Oh, also, depending on how you installed Python in Windows, you may or may not need to use `py.exe` instead of `python.exe` (or `python3.exe`) lolwtf so let's figure that out as well
+    if (isWin && !pyCommandCache) {
+      try {
+        // `py` is conveniently installed as a symlink from the official installer, and should be available in PS + cmd; prefer `py` since it has preferred version selection logic
+        execSync('where py')
+        command = 'py'
+      }
+      // `python` should(?) be installed by Windows Store Python installations
+      catch { command = 'python' }
+      pyCommandCache = command
+    }
     return {
-      command: isWin ? 'python' : 'python3',
+      command: pyCommandCache || command,
       args: isWin ? [ script ] : [ '-c', script ],
     }
   },

@@ -91,7 +91,7 @@ test('Test runtime invocations', t => {
     if (err) t.end(err)
     let { options, invocations, requestID, timeout } = execPassedParams
     t.equals(options.cwd, lambda.src, 'python3.8 passed correct path')
-    t.equals(timeout, 38000, 'python3.8 ran with correct timeout')
+    t.equals(timeout, 3000, 'python3.8 ran with correct timeout')
     t.deepEqual(invocations[requestID].request, event, 'python3.8 received event')
   })
 
@@ -100,7 +100,7 @@ test('Test runtime invocations', t => {
     if (err) t.end(err)
     let { options, invocations, requestID, timeout } = execPassedParams
     t.equals(options.cwd, lambda.src, 'python3.7 passed correct path')
-    t.equals(timeout, 37000, 'python3.7 ran with correct timeout')
+    t.equals(timeout, 3000, 'python3.7 ran with correct timeout')
     t.deepEqual(invocations[requestID].request, event, 'python3.7 received event')
   })
 
