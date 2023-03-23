@@ -119,12 +119,13 @@ let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
         }
         /* As of tiny 7.5, falsy bodies result in posting an empty object (which is a false positive), so in that specific case we need to not publish a response */
         else {
+          /* Publish meta first so the process isn't terminated immediately upon hitting the /response endpoint */
+          let meta = { missing, debug, version: process.version };
+          await tiny.post({ url: metaEndpoint, body: meta });
           if (result || apiType === 'http') {
             if (!result) result = 'null';
             await tiny.post({ url: responseEndpoint, body: result });
           }
-          let meta = { missing, debug, version: process.version };
-          await tiny.post({ url: metaEndpoint, body: meta });
         }
       }
       try {
