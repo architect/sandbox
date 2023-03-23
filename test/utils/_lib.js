@@ -15,6 +15,21 @@ let credentials = {
 
 let data = { hi: 'there' }
 
+let timedOut = /Lambda timed out/g
+function isWindowsPythonStalling (err, t) {
+  if (!err || !CI) return
+  if (err?.raw?.statusCode === 500 && err?.body?.match(timedOut)) {
+    t.plan(1)
+    t.pass(
+      `Windows GitHub Actions sometimes fails to execute our Python script in a reasonable amount of ` +
+      `time, failing to get past the import statements of builtins in multiple seconds. After dozens ` +
+      `of attempts to pin down why, we are adding this highly specific and extremely disconcerting ` +
+      `workaround. Help wanted!`
+    )
+    return true
+  }
+}
+
 let port = 6666
 
 // Enable NOISY_TESTS for local debugging
@@ -73,6 +88,7 @@ module.exports = {
   copy,
   credentials,
   data,
+  isWindowsPythonStalling,
   port,
   quiet,
   prepTmpDir,

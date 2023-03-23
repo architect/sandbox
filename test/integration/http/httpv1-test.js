@@ -3,7 +3,7 @@ let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
-let { b64dec, checkRestResult: checkResult, data, rmPublic, run, shutdown, startup, url, verifyShutdown } = require('../../utils')
+let { b64dec, checkRestResult: checkResult, data, isWindowsPythonStalling, rmPublic, run, shutdown, startup, url, verifyShutdown } = require('../../utils')
 
 test('Set up env', t => {
   t.plan(1)
@@ -209,7 +209,8 @@ function runTests (runType, t) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.end(err)
+      if (isWindowsPythonStalling(err, t)) return
+      else if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /python3.8 (running python3.8)',
@@ -241,7 +242,8 @@ function runTests (runType, t) {
     tiny.get({
       url: url + path
     }, function _got (err, result) {
-      if (err) t.end(err)
+      if (isWindowsPythonStalling(err, t)) return
+      else if (err) t.end(err)
       else {
         checkResult(t, result.body, {
           message: 'Hello from get /python3.7 (running python3.7)',
