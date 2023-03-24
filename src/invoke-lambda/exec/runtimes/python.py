@@ -17,9 +17,9 @@ try:
   invocation = urlopen(request)
   event = json.loads(invocation.read())
 
-  requestID = invocation.getheader('Lambda-Runtime-Aws-Request-Id') or invocation.getheader('lambda-runtime-aws-request-id')
-  errorEndpoint = url('invocation/' + requestID + '/error')
-  responseEndpoint = url('invocation/' + requestID + '/response')
+  request_id = invocation.getheader('Lambda-Runtime-Aws-Request-Id') or invocation.getheader('lambda-runtime-aws-request-id')
+  error_endpoint = url('invocation/' + request_id + '/error')
+  response_endpoint = url('invocation/' + request_id + '/response')
 
   try:
     handler_file = config['handlerFile']
@@ -30,7 +30,7 @@ try:
     handler = getattr(module, handler_method)
     result = handler(event, context)
     data = json.dumps(result).encode('utf-8')
-    request = Request(responseEndpoint, data=data, headers=headers)
+    request = Request(response_endpoint, data=data, headers=headers)
     urlopen(request)
 
   except Exception as handler_err:
@@ -38,14 +38,14 @@ try:
     errorType = getattr(handler_err, 'message', repr(handler_err))
     stackTrace = traceback.format_exc()
     data = json.dumps({ 'errorType': errorType, 'stackTrace': stackTrace }).encode('utf-8')
-    request = Request(errorEndpoint, data=data, headers=headers)
+    request = Request(error_endpoint, data=data, headers=headers)
     urlopen(request)
 
 except Exception as init_err:
   print(traceback.format_exc())
-  initErrorEndpoint = url('init/error')
+  init_error_endpoint = url('init/error')
   errorType = getattr(init_err, 'message', repr(init_err))
   stackTrace = traceback.format_exc()
   data = json.dumps({ 'errorType': errorType, 'stackTrace': stackTrace }).encode('utf-8')
-  request = Request(initErrorEndpoint, data=data, headers=headers)
+  request = Request(init_error_endpoint, data=data, headers=headers)
   urlopen(request)
