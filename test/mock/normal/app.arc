@@ -33,6 +33,8 @@ get     /promise-return
 get     /reject-promise
 get     /throw-sync-error
 get     /times-out
+get     /python-error
+get     /ruby-error
 /custom
   method get
   src src/http/custom

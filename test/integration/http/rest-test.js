@@ -507,6 +507,37 @@ function runTests (runType) {
     })
   })
 
+  test(`${mode} get /python-error should fail`, t => {
+    t.plan(2)
+    tiny.get({
+      url: url + '/python-error'
+    }, function _got (err) {
+      if (isWindowsPythonStalling(err, t)) return
+      else if (err) {
+        t.equal(err.statusCode, 500, 'Got 500 for function error')
+        t.match(err.body, /Hello from get \/python-error/, 'Got function error')
+      }
+      else {
+        t.fail('request should have failed')
+      }
+    })
+  })
+
+  test(`${mode} get /ruby-error should fail`, t => {
+    t.plan(2)
+    tiny.get({
+      url: url + '/ruby-error'
+    }, function _got (err) {
+      if (err) {
+        t.equal(err.statusCode, 500, 'Got 500 for function error')
+        t.match(err.body, /Hello from get \/ruby-error/, 'Got function error')
+      }
+      else {
+        t.fail('request should have failed')
+      }
+    })
+  })
+
   test(`${mode} Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
