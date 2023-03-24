@@ -236,7 +236,7 @@ function runTests (runType) {
       }
     })
   })
-  /*
+
   test(`${mode} get /ruby2.7`, t => {
     t.plan(17)
     let path = '/ruby2.7'
@@ -268,7 +268,6 @@ function runTests (runType) {
       }
     })
   })
-  */
 
   test(`${mode} get /deno`, t => {
     t.plan(16)
