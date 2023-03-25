@@ -1,10 +1,11 @@
 let { spawn } = require('child_process')
 let { readdirSync } = require('fs')
 let kill = require('tree-kill')
-let errors = require('./errors')
+let errors = require('../../lib/errors')
+let { invocations } = require('../../arc/_runtime-api')
 
 module.exports = function spawnChild (params, callback) {
-  let { args, context, cwd, command, invocations, lambda, options, requestID, timeout } = params
+  let { args, context, cwd, command, lambda, options, requestID, timeout } = params
   let { apiType, update } = context
   let functionPath = options.cwd.replace(cwd, '').substr(1)
   let isInLambda = process.env.AWS_LAMBDA_FUNCTION_NAME

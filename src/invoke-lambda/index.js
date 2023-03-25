@@ -6,7 +6,7 @@ let getEnv = require('./env')
 let exec = require('./exec')
 let warn = require('./warn')
 
-let invocations = {}
+let { invocations } = require('../arc/_runtime-api')
 
 let serialize = i => chalk.dim(JSON.stringify(i, null, 2))
 
@@ -43,7 +43,10 @@ module.exports = function invokeLambda (params, callback) {
   if (chonky) update.debug.status('Truncated event payload log at 10KB')
 
   let requestID = randomUUID()
-  invocations[requestID] = { request: event }
+  invocations[requestID] = {
+    request: event,
+    lambda,
+  }
 
   exec(lambda, {
     // Internal execution context
@@ -51,10 +54,9 @@ module.exports = function invokeLambda (params, callback) {
     // Child process options
     options: {
       cwd: build || src,
-      env: getEnv(params),
+      env: getEnv(params, requestID),
       shell: true,
     },
-    invocations,
     requestID,
     timeout: config.timeout * 1000,
     update,

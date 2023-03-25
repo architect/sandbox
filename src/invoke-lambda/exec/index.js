@@ -2,12 +2,12 @@ let _asap = require('@architect/asap')
 let load = require('./loader')
 let spawn = require('./spawn')
 let { runtimeEval } = require('../../lib')
-let runtimeAPI = require('./runtime-api')
+let { invocations } = require('../../arc/_runtime-api')
 
 module.exports = function exec (lambda, params, callback) {
   // ASAP is a special case that doesn't spawn
   if (lambda.arcStaticAssetProxy) {
-    let { context, invocations, requestID } = params
+    let { context, requestID } = params
     let asap = _asap({
       // Runs ASAP in local mode, skipping bucket config / env var checks, etc.
       env: 'testing',
@@ -29,18 +29,7 @@ module.exports = function exec (lambda, params, callback) {
     let run = getRuntime(lambda)
     let bootstrap = load()[run]
     let { command, args } = runtimeEval[run](bootstrap)
-    runtimeAPI(lambda, params, (err, server) => {
-      if (err) callback(err)
-      else {
-        spawn({ command, args, ...params, lambda }, (err) => {
-          if (err) callback(err)
-          else {
-            server.destroy()
-            callback()
-          }
-        })
-      }
-    })
+    spawn({ command, args, ...params, lambda }, callback)
   }
 }
 

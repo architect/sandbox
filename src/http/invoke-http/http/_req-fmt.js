@@ -59,9 +59,10 @@ module.exports = function requestFormatter ({ method, path, req }) {
   request.requestContext = {
     http: {
       method: req.method || method.toUpperCase(),
-      path: pathname
+      path: pathname,
     },
-    routeKey
+    routeKey,
+    timeEpoch: Math.floor(Date.now() / 1000)
   }
 
   // Path parameters

@@ -3,7 +3,9 @@ let proxyquire = require('proxyquire')
 let test = require('tape')
 let _inventory = require('@architect/inventory')
 let update = require('@architect/utils').updater()
-let mock = join(process.cwd(), 'test', 'mock')
+let cwd = process.cwd()
+let mock = join(cwd, 'test', 'mock')
+let { invocations } = require(join(cwd, 'src', 'arc', '_runtime-api'))
 
 let runtimes = {
   asap: 0,
@@ -24,6 +26,7 @@ let exec = (lambda, params, callback) => {
   if (arcStaticAssetProxy) run = 'asap'
   runtimes[run]++
   execPassedParams = JSON.parse(JSON.stringify(params))
+  invocations[params.requestID].response = event
   callback()
 }
 let invoke = proxyquire('../../../../src/invoke-lambda', {
@@ -60,66 +63,66 @@ test('Test runtime invocations', t => {
   let lambda
 
   lambda = get.http('get /')
-  invoke({ lambda, ...params }, (err) => {
+  invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
-    let { options, invocations, requestID, timeout } = execPassedParams
+    let { options, timeout } = execPassedParams
     t.equals(options.cwd, lambda.src, 'Default runtime passed correct path')
     t.equals(timeout, 5000, 'Default runtime ran with correct timeout')
-    t.deepEqual(invocations[requestID].request, event, 'Default runtime received event')
+    t.deepEqual(result, event, 'Default runtime received event')
   })
 
   lambda = get.http('get /nodejs18.x')
-  invoke({ lambda, ...params }, (err) => {
+  invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
-    let { options, invocations, requestID, timeout } = execPassedParams
+    let { options, timeout } = execPassedParams
     t.equals(options.cwd, lambda.src, 'nodejs18.x passed correct path')
     t.equals(timeout, 12000, 'nodejs18.x ran with correct timeout')
-    t.deepEqual(invocations[requestID].request, event, 'nodejs18.x received event')
+    t.deepEqual(result, event, 'nodejs18.x received event')
   })
 
   lambda = get.http('get /nodejs14.x')
-  invoke({ lambda, ...params }, (err) => {
+  invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
-    let { options, invocations, requestID, timeout } = execPassedParams
+    let { options, timeout } = execPassedParams
     t.equals(options.cwd, lambda.src, 'nodejs14.x passed correct path')
     t.equals(timeout, 14000, 'nodejs14.x ran with correct timeout')
-    t.deepEqual(invocations[requestID].request, event, 'nodejs14.x received event')
+    t.deepEqual(result, event, 'nodejs14.x received event')
   })
 
   lambda = get.http('get /python3.8')
-  invoke({ lambda, ...params }, (err) => {
+  invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
-    let { options, invocations, requestID, timeout } = execPassedParams
+    let { options, timeout } = execPassedParams
     t.equals(options.cwd, lambda.src, 'python3.8 passed correct path')
     t.equals(timeout, 3000, 'python3.8 ran with correct timeout')
-    t.deepEqual(invocations[requestID].request, event, 'python3.8 received event')
+    t.deepEqual(result, event, 'python3.8 received event')
   })
 
   lambda = get.http('get /python3.7')
-  invoke({ lambda, ...params }, (err) => {
+  invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
-    let { options, invocations, requestID, timeout } = execPassedParams
+    let { options, timeout } = execPassedParams
     t.equals(options.cwd, lambda.src, 'python3.7 passed correct path')
     t.equals(timeout, 3000, 'python3.7 ran with correct timeout')
-    t.deepEqual(invocations[requestID].request, event, 'python3.7 received event')
+    t.deepEqual(result, event, 'python3.7 received event')
   })
 
   lambda = get.http('get /ruby2.7')
-  invoke({ lambda, ...params }, (err) => {
+  invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
-    let { options, invocations, requestID, timeout } = execPassedParams
+    let { options, timeout } = execPassedParams
     t.equals(options.cwd, lambda.src, 'ruby2.7 passed correct path')
     t.equals(timeout, 25000, 'ruby2.7 ran with correct timeout')
-    t.deepEqual(invocations[requestID].request, event, 'ruby2.7 received event')
+    t.deepEqual(result, event, 'ruby2.7 received event')
   })
 
   lambda = get.http('get /deno')
-  invoke({ lambda, ...params }, (err) => {
+  invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
-    let { options, invocations, requestID, timeout } = execPassedParams
+    let { options, timeout } = execPassedParams
     t.equals(options.cwd, lambda.src, 'deno passed correct path')
     t.equals(timeout, 10000, 'deno ran with correct timeout')
-    t.deepEqual(invocations[requestID].request, event, 'deno received event')
+    t.deepEqual(result, event, 'deno received event')
   })
 })
 
@@ -170,12 +173,12 @@ test('Get inventory again to exercise ASAP', t => {
 test('Test ASAP invocation', t => {
   t.plan(3)
   let lambda = get.http('get /*')
-  invoke({ lambda, ...params }, (err) => {
+  invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
-    let { options, invocations, requestID, timeout } = execPassedParams
+    let { options, timeout } = execPassedParams
     t.equals(options.cwd, lambda.src, 'Default runtime passed correct path')
     t.equals(timeout, 5000, 'Default runtime ran with correct timeout')
-    t.deepEqual(invocations[requestID].request, event, 'Default runtime received event')
+    t.deepEqual(result, event, 'Default runtime received event')
   })
 })
 

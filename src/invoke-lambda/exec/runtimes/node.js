@@ -144,7 +144,7 @@ let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
     /* eslint-disable-next-line */
     let tiny = require('tiny-json-http');
     (async function initError () {
-      console.log(err);
+      console.log('Lambda init error:', err.body || err.message);
       let initErrorEndpoint = url('init/error');
       let errorMessage = err.message || 'Unknown init error';
       let errorType = err.name || 'Unknown init error type';

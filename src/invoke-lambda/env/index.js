@@ -4,8 +4,8 @@ let { userEnvVars } = require('../../lib')
 let { version } = require('../../../package.json')
 
 // Assemble Lambda-specific execution environment variables
-module.exports = function getEnv (params) {
-  let { apiType, cwd, lambda, inventory, ports, staticPath } = params
+module.exports = function getEnv (params, requestID) {
+  let { apiType, cwd, lambda, host, inventory, ports, staticPath } = params
   let { config, src, build, handlerFile } = lambda
   let { inv } = inventory
   let { AWS_ACCESS_KEY_ID, AWS_PROFILE, AWS_REGION, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, PATH } = process.env
@@ -17,6 +17,10 @@ module.exports = function getEnv (params) {
   let env = {
     // AWS-specific
     AWS_ACCESS_KEY_ID,
+    AWS_LAMBDA_FUNCTION_MEMORY_SIZE: lambda.config.memory,
+    AWS_LAMBDA_FUNCTION_NAME: `@${lambda.pragma} ${lambda.name}`,
+    AWS_LAMBDA_FUNCTION_VERSION: '$latest',
+    AWS_LAMBDA_RUNTIME_API: `http://${host || 'localhost'}:${ports._arc}/${requestID}`,
     AWS_PROFILE,
     AWS_REGION,
     AWS_SECRET_ACCESS_KEY,

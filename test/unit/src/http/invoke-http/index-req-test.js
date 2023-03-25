@@ -35,7 +35,6 @@ function teardown () {
   lambdaStub.reset() // mostly jic
 }
 
-
 /**
  * Arc v6 (HTTP API mode)
  */
@@ -65,9 +64,16 @@ function eatCookies (headers) {
 // Reusable result checker
 function checkArcV7HttpResult (mock, req, t) {
   httpParams.forEach(param => {
+    // Reset cookies
     let ref = param === 'headers'
       ? eatCookies(mock[param])
       : mock[param]
+    // Remove dynamic properties
+    if (param === 'requestContext') {
+      let { timeEpoch } = req.requestContext
+      // TODO add these properties back into the req/res mocks
+      if (timeEpoch) ref.timeEpoch = timeEpoch
+    }
     t.equal(
       str(ref),
       str(req[param]),

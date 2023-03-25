@@ -53,7 +53,7 @@ const headers = { 'content-type': 'application/json' };
   }
   catch (err) {
     (async function initError () {
-      console.log(err);
+      console.log('Lambda init error:', err);
       const initErrorEndpoint = url('init/error');
       const errorMessage = err.message || 'Unknown init error';
       const errorType = err.name || 'Unknown init error type';

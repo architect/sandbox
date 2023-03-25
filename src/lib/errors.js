@@ -1,4 +1,4 @@
-let { template } = require('../../lib')
+let template = require('./template')
 let { head } = template
 let headers = {
   'content-type': 'text/html; charset=utf8;',
