@@ -2,6 +2,20 @@
 
 ---
 
+## [5.6.0] 2023-03-27
+
+### Added
+
+- Added support for compiled runtimes (Rust, Go, Java, etc.)
+- Added support for Lambda runtime API (available during execution via `AWS_LAMBDA_RUNTIME_API` env var)
+
+
+### Changed
+
+- Internal change: dramatically simplified Lambda execution lifecyle
+
+---
+
 ## [5.5.3 - 5.5.4] 2023-03-09
 
 ### Changed
