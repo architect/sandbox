@@ -13,6 +13,13 @@ module.exports = function getEnv (params, requestID) {
   let lambdaContext = getContext(params)
   let envVars = userEnvVars(params)
 
+  let AWS_LAMBDA_RUNTIME_API = `http://${host || 'localhost'}:${ports._arc}/${requestID}`
+  // Strangely, various AWS language libs exhibit different behavior relating to the presence of URI scheme
+  // Use kinda brittle `includes()` here (because `go` is a reserved runtime alias for the legacy `go1.x` Lambda runtime, and Sandbox does not support it), so the Arc plugin will have to use a different, unique runtime name for now
+  if (lambda.config.runtime.includes('go')) {
+    AWS_LAMBDA_RUNTIME_API = AWS_LAMBDA_RUNTIME_API.replace('http://', '')
+  }
+
   // Runtime environment variables
   let env = {
     // AWS-specific
@@ -20,7 +27,7 @@ module.exports = function getEnv (params, requestID) {
     AWS_LAMBDA_FUNCTION_MEMORY_SIZE: lambda.config.memory,
     AWS_LAMBDA_FUNCTION_NAME: `@${lambda.pragma} ${lambda.name}`,
     AWS_LAMBDA_FUNCTION_VERSION: '$latest',
-    AWS_LAMBDA_RUNTIME_API: `http://${host || 'localhost'}:${ports._arc}/${requestID}`,
+    AWS_LAMBDA_RUNTIME_API,
     AWS_PROFILE,
     AWS_REGION,
     AWS_SECRET_ACCESS_KEY,
@@ -50,6 +57,12 @@ module.exports = function getEnv (params, requestID) {
     }),
     // System
     PATH,
+  }
+
+  // Tidy up compiled env vars
+  if (config?.runtimeConfig?.type === 'compiled') {
+    delete env.__ARC_CONTEXT__
+    delete env.__ARC_CONFIG__
   }
 
   // Runtime stuff

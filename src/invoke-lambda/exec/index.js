@@ -23,12 +23,17 @@ module.exports = function exec (lambda, params, callback) {
       })
       .catch(callback)
   }
-  // TODO: else if: custom runtimes with a bootstrap
   // Built-in runtimes or custom runtimes that rely on a `baseRuntime`
   else {
     let run = getRuntime(lambda)
-    let bootstrap = load()[run]
-    let { command, args } = runtimeEval[run](bootstrap)
+    if (run === '_compiled') {
+      var command = lambda.handlerFile
+      var args = []
+    }
+    else {
+      let bootstrap = load()[run]
+      var { command, args } = runtimeEval[run](bootstrap)
+    }
     spawn({ command, args, ...params, lambda }, callback)
   }
 }
@@ -43,4 +48,5 @@ function getRuntime ({ config, handlerModuleSystem }) {
   else if (run.startsWith('deno'))   return 'deno'
   else if (run.startsWith('ruby'))   return 'ruby'
   else if (run.startsWith('python')) return 'python'
+  else if (runtimeConfig?.type === 'compiled') return '_compiled'
 }

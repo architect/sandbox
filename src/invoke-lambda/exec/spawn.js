@@ -59,10 +59,6 @@ module.exports = function spawnChild (params, callback) {
 
     update.debug.status(`${functionPath} (pid ${pid}) shutting down (via ${event})`)
 
-    let completed = invocations[requestID].response ||
-                    invocations[requestID].initError ||
-                    invocations[requestID].error
-
     // Check if the process with specified PID is running or not
     // Stolen from: https://github.com/nisaacson/is-running/blob/master/index.js
     let isRunning = true
@@ -77,7 +73,7 @@ module.exports = function spawnChild (params, callback) {
     // Wrap up here if we can verify the process is no longer running
     if (!isRunning) {
       update.debug.status(`${functionPath} (pid ${pid}) is not running (process closed: ${isRunning}; termination is not necessary)`)
-      done(completed)
+      done()
       return
     }
 
@@ -87,8 +83,13 @@ module.exports = function spawnChild (params, callback) {
       update.error(`${functionPath} (pid ${pid}) caught child process execution error`)
     }
 
-    // Go ahead and respond to clients; process termination can continue in the background async
-    done(completed)
+    let isTesting = process.env.CI || process.env.NODE_ENV === 'testing'
+    // During testing/CI, the server is constantly being started and stopped
+    // This may create race conditions for compiled Lambdae, which may request the `/next` runtime API endpoint only to discover the Sandbox has already shut down
+    // Under normal end-user circumstances, we can go ahead and respond to clients immediately while Lambda process termination carries on in the background
+    if (!isTesting) {
+      done()
+    }
 
     if (!isInLambda) {
       kill(pid, 'SIGINT', err => {
@@ -97,6 +98,8 @@ module.exports = function spawnChild (params, callback) {
           update.debug.raw(err)
         }
         else update.debug.status(`${functionPath} (pid ${pid}) successfully terminated`)
+        // If we're in CI, it's best to wait for processes to terminate, even if slightly slower
+        if (isTesting) done()
       })
     }
     else {
@@ -113,6 +116,8 @@ module.exports = function spawnChild (params, callback) {
           }
         })
         update.debug.status(`${functionPath} (pid ${pid}) (possibly maybe) successfully terminated inside Lambda`)
+        // If we're in CI, it's best to wait for processes to terminate, even if slightly slower
+        if (isTesting) done()
       }
       catch (err) {
         update.debug.status(`${functionPath} (pid ${pid}) failed to terminate inside Lambda`)
@@ -122,7 +127,10 @@ module.exports = function spawnChild (params, callback) {
   }
 
   // End execution
-  function done (completed) {
+  function done () {
+    let completed = invocations[requestID].response ||
+                    invocations[requestID].initError ||
+                    invocations[requestID].error
     if (timedOut) {
       invocations[requestID].error = errors({
         lambdaError: {
