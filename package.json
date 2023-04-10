@@ -29,9 +29,9 @@
   ],
   "dependencies": {
     "@architect/asap": "~5.1.1",
-    "@architect/create": "~4.1.4",
+    "@architect/create": "~4.2.0-RC.0",
     "@architect/hydrate": "~3.2.0",
-    "@architect/inventory": "~3.4.3-RC.0",
+    "@architect/inventory": "~3.5.0-RC.1",
     "@architect/utils": "~3.1.6",
     "@aws-sdk/client-apigatewaymanagementapi": "3.188.0",
     "@aws-sdk/client-dynamodb": "3.188.0",
