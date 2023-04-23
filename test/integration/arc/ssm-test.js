@@ -1,3 +1,4 @@
+require('aws-sdk/lib/maintenance_mode_message').suppress = true
 let { join } = require('path')
 let test = require('tape')
 let aws = require('aws-sdk')

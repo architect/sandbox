@@ -30,6 +30,7 @@ module.exports = function getEnv (params, requestID) {
     AWS_LAMBDA_RUNTIME_API,
     AWS_PROFILE,
     AWS_REGION,
+    AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE: true, // Sigh.
     AWS_SECRET_ACCESS_KEY,
     AWS_SESSION_TOKEN,
     LAMBDA_TASK_ROOT: src,

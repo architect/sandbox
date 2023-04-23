@@ -13,6 +13,8 @@
 ### Changed
 
 - Internal change: dramatically simplified Lambda execution lifecyle
+- Unpinned `aws-sdk` from Lambda-specific version to enable SSO and resolve (unrelated) npm vulnerability warnings
+- Updated deps
 
 ---
 
