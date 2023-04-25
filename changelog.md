@@ -2,6 +2,14 @@
 
 ---
 
+## [5.6.3] 2023-04-25
+
+### Fixed
+
+- Fixed Lambda invocation issue when installed globally
+
+---
+
 ## [5.6.0 - 5.6.2] 2023-03-27
 
 ### Added

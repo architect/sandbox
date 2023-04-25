@@ -2,9 +2,53 @@
 let { __ARC_CONFIG__, __ARC_CONTEXT__, AWS_LAMBDA_RUNTIME_API: runtimeAPI } = process.env;
 let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
 
+/* Lightweight HTTP client: older Node.js doesn't have fetch, and Lambda can't access global install deps */
+import http from 'http';
+let get = client.bind({}, 'GET');
+let post = client.bind({}, 'POST');
+let jsonType = 'application/json';
+function client (method, params) {
+  return new Promise((resolve, reject) => {
+    let headers = method === 'GET'
+      ? { accept: jsonType }
+      : { 'content-type': jsonType };
+    let body;
+    if (method === 'POST' && params.body) {
+      body = JSON.stringify(params.body);
+      headers['content-length'] = body?.length;
+    }
+    let req = http.request(params.url, { method, headers, }, res => {
+      let { statusCode } = res;
+      if (statusCode < 200 || statusCode > 202) {
+        reject(Error('Runtime API error:', statusCode));
+      }
+      let raw = [];
+      res.on('data', chunk => raw.push(chunk));
+      res.on('end', () => {
+        if (method === 'GET') {
+          try {
+            resolve({
+              headers: res.headers,
+              body: JSON.parse(raw)
+            });
+          }
+          catch (err) {
+            reject(err.message);
+          }
+        }
+      });
+    });
+    req.on('error', err => {
+      reject(err.message);
+    });
+    if (method === 'GET') req.end();
+    else req.end(body, resolve);
+  });
+}
+
 (async function main () {
   try {
-    let { apiType, handlerFile, handlerMethod } = JSON.parse(__ARC_CONFIG__);
+    let { handlerFile, handlerMethod } = JSON.parse(__ARC_CONFIG__);
     let context = JSON.parse(__ARC_CONTEXT__);
     delete process.env.__ARC_CONFIG__;
     delete process.env.__ARC_CONTEXT__;
@@ -12,11 +56,8 @@ let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
     let isPromise = obj => obj && typeof obj.then === 'function';
 
     async function run (){
-      let _tiny = await import('tiny-json-http');
-      let tiny = _tiny.default;
-
       let next = url('invocation/next');
-      let invocation = await tiny.get({ url: next });
+      let invocation = await get({ url: next });
       let { headers, body: event } = invocation;
 
       let requestID = headers['Lambda-Runtime-Aws-Request-Id'] || headers['lambda-runtime-aws-request-id'];
@@ -34,12 +75,10 @@ let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
           let errorType = err.name || '(unknown error type)';
           let stackTrace = err.stack ? err.stack.split('\n') : undefined;
           let body = { errorMessage, errorType, stackTrace };
-          await tiny.post({ url: errorEndpoint, body });
+          await post({ url: errorEndpoint, body });
         }
-        /* As of tiny 7.5, falsy bodies result in posting an empty object (which is a false positive), so in that specific case we need to not publish a response */
-        else if (result || apiType === 'http') {
-          if (!result) result = 'null';
-          await tiny.post({ url: responseEndpoint, body: result });
+        else {
+          await post({ url: responseEndpoint, body: result });
         }
       }
       try {
@@ -56,15 +95,13 @@ let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
   }
   catch (err) {
     (async function initError () {
-      let _tiny = await import('tiny-json-http');
-      let tiny = _tiny.default;
       console.log('Lambda init error:', err.body || err.message);
       let initErrorEndpoint = url('init/error');
       let errorMessage = err.message || 'Unknown init error';
       let errorType = err.name || 'Unknown init error type';
       let stackTrace = err.stack ? err.stack.split('\n') : undefined;
       let body = { errorMessage, errorType, stackTrace };
-      await tiny.post({ url: initErrorEndpoint, body });
+      await post({ url: initErrorEndpoint, body });
     })();
   }
 })();

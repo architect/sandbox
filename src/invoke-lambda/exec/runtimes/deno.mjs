@@ -35,9 +35,11 @@ const headers = { 'content-type': 'application/json' };
           const body = JSON.stringify({ errorMessage, errorType, stackTrace });
           await fetch(errorEndpoint, { method: 'POST', headers, body });
         }
-        const options = { method: 'POST', headers };
-        if (result) options.body = JSON.stringify(result);
-        await fetch(responseEndpoint, options);
+        else {
+          const options = { method: 'POST', headers };
+          if (result) options.body = JSON.stringify(result);
+          await fetch(responseEndpoint, options);
+        }
       }
       try {
         const response = handler(event, context, callback);

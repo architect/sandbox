@@ -66,7 +66,7 @@ function runtimeAPI ({ body }, params, req, res) {
       res.statusCode = 500
       return res.end()
     }
-    invocations[requestID].response = JSON.parse(body)
+    invocations[requestID].response = body && JSON.parse(body) || undefined
     res.statusCode = accepted
     res.end()
   }
