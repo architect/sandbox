@@ -15,7 +15,7 @@ function client (method, params) {
     let body;
     if (method === 'POST' && params.body) {
       body = JSON.stringify(params.body);
-      headers['content-length'] = body?.length;
+      headers['content-length'] = Buffer.byteLength(body);
     }
     let req = http.request(params.url, { method, headers, }, res => {
       let { statusCode } = res;

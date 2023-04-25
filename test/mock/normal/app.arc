@@ -38,6 +38,8 @@ get     /ruby-error
 /custom
   method get
   src src/http/custom
+get     /big
+get     /big-unicode
 get     /chonky
 post    /post
 put     /put

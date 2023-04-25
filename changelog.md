@@ -2,11 +2,12 @@
 
 ---
 
-## [5.6.3] 2023-04-25
+## [5.6.3 - 5.6.4] 2023-04-25
 
 ### Fixed
 
 - Fixed Lambda invocation issue when installed globally
+- Fixed issue where very large uncompressed HTTP responses could become truncated
 
 ---
 

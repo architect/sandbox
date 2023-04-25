@@ -116,6 +116,32 @@ function runTests (runType, t) {
     })
   })
 
+  t.test(`[Big, but not oversized response / ${runType}] get /big`, t => {
+    t.plan(1)
+    tiny.get({
+      url: url + '/big'
+    }, function _got (err, result) {
+      if (err) t.end(err)
+      else {
+        let big = 1000 * 999 * 6
+        t.ok(result.body.length > big, 'Did not fail on a very large response')
+      }
+    })
+  })
+
+  t.test(`[Big, but not oversized response / ${runType}] get /big-unicode`, t => {
+    t.plan(1)
+    tiny.get({
+      url: url + '/big-unicode'
+    }, function _got (err, result) {
+      if (err) t.end(err)
+      else {
+        let big = 1000 * 900 * 6
+        t.ok(Buffer.byteLength(result.body) > big, 'Did not fail on a very large response')
+      }
+    })
+  })
+
   t.test(`[Oversized response / ${runType}] get /chonky`, t => {
     t.plan(2)
     tiny.get({

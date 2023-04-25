@@ -81,7 +81,7 @@ function end (res, body = '', opts) {
   let { livereload, ports } = opts
   let MB = 1000 * 1000
   let itBeChonky = 6 * MB // Max Lambda payload size
-  if (body.length > itBeChonky) {
+  if (Buffer.byteLength(body) > itBeChonky) {
     let size = `${(body.length / MB).toFixed(2).toLocaleString()}MB (${body.length.toLocaleString()}b) `
     body = errors.chonky(size)
     invalid(res, body)
