@@ -2,9 +2,53 @@
 let { __ARC_CONFIG__, __ARC_CONTEXT__, AWS_LAMBDA_RUNTIME_API: runtimeAPI } = process.env;
 let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
 
+/* Lightweight HTTP client: older Node.js doesn't have fetch, and Lambda can't access global install deps */
+let http = require('http');
+let get = client.bind({}, 'GET');
+let post = client.bind({}, 'POST');
+let jsonType = 'application/json';
+function client (method, params) {
+  return new Promise((resolve, reject) => {
+    let headers = method === 'GET'
+      ? { accept: jsonType }
+      : { 'content-type': jsonType };
+    let body;
+    if (method === 'POST' && params.body) {
+      body = JSON.stringify(params.body);
+      headers['content-length'] = body?.length;
+    }
+    let req = http.request(params.url, { method, headers, }, res => {
+      let { statusCode } = res;
+      if (statusCode < 200 || statusCode > 202) {
+        reject(Error('Runtime API error:', statusCode));
+      }
+      let raw = [];
+      res.on('data', chunk => raw.push(chunk));
+      res.on('end', () => {
+        if (method === 'GET') {
+          try {
+            resolve({
+              headers: res.headers,
+              body: JSON.parse(raw)
+            });
+          }
+          catch (err) {
+            reject(err.message);
+          }
+        }
+      });
+    });
+    req.on('error', err => {
+      reject(err.message);
+    });
+    if (method === 'GET') req.end();
+    else req.end(body, resolve);
+  });
+}
+
 (async function main () {
   try {
-    let { apiType, projectSrc, handlerFile, handlerMethod, shared, views } = JSON.parse(__ARC_CONFIG__);
+    let { projectSrc, handlerFile, handlerMethod, shared, views } = JSON.parse(__ARC_CONFIG__);
     let context = JSON.parse(__ARC_CONTEXT__);
     /* eslint-disable-next-line */
     let { join, sep } = require('path');
@@ -95,12 +139,8 @@ let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
       });
       if (missing.length) missing = [ ... new Set([ ...missing ]) ];
 
-      /* Load tiny down here so as not to create false positive missing dependency warnings */
-      /* eslint-disable-next-line */
-      let tiny = require('tiny-json-http');
-
       let next = url('invocation/next');
-      let invocation = await tiny.get({ url: next });
+      let invocation = await get({ url: next });
       let { headers, body: event } = invocation;
 
       let requestID = headers['Lambda-Runtime-Aws-Request-Id'] || headers['lambda-runtime-aws-request-id'];
@@ -115,17 +155,13 @@ let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
           let errorType = err.name || '(unknown error type)';
           let stackTrace = err.stack ? err.stack.split('\n') : undefined;
           let body = { errorMessage, errorType, stackTrace };
-          await tiny.post({ url: errorEndpoint, body });
+          await post({ url: errorEndpoint, body });
         }
-        /* As of tiny 7.5, falsy bodies result in posting an empty object (which is a false positive), so in that specific case we need to not publish a response */
         else {
           /* Publish meta first so the process isn't terminated immediately upon hitting the /response endpoint */
           let meta = { missing, debug, version: process.version };
-          await tiny.post({ url: metaEndpoint, body: meta });
-          if (result || apiType === 'http') {
-            if (!result) result = 'null';
-            await tiny.post({ url: responseEndpoint, body: result });
-          }
+          await post({ url: metaEndpoint, body: meta });
+          await post({ url: responseEndpoint, body: result });
         }
       }
       try {
@@ -142,7 +178,6 @@ let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
   }
   catch (err) {
     /* eslint-disable-next-line */
-    let tiny = require('tiny-json-http');
     (async function initError () {
       console.log('Lambda init error:', err.body || err.message);
       let initErrorEndpoint = url('init/error');
@@ -150,7 +185,7 @@ let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
       let errorType = err.name || 'Unknown init error type';
       let stackTrace = err.stack ? err.stack.split('\n') : undefined;
       let body = { errorMessage, errorType, stackTrace };
-      await tiny.post({ url: initErrorEndpoint, body });
+      await post({ url: initErrorEndpoint, body });
     })();
   }
 })();
