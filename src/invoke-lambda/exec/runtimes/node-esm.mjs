@@ -20,10 +20,10 @@ function client (method, params) {
     let req = http.request(params.url, { method, headers, }, res => {
       let { statusCode } = res;
       if (statusCode < 200 || statusCode > 202) {
-        reject(Error('Runtime API error:', statusCode));
+        return reject(Error('Runtime API error:', statusCode));
       }
-      let raw = [];
-      res.on('data', chunk => raw.push(chunk));
+      let raw = '';
+      res.on('data', chunk => raw += chunk.toString());
       res.on('end', () => {
         if (method === 'GET') {
           try {
@@ -42,7 +42,9 @@ function client (method, params) {
       reject(err.message);
     });
     if (method === 'GET') req.end();
-    else req.end(body, resolve);
+    else req.end(body, () => {
+      resolve();
+    });
   });
 }
 
