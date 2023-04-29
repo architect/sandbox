@@ -18,9 +18,16 @@ function runtimeAPI ({ body }, params, req, res) {
   let pathParts = req.url.split('/').filter(Boolean)
   let url = '/' + pathParts.slice(1).join('/') // Strip that prepending request ID
   let requestID = pathParts[0]
+  update.debug.status(
+    `[${requestID}] Incoming runtime API request`,
+    `URL: ${url}`,
+    `Headers: ${JSON.stringify(req.headers)}`,
+    `Body: ${body ? `'${body}'` : '[no body]'} ${body ? `(${Buffer.byteLength(body)}b)` : ''}`
+  )
 
   // Don't respond to unknown request ID roots
   if (!invocations[requestID]) {
+    update.debug.status(`[${requestID}] Runtime API: unknown request ID`)
     res.statusCode = 404
     res.end()
     return
@@ -50,6 +57,7 @@ function runtimeAPI ({ body }, params, req, res) {
     res.setHeader('Lambda-Runtime-Invoked-Function-Arn', arn)
     res.setHeader('content-type', 'application/json')
     res.end(JSON.stringify(request))
+    update.debug.status(`[${requestID}] Responded to /next request`)
   }
   else if (url === initErrorEndpoint) {
     invocations[requestID].initError = errors({
@@ -59,21 +67,25 @@ function runtimeAPI ({ body }, params, req, res) {
     })
     res.statusCode = accepted
     res.end()
+    update.debug.status(`[${requestID}] Received /init/error request`)
   }
   else if (isInvoke() === 'response') {
     if (pathParts[4] !== requestID) {
       apiError({ invocations, endpoint: 'response', update, req, requestID })
       res.statusCode = 500
+      update.debug.status(`[${requestID}] Missing request ID in /response request`)
       return res.end()
     }
     invocations[requestID].response = body && JSON.parse(body) || undefined
     res.statusCode = accepted
     res.end()
+    update.debug.status(`[${requestID}] Received /response request`)
   }
   else if (isInvoke() === 'error') {
     if (pathParts[4] !== requestID) {
       apiError({ invocations, endpoint: 'error', update, req, requestID })
       res.statusCode = 500
+      update.debug.status(`[${requestID}] Missing request ID in /error request`)
       return res.end()
     }
     invocations[requestID].error = errors({
@@ -82,14 +94,17 @@ function runtimeAPI ({ body }, params, req, res) {
     })
     res.statusCode = accepted
     res.end()
+    update.debug.status(`[${requestID}] Received /error request`)
   }
   else if (isInvoke() === 'arc_meta') {
     invocations[requestID].meta = JSON.parse(body)
     res.end()
+    update.debug.status(`[${requestID}] Received /arc_meta request`)
   }
   else {
     res.statusCode = 404
     res.end()
+    update.debug.status(`[${requestID}] Unknown request`)
   }
 }
 

@@ -5,9 +5,8 @@ let errors = require('../../lib/errors')
 let { invocations } = require('../../arc/_runtime-api')
 
 module.exports = function spawnChild (params, callback) {
-  let { args, context, cwd, command, lambda, options, requestID, timeout } = params
+  let { args, context, command, lambda, options, requestID, timeout } = params
   let { apiType, update } = context
-  let functionPath = options.cwd.replace(cwd, '').substr(1)
   let isInLambda = process.env.AWS_LAMBDA_FUNCTION_NAME
   let timedOut = false
 
@@ -25,7 +24,7 @@ module.exports = function spawnChild (params, callback) {
     if (err.code) shutdown('error')
   })
   child.on('close', (code, signal) => {
-    update.debug.status(`${functionPath} (pid ${pid}) emitted 'close' (code '${code}', signal '${signal}')`)
+    update.debug.status(`[${requestID}] Emitted 'close' (pid ${pid}, code '${code}', signal '${signal}')`)
     shutdown('child process closure')
   })
 
@@ -33,7 +32,7 @@ module.exports = function spawnChild (params, callback) {
   let to = setTimeout(function () {
     timedOut = true
     let duration = `${timeout / 1000}s`
-    update.warn(`${functionPath} timed out after hitting its ${duration} timeout!`)
+    update.warn(`[${requestID}] Timed out after hitting its ${duration} timeout!`)
     shutdown(`${duration} timeout`)
   }, timeout)
 
@@ -57,7 +56,7 @@ module.exports = function spawnChild (params, callback) {
     if (closed) return
     closed = true
 
-    update.debug.status(`${functionPath} (pid ${pid}) shutting down (via ${event})`)
+    update.debug.status(`[${requestID}] Shutting down (pid ${pid}, via ${event})`)
 
     // Check if the process with specified PID is running or not
     // Stolen from: https://github.com/nisaacson/is-running/blob/master/index.js
@@ -72,15 +71,15 @@ module.exports = function spawnChild (params, callback) {
 
     // Wrap up here if we can verify the process is no longer running
     if (!isRunning) {
-      update.debug.status(`${functionPath} (pid ${pid}) is not running (process closed: ${isRunning}; termination is not necessary)`)
+      update.debug.status(`[${requestID}] Process is no longer running (pid ${pid}, process closed: ${isRunning}; termination is not necessary)`)
       done()
       return
     }
 
     // Ok, so the process is still running (which is totally normal!)
-    update.debug.status(`${functionPath} (pid ${pid}) is still running, terminating now...`)
+    update.debug.status(`[${requestID}] Process is still running, terminating pid ${pid} now...`)
     if (error) {
-      update.error(`${functionPath} (pid ${pid}) caught child process execution error`)
+      update.error(`[${requestID}] Caught child process execution error (pid ${pid})`)
     }
 
     let isTesting = process.env.CI || process.env.NODE_ENV === 'testing'
@@ -94,10 +93,10 @@ module.exports = function spawnChild (params, callback) {
     if (!isInLambda) {
       kill(pid, 'SIGINT', err => {
         if (err) {
-          update.debug.status(`${functionPath} (pid ${pid}) tree-kill process termination error`)
+          update.debug.status(`[${requestID}] tree-kill process termination error (pid ${pid})`)
           update.debug.raw(err)
         }
-        else update.debug.status(`${functionPath} (pid ${pid}) successfully terminated`)
+        else update.debug.status(`[${requestID}] Successfully terminated process (pid ${pid})`)
         // If we're in CI, it's best to wait for processes to terminate, even if slightly slower
         if (isTesting) done()
       })
@@ -111,16 +110,16 @@ module.exports = function spawnChild (params, callback) {
           try { process.kill(tid) }
           catch (err) {
             // Task may have ended naturally or been killed by killing child.pid, I guess we don't really know
-            update.debug.status(`${functionPath} (pid ${pid}) did not kill task (tid ${tid})`)
+            update.debug.status(`[${requestID}] Did not kill task (pid ${pid}, tid ${tid})`)
             update.debug.raw(err)
           }
         })
-        update.debug.status(`${functionPath} (pid ${pid}) (possibly maybe) successfully terminated inside Lambda`)
+        update.debug.status(`[${requestID}] Process (probably) successfully terminated inside Lambda (pid ${pid})`)
         // If we're in CI, it's best to wait for processes to terminate, even if slightly slower
         if (isTesting) done()
       }
       catch (err) {
-        update.debug.status(`${functionPath} (pid ${pid}) failed to terminate inside Lambda`)
+        update.debug.status(`[${requestID}] Failed to terminate process inside Lambda (pid ${pid})`)
         update.debug.raw(err)
       }
     }
