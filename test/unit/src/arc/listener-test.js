@@ -30,7 +30,7 @@ test('_arc listener passes request body to SSM service module for POST requests 
   req.method = 'POST'
   req.url = '/_arc/ssm'
   listener({}, {}, req, res)
-  req.emit('data', { toString: () => 'somedata' })
+  req.emit('data', Buffer.from('somedata'))
   req.emit('end')
   t.equals(params.body, 'somedata', 'HTTP request body passed to ssm server module')
   t.equals(params.service, 'ssm', 'HTTP request body passed to ssm server module')
@@ -42,7 +42,7 @@ test('_arc listener passes request body to WS service module for POST requests t
   req.method = 'POST'
   req.url = '/_arc/ws'
   listener({}, {}, req, res)
-  req.emit('data', { toString: () => 'somedata' })
+  req.emit('data', Buffer.from('somedata'))
   req.emit('end')
   t.equals(params.body, 'somedata', 'HTTP request body passed to ssm server module')
   t.equals(params.service, 'ws', 'HTTP request body passed to ssm server module')

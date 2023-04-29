@@ -136,8 +136,9 @@ function runTests (runType, t) {
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
-        let big = 1000 * 900 * 6
-        t.ok(Buffer.byteLength(result.body) > big, 'Did not fail on a very large response')
+        // Sizes are a bit less predictable when generating random unicode, so we'll be a bit conservative with the estimations and see if anything breaks
+        let big = 1000 * 750 * 6
+        t.ok(Buffer.byteLength(JSON.stringify(result.body)) > big, 'Did not fail on a very large response')
       }
     })
   })

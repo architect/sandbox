@@ -6,7 +6,7 @@ let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
 let http = require('http');
 let get = client.bind({}, 'GET');
 let post = client.bind({}, 'POST');
-let jsonType = 'application/json';
+let jsonType = 'application/json; charset=utf-8';
 function client (method, params) {
   return new Promise((resolve, reject) => {
     let headers = method === 'GET'

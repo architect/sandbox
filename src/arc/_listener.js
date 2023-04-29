@@ -3,12 +3,12 @@ let _ws = require('./_ws')
 let { runtimeAPI }  = require('./_runtime-api')
 
 module.exports = function _arcListener (services, params, req, res) {
-  let body = []
+  let raw = []
 
-  req.on('data', chunk => body.push(chunk))
+  req.on('data', chunk => raw.push(chunk))
 
   req.on('end', () => {
-    body = body.toString()
+    let body = Buffer.concat(raw).toString()
 
     // Parameter store
     if (req.url.startsWith('/_arc/ssm')) {
