@@ -2,6 +2,14 @@
 
 ---
 
+## [5.6.5] 2023-04-28
+
+### Changed
+
+- Added additional Lambda invocation and runtime API debug logging
+
+---
+
 ## [5.6.3 - 5.6.4] 2023-04-25
 
 ### Fixed
