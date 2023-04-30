@@ -2,6 +2,14 @@
 
 ---
 
+## [5.6.6] 2023-04-29
+
+### Fixed
+
+- Fixed issue where certain unicode data in very large Lambda response payloads may not parse correctly
+
+---
+
 ## [5.6.5] 2023-04-28
 
 ### Changed
