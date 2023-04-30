@@ -8,7 +8,7 @@ ENV.delete('__ARC_CONFIG__')
 ENV.delete('__ARC_CONTEXT__')
 
 url = -> (p) { runtime_api + '/2018-06-01/runtime/' + p }
-headers = { 'content-type': 'application/json' }
+headers = { 'content-type': 'application/json; charset=utf-8' }
 
 begin
   next_uri = URI(url.call('invocation/next'))

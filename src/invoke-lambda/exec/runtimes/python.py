@@ -9,7 +9,7 @@ del os.environ['__ARC_CONFIG__']
 del os.environ['__ARC_CONTEXT__']
 
 url = lambda p : runtime_api + '/2018-06-01/runtime/' + p
-headers = { 'content-type': 'application/json' }
+headers = { 'content-type': 'application/json; charset=utf-8' }
 
 try:
   next = url('invocation/next')

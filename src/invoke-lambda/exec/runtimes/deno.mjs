@@ -2,7 +2,7 @@
 /* global Deno */
 const { __ARC_CONFIG__, __ARC_CONTEXT__, AWS_LAMBDA_RUNTIME_API: runtimeAPI } = Deno.env.toObject();
 const url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
-const headers = { 'content-type': 'application/json' };
+const headers = { 'content-type': 'application/json; charset=utf-8' };
 
 (async function main () {
   try {
