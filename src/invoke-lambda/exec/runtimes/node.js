@@ -22,14 +22,15 @@ function client (method, params) {
       if (statusCode < 200 || statusCode > 202) {
         return reject(Error('Runtime API error:', statusCode));
       }
-      let raw = '';
-      res.on('data', chunk => raw += chunk.toString());
+      let raw = [];
+      res.on('data', chunk => raw.push(chunk));
       res.on('end', () => {
         if (method === 'GET') {
+          let body = Buffer.concat(raw).toString();
           try {
             resolve({
               headers: res.headers,
-              body: JSON.parse(raw)
+              body: JSON.parse(body)
             });
           }
           catch (err) {
