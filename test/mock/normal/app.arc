@@ -41,6 +41,7 @@ get     /ruby-error
 get     /big
 get     /big-unicode
 get     /chonky
+post    /big
 post    /post
 put     /put
 patch   /patch

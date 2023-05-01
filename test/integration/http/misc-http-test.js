@@ -123,8 +123,9 @@ function runTests (runType, t) {
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
-        let big = 1000 * 999 * 6
-        t.ok(result.body.length > big, 'Did not fail on a very large response')
+        let validSize = (1000 * 999 * 6) + 1
+        let body = '.'.repeat(validSize)
+        t.equal(body, result.body, 'Did not fail on a very large request')
       }
     })
   })
@@ -150,6 +151,36 @@ function runTests (runType, t) {
     }, function _got (err, result) {
       if (err) {
         let message = 'Invalid payload size'
+        t.equal(err.statusCode, 502, 'Errors with 502')
+        t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
+      }
+      else t.end(result)
+    })
+  })
+
+  t.test(`[Big, but not oversized request / ${runType}] post /big`, t => {
+    t.plan(1)
+    let validSize = (1000 * 999 * 6) + 1
+    let body = { text: '.'.repeat(validSize) }
+    tiny.post({
+      url: url + '/big',
+      body
+    }, function _got (err, result) {
+      if (err) t.end(err)
+      else t.deepEqual(body, result.body, 'Did not fail on a very large request')
+    })
+  })
+
+  t.test(`[Oversized request / ${runType}] post /big`, t => {
+    t.plan(2)
+    let validSize = (1000 * 1000 * 6) + 1
+    let body = { text: '.'.repeat(validSize) }
+    tiny.post({
+      url: url + '/big',
+      body
+    }, function _got (err, result) {
+      if (err) {
+        let message = 'Maximum event body exceeded'
         t.equal(err.statusCode, 502, 'Errors with 502')
         t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
       }
