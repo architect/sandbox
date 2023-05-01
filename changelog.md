@@ -2,6 +2,14 @@
 
 ---
 
+## [5.6.7] 2023-05-01
+
+### Changed
+
+- Additional hardening to large request payloads via the runtime API
+
+---
+
 ## [5.6.6] 2023-04-29
 
 ### Fixed
