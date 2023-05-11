@@ -63,7 +63,7 @@
   },
   "devDependencies": {
     "@architect/eslint-config": "~2.1.1",
-    "@architect/functions": "~5.4.0",
+    "@architect/functions": "~6.0.0",
     "@architect/req-res-fixtures": "git+https://github.com/architect/req-res-fixtures.git",
     "cross-env": "~7.0.3",
     "eslint": "~8.39.0",

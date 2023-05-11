@@ -116,6 +116,34 @@ function runTests (runType, t) {
     })
   })
 
+  t.test(`[context.getRemainingTimeInMillis() / ${runType}] get /context-remaining-ms-node-cjs`, t => {
+    t.plan(1)
+    tiny.get({
+      url: url + '/context-remaining-ms-node-cjs'
+    }, function _got (err, result) {
+      if (err) t.end(err)
+      else {
+        let { remaining } = result.body
+        // Would you believe that Windows, being Windows, actually sometimes calculates >5s remaining on a 5s timeout? You can't make this stuff up.
+        t.ok(remaining > 0 && remaining < 6000, `Got remaining time in milliseconds from context method: ${remaining}`)
+      }
+    })
+  })
+
+  t.test(`[context.getRemainingTimeInMillis() / ${runType}] get /context-remaining-ms-node-esm`, t => {
+    t.plan(1)
+    tiny.get({
+      url: url + '/context-remaining-ms-node-esm'
+    }, function _got (err, result) {
+      if (err) t.end(err)
+      else {
+        let { remaining } = result.body
+        // Would you believe that Windows, being Windows, actually sometimes calculates >5s remaining on a 5s timeout? You can't make this stuff up.
+        t.ok(remaining > 0 && remaining < 6000, `Got remaining time in milliseconds from context method: ${remaining}`)
+      }
+    })
+  })
+
   t.test(`[Big, but not oversized response / ${runType}] get /big`, t => {
     t.plan(1)
     tiny.get({

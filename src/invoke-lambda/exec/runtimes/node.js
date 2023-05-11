@@ -66,7 +66,7 @@ function client (method, params) {
     async function run () {
       /* Require first to populate the require cache for missing dependency warnings */
       /* eslint-disable-next-line */
-      let fn = require(handlerFile)[handlerMethod];
+      let handler = require(handlerFile)[handlerMethod];
 
       /* Enumerate package files */
       let pkg = dir => exists(join(dir, 'package.json')) && JSON.parse(read(join(dir, 'package.json')));
@@ -147,6 +147,7 @@ function client (method, params) {
       let { headers, body: event } = invocation;
 
       let requestID = headers['Lambda-Runtime-Aws-Request-Id'] || headers['lambda-runtime-aws-request-id'];
+      let deadlineMS = headers['Lambda-Runtime-Deadline-Ms'] || headers['lambda-runtime-deadline-ms'];
       let errorEndpoint = url('invocation/' + requestID + '/error');
       let responseEndpoint = url('invocation/' + requestID + '/response');
       let metaEndpoint = url('invocation/' + requestID + '/arc_meta');
@@ -168,7 +169,9 @@ function client (method, params) {
         }
       }
       try {
-        const response = fn(event, context, callback);
+        function getRemainingTimeInMillis () { return deadlineMS - Date.now(); }
+        context.getRemainingTimeInMillis = getRemainingTimeInMillis;
+        const response = handler(event, context, callback);
         if (isPromise(response)) {
           response.then(result => callback(null, result)).catch(callback);
         }

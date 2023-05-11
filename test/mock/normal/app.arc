@@ -33,6 +33,8 @@ get     /promise-return
 get     /reject-promise
 get     /throw-sync-error
 get     /times-out
+get     /context-remaining-ms-node-cjs
+get     /context-remaining-ms-node-esm
 get     /python-error
 get     /ruby-error
 /custom
