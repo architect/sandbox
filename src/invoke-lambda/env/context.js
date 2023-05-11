@@ -19,7 +19,6 @@ module.exports = function createLambdaContext (params) {
       functionName,
       functionVersion,
       invokedFunctionArn: 'sandbox',
-      // TODO: getRemainingTimeInMillis()
     }
     if (apiType?.startsWith('http')) lambdaContext.memoryLimitInMB = memory
     else lambdaContext.mem = memory
@@ -33,7 +32,7 @@ module.exports = function createLambdaContext (params) {
       invoked_function_arn: invokedFunctionArn,
       memory_limit_in_mb: memory,
     }
-    // TODO: get_remaining_time_in_millis()
+    // TODO: get_remaining_time_in_millis() for py + rb
     // TODO Ruby only: deadline_ms
     return lambdaContext
   }

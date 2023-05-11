@@ -10,7 +10,7 @@ test('Set up env', t => {
   t.ok(sandbox, 'Got Sandbox')
 })
 
-test('Run misc HTTP tests', t => {
+test('Run misc handler tests', t => {
   run(runTests, t)
   t.end()
 })

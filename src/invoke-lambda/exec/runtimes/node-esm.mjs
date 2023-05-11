@@ -64,6 +64,7 @@ function client (method, params) {
       let { headers, body: event } = invocation;
 
       let requestID = headers['Lambda-Runtime-Aws-Request-Id'] || headers['lambda-runtime-aws-request-id'];
+      let deadlineMS = headers['Lambda-Runtime-Deadline-Ms'] || headers['lambda-runtime-deadline-ms'];
       let errorEndpoint = url('invocation/' + requestID + '/error');
       let responseEndpoint = url('invocation/' + requestID + '/response');
 
@@ -85,6 +86,8 @@ function client (method, params) {
         }
       }
       try {
+        function getRemainingTimeInMillis () { return deadlineMS - Date.now(); }
+        context.getRemainingTimeInMillis = getRemainingTimeInMillis;
         const response = handler(event, context, callback);
         if (isPromise(response)) {
           response.then(result => callback(null, result)).catch(callback);
