@@ -86,7 +86,7 @@ function client (method, params) {
         }
       }
       try {
-        function getRemainingTimeInMillis () { return deadlineMS - Date.now(); }
+        function getRemainingTimeInMillis () { return Number(deadlineMS) - Date.now(); }
         context.getRemainingTimeInMillis = getRemainingTimeInMillis;
         const response = handler(event, context, callback);
         if (isPromise(response)) {

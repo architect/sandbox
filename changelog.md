@@ -2,6 +2,14 @@
 
 ---
 
+## [unreleased] 2023-05-12
+
+### Fixed
+
+- Coerce type in `getRemainingTimeInMillis` Lambda context method
+
+---
+
 ## [5.6.8] 2023-05-11
 
 ### Added
