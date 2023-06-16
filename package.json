@@ -28,10 +28,10 @@
     "src/*"
   ],
   "dependencies": {
-    "@architect/asap": "~5.1.1",
+    "@architect/asap": "~6.0.0",
     "@architect/create": "~4.2.0",
     "@architect/hydrate": "~3.2.1",
-    "@architect/inventory": "~3.5.0",
+    "@architect/inventory": "~3.5.5",
     "@architect/utils": "~3.1.7",
     "@aws-sdk/client-apigatewaymanagementapi": "^3.316.0",
     "@aws-sdk/client-dynamodb": "^3.316.0",
@@ -63,7 +63,7 @@
   },
   "devDependencies": {
     "@architect/eslint-config": "~2.1.1",
-    "@architect/functions": "~6.0.0",
+    "@architect/functions": "~6.0.1",
     "@architect/req-res-fixtures": "git+https://github.com/architect/req-res-fixtures.git",
     "cross-env": "~7.0.3",
     "eslint": "~8.39.0",

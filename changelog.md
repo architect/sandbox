@@ -2,7 +2,12 @@
 
 ---
 
-## [unreleased] 2023-05-12
+## [5.6.7] 2023-05-12
+
+### Changed
+
+- Updated dependencies
+
 
 ### Fixed
 
