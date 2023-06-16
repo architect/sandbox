@@ -125,7 +125,7 @@ function runTests (runType, t) {
       else {
         let { remaining } = result.body
         // Would you believe that Windows, being Windows, actually sometimes calculates >5s remaining on a 5s timeout? You can't make this stuff up.
-        t.ok(remaining > 0 && remaining <= 5000, `Got remaining time in milliseconds from context method: ${remaining}`)
+        t.ok(remaining > 0 && remaining <= 6000, `Got remaining time in milliseconds from context method: ${remaining}`)
       }
     })
   })
@@ -139,7 +139,7 @@ function runTests (runType, t) {
       else {
         let { remaining } = result.body
         // Would you believe that Windows, being Windows, actually sometimes calculates >5s remaining on a 5s timeout? You can't make this stuff up.
-        t.ok(remaining > 0 && remaining <= 5000, `Got remaining time in milliseconds from context method: ${remaining}`)
+        t.ok(remaining > 0 && remaining <= 6000, `Got remaining time in milliseconds from context method: ${remaining}`)
       }
     })
   })
