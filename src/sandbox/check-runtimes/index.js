@@ -40,8 +40,7 @@ module.exports = function checkRuntimeVersions (params, callback) {
   check(defaultRuntime)
   // ASAP shouldn't appear in lambdasBySrcDir but check jic
   Object.values(lambdasBySrcDir).forEach(lambda => {
-    // Multi-tenant Lambda check
-    if (Array.isArray(lambda)) lambda = lambda[0]
+    if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
     if (!lambda.arcStaticAssetProxy) check(lambda.config.runtime)
   })
 

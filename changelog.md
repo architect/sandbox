@@ -2,6 +2,14 @@
 
 ---
 
+## [5.6.10] 2023-06-21
+
+### Fixed
+
+- Added additional multi-tenant Lambda checks
+
+---
+
 ## [5.6.9] 2023-05-12
 
 ### Changed

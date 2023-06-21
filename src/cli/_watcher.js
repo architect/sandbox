@@ -244,7 +244,11 @@ module.exports = function runWatcher (args, params) {
      * Live reload any + get functions;
      */
     if (!ran && livereload) {
-      let lambda = Object.values(inv.lambdasBySrcDir).find(({ src }) => filename.includes(src))
+      let lambda = Object.values(inv.lambdasBySrcDir).find(lambda => {
+        if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
+        let { src } = lambda
+        return filename.includes(src)
+      })
       if (lambda?.pragma === 'http' && livereloadMethods.includes(lambda?.method)) {
         liveReloadClients()
       }
