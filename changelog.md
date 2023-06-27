@@ -2,7 +2,7 @@
 
 ---
 
-## [5.7.0] 2023-06-27
+## [5.7.0 - 5.7.1] 2023-06-27
 
 ### Added
 
@@ -12,6 +12,9 @@
 - Added additional `@http` REST API request data
   - `requestContext` properties: `protocol` + `identity.sourceIp` + `identity.userAgent`
   - Headers: `User-Agent` + `X-Forwarded-For` + `X-Forwarded-Port` + `X-Forwarded-Proto`
+- Added additional `@ws` API request data
+  - `requestContext` properties: `identity.sourceIp`
+  - `$connect` headers: `X-Forwarded-For` + `X-Forwarded-Port` + `X-Forwarded-Proto`
 
 ---
 

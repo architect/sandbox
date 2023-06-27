@@ -15,6 +15,14 @@ module.exports = function requestFormatter (params) {
     ? name.toUpperCase()
     : 'MESSAGE'
 
+  // Client IP address
+  let ip =  req?.headers?.['x-forwarded-for'] ||
+            req?.headers?.['X-Forwarded-For'] ||
+            req?.socket?.remoteAddress ||
+            req?.connection?.remoteAddress ||
+            req?.connection?.socket?.remoteAddress
+  let sourceIp = ip?.split(':').slice(-1).join() || null // Handle IPV6 prepended formatting
+
   let request = {
     requestContext: {
       connectedAt,
@@ -27,6 +35,7 @@ module.exports = function requestFormatter (params) {
       requestTimeEpoch: Date.now(),
       routeKey,
       stage: process.env.ARC_ENV || 'testing',
+      identity: { sourceIp },
     },
     isBase64Encoded: false
   }
@@ -45,6 +54,19 @@ module.exports = function requestFormatter (params) {
   // Also, only $connect receives headers / query params, etc.
   if (req?.headers) {
     request.headers = req.headers
+  }
+  if (name === 'connect') {
+    if (!request.headers) request.headers = {}
+    // Technically this header appears in the disconnect event as an empty string, so I guess add it in at some point idk
+    if (!request.headers['X-Forwarded-For']) {
+      request.headers['X-Forwarded-For'] = sourceIp
+    }
+    if (!request.headers['X-Forwarded-Port'] && req?.socket?.localPort) {
+      request.headers['X-Forwarded-Port'] = req.socket.localPort
+    }
+    if (!request.headers['X-Forwarded-Proto']) {
+      request.headers['X-Forwarded-Proto'] = 'http'
+    }
   }
   if (req?.url) {
     let { query } = URL.parse(req.url, true)
