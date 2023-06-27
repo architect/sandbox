@@ -3,7 +3,8 @@
  * - See: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-known-issues.html
  *   - TODO: write a script to scrape this page every once in a while I guess
  */
-module.exports = function requestHeaderFormatter (reqHeaders = {}) {
+module.exports = function requestHeaderFormatter (reqHeaders = {}, params) {
+  let { req, ip } = params
   let headers = {}
   let cookies
 
@@ -42,6 +43,16 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}) {
       delete headers[header]
     }
   })
+
+  if (!headers['x-forwarded-for']) {
+    headers['x-forwarded-for'] = ip
+  }
+  if (!headers['x-forwarded-port'] && req.socket?.localPort) {
+    headers['x-forwarded-port'] = req.socket?.localPort
+  }
+  if (!headers['x-forwarded-proto']) {
+    headers['x-forwarded-proto'] = 'http'
+  }
 
   return { headers, cookies }
 }

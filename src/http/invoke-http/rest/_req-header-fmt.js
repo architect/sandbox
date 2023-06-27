@@ -5,7 +5,8 @@
  * - Funny story: HTTP APIs include emulation of REST API header mangling and deletion
  *   - But wouldn't you know it: HTTP emulation of REST APIs isn't actually exactly the same because reasons (surprisedpikachu)
  */
-module.exports = function requestHeaderFormatter (reqHeaders = {}, httpApi) {
+module.exports = function requestHeaderFormatter (reqHeaders = {}, httpApi, params) {
+  let { req, ip } = params
   let headers = {}
   let multiValueHeaders = {}
 
@@ -16,18 +17,13 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}, httpApi) {
    */
   Object.keys(reqHeaders).forEach(header => {
     let h = header.toLowerCase()
-    if (h === 'authorization' && !httpApi) {
-      headers.Authorization = reqHeaders[header]
-    }
-    else if (h === 'host') {
-      headers.Host = reqHeaders[header]
-    }
-    else if (h === 'user-agent') {
-      headers['User-Agent'] = reqHeaders[header]
-    }
-    else if (h === 'date' && !httpApi) {
-      headers.Date = reqHeaders[header]
-    }
+    /**/ if (h === 'authorization' && !httpApi) headers.Authorization = reqHeaders[header]
+    else if (h === 'date' && !httpApi) headers.Date = reqHeaders[header]
+    else if (h === 'host') headers.Host = reqHeaders[header]
+    else if (h === 'user-agent') headers['User-Agent'] = reqHeaders[header]
+    else if (h === 'x-forwarded-for') headers['X-Forwarded-For'] = reqHeaders[header]
+    else if (h === 'x-forwarded-port') headers['X-Forwarded-Port'] = reqHeaders[header]
+    else if (h === 'x-forwarded-proto') headers['X-Forwarded-Proto'] = reqHeaders[header]
     else headers[h] = reqHeaders[header]
   })
 
@@ -60,6 +56,16 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}, httpApi) {
       delete headers[header]
     }
   })
+
+  if (!headers['X-Forwarded-For']) {
+    headers['X-Forwarded-For'] = ip
+  }
+  if (!headers['X-Forwarded-Port'] && req.socket?.localPort) {
+    headers['X-Forwarded-Port'] = req.socket?.localPort
+  }
+  if (!headers['X-Forwarded-Proto']) {
+    headers['X-Forwarded-Proto'] = 'http'
+  }
 
   /**
    * multiValueHeaders impl: it's the same, but different

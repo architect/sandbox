@@ -43,7 +43,15 @@ module.exports = function requestFormatter ({ method, path, req }, httpApi) {
     }
   }
 
-  let { headers, multiValueHeaders } = headerFormatter(req.headers, httpApi)
+  // Client IP address
+  let ip =  req.headers?.['x-forwarded-for'] ||
+            req.headers?.['X-Forwarded-For'] ||
+            req.socket?.remoteAddress ||
+            req.connection?.remoteAddress ||
+            req.connection?.socket?.remoteAddress
+  let sourceIp = ip?.split(':').slice(-1).join() || null // Handle IPV6 prepended formatting
+
+  let { headers, multiValueHeaders } = headerFormatter(req.headers, httpApi, { req, ip: sourceIp })
 
   // API Gateway sends a null literal instead of an empty object because reasons
   let nullify = i => Object.getOwnPropertyNames(i).length ? i : null
@@ -65,7 +73,12 @@ module.exports = function requestFormatter ({ method, path, req }, httpApi) {
     requestContext: {
       httpMethod,
       path: pathname,
-      resourcePath: resource
+      resourcePath: resource,
+      protocol: `HTTP/${req.httpVersion}`,
+      identity: {
+        sourceIp,
+        userAgent: headers['User-Agent'] || headers['user-agent'] || null
+      },
     }
   }
 
