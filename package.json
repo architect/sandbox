@@ -40,6 +40,7 @@
     "@aws-sdk/client-sqs": "^3.316.0",
     "@aws-sdk/client-ssm": "^3.316.0",
     "@aws-sdk/lib-dynamodb": "^3.316.0",
+    "@aws-sdk/node-http-handler": "^3.360.0",
     "@begin/hashid": "~1.0.0",
     "aws-sdk": "^2.1363.0",
     "chalk": "4.1.2",
