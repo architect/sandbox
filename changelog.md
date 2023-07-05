@@ -2,6 +2,15 @@
 
 ---
 
+## [5.7.2] 2023-07-05
+
+### Fixed
+
+- Added `@aws-sdk/node-http-helper` which is required by `@architect/functions` when interacting with DynamoDB from a Node 18 process.
+  - `node-http-helper` was likely available further down the dependency graph but has been removed at some point.
+
+---
+
 ## [5.7.0 - 5.7.1] 2023-06-27
 
 ### Added
