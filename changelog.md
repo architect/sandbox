@@ -2,6 +2,19 @@
 
 ---
 
+## [5.7.3] 2023-07-19
+
+### Changed
+
+- Updated dependencies
+
+
+### Fixed
+
+- Fixed ability to configure `ARC_SESSION_TABLE_NAME` env var via `.env`, `pref[erence]s.arc`, etc.
+
+---
+
 ## [5.7.2] 2023-07-05
 
 ### Fixed

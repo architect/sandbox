@@ -41,7 +41,7 @@ module.exports = function userEnvVars (params) {
   else {
     let userEnv = envOption || inv._project.env.local?.[ARC_ENV]
     if (userEnv) {
-      let reserved = Object.keys(env)
+      let reserved = Object.keys(env).filter(n => n !== 'ARC_SESSION_TABLE_NAME')
       Object.entries(userEnv).forEach(([ n, v ]) => {
         if (!reserved.includes(n)) env[n] = v
       })
