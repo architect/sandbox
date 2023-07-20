@@ -1,29 +1,33 @@
 let test = require('tape')
-let sinon = require('sinon')
 let proxyquire = require('proxyquire')
-let lambdaStub = sinon.stub().yields()
 let { join } = require('path')
 let sut = join(process.cwd(), 'src', 'http', 'invoke-http')
 let invoke = proxyquire(sut, {
-  '../../invoke-lambda': lambdaStub
+  '../../invoke-lambda': params => event = params.event
 })
 let { arc7, arc6, headers } = require('@architect/req-res-fixtures').http.req
 
 let inventory = { inv: { _project: { preferences: null } } }
-lambdaStub.yields(null, {})
 
+let event
 let url = i => `http://localhost:6666${i ? i : ''}`
 let str = i => JSON.stringify(i)
 let match = (copy, item) => `${copy} matches: ${str(item)}`
+let noop = () => {}
 let response = {
-  getHeaders: () => ({ 'content-type': 'application/json; charset=utf-8' }),
-  setHeader: sinon.fake.returns(),
-  end: sinon.fake.returns()
+  getHeaders: noop,
+  setHeader: noop,
+  end: noop,
 }
 let httpVersion = '1.1'
 
 function teardown () {
-  lambdaStub.reset() // mostly jic
+  event = undefined
+  response = {
+    getHeaders: noop,
+    setHeader: noop,
+    end: noop,
+  }
 }
 
 /**
@@ -53,7 +57,7 @@ function eatCookies (headers) {
 }
 
 // Reusable result checker
-function checkArcV7HttpResult (mock, req, t) {
+function checkArcV7HttpResult (mock, t) {
   httpParams.forEach(param => {
     // Reset cookies
     let ref = param === 'headers'
@@ -61,14 +65,14 @@ function checkArcV7HttpResult (mock, req, t) {
       : mock[param]
     // Remove dynamic properties
     if (param === 'requestContext') {
-      let { timeEpoch } = req.requestContext
+      let { timeEpoch } = event.requestContext
       // TODO add these properties back into the req/res mocks
       if (timeEpoch) ref.timeEpoch = timeEpoch
     }
     t.equal(
-      str(req[param]),
+      str(event[param]),
       str(ref),
-      match(`${param}`, req[param])
+      match(`${param}`, event[param])
     )
   })
   teardown()
@@ -90,9 +94,7 @@ test('Architect v7 (HTTP API mode): get /', t => {
     httpVersion,
   }
   handler(input, response)
-  // Compare handler-generated request to mock
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP API mode): get /?whats=up', t => {
@@ -111,8 +113,7 @@ test('Architect v7 (HTTP API mode): get /?whats=up', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP API mode): get /?whats=up&whats=there', t => {
@@ -131,8 +132,7 @@ test('Architect v7 (HTTP API mode): get /?whats=up&whats=there', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP API mode): get /nature/hiking', t => {
@@ -151,8 +151,7 @@ test('Architect v7 (HTTP API mode): get /nature/hiking', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP API mode): get /{proxy+}', t => {
@@ -171,8 +170,7 @@ test('Architect v7 (HTTP API mode): get /{proxy+}', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP API mode): get /path/* (/path/hi/there)', t => {
@@ -191,8 +189,7 @@ test('Architect v7 (HTTP API mode): get /path/* (/path/hi/there)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP API mode): get /:activities/{proxy+} (/nature/hiking/wilderness)', t => {
@@ -214,8 +211,7 @@ test('Architect v7 (HTTP API mode): get /:activities/{proxy+} (/nature/hiking/wi
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP API mode): post /form (JSON)', t => {
@@ -235,8 +231,7 @@ test('Architect v7 (HTTP API mode): post /form (JSON)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', t => {
@@ -256,8 +251,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', 
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP API mode): post /form (multipart form data)', t => {
@@ -277,8 +271,7 @@ test('Architect v7 (HTTP API mode): post /form (multipart form data)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP API mode): post /form (octet stream)', t => {
@@ -298,8 +291,7 @@ test('Architect v7 (HTTP API mode): post /form (octet stream)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP API mode): put /form (JSON)', t => {
@@ -319,8 +311,7 @@ test('Architect v7 (HTTP API mode): put /form (JSON)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP API mode): patch /form (JSON)', t => {
@@ -340,8 +331,7 @@ test('Architect v7 (HTTP API mode): patch /form (JSON)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 test('Architect v7 (HTTP API mode): delete /form (JSON)', t => {
@@ -361,8 +351,7 @@ test('Architect v7 (HTTP API mode): delete /form (JSON)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV7HttpResult(mock, req, t)
+  checkArcV7HttpResult(mock, t)
 })
 
 
@@ -370,29 +359,29 @@ test('Architect v7 (HTTP API mode): delete /form (JSON)', t => {
  * Arc v6 (REST API mode)
  */
 // Checks AWS's funky multiValueHeaders + multiValueQueryStringParameters
-function checkMultiValueHeaders (mock, req, t) {
+function checkMultiValueHeaders (mock, t) {
   let headers = mock.headers
   // Fixtures always have headers
   for (let header of Object.keys(headers)) {
-    if (headers[header] !== req.multiValueHeaders[header][0])
+    if (headers[header] !== event.multiValueHeaders[header][0])
       t.fail(`Could not find ${header} in multiValueHeaders`)
   }
   t.pass('multiValueHeaders checked out')
 }
-function checkMultiValueQueryStringParameters (mock, req, t) {
-  if (mock.queryStringParameters === req.multiValueQueryStringParameters) {
+function checkMultiValueQueryStringParameters (mock, t) {
+  if (mock.queryStringParameters === event.multiValueQueryStringParameters) {
     t.pass('multiValueQueryStringParameters checked out')
   }
   if (mock.queryStringParameters === null &&
-      req.multiValueQueryStringParameters !== null) {
+      event.multiValueQueryStringParameters !== null) {
     t.fail(`multiValueQueryStringParameters is not null`)
   }
   else if (mock.queryStringParameters !== null) {
-    if (str(mock.queryStringParameters) !== str(req.queryStringParameters))
+    if (str(mock.queryStringParameters) !== str(event.queryStringParameters))
       t.fail(`queryStringParameters is not the same`)
     for (let param of Object.keys(mock.queryStringParameters)) {
       if (mock.queryStringParameters[param] !==
-          req.multiValueQueryStringParameters[param][req.multiValueQueryStringParameters[param].length - 1])
+          event.multiValueQueryStringParameters[param][event.multiValueQueryStringParameters[param].length - 1])
         t.fail(`Could not find '${param}' key in multiValueQueryStringParameters`)
     }
     t.pass('multiValueQueryStringParameters checked out')
@@ -400,16 +389,16 @@ function checkMultiValueQueryStringParameters (mock, req, t) {
 }
 
 // Reusable result checker
-function checkArcV6RestResult (params, mock, req, t) {
+function checkArcV6RestResult (params, mock, t) {
   params.forEach(param => {
     t.equal(
-      str(req[param]),
+      str(event[param]),
       str(mock[param]),
-      match(`${param}`, req[param])
+      match(`${param}`, event[param])
     )
   })
-  checkMultiValueHeaders(mock, req, t)
-  checkMultiValueQueryStringParameters(mock, req, t)
+  checkMultiValueHeaders(mock, t)
+  checkMultiValueQueryStringParameters(mock, t)
   teardown()
 }
 
@@ -434,8 +423,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /', t => {
   }
   handler(input, response)
   // Compare handler-generated request to mock
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): get /?whats=up', t => {
@@ -455,8 +443,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /?whats=up', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): get /?whats=up&whats=there', t => {
@@ -476,8 +463,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /?whats=up&whats=there', t =
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): get /nature/hiking', t => {
@@ -497,8 +483,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /nature/hiking', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): get /{proxy+}', t => {
@@ -518,8 +503,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /{proxy+}', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): get /path/* (/path/hi/there)', t => {
@@ -539,8 +523,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /path/* (/path/hi/there)', t
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): get /:activities/{proxy+} (/nature/hiking/wilderness)', t => {
@@ -563,8 +546,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /:activities/{proxy+} (/natu
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (JSON)', t => {
@@ -585,8 +567,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (JSON)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', t => {
@@ -607,8 +588,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (form URL encoded)', 
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (multipart form data)', t => {
@@ -629,8 +609,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (multipart form data)
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (octet stream)', t => {
@@ -651,8 +630,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): post /form (octet stream)', t =>
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): put /form (JSON)', t => {
@@ -673,8 +651,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): put /form (JSON)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): patch /form (JSON)', t => {
@@ -695,8 +672,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): patch /form (JSON)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v7 (HTTP + Lambda 1.0 payload): delete /form (JSON)', t => {
@@ -717,8 +693,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): delete /form (JSON)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 
@@ -743,8 +718,7 @@ test('Architect v6 (REST API mode): get /', t => {
   }
   handler(input, response)
   // Compare handler-generated request to mock
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v6 (REST API mode): get /?whats=up', t => {
@@ -764,8 +738,7 @@ test('Architect v6 (REST API mode): get /?whats=up', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
@@ -785,8 +758,7 @@ test('Architect v6 (REST API mode): get /?whats=up&whats=there', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v6 (REST API mode): get /nature/hiking', t => {
@@ -806,8 +778,7 @@ test('Architect v6 (REST API mode): get /nature/hiking', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v6 (REST API mode): get /{proxy+}', t => {
@@ -829,8 +800,7 @@ test('Architect v6 (REST API mode): get /{proxy+}', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v6 (REST API mode): post /form (JSON)', t => {
@@ -851,8 +821,7 @@ test('Architect v6 (REST API mode): post /form (JSON)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
@@ -873,8 +842,7 @@ test('Architect v6 (REST API mode): post /form (form URL encoded)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
@@ -895,8 +863,7 @@ test('Architect v6 (REST API mode): post /form (multipart form data)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v6 (REST API mode): post /form (octet stream)', t => {
@@ -917,8 +884,7 @@ test('Architect v6 (REST API mode): post /form (octet stream)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v6 (REST API mode): put /form (JSON)', t => {
@@ -939,8 +905,7 @@ test('Architect v6 (REST API mode): put /form (JSON)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v6 (REST API mode): patch /form (JSON)', t => {
@@ -961,8 +926,7 @@ test('Architect v6 (REST API mode): patch /form (JSON)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })
 
 test('Architect v6 (REST API mode): delete /form (JSON)', t => {
@@ -983,6 +947,5 @@ test('Architect v6 (REST API mode): delete /form (JSON)', t => {
     httpVersion,
   }
   handler(input, response)
-  let req = lambdaStub.args[0][0].event
-  checkArcV6RestResult(params, mock, req, t)
+  checkArcV6RestResult(params, mock, t)
 })

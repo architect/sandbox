@@ -1,14 +1,15 @@
 let test = require('tape')
-let sinon = require('sinon')
 let proxyquire = require('proxyquire')
-let lambdaStub = sinon.stub().yields()
 let { join } = require('path')
 let sut = join(process.cwd(), 'src', 'http', 'invoke-http')
-let invoke = proxyquire(sut, {
-  '../../invoke-lambda': lambdaStub
-})
 let { arc7, arc6 } = require('@architect/req-res-fixtures').http.res
 let { url } = require(join(process.cwd(), 'test', 'utils'))
+let invoke = proxyquire(sut, {
+  '../../invoke-lambda': (params, callback) => {
+    if (returnError) return callback(returnError)
+    else callback(null, response)
+  }
+})
 
 let b64dec = i => Buffer.from(i, 'base64').toString()
 let b64enc = i => Buffer.from(i).toString('base64')
@@ -25,24 +26,13 @@ let localCookie = 'hi=there; Path=/'
 // Test invocation errors
 let returnError = false
 
-// Reconstructs response from Sinon stub
-function parseOutput (output) {
-  let res = {
-    body: output.end.args[0][0],
-    headers: {}
-  }
-  output.setHeader.args.forEach(arg => {
-    let key = arg[0]
-    let value = arg[1]
-    res.headers[key] = value
-  })
-  if (output.statusCode) res.statusCode = output.statusCode
-  if (output.isBase64Encoded) res.isBase64Encoded = output.isBase64Encoded
-  return res
-}
+// Assembles response invocation for each test block
+let response
+function getInvoker (params, _response, callback) {
+  let body
+  let headers = {}
+  response = _response
 
-// Assembles response invokation for each test block
-function getInvoker (params, response, callback) {
   // Generic input (shouldn't impact tests)
   let input = {
     url,
@@ -53,22 +43,19 @@ function getInvoker (params, response, callback) {
   // Mocked res object
   let output = {
     getHeaders: () => ({ 'content-type': 'application/json; charset=utf-8' }),
-    statusCode: sinon.fake.returns(),
-    setHeader: sinon.fake.returns(),
-    end: sinon.fake.returns()
+    setHeader: (header, value) => headers[header] = value,
+    end: i => body = i
   }
-  // Path for returning an invocation error
-  if (returnError) lambdaStub.yields(returnError)
-  else lambdaStub.yields(null, response)
-
   let handler = invoke(params)
   handler(input, output)
-  let res = parseOutput(output)
+  let res = { body, headers }
+  if (output.statusCode) res.statusCode = output.statusCode
+  if (output.isBase64Encoded) res.isBase64Encoded = output.isBase64Encoded
   callback(res)
 }
 function teardown () {
-  lambdaStub.reset() // mostly jic
   returnError = false
+  response = undefined
 }
 
 test('Unknown invocation error', t => {
