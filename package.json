@@ -28,7 +28,7 @@
     "src/*"
   ],
   "dependencies": {
-    "@architect/asap": "~6.0.0",
+    "@architect/asap": "~6.0.2",
     "@architect/create": "~4.2.0",
     "@architect/hydrate": "~3.2.1",
     "@architect/inventory": "~3.5.5",

@@ -186,6 +186,28 @@ function runTests (runType, t) {
     t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
   })
 
+  // Case-sensitivity check
+  t.test(`[HTTP mode / ${runType}] get /index.html - ASAP`, async t => {
+    t.plan(1)
+    let result = await tiny.get({ url: url + '/index.html' })
+    t.ok(result.body.startsWith(indexHTML), 'Got static index.html')
+  })
+
+  // This should always fail
+  t.test(`[HTTP mode / ${runType}] get /index.HTML - ASAP`, async t => {
+    t.plan(3)
+    try {
+      await tiny.get({ url: url + '/index.HTML' })
+      t.fail('Expected an error')
+    }
+    catch (err) {
+      let { body, statusCode } = err
+      t.match(body, /NoSuchKey/, 'Got back NoSuchKey error')
+      t.match(body, /index.HTML/, 'Got back filename')
+      t.equal(statusCode, 404, 'Got back 404')
+    }
+  })
+
   t.test(`[HTTP mode / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })

@@ -1,8 +1,7 @@
-// Don't destructure requires, so we can mock them in unit tests
-let fs = require('fs')
-let url = require('url')
-let send = require('send')
+let { existsSync, readdirSync, statSync } = require('fs')
 let path = require('path')
+let send = require('send')
+let url = require('url')
 
 /**
  * Serves static assets out of /_static
@@ -17,17 +16,24 @@ module.exports = function _static ({ staticPath }, req, res, next) {
   }
 }
 
-function sends (staticPath, req, res, next) {
+function sends (staticPath, req, res) {
   let basePath = req.url.replace('/_static', '')
-  if (!basePath || basePath === '/')
+  if (!basePath || basePath === '/') {
     basePath = 'index.html'
+  }
 
   let pathToFile = url.parse(basePath).pathname
   let fullPath = path.join(staticPath, decodeURI(pathToFile))
+  let { dir, base } = path.parse(fullPath)
+  let found = false
+  if (existsSync(dir)) {
+    let files = readdirSync(dir)
+    found = files.includes(base) && statSync(fullPath).isFile()
+  }
 
-  let found = fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()
   if (!found) {
-    next()
+    res.statusCode = 404
+    res.end(`NoSuchKey: ${fullPath} not found`)
   }
   else {
     function error (err) {

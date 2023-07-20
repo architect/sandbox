@@ -2,6 +2,14 @@
 
 ---
 
+## [5.7.4] 2023-07-20
+
+### Fixed
+
+- Ensure improper casing when loading static assets from `_static` does not result in false-positive file reads; thanks @andybee!
+
+---
+
 ## [5.7.3] 2023-07-19
 
 ### Changed
