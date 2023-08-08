@@ -3,13 +3,22 @@ let getKeySchema = require('./_get-key-schema')
 let getGSI = require('./_get-global-secondary-index')
 
 module.exports = function _createTable (params, callback) {
-  let { name, TableName, dynamo, inventory, table } = params
+  let { name, TableName, dynamo, inventory, ports, table } = params
 
   dynamo.listTables({}, function _tables (err, result) {
     if (err) {
-      // Blow up if a programmer config err
       console.log(err)
-      throw Error('Unable to list DynamoDB tables')
+      if (err.message === 'socket hung up' &&
+          err.name === 'TimeoutError' &&
+          err.stack.includes('aws-sdk')) {
+        let msg = `Sandbox was unable to instantiate database tables on port ${ports.tables} due to a timeout error\n` +
+              `This has been known to occur when system emulators (or tools use them) attempt to use port ${ports.tables}\n` +
+              `Please ensure you are not running any such emulators or tools, or manually specify a different @tables port, and try starting Sandbox again`
+        console.log(msg)
+        process.exit(1)
+      }
+      let msg = 'Unable to list DynamoDB tables'
+      throw Error(msg)
     }
     else {
       let found = result.TableNames.find(tbl => tbl === TableName)

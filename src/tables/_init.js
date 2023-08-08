@@ -14,7 +14,7 @@ module.exports = function init ({ inventory, ports }, callback) {
     // User tables (and their indexes)
     let plans = inv.tables.map(table => {
       return function (callback) {
-        createTable({ app, dynamo, inventory, table }, callback)
+        createTable({ app, dynamo, inventory, ports, table }, callback)
       }
     })
 

@@ -2,6 +2,14 @@
 
 ---
 
+## [5.7.5] 2023-08-08
+
+### Fixed
+
+- Improve error handling during possible `@tables` port conflicts on startup; thanks @jlipps!
+
+---
+
 ## [5.7.4] 2023-07-20
 
 ### Fixed
