@@ -8,11 +8,10 @@ module.exports = function _createTable (params, callback) {
   dynamo.listTables({}, function _tables (err, result) {
     if (err) {
       console.log(err)
-      if (err.message === 'socket hung up' &&
-          err.name === 'TimeoutError' &&
-          err.stack.includes('aws-sdk')) {
+      if (err.message === 'socket hang up' &&
+          err.name === 'TimeoutError') {
         let msg = `Sandbox was unable to instantiate database tables on port ${ports.tables} due to a timeout error\n` +
-              `This has been known to occur when system emulators (or tools use them) attempt to use port ${ports.tables}\n` +
+              `This has been known to occur when system emulators (or tools that use them) attempt to use port ${ports.tables}\n` +
               `Please ensure you are not running any such emulators or tools, or manually specify a different @tables port, and try starting Sandbox again`
         console.log(msg)
         process.exit(1)
