@@ -6,7 +6,7 @@
 
 ### Fixed
 
-- Improve error handling during possible `@tables` port conflicts on startup; thanks @jlipps!
+- Improve error handling during possible `@tables` port conflicts on startup; partially fixes #1441, thanks @jlipps!
 
 ---
 
