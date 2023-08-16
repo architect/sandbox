@@ -13,13 +13,16 @@ module.exports = function getFlags () {
     quiet: [ 'q' ],
     verbose: [ 'v' ],
   }
-  let boolean = [ 'disable-symlinks' ]
+  let boolean = [ 'disable-delete-vendor', 'disable-symlinks' ]
   let args = minimist(process.argv.slice(2), { alias, boolean })
 
   // Log levels (defaults to `normal` in the updater)
   let logLevel
   if (args.verbose) logLevel = 'verbose'
   if (args.debug) logLevel = 'debug'
+
+  // Disable node_modules / vendor dir deletion upon startup
+  let deleteVendor = !args['disable-delete-vendor']
 
   // Main user-facing @http port
   let port = Number(args.port) || undefined
@@ -38,6 +41,7 @@ module.exports = function getFlags () {
   let symlink = !args['disable-symlinks']
 
   let flags = {
+    deleteVendor,
     port,
     host,
     quiet,

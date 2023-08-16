@@ -61,7 +61,7 @@ function _start (params, callback) {
       http.start(params, callback)
     },
 
-    // Loop through functions and see if any need dependency hydration
+    // Loop through functions, clear vendor dirs, and see if any need dependency hydration
     function (callback) {
       maybeHydrate(params, callback)
     },

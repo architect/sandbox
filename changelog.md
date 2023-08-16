@@ -11,7 +11,8 @@
 
 ### Fixed
 
-- Improve error handling during possible `@tables` port conflicts on startup; partially fixes #1441, thanks @jlipps!
+- Improved cleanup of per-Lambda vendor dirs (`node_modules`, `vendor`) upon startup; fixes #1426
+- Improved error handling during possible `@tables` port conflicts on startup; partially fixes #1441, thanks @jlipps!
 
 ---
 

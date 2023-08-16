@@ -39,6 +39,7 @@ npx arc sandbox
 - `-v`, `--verbose` - Enable verbose logging
 - `-d`, `--debug` - Enable debug logging
 - `-q`, `--quiet` - Disable (most) logging
+- `--disable-delete-vendor` - Disable deleting Lambda vendor dirs upon startup
 - `--disable-symlinks` - Disable symlinking `src/shared` into all functions and use file copying instead
 
 
@@ -79,6 +80,8 @@ Methods may be passed an options object containing the following parameters:
   - Defaults to `http`
   - Can be one of `http` (aliased to `httpv2`), `httpv1`, `rest`
 - `cwd` - **String** - Specify a working directory (handy for aiming Sandbox at test mocks)
+- `deleteVendor` - **Boolean** - Delete Lambda vendor dirs upon startup
+  - Defaults to `true`
 - `env` - **Object** - Environment variables for Lambda invocations in automated testing
   - String values overwrite env vars of the same name set via `.env` or `prefs.arc` files
   - `undefined` values delete any env vars of the same name set via `.env` or `prefs.arc` files

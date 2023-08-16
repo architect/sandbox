@@ -1,0 +1,2 @@
+@sandbox
+delete-vendor false

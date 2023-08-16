@@ -30,7 +30,7 @@
   "dependencies": {
     "@architect/asap": "~6.0.3",
     "@architect/create": "~4.2.3-RC.0",
-    "@architect/hydrate": "~3.3.0-RC.1",
+    "@architect/hydrate": "~3.3.0-RC.2",
     "@architect/inventory": "~3.6.0",
     "@architect/utils": "~3.1.9",
     "@aws-sdk/client-apigatewaymanagementapi": "^3.316.0",
