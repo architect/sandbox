@@ -2,7 +2,13 @@
 
 ---
 
-## [5.7.5] 2023-08-08
+## [5.8.0] 2023-08-08
+
+### Added
+
+- Sandbox now cleans up per-Lambda vendor dirs (`node_modules`, `vendor`) upon startup; fixes #1426
+  - This can be disabled with `@sandbox delete-vendor false` preference or using the `--disable-delete-vendor` flag
+
 
 ### Changed
 
@@ -11,7 +17,6 @@
 
 ### Fixed
 
-- Improved cleanup of per-Lambda vendor dirs (`node_modules`, `vendor`) upon startup; fixes #1426
 - Improved error handling during possible `@tables` port conflicts on startup; partially fixes #1441, thanks @jlipps!
 
 ---

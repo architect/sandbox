@@ -153,11 +153,11 @@ module.exports = function spawnChild (params, callback) {
         lambdaError: {
           errorType: `No response found`,
           errorMessage: `Lambda did not execute the completion callback or return a value`,
-          additional: `Dependency-free functions, or functions that use <code>@architect/functions arc.http.async()</code> must return a correctly formatted response object.</p>
+          additional: `Dependency-free functions, or functions that use <code>@architect/functions arc.http()</code> must return a correctly formatted response object.</p>
 
 <p>Functions that utilize <code>@architect/functions arc.http()</code> must ensure <code>res</code> gets called</p>
 
-<p>Learn more about <a href="https://arc.codes/primitives/http">dependency-free responses</a>, or about using <code><a href="https://arc.codes/reference/functions/http/node/classic">arc.http()</a></code> and <code><a href="https://arc.codes/reference/functions/http/node/async">arc.http.async()</a></code>.`,
+<p>Learn more about <a href="https://arc.codes/primitives/http">dependency-free responses</a>, or about using <code><a href="https://arc.codes/reference/functions/http/node/classic">arc.http()</a></code> and <code><a href="https://arc.codes/reference/functions/http/node/async">arc.http()</a></code>.`,
         },
         lambda,
       })
