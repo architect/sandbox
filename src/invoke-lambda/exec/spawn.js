@@ -127,32 +127,45 @@ module.exports = function spawnChild (params, callback) {
 
   // End execution
   function done () {
+    let requiresResponse = false
+    if (lambda.pragma === 'ws' ||
+        (lambda.pragma === 'http' && ![ 'http', 'httpv2' ].includes(apiType))) {
+      requiresResponse = true
+    }
+
     let completed = invocations[requestID].response ||
                     invocations[requestID].initError ||
                     invocations[requestID].error
     if (timedOut) {
-      invocations[requestID].error = errors({
+      let type = 'Timeout error'
+      invocations[requestID].error = `${type}: Lambda timed out after ${timeout / 1000} seconds`
+      invocations[requestID].response = errors({
         lambdaError: {
-          errorType: 'Timeout error',
+          errorType: type,
           errorMessage: `<p>Lambda timed out after <b>${timeout / 1000} seconds</b></p>`,
         },
         lambda,
       })
     }
     else if (error) {
-      invocations[requestID].error = errors({
+      let type = 'Function is missing or not defined, or unknown execution error'
+      invocations[requestID].error = `${type}: ${error}`
+      invocations[requestID].response = errors({
         lambdaError: {
-          errorType: `Function is missing or not defined, or unknown execution error`,
+          errorType: type,
           errorMessage: `<p>${error}</p>`,
         },
         lambda,
       })
     }
-    else if (![ 'http', 'httpv2' ].includes(apiType) && !completed) {
-      invocations[requestID].error = errors({
+    else if (requiresResponse && !completed) {
+      let type = 'No response found'
+      let msg = 'Lambda did not execute the completion callback or return a value'
+      invocations[requestID].error = `${type}: ${msg}`
+      invocations[requestID].response = errors({
         lambdaError: {
-          errorType: `No response found`,
-          errorMessage: `Lambda did not execute the completion callback or return a value`,
+          errorType: type,
+          errorMessage: msg,
           additional: `Dependency-free functions, or functions that use <code>@architect/functions arc.http()</code> must return a correctly formatted response object.</p>
 
 <p>Functions that utilize <code>@architect/functions arc.http()</code> must ensure <code>res</code> gets called</p>

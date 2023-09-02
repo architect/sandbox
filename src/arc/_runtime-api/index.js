@@ -60,8 +60,12 @@ function runtimeAPI ({ body }, params, req, res) {
     update.debug.status(`[${requestID}] Responded to /next request`)
   }
   else if (url === initErrorEndpoint) {
-    invocations[requestID].initError = errors({
-      lambdaError: JSON.parse(body),
+    let error = JSON.parse(body)
+    invocations[requestID].initError = error
+    // Always backfill an API Gateway-compliant response in case it's an @http / @ws Lambda
+    invocations[requestID].response = errors({
+      error,
+      lambdaError: error,
       lambda,
       type: 'init error',
     })
@@ -88,8 +92,11 @@ function runtimeAPI ({ body }, params, req, res) {
       update.debug.status(`[${requestID}] Missing request ID in /error request`)
       return res.end()
     }
-    invocations[requestID].error = errors({
-      lambdaError: JSON.parse(body),
+    let error = JSON.parse(body)
+    invocations[requestID].error = error
+    // Always backfill an API Gateway-compliant response in case it's an @http / @ws Lambda
+    invocations[requestID].response = errors({
+      lambdaError: error,
       lambda,
     })
     res.statusCode = accepted

@@ -2,6 +2,14 @@
 
 ---
 
+## [5.8.1] 2023-09-02
+
+### Added
+
+- Added error bubbling for the Sandbox plugin `invoke()` method; fixes #1447
+
+---
+
 ## [5.8.0] 2023-08-08
 
 ### Added

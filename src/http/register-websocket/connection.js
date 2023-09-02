@@ -8,8 +8,8 @@ module.exports = function connection (params, connectionId, ws) {
   // Save this for send to use
   pool.register(connectionId, ws)
 
-  const respondToError = (err, resp) => {
-    if (err || resp && resp.statusCode >= 400) {
+  const respondToError = (err, response) => {
+    if (err || response && response.statusCode >= 400) {
       ws.send(JSON.stringify({ 'message': 'Internal server error', connectionId, 'requestId': 'xxxxxx=' }), noop)
     }
   }

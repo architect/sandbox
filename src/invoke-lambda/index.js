@@ -80,8 +80,7 @@ module.exports = function invokeLambda (params, callback) {
       }
       update.debug.status(`[${requestID}] Invocation successfully completed`)
 
-      let result = initError || error || response
-      callback(null, result)
+      callback(null, response, error, initError)
     }
   })
 }
