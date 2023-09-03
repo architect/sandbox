@@ -6,18 +6,20 @@ let url = require('url')
 /**
  * Serves static assets out of /_static
  */
-module.exports = function _static ({ staticPath }, req, res, next) {
+module.exports = function _static (params, req, res, next) {
   let isStatic = req.url.startsWith('/_static')
   if (isStatic) {
-    sends(staticPath, req, res, next)
+    sends(params, req, res, next)
   }
   else {
     next()
   }
 }
 
-function sends (staticPath, req, res) {
-  let basePath = req.url.replace('/_static', '')
+function sends ({ inventory, staticPath }, req, res) {
+  let prefix = inventory.inv.static?.prefix
+  let rootPath = '/_static' + (prefix ? '/' + prefix : '')
+  let basePath = req.url.replace(rootPath, '')
   if (!basePath || basePath === '/') {
     basePath = 'index.html'
   }

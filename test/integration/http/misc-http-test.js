@@ -99,37 +99,6 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`[_static / ${runType}] get /_static (sends static asset)`, t => {
-    t.plan(2)
-    let path = '/_static/hi.txt'
-    tiny.get({
-      url: url + path
-    }, function _got (err, result) {
-      if (err) t.end(err)
-      else {
-        let { body, headers } = result
-        t.match(body, /hello from public!/, 'Got back static asset (text file)')
-        t.match(headers['content-type'], /text\/plain/, 'Asset is correct content type')
-      }
-    })
-  })
-
-  t.test(`[_static / ${runType}] get /_static (file is missing)`, t => {
-    t.plan(3)
-    let path = '/_static/foo/hi.json'
-    tiny.get({
-      url: url + path
-    }, function _got (err) {
-      if (err) {
-        let { body, statusCode } = err
-        t.match(body, /NoSuchKey/, 'Got back NoSuchKey error')
-        t.match(body, /foo[\/\\]hi.json/, 'Got back filename')
-        t.equal(statusCode, 404, 'Got back 404')
-      }
-      else t.end('Expected 404')
-    })
-  })
-
   // Maybe not strictly an HTTP test but let's check it out anyway
   t.test(`[Timeout / ${runType}] get /times-out`, t => {
     t.plan(3)
@@ -244,6 +213,76 @@ function runTests (runType, t) {
         t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
       }
       else t.end(result)
+    })
+  })
+
+  t.test(`[_static / ${runType}] get /_static (sends static asset)`, t => {
+    t.plan(2)
+    let path = '/_static/hi.txt'
+    tiny.get({
+      url: url + path
+    }, function _got (err, result) {
+      if (err) t.end(err)
+      else {
+        let { body, headers } = result
+        t.match(body, /hello from public!/, 'Got back static asset (text file)')
+        t.match(headers['content-type'], /text\/plain/, 'Asset is correct content type')
+      }
+    })
+  })
+
+  t.test(`[_static / ${runType}] get /_static (file is missing)`, t => {
+    t.plan(3)
+    let path = '/_static/foo/hi.json'
+    tiny.get({
+      url: url + path
+    }, function _got (err) {
+      if (err) {
+        let { body, statusCode } = err
+        t.match(body, /NoSuchKey/, 'Got back NoSuchKey error')
+        t.match(body, /foo[\/\\]hi.json/, 'Got back filename')
+        t.equal(statusCode, 404, 'Got back 404')
+      }
+      else t.end('Expected 404')
+    })
+  })
+
+  t.test(`[Misc / ${runType}] Shut down Sandbox`, t => {
+    shutdown[runType](t)
+  })
+
+  t.test(`[Misc / ${runType}] Start Sandbox`, t => {
+    startup[runType](t, 'static-prefix')
+  })
+
+  t.test(`[_static prefix / ${runType}] get /_static with correct prefix (sends static asset)`, t => {
+    t.plan(2)
+    let path = '/_static/foo/hi.txt'
+    tiny.get({
+      url: url + path
+    }, function _got (err, result) {
+      if (err) t.end(err)
+      else {
+        let { body, headers } = result
+        t.match(body, /hello from public!/, 'Got back static asset (text file)')
+        t.match(headers['content-type'], /text\/plain/, 'Asset is correct content type')
+      }
+    })
+  })
+
+  t.test(`[_static / ${runType}] get /_static without prefix fails`, t => {
+    t.plan(3)
+    let path = '/_static/hi.txt'
+    tiny.get({
+      url: url + path
+    }, function _got (err) {
+      if (err) {
+        let { body, statusCode } = err
+        t.match(body, /NoSuchKey/, 'Got back NoSuchKey error')
+        t.match(body, /_static[\/\\]hi.txt/, 'Got back filename')
+        t.equal(statusCode, 404, 'Got back 404')
+      }
+      else t.end('Expected 404')
     })
   })
 

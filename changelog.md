@@ -2,11 +2,12 @@
 
 ---
 
-## [5.8.1] 2023-09-02
+## [5.8.1 - 5.8.2] 2023-09-02
 
 ### Added
 
 - Added error bubbling for the Sandbox plugin `invoke()` method; fixes #1447
+- Added `@static prefix` setting support; fixes #1450
 
 ---
 
