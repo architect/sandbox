@@ -51,7 +51,12 @@ function client (method, params) {
 
 (async function main () {
   try {
-    let { projectSrc, handlerFile, handlerMethod, shared, views } = JSON.parse(__ARC_CONFIG__);
+    let { projectSrc, handlerFile, handlerMethod, shared, views, enableInspector, inspectorPort } = JSON.parse(__ARC_CONFIG__);
+
+    /* eslint-disable-next-line */
+    let inspector = enableInspector ? require('inspector') : undefined;
+    if (inspector) inspector.open(inspectorPort);
+
     let context = JSON.parse(__ARC_CONTEXT__);
     /* eslint-disable-next-line */
     let { join, sep } = require('path');
@@ -171,12 +176,14 @@ function client (method, params) {
       try {
         function getRemainingTimeInMillis () { return Number(deadlineMS) - Date.now(); }
         context.getRemainingTimeInMillis = getRemainingTimeInMillis;
+        if (inspector) inspector.waitForDebugger();
         const response = handler(event, context, callback);
         if (isPromise(response)) {
           response.then(result => callback(null, result)).catch(callback);
         }
       }
       catch (err) {
+        if (inspector) inspector.close();
         callback(err);
       }
     }

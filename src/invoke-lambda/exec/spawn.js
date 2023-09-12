@@ -4,15 +4,50 @@ let kill = require('tree-kill')
 let errors = require('../../lib/errors')
 let { invocations } = require('../../arc/_runtime-api')
 
-module.exports = function spawnChild (params, callback) {
-  let { args, context, command, lambda, options, requestID, timeout } = params
+let inspecting = {
+  http: {},
+  events: {},
+  scheduled: {},
+  queues: {},
+  ws: {},
+  customLambdas: {},
+}
+let processes = {}
+
+function spawnChild (params, callback) {
+  let { args, context, command, inspectorPort, lambda, options, requestID, timeout } = params
   let { apiType, update } = context
   let isInLambda = process.env.AWS_LAMBDA_FUNCTION_NAME
   let timedOut = false
 
+  let { name, pragma } = lambda
+  if (inspectorPort && inspecting?.[pragma]?.[name]) {
+    return callback(null, {
+      statusCode: 500,
+      headers: {
+        'content-type': 'text/html; charset=utf8;',
+        'cache-control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
+      },
+      body: `<h1>Inspector conflict</h1>
+          <p>Lambda is already being inspected!</p>`
+    })
+  }
+  else if (inspectorPort) {
+    inspecting[pragma][name] = true
+    timeout = 604800000
+    // Replace the handler placeholder for easier identification in VS Code
+    args.forEach((arg, i) => {
+      let tag = '$handler'
+      if (arg.includes(tag)) {
+        args[i] = arg.replace(tag, `--- @${pragma} '${name}' handler ---`)
+      }
+    })
+  }
+
   // Let's go!
   let child = spawn(command, args, options)
   let pid = child.pid
+  processes[`${pid}`] = true
   let error
   let closed
 
@@ -92,6 +127,10 @@ module.exports = function spawnChild (params, callback) {
 
     if (!isInLambda) {
       kill(pid, 'SIGINT', err => {
+        if (inspectorPort) {
+          delete inspecting[pragma][name]
+        }
+        delete processes[`${pid}`]
         if (err) {
           update.debug.status(`[${requestID}] tree-kill process termination error (pid ${pid})`)
           update.debug.raw(err)
@@ -178,3 +217,5 @@ module.exports = function spawnChild (params, callback) {
     callback()
   }
 }
+
+module.exports = { spawn: spawnChild, processes }

@@ -43,6 +43,7 @@ module.exports = function getEnv (params, requestID) {
       handlerMethod: 'handler',
       shared: inv.shared,
       views: inv.views,
+      enableInspector: inv._project?.preferences?.sandbox?.debug || false
     }),
     // Arc + userland
     ...envVars,

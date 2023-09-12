@@ -3,8 +3,13 @@ let rehydrator = require('./_rehydrate')
 let watch = require('./_watcher')
 let stdin = require('./_stdin')
 let getFlags = require('./_flags')
+// let inspector = require('inspector')
 
 module.exports = function cli (options, callback) {
+  // I don't remember why these ↓ were here, but everything breaks when I turn them on lol
+  // inspector.open()
+  // inspector.waitForDebugger()
+
   let flags = getFlags()
   let params = { ...options, ...flags }
   params.quiet = options.quiet || flags.quiet
