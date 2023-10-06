@@ -82,7 +82,7 @@ function checkPort (checking, ports, name, single, callback) {
     tester.once('error', err => {
       if (err.message.includes('EADDRINUSE')) {
         if (single) {
-          return callback(Error(`Port ${checking} (${name}) is already in use, please select another with prefs.arc`))
+          return callback(Error(`Port ${checking} (${name}) is already in use, please select another with prefs.arc\nSee https://arc.codes/docs/en/reference/configuration/local-preferences#ports---list for config`))
         }
         else {
           tries++
