@@ -20,11 +20,15 @@ module.exports = function _ws ({ body }, req, res) {
 
   if (req.method === 'GET') {
     // from https://github.com/aws/aws-sdk-js/blob/307e82673b48577fce4389e4ce03f95064e8fe0d/apis/apigatewaymanagementapi-2018-11-29.normal.json#L132
-    const output = {
+    const output = JSON.stringify({
       connectedAt: new Date(pool.getConnectedAt(connectionId)).toISOString(),
       // lastActiveAt: 'I wish this was easy to figure out but it is optional',
-    }
-    res.end(JSON.stringify(output))
+      'x-amz-apigw-id': connectionId,
+      // TODO: add `x-amzn-requestid`,
+    })
+    res.setHeader('content-type', 'application/json')
+    res.setHeader('content-length', output.length)
+    res.end(output)
     return
   }
 

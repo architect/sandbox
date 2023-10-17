@@ -2,6 +2,15 @@
 
 ---
 
+## [5.8.3] 2023-10-17
+
+### Added
+
+- Minor improvements to Sandbox `@WS` API emulation
+- Added improvements to help output when port is in use; thanks @remysharp!
+
+---
+
 ## [5.8.1 - 5.8.2] 2023-09-02
 
 ### Added

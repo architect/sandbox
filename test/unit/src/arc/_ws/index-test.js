@@ -75,9 +75,7 @@ test('ws module GET should return JSON containing connection information', t => 
   ws({}, req, res)
   t.equals(res.statusCode, 200, 'response statusCode set to 200')
   let body = JSON.parse(resBody)
-  t.deepEqual(body, {
-    connectedAt: new Date(pool.getConnectedAt(connectionId)).toISOString()
-  }, 'Gets Connected At')
+  t.deepEqual(body.connectedAt, new Date(pool.getConnectedAt(connectionId)).toISOString(), 'Gets Connected At')
 })
 
 test('ws module delete should close the connection', t => {
