@@ -69,7 +69,7 @@
     "@architect/functions": "~7.0.0",
     "@architect/req-res-fixtures": "git+https://github.com/architect/req-res-fixtures.git",
     "@aws-lite/apigatewaymanagementapi": "~0.0.2",
-    "@aws-lite/ssm": "~0.1.1",
+    "@aws-lite/ssm": "~0.2.0",
     "cross-env": "~7.0.3",
     "eslint": "~8.47.0",
     "fs-extra": "~11.1.1",

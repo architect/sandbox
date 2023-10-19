@@ -101,6 +101,7 @@ module.exports = function _ssm ({ body, services }, params, req, res) {
     update.verbose.warn(err)
     res.statusCode = 400
     error = error || { __type: 'InternalServerError', message: 'Unknown Sandbox error: ' + err.stack }
+    res.setHeader('content-type', 'application/json')
     res.end(JSON.stringify(error))
     return
   }

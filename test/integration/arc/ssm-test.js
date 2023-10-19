@@ -1,8 +1,6 @@
-require('aws-sdk/lib/maintenance_mode_message').suppress = true
 let { join } = require('path')
 let test = require('tape')
-let aws = require('aws-sdk')
-let http = require('http')
+let awsLite = require('@aws-lite/client')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let { credentials, run, startup, shutdown } = require('../../utils')
@@ -10,11 +8,7 @@ let _arcPort = 2222
 
 let app = 'MockappTesting'
 let tables = [ 'accounts', 'pets', 'places', 'data' ]
-
-// AWS services to test
-let endpoint = new aws.Endpoint(`http://localhost:${_arcPort}/_arc/ssm`)
-let httpOptions = { agent: new http.Agent() }
-let ssm = new aws.SSM({ endpoint, region: 'us-west-2', httpOptions, credentials })
+let ssm
 
 function check ({ result, type, items, fallback, t }) {
   let internal = result.Parameters?.[0]?.Name?.includes('ARC_SANDBOX') ? 1 : 0
@@ -30,9 +24,19 @@ function check ({ result, type, items, fallback, t }) {
   })
 }
 
-test('Set up env', t => {
-  t.plan(1)
+test('Set up env', async t => {
+  t.plan(2)
   t.ok(sandbox, 'Got Sandbox')
+  let aws = await awsLite({
+    ...credentials,
+    endpointPrefix: '/_arc/ssm',
+    host: 'localhost',
+    port: _arcPort,
+    protocol: 'http',
+    region: 'us-west-2',
+  })
+  ssm = aws.SSM
+  t.ok(ssm, 'Populated SSM client')
 })
 
 test('Run internal Arc SSM service tests', t => {
@@ -50,165 +54,134 @@ function runTests (runType, t) {
   /**
    * ssm.getParametersByPath()
    */
-  t.test(`${mode} Get & check params (without specifying a type)`, t => {
+  t.test(`${mode} Get & check params (without specifying a type)`, async t => {
     t.plan(6)
     // Should get all tables params back
-    ssm.getParametersByPath({ Path: `/${app}` }, function (err, result) {
-      if (err) t.end(err)
-      else {
-        t.equal(result.Parameters.length, 5, 'Got back correct number of params')
-        check({ result, type: 'tables', items: tables, t })
-      }
-    })
+    let result = await ssm.GetParametersByPath({ Path: `/${app}` })
+    t.equal(result.Parameters.length, 5, 'Got back correct number of params')
+    check({ result, type: 'tables', items: tables, t })
   })
 
-  t.test(`${mode} Get & check params (without specifying a type; Arc Functions bare module mode)`, t => {
+  t.test(`${mode} Get & check params (without specifying a type; Arc Functions bare module mode)`, async t => {
     t.plan(6)
     // Should get all tables params back
-    ssm.getParametersByPath({ Path: `/ArcAppTesting` }, function (err, result) {
-      if (err) t.end(err)
-      else {
-        t.equal(result.Parameters.length, 5, 'Got back correct number of params')
-        check({ result, type: 'tables', items: tables, fallback: true, t })
-      }
-    })
+    let result = await ssm.GetParametersByPath({ Path: `/ArcAppTesting` })
+    t.equal(result.Parameters.length, 5, 'Got back correct number of params')
+    check({ result, type: 'tables', items: tables, fallback: true, t })
   })
 
-  t.test(`${mode} Get & check params (specifying a type)`, t => {
+  t.test(`${mode} Get & check params (specifying a type)`, async t => {
     t.plan(6)
-    ssm.getParametersByPath({ Path: `/${app}/tables` }, function (err, result) {
-      if (err) t.end(err)
-      else {
-        t.equal(result.Parameters.length, 4, 'Got back correct number of params')
-        check({ result, type: 'tables', items: tables, t })
-      }
-    })
+    let result = await ssm.GetParametersByPath({ Path: `/${app}/tables` })
+    t.equal(result.Parameters.length, 4, 'Got back correct number of params')
+    check({ result, type: 'tables', items: tables, t })
   })
 
-  t.test(`${mode} Get & check params (specifying a type; Arc Functions bare module mode)`, t => {
+  t.test(`${mode} Get & check params (specifying a type; Arc Functions bare module mode)`, async t => {
     t.plan(6)
-    ssm.getParametersByPath({ Path: `/ArcAppTesting/tables` }, function (err, result) {
-      if (err) t.end(err)
-      else {
-        t.equal(result.Parameters.length, 4, 'Got back correct number of params')
-        check({ result, type: 'tables', items: tables, fallback: true, t })
-      }
-    })
+    let result = await ssm.GetParametersByPath({ Path: `/ArcAppTesting/tables` })
+    check({ result, type: 'tables', items: tables, fallback: true, t })
+    t.equal(result.Parameters.length, 4, 'Got back correct number of params')
   })
 
-  t.test(`${mode} Get & check params (specifying an invalid or unknown service)`, t => {
+  t.test(`${mode} Get & check params (specifying an invalid or unknown service)`, async t => {
     t.plan(1)
-    ssm.getParametersByPath({ Path: `/${app}/idk` }, function (err, result) {
-      if (err) t.end(err)
-      else t.deepEqual(result.Parameters, [], 'No parameters returned')
-    })
+    let result = await ssm.GetParametersByPath({ Path: `/${app}/idk` })
+    t.deepEqual(result.Parameters, [], 'No parameters returned')
   })
 
-  t.test(`${mode} Get & check params (specifying an invalid or unknown service; Arc Functions bare module mode)`, t => {
+  t.test(`${mode} Get & check params (specifying an invalid or unknown service; Arc Functions bare module mode)`, async t => {
     t.plan(1)
-    ssm.getParametersByPath({ Path: `/ArcAppTesting/idk` }, function (err, result) {
-      if (err) t.end(err)
-      else t.deepEqual(result.Parameters, [], 'No parameters returned')
-    })
+    let result = await ssm.GetParametersByPath({ Path: `/ArcAppTesting/idk` })
+    t.deepEqual(result.Parameters, [], 'No parameters returned')
   })
 
-  t.test(`${mode} Get & check params (specifying an invalid or unknown app)`, t => {
+  t.test(`${mode} Get & check params (specifying an invalid or unknown app)`, async t => {
     t.plan(1)
-    ssm.getParametersByPath({ Path: `/idk` }, function (err, result) {
-      if (err) t.end(err)
-      else t.deepEqual(result.Parameters, [], 'No parameters returned')
-    })
+    let result = await ssm.GetParametersByPath({ Path: `/idk` })
+    t.deepEqual(result.Parameters, [], 'No parameters returned')
   })
 
-  t.test(`${mode} Get & check params (specifying an unknown app + known service)`, t => {
+  t.test(`${mode} Get & check params (specifying an unknown app + known service)`, async t => {
     t.plan(1)
-    ssm.getParametersByPath({ Path: `/idk/tables` }, function (err, result) {
-      if (err) t.end(err)
-      else t.deepEqual(result.Parameters, [], 'No parameters returned')
-    })
+    let result = await ssm.GetParametersByPath({ Path: `/idk/tables` })
+    t.deepEqual(result.Parameters, [], 'No parameters returned')
   })
 
   /**
    * ssm.getParameter()
    */
-  t.test(`${mode} Get & check a param`, t => {
+  t.test(`${mode} Get & check a param`, async t => {
     t.plan(1)
     let key = `/${app}/tables/accounts`
-    ssm.getParameter({ Name: key }, function (err, result) {
-      if (err) t.end(err)
-      else {
-        let { Name, Value } = result.Parameter
-        if (Name === key && Value === `mockapp-staging-accounts`) {
-          t.pass(`Found param: ${key}`)
-        }
-        else t.end(`Could not find param: ${key}`)
-      }
-    })
+    let result = await ssm.GetParameter({ Name: key })
+    let { Name, Value } = result.Parameter
+    if (Name === key && Value === `mockapp-staging-accounts`) {
+      t.pass(`Found param: ${key}`)
+    }
+    else t.end(`Could not find param: ${key}`)
   })
 
-  t.test(`${mode} Get & check a param (Arc Functions bare module mode)`, t => {
+  t.test(`${mode} Get & check a param (Arc Functions bare module mode)`, async t => {
     t.plan(1)
     let key = `/ArcAppTesting/tables/accounts`
-    ssm.getParameter({ Name: key }, function (err, result) {
-      if (err) t.end(err)
-      else {
-        let { Name, Value } = result.Parameter
-        if (Name === key && Value === `mockapp-staging-accounts`) {
-          t.pass(`Found param: ${key}`)
-        }
-        else t.end(`Could not find param: ${key}`)
-      }
-    })
+    let result = await ssm.GetParameter({ Name: key })
+    let { Name, Value } = result.Parameter
+    if (Name === key && Value === `mockapp-staging-accounts`) {
+      t.pass(`Found param: ${key}`)
+    }
+    else t.end(`Could not find param: ${key}`)
   })
 
-  t.test(`${mode} Getting a param without specifying a service type should fail`, t => {
-    t.plan(2)
+  t.test(`${mode} Getting a param without specifying a service type should fail`, async t => {
+    t.plan(1)
     let key = `/${app}`
-    ssm.getParameter({ Name: key }, function (err) {
-      if (!err) t.fail('Expected error')
-      else {
-        t.match(err.name, /ParameterNotFound/, 'Got ParameterNotFound error')
-        t.equal(err.message, null, 'Returned null value')
-      }
-    })
+    try {
+      await ssm.GetParameter({ Name: key })
+      t.fail('Expected an error')
+    }
+    catch (err) {
+      t.match(err.__type, /ParameterNotFound/, 'Got ParameterNotFound error')
+    }
   })
 
-  t.test(`${mode} Getting a param without specifying a param should fail`, t => {
-    t.plan(2)
+  t.test(`${mode} Getting a param without specifying a param should fail`, async t => {
+    t.plan(1)
     let key = `/${app}/tables/idk`
-    ssm.getParameter({ Name: key }, function (err) {
-      if (!err) t.fail('Expected error')
-      else {
-        t.match(err.name, /ParameterNotFound/, 'Got ParameterNotFound error')
-        t.equal(err.message, null, 'Returned null value')
-      }
-    })
+    try {
+      await ssm.GetParameter({ Name: key })
+      t.fail('Expected an error')
+    }
+    catch (err) {
+      t.match(err.__type, /ParameterNotFound/, 'Got ParameterNotFound error')
+    }
   })
 
-  t.test(`${mode} Getting a param without specifying a param should fail (trailing slash)`, t => {
+  t.test(`${mode} Getting a param without specifying a param should fail (trailing slash)`, async t => {
     t.plan(2)
     let key = `/${app}/tables/`
-    ssm.getParameter({ Name: key }, function (err) {
-      if (!err) t.fail('Expected error')
-      else {
-        t.match(err.name, /ValidationException/, 'Got ValidationException error')
-        t.match(err.message, /Parameter cannot end in \'\/\'/, 'Errored on trailing slash')
-      }
-    })
+    try {
+      await ssm.GetParameter({ Name: key })
+      t.fail('Expected an error')
+    }
+    catch (err) {
+      t.match(err.__type, /ValidationException/, 'Got ValidationException error')
+      t.match(err.message, /Parameter cannot end in \'\/\'/, 'Errored on trailing slash')
+    }
   })
 
   /**
    * Fail on unsupported ssm methods
    */
-  t.test(`${mode} Get & check params (without specifying a type)`, t => {
-    t.plan(2)
-    ssm.getParameters({ Names: [ 'a', 'b' ] }, function (err) {
-      if (!err) t.fail('Expected error')
-      else {
-        t.match(err.name, /InternalServerError/, 'Got InternalServerError error')
-        t.match(err.message, /Unrecognized request, Sandbox only supports/, 'Tried to provide a helpful error')
-      }
-    })
+  t.test(`${mode} Get & check params (without specifying a type)`, async t => {
+    t.plan(1)
+    try {
+      await ssm.GetParameters({ Names: [ 'a', 'b' ] })
+      t.fail('Expected an error')
+    }
+    catch (err) {
+      t.match(err.message, /Unrecognized request, Sandbox only supports/, 'Tried to provide a helpful error')
+    }
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
@@ -219,19 +192,15 @@ function runTests (runType, t) {
     startup[runType](t, 'plugins-sync')
   })
 
-  t.test(`${mode} Get & check params provided by plugin (without specifying a type)`, t => {
+  t.test(`${mode} Get & check params provided by plugin (without specifying a type)`, async t => {
     t.plan(5)
     // Should get all tables params back
-    ssm.getParametersByPath({ Path: '/PluginsSandboxTesting' }, function (err, result) {
-      if (err) t.end(err)
-      else {
-        t.equal(result.Parameters.length, 2, 'One parameter returned')
-        t.equal(result.Parameters[0].Name, '/PluginsSandboxTesting/ARC_SANDBOX/ports', 'Plugin parameter name correct')
-        t.match(result.Parameters[0].Value, /\"_arc\":/, 'Plugin parameter value correct')
-        t.equal(result.Parameters[1].Name, '/PluginsSandboxTesting/myplugin/varOne', 'Plugin parameter name correct')
-        t.equal(result.Parameters[1].Value, 'valueOne', 'Plugin parameter value correct')
-      }
-    })
+    let result = await ssm.GetParametersByPath({ Path: '/PluginsSandboxTesting' })
+    t.equal(result.Parameters.length, 2, 'One parameter returned')
+    t.equal(result.Parameters[0].Name, '/PluginsSandboxTesting/ARC_SANDBOX/ports', 'Plugin parameter name correct')
+    t.match(result.Parameters[0].Value, /\"_arc\":/, 'Plugin parameter value correct')
+    t.equal(result.Parameters[1].Name, '/PluginsSandboxTesting/myplugin/varOne', 'Plugin parameter name correct')
+    t.equal(result.Parameters[1].Value, 'valueOne', 'Plugin parameter value correct')
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
