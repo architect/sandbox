@@ -47,7 +47,7 @@ function runTests (runType, t) {
     t.plan(1)
     getDBClient(ports, function _gotDBClient (err, client) {
       if (err) console.log(err) // Yes, but actually no
-      dynamo = client
+      dynamo = client.DynamoDB
       t.ok(dynamo, 'Got Dynamo client')
     })
   })
@@ -55,90 +55,81 @@ function runTests (runType, t) {
   t.test(`${mode} Can list tables`, t => {
     t.plan(1)
     setup(t)
-    dynamo.listTables({}, function done (err, result) {
-      if (err) t.end(err)
-      else {
+    dynamo.ListTables({})
+      .then(result => {
         let { TableNames } = result
         t.ok(Array.isArray(TableNames), `Got tables back from the DB: ${TableNames}`)
         teardown(t)
-      }
-    })
+      })
+      .catch(t.end)
   })
 
   t.test(`${mode} Can insert a row`, t => {
     t.plan(1)
     setup(t)
-    dynamo.putItem({
+    dynamo.PutItem({
       TableName,
       Item: {
-        accountID: { S: 'mock-account-id' },
-        email: { S: 'person@email.lol' }
-      }
-    },
-    function _put (err, result) {
-      if (err) t.end(err)
-      else {
-        t.ok(result, `Got result: ${str(result)}`)
-        teardown(t)
+        accountID: 'mock-account-id',
+        email: 'person@email.lol'
       }
     })
+      .then(result => {
+        t.ok(result, `Got result: ${str(result)}`)
+        teardown(t)
+      })
+      .catch(t.end)
   })
 
   t.test(`${mode} Can read index in Arc 6`, t => {
     t.plan(1)
     setup(t)
-    dynamo.describeTable({
+    dynamo.DescribeTable({
       TableName
-    },
-    function _desc (err, result) {
-      if (err) t.end(err)
-      else {
+    })
+      .then(result => {
         t.equal(result.Table.GlobalSecondaryIndexes[0].IndexName, 'email-index', 'Got index: email-index')
         teardown(t)
-      }
-    })
+      })
+      .catch(t.end)
   })
 
   t.test(`${mode} Can read index in Arc 6`, t => {
     t.plan(3)
     setup(t)
-    dynamo.describeTable({
+    dynamo.DescribeTable({
       TableName: TableName2
-    },
-    function _desc (err, result) {
-      if (err) t.end(err)
-      else {
+    })
+      .then(result => {
         let indexes = result.Table.GlobalSecondaryIndexes
         t.equal(indexes.length, 2, 'Got back two indexes')
         t.equal(indexes[0].IndexName, 'petID-index', 'Got index: petID-index')
         t.equal(indexes[1].IndexName, 'accountID-petID-index', 'Got index: accountID-petID-index')
         teardown(t)
-      }
-    })
+      })
+      .catch(t.end)
   })
 
   t.test(`${mode} Can read the row`, t => {
     t.plan(1)
     setup(t)
-    dynamo.getItem({
+    dynamo.GetItem({
       TableName,
       Key: {
-        accountID: { S: 'fake-account-id' }
-      }
-    },
-    function _desc (err, result) {
-      if (err) t.end(err)
-      else {
-        t.ok(result, `Got result: ${str(result)}`)
-        teardown(t)
+        accountID: 'fake-account-id'
       }
     })
+      .then(result => {
+        t.ok(result, `Got result: ${str(result)}`)
+        teardown(t)
+      })
+      .catch(t.end)
   })
 
   t.test(`${mode} Can query the index`, t => {
     t.plan(1)
     setup(t)
-    dynamo.query({
+    dynamo.Query({
       TableName,
       IndexName: 'email-index',
       KeyConditions: {
@@ -147,14 +138,12 @@ function runTests (runType, t) {
           ComparisonOperator: 'EQ'
         }
       }
-    },
-    function _desc (err, result) {
-      if (err) t.end(err)
-      else {
+    })
+      .then(result => {
         t.ok(result, `Got result: ${str(result)}`)
         teardown(t)
-      }
-    })
+      })
+      .catch(t.end)
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
@@ -171,35 +160,28 @@ function runTests (runType, t) {
   t.test(`${mode} Scan seeded rows from first table`, t => {
     t.plan(3)
     setup(t)
-    dynamo.scan({ TableName: 'seed-data-staging-stuff' },
-      function _desc (err, result) {
-        if (err) t.end(err)
-        else {
-          console.log(str(result))
-          t.equal(result.Count, 2, 'Got two results')
-          t.equal(result.Items[0].id.S, 'fiz', `Got expected row`)
-          t.equal(result.Items[1].id.S, 'foo', `Got expected row`)
-          teardown(t)
-        }
-      }
-    )
+    dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
+      .then(result => {
+        console.log(str(result))
+        t.equal(result.Count, 2, 'Got two results')
+        t.equal(result.Items[0].id, 'fiz', `Got expected row`)
+        t.equal(result.Items[1].id, 'foo', `Got expected row`)
+        teardown(t)
+      })
+      .catch(t.end)
   })
 
   t.test(`${mode} Scan seeded rows from second table`, t => {
     t.plan(3)
     setup(t)
-    dynamo.scan({ TableName: 'seed-data-staging-things' },
-      function _desc (err, result) {
-        if (err) t.end(err)
-        else {
-          console.log(str(result))
-          t.equal(result.Count, 2, 'Got two results')
-          t.equal(result.Items[0].id.S, 'foo', `Got expected row`)
-          t.equal(result.Items[1].id.S, 'foo', `Got expected row`)
-          teardown(t)
-        }
-      }
-    )
+    dynamo.Scan({ TableName: 'seed-data-staging-things' })
+      .then(result => {
+        console.log(str(result))
+        t.equal(result.Count, 2, 'Got two results')
+        t.equal(result.Items[0].id, 'foo', `Got expected row`)
+        t.equal(result.Items[1].id, 'foo', `Got expected row`)
+        teardown(t)
+      })
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
@@ -213,35 +195,28 @@ function runTests (runType, t) {
   t.test(`${mode} Scan seeded rows from first table`, t => {
     t.plan(3)
     setup(t)
-    dynamo.scan({ TableName: 'seed-data-staging-stuff' },
-      function _desc (err, result) {
-        if (err) t.end(err)
-        else {
-          console.log(str(result))
-          t.equal(result.Count, 2, 'Got two results')
-          t.equal(result.Items[0].id.S, 'fiz', `Got expected row`)
-          t.equal(result.Items[1].id.S, 'foo', `Got expected row`)
-          teardown(t)
-        }
-      }
-    )
+    dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
+      .then(result => {
+        console.log(str(result))
+        t.equal(result.Count, 2, 'Got two results')
+        t.equal(result.Items[0].id, 'fiz', `Got expected row`)
+        t.equal(result.Items[1].id, 'foo', `Got expected row`)
+        teardown(t)
+      })
+      .catch(t.end)
   })
 
   t.test(`${mode} Scan seeded rows from second table`, t => {
     t.plan(3)
     setup(t)
-    dynamo.scan({ TableName: 'seed-data-staging-things' },
-      function _desc (err, result) {
-        if (err) t.end(err)
-        else {
-          console.log(str(result))
-          t.equal(result.Count, 2, 'Got two results')
-          t.equal(result.Items[0].id.S, 'foo', `Got expected row`)
-          t.equal(result.Items[1].id.S, 'foo', `Got expected row`)
-          teardown(t)
-        }
-      }
-    )
+    dynamo.Scan({ TableName: 'seed-data-staging-things' })
+      .then(result => {
+        console.log(str(result))
+        t.equal(result.Count, 2, 'Got two results')
+        t.equal(result.Items[0].id, 'foo', `Got expected row`)
+        t.equal(result.Items[1].id, 'foo', `Got expected row`)
+        teardown(t)
+      })
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
@@ -255,35 +230,29 @@ function runTests (runType, t) {
   t.test(`${mode} Scan seeded rows from first table`, t => {
     t.plan(3)
     setup(t)
-    dynamo.scan({ TableName: 'seed-data-staging-stuff' },
-      function _desc (err, result) {
-        if (err) t.end(err)
-        else {
-          console.log(str(result))
-          t.equal(result.Count, 2, 'Got two results')
-          t.equal(result.Items[0].id.S, 'fiz', `Got expected row`)
-          t.equal(result.Items[1].id.S, 'foo', `Got expected row`)
-          teardown(t)
-        }
-      }
-    )
+    dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
+      .then(result => {
+        console.log(str(result))
+        t.equal(result.Count, 2, 'Got two results')
+        t.equal(result.Items[0].id, 'fiz', `Got expected row`)
+        t.equal(result.Items[1].id, 'foo', `Got expected row`)
+        teardown(t)
+      })
+      .catch(t.end)
   })
 
   t.test(`${mode} Scan seeded rows from second table`, t => {
     t.plan(3)
     setup(t)
-    dynamo.scan({ TableName: 'seed-data-staging-things' },
-      function _desc (err, result) {
-        if (err) t.end(err)
-        else {
-          console.log(str(result))
-          t.equal(result.Count, 2, 'Got two results')
-          t.equal(result.Items[0].id.S, 'foo', `Got expected row`)
-          t.equal(result.Items[1].id.S, 'foo', `Got expected row`)
-          teardown(t)
-        }
-      }
-    )
+    dynamo.Scan({ TableName: 'seed-data-staging-things' })
+      .then(result => {
+        console.log(str(result))
+        t.equal(result.Count, 2, 'Got two results')
+        t.equal(result.Items[0].id, 'foo', `Got expected row`)
+        t.equal(result.Items[1].id, 'foo', `Got expected row`)
+        teardown(t)
+      })
+      .catch(t.end)
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
@@ -292,26 +261,24 @@ function runTests (runType, t) {
 
   t.test(`${mode} Start Sandbox`, t => {
     process.env.ARC_ENV = 'staging'
+    process.env.ARC_SANDBOX = '{}' // Force aws-lite to disable keepalive
     startup[runType](t, join('seed-data', 'js'))
   })
 
   t.test(`${mode} Data is not seeded when in !testing env`, t => {
     t.plan(1)
     setup(t)
-    dynamo.scan({ TableName: 'seed-data-staging-stuff' },
-      function _desc (err, result) {
-        if (err) t.end(err)
-        else {
-          console.log(str(result))
-          t.equal(result.Count, 0, 'Got zero results')
-          teardown(t)
-        }
-      }
-    )
+    dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
+      .then(result => {
+        console.log(str(result))
+        t.equal(result.Count, 0, 'Got zero results')
+        teardown(t)
+      })
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
     delete process.env.ARC_ENV
+    delete process.env.ARC_SANDBOX
     shutdown[runType](t)
   })
 
@@ -338,7 +305,7 @@ function runTests (runType, t) {
     setup(t, externalDBPort)
     getDBClient({ tables: externalDBPort }, function _gotDBClient (err, client) {
       if (err) console.log(err) // Yes, but actually no
-      dynamo = client
+      dynamo = client.DynamoDB
       t.ok(dynamo, 'Got Dynamo client')
       teardown(t)
     })
@@ -347,14 +314,13 @@ function runTests (runType, t) {
   t.test(`${mode} Can list tables (external DB)`, t => {
     t.plan(1)
     setup(t, externalDBPort)
-    dynamo.listTables({}, function done (err, result) {
-      if (err) t.end(err)
-      else {
+    dynamo.ListTables({})
+      .then(result => {
         let { TableNames } = result
         t.ok(Array.isArray(TableNames), `Got tables back from the DB: ${TableNames}`)
         teardown(t)
-      }
-    })
+      })
+      .catch(t.end)
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {

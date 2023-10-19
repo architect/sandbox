@@ -1,3 +1,4 @@
+let series = require('run-series')
 let parallel = require('run-parallel')
 let create = require('./_create-table')
 
@@ -6,24 +7,30 @@ let create = require('./_create-table')
  * @param params.app String
  * @param params.table Object
  */
-module.exports = function createTable (params, callback) {
-  let { app, table } = params
-  let { name } = table
+module.exports = function createTables (params, callback) {
+  let { inventory } = params
+  let { inv } = inventory
+  let app = inv.app
 
-  parallel([
-    function _createStaging (callback) {
-      create({
-        name,
-        TableName: `${app}-staging-${name}`,
-        ...params
-      }, callback)
-    },
-    function _createProduction (callback) {
-      create({
-        name,
-        TableName: `${app}-production-${name}`,
-        ...params
+  // User tables (and their indexes)
+  let plans = inv.tables.map(table => {
+    return function (callback) {
+      parallel({
+        staging: (callback) => {
+          create({
+            TableName: `${app}-staging-${table.name}`,
+            table, ...params
+          }, callback)
+        },
+        production: (callback) => {
+          create({
+            TableName: `${app}-production-${table.name}`,
+            table, ...params
+          }, callback)
+        }
       }, callback)
     }
-  ], callback)
+  })
+
+  series(plans, callback)
 }

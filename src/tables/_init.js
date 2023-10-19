@@ -1,23 +1,10 @@
-let createTable = require('./create-table')
 let getDBClient = require('./_get-db-client')
-let series = require('run-series')
+let createTables = require('./create-table')
 
+// Just a thin passthrough to enable the abstraction of getDBClient (for testing)
 module.exports = function init ({ inventory, ports }, callback) {
-  getDBClient(ports, function _gotDBClient (err, dynamo) {
-    if (err) {
-      return callback(err)
-    }
-
-    let { inv } = inventory
-    let app = inv.app
-
-    // User tables (and their indexes)
-    let plans = inv.tables.map(table => {
-      return function (callback) {
-        createTable({ app, dynamo, inventory, ports, table }, callback)
-      }
-    })
-
-    series(plans, callback)
+  getDBClient(ports, (err, aws) => {
+    if (err) return callback(err)
+    createTables({ aws, inventory, ports }, callback)
   })
 }

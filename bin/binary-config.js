@@ -22,7 +22,8 @@ let config = {
       '../node_modules/**/@architect/inventory/**/*.js',
     ],
     assets: [
-      '../src/invoke-lambda/exec/runtimes/*'
+      '../src/invoke-lambda/exec/runtimes/*',
+      '../src/tables/_aws-lite-dynamodb-vendor.js',
     ],
     targets: [],
     outputPath: 'bin'

@@ -38,7 +38,7 @@ test('Get DynamoDB AttributeDefinitions (partition key only, manually injected)'
 
 test('Get DynamoDB AttributeDefinitions (partition key + GSI, user defined)', t => {
   t.plan(5)
-  let result = getDefns({ name: 'accounts', inventory })
+  let result = getDefns({ table: { name: 'accounts' }, inventory })
   t.equal(result.length, 2, 'Got back one attribute definition')
   t.equal(result[0].AttributeName, 'accountID', `Got back correct attribute name`)
   t.equal(result[0].AttributeType, 'S', `Got back correct attribute type`)
@@ -60,7 +60,7 @@ test('Get DynamoDB AttributeDefinitions (partition key + multiple GSIs, user def
   // Note: the GSIs in this mock share key names
   // Thus, we demonstrate reduced properties; there aren't more attribues just because more GSIs
   t.plan(5)
-  let result = getDefns({ name: 'pets', inventory })
+  let result = getDefns({ table: { name: 'pets' }, inventory })
   t.equal(result.length, 2, 'Got back one attribute definition')
   t.equal(result[0].AttributeName, 'accountID', `Got back correct attribute name`)
   t.equal(result[0].AttributeType, 'S', `Got back correct attribute type`)

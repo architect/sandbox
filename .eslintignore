@@ -1,2 +1,3 @@
 test/mock
 scratch/
+*-vendor.js

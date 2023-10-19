@@ -1,5 +1,6 @@
 module.exports = function getAttributeDefinitions (params) {
-  let { name, inventory, table, oob } = params
+  let { table, inventory, oob } = params
+  let { name } = table
   let { get } = inventory
 
   // oob is Sandbox default tables; otherwise it's userland

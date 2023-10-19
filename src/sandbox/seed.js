@@ -47,13 +47,17 @@ module.exports = function startupSeedData (params, callback) {
         return
       }
       let TableName = `${app}-staging-${table}`
-      return rows.map(Item => callback => dynamo.put({ TableName, Item }, callback))
+      return rows.map(Item => callback => {
+        dynamo.PutItem({ TableName, Item })
+          .then(result => callback(null, result))
+          .catch(callback)
+      })
     }).filter(Boolean)
 
-    getDBClient(ports, (err, db, doc) => {
+    getDBClient(ports, (err, aws) => {
       if (err) callback(err)
       else {
-        dynamo = doc
+        dynamo = aws.DynamoDB
         let start = Date.now()
         series(seeds, (err) => {
           if (err) callback(err)

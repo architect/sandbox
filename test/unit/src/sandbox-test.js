@@ -88,6 +88,7 @@ let envVars = [
   'ARC_APP_NAME',
   'ARC_AWS_CREDS',
   'ARC_ENV',
+  'ARC_SANDBOX',
   'AWS_ACCESS_KEY_ID',
   'AWS_PROFILE',
   'AWS_REGION',
@@ -118,6 +119,7 @@ test('Sandbox only minimally mutates env vars', async t => {
   // Architect 6+ (staging/prod)
   before = copy(process.env)
   process.env.ARC_ENV = 'staging'
+  process.env.ARC_SANDBOX = '{}' // Force aws-lite to disable keepalive
   await sandbox.start({ cwd: join(mock, 'normal'), port, quiet })
   after = copy(process.env)
   envVars.forEach(v => delete after[v])
