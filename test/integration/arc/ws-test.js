@@ -1,17 +1,21 @@
-require('aws-sdk/lib/maintenance_mode_message').suppress = true
 let { join } = require('path')
 let test = require('tape')
-let aws = require('aws-sdk')
-let http = require('http')
+let awsLite = require('@aws-lite/client')
 let Websocket = require('ws')
 let sut = join(process.cwd(), 'src')
 let sandbox = require(sut)
 let { credentials, run, startup, shutdown, makeSideChannel, wsUrl } = require('../../utils')
 let _arcPort = 2222
+let ApiUrl = `http://localhost:${_arcPort}/_arc/ws`
+let apiGatewayManagementApi
+
 
 test('Set up env', async t => {
-  t.plan(1)
+  t.plan(2)
   t.ok(sandbox, 'Got Sandbox')
+  let aws = await awsLite({ ...credentials, region: 'us-west-2', keepAlive: false })
+  apiGatewayManagementApi = aws.ApiGatewayManagementApi
+  t.ok(apiGatewayManagementApi, 'Populated ApiGatewayManagementApi client')
 })
 
 test('Run internal Arc API Gateway Management service tests', t => {
@@ -24,11 +28,6 @@ function runTests (runType, t) {
   let _events
   let _ws
   let ConnectionId
-
-  // AWS services to test
-  let endpoint = new aws.Endpoint(`http://localhost:${_arcPort}/_arc/ws`)
-  let httpOptions = { agent: new http.Agent() }
-  let apiGatewayManagementApi = new aws.ApiGatewayManagementApi({ endpoint, region: 'us-west-2', httpOptions, credentials })
 
   let connectWebSocket = async () => {
     if (_ws) throw Error('Only one websocket can be connected at a time, test is not clean')
@@ -72,7 +71,7 @@ function runTests (runType, t) {
     ConnectionId = connectionEvent.event.requestContext.connectionId
     t.ok(ConnectionId, `Got requestContext with connectionId: ${ConnectionId}`)
 
-    let connection = await apiGatewayManagementApi.getConnection({ ConnectionId }).promise()
+    let connection = await apiGatewayManagementApi.GetConnection({ ApiUrl, ConnectionId })
     t.ok(new Date(Date.parse(connection.ConnectedAt)) <= new Date(), `Got back connectedAt string: ${connection.ConnectedAt}`)
   })
 
@@ -80,25 +79,23 @@ function runTests (runType, t) {
     t.plan(1)
     let Data = JSON.stringify({ message: 'hi' })
     let messagePromise = new Promise(resolve => _ws.once('message', resolve))
-    await apiGatewayManagementApi.postToConnection({ ConnectionId, Data }).promise()
+    await apiGatewayManagementApi.PostToConnection({ ApiUrl, ConnectionId, Data })
     const message = (await messagePromise).toString()
-    // console.log({ message })
     t.equals(message, Data, 'Got message')
   })
 
   t.test(`${mode} Disconnect a socket`, async t => {
-    t.plan(3)
+    t.plan(2)
     let closePromise = new Promise(resolve => _ws.once('close', resolve))
-    await apiGatewayManagementApi.deleteConnection({ ConnectionId }).promise()
+    await apiGatewayManagementApi.DeleteConnection({ ApiUrl, ConnectionId })
     await closePromise
     t.notOk(_ws, 'WebSocket closed')
     try {
-      await apiGatewayManagementApi.getConnection({ ConnectionId }).promise()
+      await apiGatewayManagementApi.GetConnection({ ApiUrl, ConnectionId })
       t.fail('getConnection should have thrown')
     }
     catch (error) {
-      t.equals(error.message, '410', 'Error message matches')
-      t.equals(error.code, 'GoneException', 'Error Code Matches')
+      t.equals(error.statusCode, 410, 'Error status matches')
     }
   })
 
