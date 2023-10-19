@@ -52,84 +52,69 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} Can list tables`, t => {
+  t.test(`${mode} Can list tables`, async t => {
     t.plan(1)
     setup(t)
-    dynamo.ListTables({})
-      .then(result => {
-        let { TableNames } = result
-        t.ok(Array.isArray(TableNames), `Got tables back from the DB: ${TableNames}`)
-        teardown(t)
-      })
-      .catch(t.end)
+    let result = await dynamo.ListTables({})
+    let { TableNames } = result
+    t.ok(Array.isArray(TableNames), `Got tables back from the DB: ${TableNames}`)
+    teardown(t)
   })
 
-  t.test(`${mode} Can insert a row`, t => {
+  t.test(`${mode} Can insert a row`, async t => {
     t.plan(1)
     setup(t)
-    dynamo.PutItem({
+    let result = await dynamo.PutItem({
       TableName,
       Item: {
         accountID: 'mock-account-id',
         email: 'person@email.lol'
       }
     })
-      .then(result => {
-        t.ok(result, `Got result: ${str(result)}`)
-        teardown(t)
-      })
-      .catch(t.end)
+    t.ok(result, `Got result: ${str(result)}`)
+    teardown(t)
   })
 
-  t.test(`${mode} Can read index in Arc 6`, t => {
+  t.test(`${mode} Can read index in Arc 6`, async t => {
     t.plan(1)
     setup(t)
-    dynamo.DescribeTable({
+    let result = await dynamo.DescribeTable({
       TableName
     })
-      .then(result => {
-        t.equal(result.Table.GlobalSecondaryIndexes[0].IndexName, 'email-index', 'Got index: email-index')
-        teardown(t)
-      })
-      .catch(t.end)
+    t.equal(result.Table.GlobalSecondaryIndexes[0].IndexName, 'email-index', 'Got index: email-index')
+    teardown(t)
   })
 
-  t.test(`${mode} Can read index in Arc 6`, t => {
+  t.test(`${mode} Can read index in Arc 6`, async t => {
     t.plan(3)
     setup(t)
-    dynamo.DescribeTable({
+    let result = await dynamo.DescribeTable({
       TableName: TableName2
     })
-      .then(result => {
-        let indexes = result.Table.GlobalSecondaryIndexes
-        t.equal(indexes.length, 2, 'Got back two indexes')
-        t.equal(indexes[0].IndexName, 'petID-index', 'Got index: petID-index')
-        t.equal(indexes[1].IndexName, 'accountID-petID-index', 'Got index: accountID-petID-index')
-        teardown(t)
-      })
-      .catch(t.end)
+    let indexes = result.Table.GlobalSecondaryIndexes
+    t.equal(indexes.length, 2, 'Got back two indexes')
+    t.equal(indexes[0].IndexName, 'petID-index', 'Got index: petID-index')
+    t.equal(indexes[1].IndexName, 'accountID-petID-index', 'Got index: accountID-petID-index')
+    teardown(t)
   })
 
-  t.test(`${mode} Can read the row`, t => {
+  t.test(`${mode} Can read the row`, async t => {
     t.plan(1)
     setup(t)
-    dynamo.GetItem({
+    let result = await dynamo.GetItem({
       TableName,
       Key: {
         accountID: 'fake-account-id'
       }
     })
-      .then(result => {
-        t.ok(result, `Got result: ${str(result)}`)
-        teardown(t)
-      })
-      .catch(t.end)
+    t.ok(result, `Got result: ${str(result)}`)
+    teardown(t)
   })
 
-  t.test(`${mode} Can query the index`, t => {
+  t.test(`${mode} Can query the index`, async t => {
     t.plan(1)
     setup(t)
-    dynamo.Query({
+    let result = await dynamo.Query({
       TableName,
       IndexName: 'email-index',
       KeyConditions: {
@@ -139,11 +124,8 @@ function runTests (runType, t) {
         }
       }
     })
-      .then(result => {
-        t.ok(result, `Got result: ${str(result)}`)
-        teardown(t)
-      })
-      .catch(t.end)
+    t.ok(result, `Got result: ${str(result)}`)
+    teardown(t)
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
@@ -157,31 +139,26 @@ function runTests (runType, t) {
     startup[runType](t, join('seed-data', 'js'), { confirmStarted })
   })
 
-  t.test(`${mode} Scan seeded rows from first table`, t => {
+  t.test(`${mode} Scan seeded rows from first table`, async t => {
     t.plan(3)
     setup(t)
-    dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
-      .then(result => {
-        console.log(str(result))
-        t.equal(result.Count, 2, 'Got two results')
-        t.equal(result.Items[0].id, 'fiz', `Got expected row`)
-        t.equal(result.Items[1].id, 'foo', `Got expected row`)
-        teardown(t)
-      })
-      .catch(t.end)
+    let result = await dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
+    console.log(str(result))
+    t.equal(result.Count, 2, 'Got two results')
+    t.equal(result.Items[0].id, 'fiz', `Got expected row`)
+    t.equal(result.Items[1].id, 'foo', `Got expected row`)
+    teardown(t)
   })
 
-  t.test(`${mode} Scan seeded rows from second table`, t => {
+  t.test(`${mode} Scan seeded rows from second table`, async t => {
     t.plan(3)
     setup(t)
-    dynamo.Scan({ TableName: 'seed-data-staging-things' })
-      .then(result => {
-        console.log(str(result))
-        t.equal(result.Count, 2, 'Got two results')
-        t.equal(result.Items[0].id, 'foo', `Got expected row`)
-        t.equal(result.Items[1].id, 'foo', `Got expected row`)
-        teardown(t)
-      })
+    let result = await dynamo.Scan({ TableName: 'seed-data-staging-things' })
+    console.log(str(result))
+    t.equal(result.Count, 2, 'Got two results')
+    t.equal(result.Items[0].id, 'foo', `Got expected row`)
+    t.equal(result.Items[1].id, 'foo', `Got expected row`)
+    teardown(t)
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
@@ -192,31 +169,26 @@ function runTests (runType, t) {
     startup[runType](t, join('seed-data', 'json'), { confirmStarted })
   })
 
-  t.test(`${mode} Scan seeded rows from first table`, t => {
+  t.test(`${mode} Scan seeded rows from first table`, async t => {
     t.plan(3)
     setup(t)
-    dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
-      .then(result => {
-        console.log(str(result))
-        t.equal(result.Count, 2, 'Got two results')
-        t.equal(result.Items[0].id, 'fiz', `Got expected row`)
-        t.equal(result.Items[1].id, 'foo', `Got expected row`)
-        teardown(t)
-      })
-      .catch(t.end)
+    let result = await dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
+    console.log(str(result))
+    t.equal(result.Count, 2, 'Got two results')
+    t.equal(result.Items[0].id, 'fiz', `Got expected row`)
+    t.equal(result.Items[1].id, 'foo', `Got expected row`)
+    teardown(t)
   })
 
-  t.test(`${mode} Scan seeded rows from second table`, t => {
+  t.test(`${mode} Scan seeded rows from second table`, async t => {
     t.plan(3)
     setup(t)
-    dynamo.Scan({ TableName: 'seed-data-staging-things' })
-      .then(result => {
-        console.log(str(result))
-        t.equal(result.Count, 2, 'Got two results')
-        t.equal(result.Items[0].id, 'foo', `Got expected row`)
-        t.equal(result.Items[1].id, 'foo', `Got expected row`)
-        teardown(t)
-      })
+    let result = await dynamo.Scan({ TableName: 'seed-data-staging-things' })
+    console.log(str(result))
+    t.equal(result.Count, 2, 'Got two results')
+    t.equal(result.Items[0].id, 'foo', `Got expected row`)
+    t.equal(result.Items[1].id, 'foo', `Got expected row`)
+    teardown(t)
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
@@ -227,32 +199,26 @@ function runTests (runType, t) {
     startup[runType](t, join('seed-data', 'custom'), { confirmStarted })
   })
 
-  t.test(`${mode} Scan seeded rows from first table`, t => {
+  t.test(`${mode} Scan seeded rows from first table`, async t => {
     t.plan(3)
     setup(t)
-    dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
-      .then(result => {
-        console.log(str(result))
-        t.equal(result.Count, 2, 'Got two results')
-        t.equal(result.Items[0].id, 'fiz', `Got expected row`)
-        t.equal(result.Items[1].id, 'foo', `Got expected row`)
-        teardown(t)
-      })
-      .catch(t.end)
+    let result = await dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
+    console.log(str(result))
+    t.equal(result.Count, 2, 'Got two results')
+    t.equal(result.Items[0].id, 'fiz', `Got expected row`)
+    t.equal(result.Items[1].id, 'foo', `Got expected row`)
+    teardown(t)
   })
 
-  t.test(`${mode} Scan seeded rows from second table`, t => {
+  t.test(`${mode} Scan seeded rows from second table`, async t => {
     t.plan(3)
     setup(t)
-    dynamo.Scan({ TableName: 'seed-data-staging-things' })
-      .then(result => {
-        console.log(str(result))
-        t.equal(result.Count, 2, 'Got two results')
-        t.equal(result.Items[0].id, 'foo', `Got expected row`)
-        t.equal(result.Items[1].id, 'foo', `Got expected row`)
-        teardown(t)
-      })
-      .catch(t.end)
+    let result = await dynamo.Scan({ TableName: 'seed-data-staging-things' })
+    console.log(str(result))
+    t.equal(result.Count, 2, 'Got two results')
+    t.equal(result.Items[0].id, 'foo', `Got expected row`)
+    t.equal(result.Items[1].id, 'foo', `Got expected row`)
+    teardown(t)
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
@@ -265,15 +231,13 @@ function runTests (runType, t) {
     startup[runType](t, join('seed-data', 'js'))
   })
 
-  t.test(`${mode} Data is not seeded when in !testing env`, t => {
+  t.test(`${mode} Data is not seeded when in !testing env`, async t => {
     t.plan(1)
     setup(t)
-    dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
-      .then(result => {
-        console.log(str(result))
-        t.equal(result.Count, 0, 'Got zero results')
-        teardown(t)
-      })
+    let result = await dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
+    console.log(str(result))
+    t.equal(result.Count, 0, 'Got zero results')
+    teardown(t)
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
@@ -311,16 +275,13 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} Can list tables (external DB)`, t => {
+  t.test(`${mode} Can list tables (external DB)`, async t => {
     t.plan(1)
     setup(t, externalDBPort)
-    dynamo.ListTables({})
-      .then(result => {
-        let { TableNames } = result
-        t.ok(Array.isArray(TableNames), `Got tables back from the DB: ${TableNames}`)
-        teardown(t)
-      })
-      .catch(t.end)
+    let result = await dynamo.ListTables({})
+    let { TableNames } = result
+    t.ok(Array.isArray(TableNames), `Got tables back from the DB: ${TableNames}`)
+    teardown(t)
   })
 
   t.test(`${mode} Shut down Sandbox`, t => {
