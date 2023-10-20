@@ -35,12 +35,8 @@ module.exports = function initDynamoClient (ports, callback) {
     .then(go)
     .catch(err => {
       if (err.message.match(/You must supply AWS credentials/)) {
-        let dummy = 'xxx'
-        // These env vars *should* already be instantiated by utils >= 1.4.7 – but do it jic!
-        // TODO remove this junk after implementing aws-lite
-        process.env.AWS_SECRET_ACCESS_KEY = dummy
-        process.env.AWS_ACCESS_KEY_ID = dummy
-        config.accessKeyId = config.secretAccessKey = dummy
+        config.accessKeyId = 'arc_dummy_access_key'
+        config.secretAccessKey = 'arc_dummy_secret_key'
         awsLite(config).then(go).catch(callback)
       }
       else callback(err)

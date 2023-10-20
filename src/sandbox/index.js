@@ -107,12 +107,7 @@ function _start (params, callback) {
   ],
   function (err) {
     if (err) callback(err)
-    else {
-      if (process.env.ARC_AWS_CREDS === 'dummy' && !restart) {
-        update.verbose.warn('Missing or invalid AWS credentials or credentials file, using dummy credentials (this is probably ok)')
-      }
-      callback(null, params.ports)
-    }
+    else callback(null, params.ports)
   })
 }
 

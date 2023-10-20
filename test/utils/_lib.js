@@ -9,8 +9,8 @@ let copy = thing => JSON.parse(JSON.stringify(thing))
 
 // Dummy AWS creds
 let credentials = {
-  accessKeyId: 'xxx',
-  secretAccessKey: 'xxx',
+  accessKeyId: 'arc_dummy_access_key',
+  secretAccessKey: 'arc_dummy_secret_key',
 }
 
 let data = { hi: 'there' }

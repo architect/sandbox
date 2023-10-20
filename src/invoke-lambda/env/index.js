@@ -23,7 +23,7 @@ module.exports = function getEnv (params, requestID) {
   // Runtime environment variables
   let env = {
     // AWS-specific
-    AWS_ACCESS_KEY_ID,
+    AWS_ACCESS_KEY_ID: AWS_ACCESS_KEY_ID || 'arc_dummy_access_key',
     AWS_LAMBDA_FUNCTION_MEMORY_SIZE: lambda.config.memory,
     AWS_LAMBDA_FUNCTION_NAME: `@${lambda.pragma} ${lambda.name}`,
     AWS_LAMBDA_FUNCTION_VERSION: '$latest',
@@ -31,7 +31,7 @@ module.exports = function getEnv (params, requestID) {
     AWS_PROFILE,
     AWS_REGION,
     AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE: true, // Sigh.
-    AWS_SECRET_ACCESS_KEY,
+    AWS_SECRET_ACCESS_KEY: AWS_SECRET_ACCESS_KEY || 'arc_dummy_secret_key',
     AWS_SESSION_TOKEN,
     LAMBDA_TASK_ROOT: src,
     TZ: 'UTC',

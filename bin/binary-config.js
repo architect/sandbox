@@ -17,6 +17,8 @@ let config = {
     // Don't manually include runtimes/deno.js in scripts, as it fails on pkg#997
     scripts: [
       '../node_modules/@architect/inventory/**/*.js',
+      // Utils now has a child process-executed script for checking credentials
+      '../node_modules/@architect/utils/**/*.js',
       '../node_modules/dynalite/**/*.js',
       // This line is only necessary when testing RC releases of Inventory, do NOT use it in production binary builds of Sandbox:
       '../node_modules/**/@architect/inventory/**/*.js',
