@@ -66,7 +66,7 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor },
           let copyShared = false
           // Disable sidecar shared/views hydration; handled project-wide elsewhere
           let hydrateShared = path === shared || path === views || false
-          hydrate.install({ cwd, inventory, basepath: path, copyShared, hydrateShared, quiet }, callback)
+          hydrate.install({ cwd, inventory, basepath: path, copyShared, hydrateShared, local: true, quiet }, callback)
         }
 
         if (isNode || (!lambda && exists(packageJson))) {

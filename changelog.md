@@ -2,6 +2,14 @@
 
 ---
 
+## [5.8.4] 2023-10-23
+
+### Added
+
+- Added support for hydration of platform-specific binary deps (namely: Python); fixes #1457
+
+---
+
 ## [5.8.3] 2023-10-17
 
 ### Added
