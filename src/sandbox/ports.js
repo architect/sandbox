@@ -77,35 +77,41 @@ function checkPort (checking, ports, name, single, callback) {
       let msg = `Could not find open port after 50 tries, please close some applications and try again`
       return callback(Error(msg))
     }
-    let client = net.createConnection({ port: checking }, () => {
+    let socket = net.createConnection({ port: checking })
+    socket.setTimeout(0)
+    socket.on('timeout', terminate)
+    socket.on('connect', () => {
+      terminate()
       if (single) {
         return callback(Error(`Port ${checking} (${name}) is already in use, please select another with prefs.arc\nSee https://arc.codes/docs/en/reference/configuration/local-preferences#ports---list for config`))
       }
       else {
         tries++
         checking++
-        return client.end(check)
+        check()
       }
     })
-    client.once('error', err => {
-      client.end(() => {
-        if (err.code === 'ECONNREFUSED') {
-          // Tester close emits multiple events, so only call back once
-          if (!done) {
-            done = true
-            if (Object.values(ports).includes(checking)) {
-              return callback(Error(`Port conflict found on ${checking}, please specify another port`))
-            }
-            ports[name] = checking
-            callback()
+    socket.on('error', err => {
+      terminate()
+      if (err.code === 'ECONNREFUSED') {
+        // Tester close emits multiple events, so only call back once
+        if (!done) {
+          done = true
+          if (Object.values(ports).includes(checking)) {
+            return callback(Error(`Port conflict found on ${checking}, please specify another port`))
           }
+          ports[name] = checking
+          callback()
         }
-        else {
-          console.error(`Unknown port checking error`)
-          return callback(err)
-        }
-      })
+      }
+      else {
+        console.error(`Unknown port checking error`)
+        return callback(err)
+      }
     })
+    function terminate () {
+      if (!socket.destroyed) socket.destroy()
+    }
   }
   check()
 }
