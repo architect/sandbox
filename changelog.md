@@ -2,11 +2,16 @@
 
 ---
 
-## [5.8.4] 2023-10-23
+## [5.8.4 - 5.8.5] 2023-10-23
 
 ### Added
 
 - Added support for hydration of platform-specific binary deps (namely: Python); fixes #1457
+
+
+### Fixed
+
+- Fixed issue where qemu/emulator port conflicts were not detected with our open port tester; fixes 1441
 
 ---
 
