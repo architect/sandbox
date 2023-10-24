@@ -1,16 +1,17 @@
-.DS_Store
 __pycache__
 !test/mock/dep-warn/**/node_modules
+.DS_Store
 .nyc_output/
 bin/*.json
 bin/sandbox-binary*
+chonky.txt
 coverage/
 node_modules/
 package-lock.json
 scratch/
 test/mock/*/.db
-test/mock/*/src/*/*/vendor/
 test/mock/*/*.test
+test/mock/*/src/*/*/vendor/
 test/mock/*/tmp
 test/mock/tmp
 

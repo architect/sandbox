@@ -16,6 +16,8 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor },
     callback()
   }
   else {
+    let coldstart = inv._project?.preferences?.sandbox?.coldstart || false
+
     // Enable vendor dir deletion by default
     let del = deleteVendor === undefined ? true : deleteVendor
     if (inv._project.preferences?.sandbox?.['delete-vendor'] !== undefined) {
@@ -90,8 +92,11 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor },
             // Looks like deps are all good here, no need to destroy `node_modules`
             else callback()
           }
-          else {
+          else if (coldstart) {
             destroy(nodeModules)
+            install(callback)
+          }
+          else {
             callback()
           }
         }
@@ -110,6 +115,9 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor },
             }
             install(callback)
           }
+          else if (coldstart) {
+            install(callback)
+          }
           else callback()
         }
 
@@ -119,6 +127,9 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor },
           destroy(vendor)
 
           if (exists(gemfile)) {
+            install(callback)
+          }
+          else if (coldstart) {
             install(callback)
           }
           else callback()

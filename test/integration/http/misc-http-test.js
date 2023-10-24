@@ -1,4 +1,5 @@
 let { join } = require('path')
+let { existsSync, statSync, writeFileSync } = require('fs')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
@@ -289,4 +290,56 @@ function runTests (runType, t) {
   t.test(`[Misc / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
+
+  // Windows doesn't ship with `du`, so we'll just assume the vendored code runs properly
+  let isWin = process.platform.startsWith('win')
+  if (!isWin) {
+    t.test(`[Misc / ${runType}] Start Sandbox`, t => {
+      startup[runType](t, 'coldstart')
+    })
+
+    t.test(`[Misc / ${runType}] Set up coldstart chonkyboi`, t => {
+      t.plan(1)
+      let file = join(process.cwd(), 'test', 'mock', 'coldstart', 'src', 'http', 'get-chonk', 'chonky.txt')
+      let MB = 1024 * 1024
+      let size = MB * 115
+      if (existsSync(file)) t.equal(statSync(file).size, size, 'Found coldstart enchonkinator')
+      else {
+        let start = Date.now()
+        writeFileSync(file, Buffer.alloc(size))
+        console.log(`Wrote enchonkinator to Lambda in ${Date.now() - start}ms`)
+        t.equal(statSync(file).size, size, 'Found coldstart enchonkinator')
+      }
+    })
+
+    t.test(`[Misc / ${runType}] No coldstart timeout`, t => {
+      t.plan(1)
+      tiny.get({
+        url: url + '/smol'
+      }, function _got (err, result) {
+        if (err) t.end(err)
+        else t.deepEqual(result.body, { ok: true }, 'Lambda did not timeout from a coldstart')
+      })
+    })
+
+    t.test(`[Misc / ${runType}] Coldstart timeout`, t => {
+      t.plan(3)
+      tiny.get({
+        url: url + '/chonk'
+      }, function _got (err, result) {
+        if (err) {
+          let message = 'Timeout error'
+          let time = '1 second'
+          t.equal(err.statusCode, 500, 'Errors with 500')
+          t.match(err.body, new RegExp(message), `Errors with message: '${message}'`)
+          t.match(err.body, new RegExp(time), `Timed out set to ${time}`)
+        }
+        else t.end(result)
+      })
+    })
+
+    t.test(`[Misc / ${runType}] Shut down Sandbox`, t => {
+      shutdown[runType](t)
+    })
+  }
 }

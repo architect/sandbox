@@ -42,6 +42,8 @@ module.exports = function invokeLambda (params, callback) {
   update.debug.raw(output + '...')
   if (chonky) update.debug.status(`[${requestID}] Truncated event payload log at 10KB`)
 
+  let coldstart = inventory.inv._project?.preferences?.sandbox?.coldstart || false
+
   invocations[requestID] = {
     request: event,
     lambda,
@@ -58,6 +60,7 @@ module.exports = function invokeLambda (params, callback) {
     },
     requestID,
     timeout: config.timeout * 1000,
+    coldstart,
     update,
   }, function done (err) {
     update.debug.status(`[${requestID}] Final invocation state`)

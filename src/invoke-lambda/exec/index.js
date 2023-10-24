@@ -1,8 +1,14 @@
 let _asap = require('@architect/asap')
 let load = require('./loader')
 let spawn = require('./spawn')
-let { runtimeEval } = require('../../lib')
+let { getFolderSize, runtimeEval } = require('../../lib')
 let { invocations } = require('../../arc/_runtime-api')
+
+let tenMB = 1024 * 1024 * 10
+function coldstartMs (bytes) {
+  // Very rough coldstart estimate: ~10MB = 100ms
+  return Math.floor(bytes / (tenMB / 100))
+}
 
 module.exports = function exec (lambda, params, callback) {
   // ASAP is a special case that doesn't spawn
@@ -34,7 +40,20 @@ module.exports = function exec (lambda, params, callback) {
       let bootstrap = load()[run]
       var { command, args } = runtimeEval[run](bootstrap)
     }
-    spawn({ command, args, ...params, lambda }, callback)
+    if (params.coldstart) {
+      getFolderSize(lambda.src, (err, folderSize) => {
+        if (err) callback(err)
+        else {
+          let { requestID } = params
+          let coldstart = coldstartMs(folderSize)
+          params.update.verbose.status(`[${requestID}] Coldstart simulator: ${coldstart}ms latency added to ${folderSize}b Lambda`)
+          spawn({ command, args, ...params, coldstart, lambda }, callback)
+        }
+      })
+    }
+    else {
+      spawn({ command, args, ...params, lambda }, callback)
+    }
   }
 }
 

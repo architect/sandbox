@@ -185,9 +185,10 @@ function client (method, params) {
   catch (err) {
     /* eslint-disable-next-line */
     (async function initError () {
-      console.log('Lambda init error:', err.body || err.message);
+      let unknown = 'Unknown init error';
+      console.log('Lambda init error:', err.body || err.message || unknown);
       let initErrorEndpoint = url('init/error');
-      let errorMessage = err.message || 'Unknown init error';
+      let errorMessage = err.message || unknown;
       let errorType = err.name || 'Unknown init error type';
       let stackTrace = err.stack ? err.stack.split('\n') : undefined;
       let body = { errorMessage, errorType, stackTrace };

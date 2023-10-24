@@ -2,6 +2,15 @@
 
 ---
 
+## [5.9.0] 2023-10-24
+
+### Added
+
+- Add coldstart simulator via `@sandbox coldstart true` setting in `prefs.arc`
+  - Note: Windows users must install [`du`](https://learn.microsoft.com/en-us/sysinternals/downloads/du)
+
+---
+
 ## [5.8.5] 2023-10-24
 
 ### Fixed
