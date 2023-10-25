@@ -10,13 +10,19 @@ let { chars } = require('@architect/utils')
  * Checks for the existence of supported dependency manifests, and auto-hydrates dependencies as necessary
  * Supported manifests: `package.json`, `requirements.txt`, `Gemfile`
  */
-module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor }, callback) {
+module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor, update }, callback) {
   let { inv } = inventory
   if (!inv.lambdaSrcDirs || !inv.lambdaSrcDirs.length) {
     callback()
   }
   else {
+    /**
+     * Coldstart simulator status
+     */
     let coldstart = inv._project?.preferences?.sandbox?.coldstart || false
+    if (coldstart) {
+      update.done('Started with Lambda coldstart simulator')
+    }
 
     // Enable vendor dir deletion by default
     let del = deleteVendor === undefined ? true : deleteVendor

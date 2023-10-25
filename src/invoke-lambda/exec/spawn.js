@@ -12,7 +12,7 @@ module.exports = function spawnChild (params, callback) {
 
   // Let's go!
   let pid = 'init'
-  let child, error, closed
+  let child, error, closed, to, check
   function start () {
     child = spawn(command, args, options)
     pid = child.pid
@@ -28,32 +28,27 @@ module.exports = function spawnChild (params, callback) {
       update.debug.status(`[${requestID}] Emitted 'close' (pid ${pid}, code '${code}', signal '${signal}')`)
       shutdown('child process closure')
     })
+
+    // Set an execution timeout
+    to = setTimeout(function () {
+      timedOut = true
+      let duration = `${timeout / 1000}s`
+      update.warn(`[${requestID}] Timed out after hitting its ${duration} timeout!`)
+      shutdown(`${duration} timeout`)
+    }, timeout)
+
+    // Terminate once we find a result from the runtime API
+    // 25ms is arbitrary, but hopefully it should be solid enough
+    check = setInterval(function () {
+      if (invocations[requestID].response ||
+          invocations[requestID].initError ||
+          invocations[requestID].error) {
+        shutdown('runtime API completion check')
+      }
+    }, 25)
   }
-  if (coldstart) {
-    if (coldstart < timeout) setTimeout(start, coldstart)
-    else {
-      update.debug.status(`[${requestID}] Coldstart simulator: coldstart of ${coldstart}ms exceeds timeout of ${timeout}ms, not spawning the Lambda`)
-    }
-  }
+  if (coldstart) setTimeout(start, coldstart)
   else start()
-
-  // Set an execution timeout
-  let to = setTimeout(function () {
-    timedOut = true
-    let duration = `${timeout / 1000}s`
-    update.warn(`[${requestID}] Timed out after hitting its ${duration} timeout!`)
-    shutdown(`${duration} timeout`)
-  }, timeout)
-
-  // Terminate once we find a result from the runtime API
-  // 25ms is arbitrary, but hopefully it should be solid enough
-  let check = setInterval(function () {
-    if (invocations[requestID].response ||
-        invocations[requestID].initError ||
-        invocations[requestID].error) {
-      shutdown('runtime API completion check')
-    }
-  }, 25)
 
   // Ensure we don't have dangling processes due to open connections, etc. before we wrap up
   function shutdown (event) {
