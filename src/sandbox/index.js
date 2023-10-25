@@ -3,6 +3,7 @@ let series = require('run-series')
 let create = require('@architect/create')
 
 let env = require('./env')
+let creds = require('./creds')
 let ports = require('./ports')
 let checkRuntimes = require('./check-runtimes')
 let maybeHydrate = require('./maybe-hydrate')
@@ -25,6 +26,11 @@ function _start (params, callback) {
     // Set up + validate env vars, print the banner
     function (callback) {
       env(params, callback)
+    },
+
+    // Load credentials
+    function (callback) {
+      creds(params, callback)
     },
 
     // Get the ports for services

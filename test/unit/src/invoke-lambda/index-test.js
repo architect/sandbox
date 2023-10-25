@@ -6,6 +6,7 @@ let update = require('@architect/utils').updater()
 let cwd = process.cwd()
 let mock = join(cwd, 'test', 'mock')
 let { invocations } = require(join(cwd, 'src', 'arc', '_runtime-api'))
+let { credentials: creds } = require(join(cwd, 'test', 'utils'))
 
 let runtimes = {
   asap: 0,
@@ -36,7 +37,7 @@ let event = { something: 'happened' }
 let inventory = { inv: { _project: { env: { local: { testing: null, staging: null, production: null } } }, app: 'hi' } }
 let ports = {}
 let userEnv = {}
-let params = { event, inventory, update, userEnv, ports }
+let params = { creds, event, inventory, update, userEnv, ports }
 let inv
 let get
 

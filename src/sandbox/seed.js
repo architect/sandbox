@@ -5,7 +5,7 @@ let getDBClient = require('../tables/_get-db-client')
 
 module.exports = function startupSeedData (params, callback) {
   let { ARC_ENV } = process.env
-  let { cwd, inventory, update, ports } = params
+  let { creds, cwd, inventory, update, ports } = params
   let { inv, get } = inventory
   let { app, tables } = inv
   if (!tables || ARC_ENV !== 'testing') return callback()
@@ -54,7 +54,7 @@ module.exports = function startupSeedData (params, callback) {
       })
     }).filter(Boolean)
 
-    getDBClient(ports, (err, aws) => {
+    getDBClient({ creds, ports }, (err, aws) => {
       if (err) callback(err)
       else {
         dynamo = aws.DynamoDB

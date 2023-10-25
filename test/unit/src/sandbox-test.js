@@ -83,7 +83,7 @@ test('Sandbox uses continuation passing', t => {
   ])
 })
 
-// Standard env vars that may be populated during a banner / AWS init
+// Nothing should be mutating these, but reset them jic!
 let envVars = [
   'ARC_APP_NAME',
   'ARC_AWS_CREDS',

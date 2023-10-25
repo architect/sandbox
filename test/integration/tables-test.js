@@ -6,7 +6,7 @@ let getDBClient = require(join(process.cwd(), 'src', 'tables', '_get-db-client')
 let TableName = 'mockapp-production-accounts'
 let TableName2 = 'mockapp-production-pets'
 let mock = join(process.cwd(), 'test', 'mock')
-let { run, startup, shutdown } = require('../utils')
+let { credentials: creds, run, startup, shutdown } = require('../utils')
 let str = s => JSON.stringify(s, null, 2)
 let dynamo
 let tablesPort = 5555
@@ -45,7 +45,7 @@ function runTests (runType, t) {
 
   t.test(`${mode} Get client`, t => {
     t.plan(1)
-    getDBClient(ports, function _gotDBClient (err, client) {
+    getDBClient({ creds, ports }, function _gotDBClient (err, client) {
       if (err) console.log(err) // Yes, but actually no
       dynamo = client.DynamoDB
       t.ok(dynamo, 'Got Dynamo client')
@@ -267,7 +267,7 @@ function runTests (runType, t) {
   t.test(`${mode} Get client (external DB)`, t => {
     t.plan(1)
     setup(t, externalDBPort)
-    getDBClient({ tables: externalDBPort }, function _gotDBClient (err, client) {
+    getDBClient({ creds, ports: { tables: externalDBPort } }, function _gotDBClient (err, client) {
       if (err) console.log(err) // Yes, but actually no
       dynamo = client.DynamoDB
       t.ok(dynamo, 'Got Dynamo client')

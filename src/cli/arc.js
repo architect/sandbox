@@ -6,10 +6,8 @@ let cli = require('./index.js')
  */
 module.exports = function arcCalling ({ inventory }) {
   cli({
-    checkCreds: false,
     disableBanner: true,
     inventory,
-    needsValidCreds: false,
     runtimeCheck: 'warn',
   },
   function _done (err) {

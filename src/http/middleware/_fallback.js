@@ -12,7 +12,7 @@ let httpProxy = require('http-proxy')
  * - Error out
  */
 module.exports = function fallback (args, req, res, next) {
-  let { apiType, cwd, inventory, ports, staticPath, update } = args
+  let { apiType, creds, cwd, inventory, ports, staticPath, update } = args
   let { inv, get } = inventory
   let httpAPI = apiType.startsWith('http')
   let method = req.method.toLowerCase()
@@ -111,6 +111,7 @@ module.exports = function fallback (args, req, res, next) {
     let name = `${rootParam[0]} /${rootParam[1]}`
     let lambda = get.http(name)
     let exec = invoker({
+      creds,
       cwd,
       lambda,
       apiType,
@@ -144,6 +145,7 @@ module.exports = function fallback (args, req, res, next) {
   function invokeProxy (src, arcStaticAssetProxy) {
     let exec = invoker({
       apiType,
+      creds,
       cwd,
       lambda: {
         name: 'get /*',

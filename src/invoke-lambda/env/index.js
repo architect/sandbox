@@ -5,10 +5,11 @@ let { version } = require('../../../package.json')
 
 // Assemble Lambda-specific execution environment variables
 module.exports = function getEnv (params, requestID) {
-  let { apiType, cwd, lambda, host, inventory, ports, staticPath } = params
+  let { apiType, creds, cwd, lambda, host, inventory, ports, staticPath } = params
+  let { accessKeyId, secretAccessKey, sessionToken } = creds
   let { config, src, build, handlerFile } = lambda
   let { inv } = inventory
-  let { AWS_ACCESS_KEY_ID, AWS_PROFILE, AWS_REGION, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, PATH } = process.env
+  let { AWS_PROFILE, AWS_REGION, PATH } = process.env
 
   let lambdaContext = getContext(params)
   let envVars = userEnvVars(params)
@@ -23,7 +24,7 @@ module.exports = function getEnv (params, requestID) {
   // Runtime environment variables
   let env = {
     // AWS-specific
-    AWS_ACCESS_KEY_ID: AWS_ACCESS_KEY_ID || 'arc_dummy_access_key',
+    AWS_ACCESS_KEY_ID: accessKeyId,
     AWS_LAMBDA_FUNCTION_MEMORY_SIZE: lambda.config.memory,
     AWS_LAMBDA_FUNCTION_NAME: `@${lambda.pragma} ${lambda.name}`,
     AWS_LAMBDA_FUNCTION_VERSION: '$latest',
@@ -31,8 +32,8 @@ module.exports = function getEnv (params, requestID) {
     AWS_PROFILE,
     AWS_REGION,
     AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE: true, // Sigh.
-    AWS_SECRET_ACCESS_KEY: AWS_SECRET_ACCESS_KEY || 'arc_dummy_secret_key',
-    AWS_SESSION_TOKEN,
+    AWS_SECRET_ACCESS_KEY: secretAccessKey,
+    AWS_SESSION_TOKEN: sessionToken,
     LAMBDA_TASK_ROOT: src,
     TZ: 'UTC',
     // Internal for handler bootstrap

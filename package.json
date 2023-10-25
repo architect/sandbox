@@ -32,7 +32,7 @@
     "@architect/create": "~4.2.3",
     "@architect/hydrate": "~3.4.1",
     "@architect/inventory": "~3.6.2",
-    "@architect/utils": "~4.0.0-RC.0",
+    "@architect/utils": "~4.0.0-RC.1",
     "@aws-lite/client": "~0.11.1",
     "@aws-lite/dynamodb": "~0.2.2",
     "@begin/hashid": "~1.0.0",
