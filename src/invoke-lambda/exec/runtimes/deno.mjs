@@ -55,9 +55,10 @@ const headers = { 'content-type': 'application/json; charset=utf-8' };
   }
   catch (err) {
     (async function initError () {
-      console.log('Lambda init error:', err);
+      const unknown = 'Unknown init error';
+      console.log('Lambda init error:', err || unknown);
       const initErrorEndpoint = url('init/error');
-      const errorMessage = err.message || 'Unknown init error';
+      const errorMessage = err.message || unknown;
       const errorType = err.name || 'Unknown init error type';
       const stackTrace = err.stack ? err.stack.split('\n') : undefined;
       const body = JSON.stringify({ errorMessage, errorType, stackTrace });

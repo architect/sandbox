@@ -5,46 +5,50 @@ let errors = require('../../lib/errors')
 let { invocations } = require('../../arc/_runtime-api')
 
 module.exports = function spawnChild (params, callback) {
-  let { args, context, command, lambda, options, requestID, timeout } = params
+  let { args, coldstart, context, command, lambda, options, requestID, timeout } = params
   let { apiType, update } = context
   let isInLambda = process.env.AWS_LAMBDA_FUNCTION_NAME
   let timedOut = false
 
   // Let's go!
-  let child = spawn(command, args, options)
-  let pid = child.pid
-  let error
-  let closed
+  let pid = 'init'
+  let child, error, closed, to, check
+  function start () {
+    child = spawn(command, args, options)
+    pid = child.pid
 
-  child.stdout.on('data', data => process.stdout.write('\n' + data))
-  child.stderr.on('data', data => process.stderr.write('\n' + data))
-  child.on('error', err => {
-    error = err
-    // Seen some non-string oob errors come via binary compilation
-    if (err.code) shutdown('error')
-  })
-  child.on('close', (code, signal) => {
-    update.debug.status(`[${requestID}] Emitted 'close' (pid ${pid}, code '${code}', signal '${signal}')`)
-    shutdown('child process closure')
-  })
+    child.stdout.on('data', data => process.stdout.write('\n' + data))
+    child.stderr.on('data', data => process.stderr.write('\n' + data))
+    child.on('error', err => {
+      error = err
+      // Seen some non-string oob errors come via binary compilation
+      if (err.code) shutdown('error')
+    })
+    child.on('close', (code, signal) => {
+      update.debug.status(`[${requestID}] Emitted 'close' (pid ${pid}, code '${code}', signal '${signal}')`)
+      shutdown('child process closure')
+    })
 
-  // Set an execution timeout
-  let to = setTimeout(function () {
-    timedOut = true
-    let duration = `${timeout / 1000}s`
-    update.warn(`[${requestID}] Timed out after hitting its ${duration} timeout!`)
-    shutdown(`${duration} timeout`)
-  }, timeout)
+    // Set an execution timeout
+    to = setTimeout(function () {
+      timedOut = true
+      let duration = `${timeout / 1000}s`
+      update.warn(`[${requestID}] Timed out after hitting its ${duration} timeout!`)
+      shutdown(`${duration} timeout`)
+    }, timeout)
 
-  // Terminate once we find a result from the runtime API
-  // 25ms is arbitrary, but hopefully it should be solid enough
-  let check = setInterval(function () {
-    if (invocations[requestID].response ||
-        invocations[requestID].initError ||
-        invocations[requestID].error) {
-      shutdown('runtime API completion check')
-    }
-  }, 25)
+    // Terminate once we find a result from the runtime API
+    // 25ms is arbitrary, but hopefully it should be solid enough
+    check = setInterval(function () {
+      if (invocations[requestID].response ||
+          invocations[requestID].initError ||
+          invocations[requestID].error) {
+        shutdown('runtime API completion check')
+      }
+    }, 25)
+  }
+  if (coldstart) setTimeout(start, coldstart)
+  else start()
 
   // Ensure we don't have dangling processes due to open connections, etc. before we wrap up
   function shutdown (event) {
@@ -63,7 +67,7 @@ module.exports = function spawnChild (params, callback) {
     let isRunning = true
     try {
       // Signal 0 is a special node construct, see: https://nodejs.org/docs/latest-v14.x/api/process.html#process_process_kill_pid_signal
-      isRunning = process.kill(pid, 0)
+      isRunning = pid === 'init' ? false : process.kill(pid, 0)
     }
     catch (err) {
       isRunning = err.code === 'EPERM'

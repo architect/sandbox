@@ -10,12 +10,20 @@ let { chars } = require('@architect/utils')
  * Checks for the existence of supported dependency manifests, and auto-hydrates dependencies as necessary
  * Supported manifests: `package.json`, `requirements.txt`, `Gemfile`
  */
-module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor }, callback) {
+module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor, update }, callback) {
   let { inv } = inventory
   if (!inv.lambdaSrcDirs || !inv.lambdaSrcDirs.length) {
     callback()
   }
   else {
+    /**
+     * Coldstart simulator status
+     */
+    let coldstart = inv._project?.preferences?.sandbox?.coldstart || false
+    if (coldstart) {
+      update.done('Started with Lambda coldstart simulator')
+    }
+
     // Enable vendor dir deletion by default
     let del = deleteVendor === undefined ? true : deleteVendor
     if (inv._project.preferences?.sandbox?.['delete-vendor'] !== undefined) {
@@ -66,7 +74,7 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor },
           let copyShared = false
           // Disable sidecar shared/views hydration; handled project-wide elsewhere
           let hydrateShared = path === shared || path === views || false
-          hydrate.install({ cwd, inventory, basepath: path, copyShared, hydrateShared, quiet }, callback)
+          hydrate.install({ cwd, inventory, basepath: path, copyShared, hydrateShared, local: true, quiet }, callback)
         }
 
         if (isNode || (!lambda && exists(packageJson))) {
@@ -90,8 +98,11 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor },
             // Looks like deps are all good here, no need to destroy `node_modules`
             else callback()
           }
-          else {
+          else if (coldstart) {
             destroy(nodeModules)
+            install(callback)
+          }
+          else {
             callback()
           }
         }
@@ -110,6 +121,9 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor },
             }
             install(callback)
           }
+          else if (coldstart) {
+            install(callback)
+          }
           else callback()
         }
 
@@ -119,6 +133,9 @@ module.exports = function maybeHydrate ({ cwd, inventory, quiet, deleteVendor },
           destroy(vendor)
 
           if (exists(gemfile)) {
+            install(callback)
+          }
+          else if (coldstart) {
             install(callback)
           }
           else callback()

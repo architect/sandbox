@@ -2,6 +2,31 @@
 
 ---
 
+## [5.9.0 - 5.9.1] 2023-10-24
+
+### Added
+
+- Add coldstart simulator via `@sandbox coldstart true` setting in `prefs.arc`
+  - Note: Windows users must install [`du`](https://learn.microsoft.com/en-us/sysinternals/downloads/du)
+
+---
+
+## [5.8.5] 2023-10-24
+
+### Fixed
+
+- Fixed issue where qemu/emulator port conflicts were not detected with our open port tester; fixes 1441
+
+---
+
+## [5.8.4] 2023-10-23
+
+### Added
+
+- Added support for hydration of platform-specific binary deps (namely: Python); fixes #1457
+
+---
+
 ## [5.8.3] 2023-10-17
 
 ### Added

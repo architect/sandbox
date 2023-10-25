@@ -5,6 +5,7 @@ __pycache__
 *-vendor.js
 bin/*.json
 bin/sandbox-binary*
+chonky.txt
 coverage/
 node_modules/
 package-lock.json

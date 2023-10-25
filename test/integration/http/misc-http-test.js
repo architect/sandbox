@@ -1,4 +1,5 @@
 let { join } = require('path')
+let { existsSync, statSync, writeFileSync } = require('fs')
 let tiny = require('tiny-json-http')
 let test = require('tape')
 let sut = join(process.cwd(), 'src')
@@ -289,4 +290,64 @@ function runTests (runType, t) {
   t.test(`[Misc / ${runType}] Shut down Sandbox`, t => {
     shutdown[runType](t)
   })
+
+  // Windows doesn't ship with `du`, so we'll just assume the vendored code runs properly
+  let isWin = process.platform.startsWith('win')
+  if (!isWin) {
+    t.test(`[Misc / ${runType}] Start Sandbox`, t => {
+      startup[runType](t, 'coldstart')
+    })
+
+    t.test(`[Misc / ${runType}] Set up coldstart chonkyboi`, t => {
+      t.plan(1)
+      let file = join(process.cwd(), 'test', 'mock', 'coldstart', 'src', 'http', 'get-chonk', 'chonky.txt')
+      let MB = 1024 * 1024
+      let size = MB * 50
+      if (existsSync(file)) t.equal(statSync(file).size, size, 'Found coldstart enchonkinator')
+      else {
+        let start = Date.now()
+        writeFileSync(file, Buffer.alloc(size))
+        console.log(`Wrote enchonkinator to Lambda in ${Date.now() - start}ms`)
+        t.equal(statSync(file).size, size, 'Found coldstart enchonkinator')
+      }
+    })
+
+    /*
+    // It took precisely two runs for this test to fail (>580ms on a GHA Mac) so that's something
+    t.test(`[Misc / ${runType}] No coldstart delay`, t => {
+      t.plan(2)
+      let start = Date.now()
+      tiny.get({
+        url: url + '/smol'
+      }, function _got (err, result) {
+        if (err) t.end(err)
+        else {
+          t.deepEqual(result.body, { ok: true }, 'Lambda did not timeout from a coldstart')
+          let time = Date.now() - start
+          // 450 is probably extremely conservative, but sometimes CI can be super slow
+          t.ok(time < 450, `Response returned quickly (${time}ms)`)
+        }
+      })
+    })
+    */
+
+    t.test(`[Misc / ${runType}] Coldstart delay`, t => {
+      t.plan(2)
+      let start = Date.now()
+      tiny.get({
+        url: url + '/chonk'
+      }, function _got (err, result) {
+        if (err) t.end(err)
+        else {
+          t.deepEqual(result.body, { ok: true }, 'Lambda did not timeout from a coldstart')
+          let time = Date.now() - start
+          t.ok(time > 450, `Response returned slowly (${time}ms)`)
+        }
+      })
+    })
+
+    t.test(`[Misc / ${runType}] Shut down Sandbox`, t => {
+      shutdown[runType](t)
+    })
+  }
 }
