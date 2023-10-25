@@ -312,6 +312,8 @@ function runTests (runType, t) {
       }
     })
 
+    /*
+    // It took precisely two runs for this test to fail (>580ms on a GHA Mac) so that's something
     t.test(`[Misc / ${runType}] No coldstart delay`, t => {
       t.plan(2)
       let start = Date.now()
@@ -327,6 +329,7 @@ function runTests (runType, t) {
         }
       })
     })
+    */
 
     t.test(`[Misc / ${runType}] Coldstart delay`, t => {
       t.plan(2)
