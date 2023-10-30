@@ -3,7 +3,7 @@ let { join } = require('path')
 let sut = join(process.cwd(), 'src', 'http', 'invoke-http', 'rest', '_req-header-fmt')
 let headerFormatter = require(sut)
 let params = {
-  req: { socket: { localPort: 'foo' } },
+  req: { socket: { localPort: 1234 } },
   ip: 'bar',
 }
 
@@ -37,7 +37,7 @@ test('Header mangling (HTTP + Lambda 1.0 payload)', t => {
   t.ok(headers.Host, 'Got back upcased Host')
   t.ok(headers['User-Agent'], 'Got back upcased User-Agent')
   t.ok(headers['X-Forwarded-For'], 'Got back upcased X-Forwarded-For')
-  t.ok(headers['X-Forwarded-Port'], 'Got back upcased X-Forwarded-Port')
+  t.equal(headers['X-Forwarded-Port'], '1234', 'Got back upcased X-Forwarded-Port')
   t.ok(headers['X-Forwarded-Proto'], 'Got back upcased X-Forwarded-Proto')
   t.ok(headers.date, 'Got back lowcased date')
   t.ok(headers.foo, 'Got back lowcased foo')
@@ -45,7 +45,7 @@ test('Header mangling (HTTP + Lambda 1.0 payload)', t => {
   t.ok(multiValueHeaders.Host, 'Got back upcased Host')
   t.ok(multiValueHeaders['User-Agent'], 'Got back upcased User-Agent')
   t.ok(multiValueHeaders['X-Forwarded-For'], 'Got back upcased X-Forwarded-For')
-  t.ok(multiValueHeaders['X-Forwarded-Port'], 'Got back upcased X-Forwarded-Port')
+  t.deepEqual(multiValueHeaders['X-Forwarded-Port'], [ '1234' ], 'Got back upcased X-Forwarded-Port')
   t.ok(multiValueHeaders['X-Forwarded-Proto'], 'Got back upcased X-Forwarded-Proto')
   t.ok(multiValueHeaders.date, 'Got back lowcased date')
   t.ok(multiValueHeaders.foo, 'Got back lowcased foo')
@@ -105,7 +105,7 @@ test('Header mangling (REST)', t => {
   t.ok(headers.Host, 'Got back upcased Host')
   t.ok(headers['User-Agent'], 'Got back upcased User-Agent')
   t.ok(headers['X-Forwarded-For'], 'Got back upcased X-Forwarded-For')
-  t.ok(headers['X-Forwarded-Port'], 'Got back upcased X-Forwarded-Port')
+  t.equal(headers['X-Forwarded-Port'], '1234', 'Got back upcased X-Forwarded-Port')
   t.ok(headers['X-Forwarded-Proto'], 'Got back upcased X-Forwarded-Proto')
   t.ok(headers.Date, 'Got back upased Date')
   t.ok(headers.foo, 'Got back lowcased foo')
@@ -113,7 +113,7 @@ test('Header mangling (REST)', t => {
   t.ok(multiValueHeaders.Host, 'Got back upcased Host')
   t.ok(multiValueHeaders['User-Agent'], 'Got back upcased User-Agent')
   t.ok(multiValueHeaders['X-Forwarded-For'], 'Got back upcased X-Forwarded-For')
-  t.ok(multiValueHeaders['X-Forwarded-Port'], 'Got back upcased X-Forwarded-Port')
+  t.deepEqual(multiValueHeaders['X-Forwarded-Port'], [ '1234' ], 'Got back upcased X-Forwarded-Port')
   t.ok(multiValueHeaders['X-Forwarded-Proto'], 'Got back upcased X-Forwarded-Proto')
   t.ok(multiValueHeaders.Date, 'Got back upased Date')
   t.ok(multiValueHeaders.foo, 'Got back lowcased foo')

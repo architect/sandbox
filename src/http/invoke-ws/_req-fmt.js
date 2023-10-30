@@ -62,7 +62,7 @@ module.exports = function requestFormatter (params) {
       request.headers['X-Forwarded-For'] = sourceIp
     }
     if (!request.headers['X-Forwarded-Port'] && req?.socket?.localPort) {
-      request.headers['X-Forwarded-Port'] = req.socket.localPort
+      request.headers['X-Forwarded-Port'] = req.socket.localPort.toString()
     }
     if (!request.headers['X-Forwarded-Proto']) {
       request.headers['X-Forwarded-Proto'] = 'http'
