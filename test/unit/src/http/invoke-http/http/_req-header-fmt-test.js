@@ -3,7 +3,7 @@ let { join } = require('path')
 let sut = join(process.cwd(), 'src', 'http', 'invoke-http', 'http', '_req-header-fmt')
 let requestHeaderFormatter = require(sut)
 let params = {
-  req: { socket: { localPort: 'foo' } },
+  req: { socket: { localPort: 1234 } },
   ip: 'bar',
 }
 
@@ -40,7 +40,7 @@ test('Header mangling & cookies (HTTP)', t => {
   t.equal(cookies[1], 'fiz=buz', 'Got back cookie two')
   // Metadata
   t.equal(headers['x-forwarded-for'], 'bar', 'Got back header: x-forwarded-for')
-  t.equal(headers['x-forwarded-port'], 'foo', 'Got back header: x-forwarded-port')
+  t.equal(headers['x-forwarded-port'], '1234', 'Got back header: x-forwarded-port')
   t.equal(headers['x-forwarded-proto'], 'http', 'Got back header: x-forwarded-proto')
 })
 
