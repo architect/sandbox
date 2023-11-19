@@ -216,7 +216,7 @@ module.exports = function runWatcher (args, params) {
     }
 
     /**
-     * Regenerate public/static.json upon changes to public/
+     * Refresh clients + regenerate public/static.json upon changes to public/
      */
     let isStaticAsset = inv.static && filename.includes(join(cwd, staticFolder))
     if (!ran && isStaticAsset) {
@@ -235,6 +235,7 @@ module.exports = function runWatcher (args, params) {
                 only: 'staticJson',
               }, liveReloadClients)
             }
+            else liveReloadClients()
           }
         })
       }, debounce)
