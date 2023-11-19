@@ -8,6 +8,11 @@
 
 - Updated dependencies
 
+
+### Fixed
+
+- Ensure connected livereload clients are refreshed on all changes to `public/`
+
 ---
 
 ## [5.9.2] 2023-10-31
