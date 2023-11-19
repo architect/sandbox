@@ -2,6 +2,14 @@
 
 ---
 
+## [5.9.3] 2023-11-19
+
+### Changed
+
+- Updated dependencies
+
+---
+
 ## [5.9.2] 2023-10-31
 
 ### Changed
