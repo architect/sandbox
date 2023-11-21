@@ -48,7 +48,7 @@ module.exports = function requestHeaderFormatter (reqHeaders = {}, params) {
     headers['x-forwarded-for'] = ip
   }
   if (!headers['x-forwarded-port'] && req.socket?.localPort) {
-    headers['x-forwarded-port'] = req.socket.localPort.toString()
+    headers['x-forwarded-port'] = req.socket.localPort?.toString()
   }
   if (!headers['x-forwarded-proto']) {
     headers['x-forwarded-proto'] = 'http'

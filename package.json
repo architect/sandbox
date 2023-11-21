@@ -28,9 +28,9 @@
     "src/*"
   ],
   "dependencies": {
-    "@architect/asap": "~6.0.3",
+    "@architect/asap": "~6.0.4",
     "@architect/create": "~4.2.4",
-    "@architect/hydrate": "~3.5.0",
+    "@architect/hydrate": "~3.5.1",
     "@architect/inventory": "~3.6.3",
     "@architect/utils": "~3.1.9",
     "@aws-sdk/client-apigatewaymanagementapi": "^3.316.0",

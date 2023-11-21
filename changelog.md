@@ -2,6 +2,19 @@
 
 ---
 
+## [5.9.4] 2023-11-20
+
+### Changed
+
+- Updated dependencies
+
+
+### Fixed
+
+- Ensure `X-Forwarded-Port` header is always a string; thanks @lpsinger!
+
+---
+
 ## [5.9.3] 2023-11-19
 
 ### Changed
