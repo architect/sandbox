@@ -34,20 +34,21 @@ module.exports = function handleStdin (params) {
       })
     }
     if (key.sequence === '\u0003' || key.sequence === '\u0004') {
-      if (watcher) {
-        watcher.close().then(end)
-      }
-      else end()
+      end()
     }
   })
 
-  function end () {
-    sandbox.end(function (err) {
-      if (err) {
-        update.err(err)
-        process.exit(1)
-      }
-      process.exit(0)
-    })
+  import('exit-hook').then(({ asyncExitHook }) => asyncExitHook(end, { wait: 5000 }))
+
+  async function end () {
+    try {
+      if (watcher) await watcher.close()
+      await sandbox.end()
+    }
+    catch (err) {
+      update.err(err)
+      process.exit(1)
+    }
+    process.exit(0)
   }
 }
