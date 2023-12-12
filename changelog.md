@@ -2,6 +2,40 @@
 
 ---
 
+## [5.9.4] 2023-11-20
+
+### Changed
+
+- Updated dependencies
+
+
+### Fixed
+
+- Ensure `X-Forwarded-Port` header is always a string; thanks @lpsinger!
+
+---
+
+## [5.9.3] 2023-11-19
+
+### Changed
+
+- Updated dependencies
+
+
+### Fixed
+
+- Ensure connected livereload clients are refreshed on all changes to `public/`
+
+---
+
+## [5.9.2] 2023-10-31
+
+### Changed
+
+- Updated dependencies
+
+---
+
 ## [5.9.0 - 5.9.1] 2023-10-24
 
 ### Added
