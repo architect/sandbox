@@ -86,7 +86,7 @@ test('Project global runtime config', async t => {
   t.ok(result[1].includes('aliased to ruby'), 'Reported issue with alias')
 
   // Minor
-  rawArc = basic + '\n@aws\nruntime ruby2.7'
+  rawArc = basic + '\n@aws\nruntime ruby3.2'
   inventory = await _inventory({ rawArc })
   localRuntimes = { ruby: '2.6.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
@@ -94,7 +94,7 @@ test('Project global runtime config', async t => {
   t.ok(result[1].includes('Project global runtime'), 'Reported issue with project global runtime')
 
   // Major
-  rawArc = basic + '\n@aws\nruntime ruby2.7'
+  rawArc = basic + '\n@aws\nruntime ruby3.2'
   inventory = await _inventory({ rawArc })
   localRuntimes = { ruby: '1.7.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
@@ -114,15 +114,15 @@ test('Per-Lambda runtime config', async t => {
   t.notOk(result, 'Control: no runtime configuration did not return any issues')
 
   inventory = await _inventory({ rawArc })
-  inventory.inv.http[0].config.runtime = 'nodejs14.x'
-  localRuntimes = { node: '16.0.0' }
+  inventory.inv.http[0].config.runtime = 'nodejs18.x'
+  localRuntimes = { node: '20.0.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
   t.notOk(result, 'Control: compatible runtime configuration did not return any issues')
 
   // Minor
   inventory = await _inventory({ rawArc })
-  inventory.inv.http[0].config.runtime = 'nodejs14.x'
-  localRuntimes = { node: '14.1.0' }
+  inventory.inv.http[0].config.runtime = 'nodejs18.x'
+  localRuntimes = { node: '18.1.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
   t.notOk(result, 'Compatible runtime configuration did not return any issues')
 
@@ -152,17 +152,17 @@ test('Per-Lambda runtime config', async t => {
 
   // Minor
   inventory = await _inventory({ rawArc })
-  inventory.inv.http[0].config.runtime = 'ruby2.7'
+  inventory.inv.http[0].config.runtime = 'ruby3.2'
   localRuntimes = { ruby: '2.6.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
   console.log(result[1])
-  t.ok(result[1].includes('ruby2.7'), 'Reported issue with Lambda runtime')
+  t.ok(result[1].includes('ruby3.2'), 'Reported issue with Lambda runtime')
 
   // Major
   inventory = await _inventory({ rawArc })
-  inventory.inv.http[0].config.runtime = 'ruby2.7'
+  inventory.inv.http[0].config.runtime = 'ruby3.2'
   localRuntimes = { ruby: '1.7.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
   console.log(result[1])
-  t.ok(result[1].includes('ruby2.7'), 'Reported issue with Lambda runtime')
+  t.ok(result[1].includes('ruby3.2'), 'Reported issue with Lambda runtime')
 })

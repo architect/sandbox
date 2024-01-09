@@ -166,17 +166,17 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} get /nodejs18.x`, t => {
+  t.test(`${mode} get /nodejs20.x`, t => {
     t.plan(15)
-    let rawPath = '/nodejs18.x'
+    let rawPath = '/nodejs20.x'
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /nodejs18.x (running nodejs18.x)',
-          routeKey: 'GET /nodejs18.x',
+          message: 'Hello from get /nodejs20.x (running nodejs20.x)',
+          routeKey: 'GET /nodejs20.x',
           rawPath,
           pathParameters: undefined,
           cookies: undefined,
@@ -190,17 +190,17 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} get /nodejs14.x`, t => {
+  t.test(`${mode} get /nodejs18.x`, t => {
     t.plan(15)
-    let rawPath = '/nodejs14.x'
+    let rawPath = '/nodejs18.x'
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /nodejs14.x (running nodejs14.x)',
-          routeKey: 'GET /nodejs14.x',
+          message: 'Hello from get /nodejs18.x (running nodejs18.x)',
+          routeKey: 'GET /nodejs18.x',
           rawPath,
           pathParameters: undefined,
           cookies: undefined,
@@ -238,6 +238,38 @@ function runTests (runType, t) {
     })
   })
 
+  t.test(`${mode} get /python3.11`, t => {
+    t.plan(16)
+    let rawPath = '/python3.11'
+    tiny.get({
+      url: url + rawPath
+    }, function _got (err, result) {
+      if (isWindowsPythonStalling(err, t)) return
+      else if (err) t.end(err)
+      else {
+        checkResult(t, result.body, {
+          message: 'Hello from get /python3.11 (running python3.11)',
+          routeKey: 'GET /python3.11',
+          rawPath,
+          pathParameters: undefined,
+          cookies: undefined,
+          queryStringParameters: undefined,
+          rawQueryString: '',
+          headers: '🤷🏽‍♀️',
+          isBase64Encoded: false,
+          body: undefined,
+          context: {
+            aws_request_id: true, // Just check for presence
+            function_name: 'sandbox-get-python3_11',
+            function_version: '$LATEST',
+            invoked_function_arn: 'sandbox',
+            memory_limit_in_mb: 1152,
+          }
+        })
+      }
+    })
+  })
+
   t.test(`${mode} get /python3.8`, t => {
     t.plan(16)
     let rawPath = '/python3.8'
@@ -270,42 +302,17 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} get /python3.7`, t => {
-    t.plan(15)
-    let rawPath = '/python3.7'
-    tiny.get({
-      url: url + rawPath
-    }, function _got (err, result) {
-      if (isWindowsPythonStalling(err, t)) return
-      else if (err) t.end(err)
-      else {
-        checkResult(t, result.body, {
-          message: 'Hello from get /python3.7 (running python3.7)',
-          routeKey: 'GET /python3.7',
-          rawPath,
-          pathParameters: undefined,
-          cookies: undefined,
-          queryStringParameters: undefined,
-          rawQueryString: '',
-          headers: '🤷🏽‍♀️',
-          isBase64Encoded: false,
-          body: undefined,
-        })
-      }
-    })
-  })
-
-  t.test(`${mode} get /ruby2.7`, t => {
+  t.test(`${mode} get /ruby3.2`, t => {
     t.plan(16)
-    let rawPath = '/ruby2.7'
+    let rawPath = '/ruby3.2'
     tiny.get({
       url: url + rawPath
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /ruby2.7 (running ruby2.7)',
-          routeKey: 'GET /ruby2.7',
+          message: 'Hello from get /ruby3.2 (running ruby3.2)',
+          routeKey: 'GET /ruby3.2',
           rawPath,
           pathParameters: undefined,
           cookies: undefined,
@@ -316,7 +323,7 @@ function runTests (runType, t) {
           body: undefined,
           context: {
             aws_request_id: true, // Just check for presence
-            function_name: 'sandbox-get-ruby2_7',
+            function_name: 'sandbox-get-ruby3_2',
             function_version: '$LATEST',
             invoked_function_arn: 'sandbox',
             memory_limit_in_mb: 1152,

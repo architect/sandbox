@@ -2,6 +2,18 @@
 
 ---
 
+## [6.0.0] 2024-01-09
+
+### Changed
+
+- Transitioned from `aws-sdk` to [`aws-lite`](https://aws-lite.org)
+- Breaking change: Sandbox no longer includes `aws-sdk` + `@aws-sdk/*` as dependencies; projects that rely on the AWS SDK should install those dependencies to their project directly
+- Added Node.js 20.x to test matrix
+- Breaking change: removed support for Node.js 14.x (now EOL, and no longer available to created in AWS Lambda)
+- Updated dependencies
+
+---
+
 ## [5.9.4] 2023-11-20
 
 ### Changed

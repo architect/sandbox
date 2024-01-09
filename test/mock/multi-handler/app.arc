@@ -17,4 +17,4 @@ get /node/esm/index.js
 get /node/esm/index.mjs
 
 @arc
-runtime nodejs14.x # The Deno functions have config files
+runtime nodejs20.x # The Deno functions have config files

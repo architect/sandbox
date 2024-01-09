@@ -1,5 +1,5 @@
 @aws
-runtime ruby2.7
-timeout 25
+runtime ruby3.2
+timeout 32
 # concurrency 1
 # memory 1152

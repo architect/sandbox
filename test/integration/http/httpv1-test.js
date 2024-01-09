@@ -128,16 +128,16 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} get /nodejs18.x`, t => {
+  t.test(`${mode} get /nodejs20.x`, t => {
     t.plan(16)
-    let path = '/nodejs18.x'
+    let path = '/nodejs20.x'
     tiny.get({
       url: url + path
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /nodejs18.x (running nodejs18.x)',
+          message: 'Hello from get /nodejs20.x (running nodejs20.x)',
           resource: path,
           path,
           httpMethod: 'GET',
@@ -153,16 +153,16 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} get /nodejs14.x`, t => {
+  t.test(`${mode} get /nodejs18.x`, t => {
     t.plan(16)
-    let path = '/nodejs14.x'
+    let path = '/nodejs18.x'
     tiny.get({
       url: url + path
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /nodejs14.x (running nodejs14.x)',
+          message: 'Hello from get /nodejs18.x (running nodejs18.x)',
           resource: path,
           path,
           httpMethod: 'GET',
@@ -203,6 +203,38 @@ function runTests (runType, t) {
     })
   })
 
+  t.test(`${mode} get /python3.11`, t => {
+    t.plan(17)
+    let path = '/python3.11'
+    tiny.get({
+      url: url + path
+    }, function _got (err, result) {
+      if (isWindowsPythonStalling(err, t)) return
+      else if (err) t.end(err)
+      else {
+        checkResult(t, result.body, {
+          message: 'Hello from get /python3.11 (running python3.11)',
+          resource: path,
+          path,
+          httpMethod: 'GET',
+          headers: '🤷🏽‍♀️',
+          multiValueHeaders: '🤷🏽‍♀️',
+          queryStringParameters: null,
+          multiValueQueryStringParameters: null,
+          pathParameters: null,
+          body: null,
+          isBase64Encoded: false,
+          context: {
+            aws_request_id: true, // Just check for presence
+            function_name: 'sandbox-get-python3_11',
+            function_version: '$LATEST',
+            invoked_function_arn: 'sandbox',
+            memory_limit_in_mb: 1152,
+          }
+        })
+      }
+    })
+  })
   t.test(`${mode} get /python3.8`, t => {
     t.plan(17)
     let path = '/python3.8'
@@ -236,42 +268,16 @@ function runTests (runType, t) {
     })
   })
 
-  t.test(`${mode} get /python3.7`, t => {
-    t.plan(16)
-    let path = '/python3.7'
-    tiny.get({
-      url: url + path
-    }, function _got (err, result) {
-      if (isWindowsPythonStalling(err, t)) return
-      else if (err) t.end(err)
-      else {
-        checkResult(t, result.body, {
-          message: 'Hello from get /python3.7 (running python3.7)',
-          resource: path,
-          path,
-          httpMethod: 'GET',
-          headers: '🤷🏽‍♀️',
-          multiValueHeaders: '🤷🏽‍♀️',
-          queryStringParameters: null,
-          multiValueQueryStringParameters: null,
-          pathParameters: null,
-          body: null,
-          isBase64Encoded: false,
-        })
-      }
-    })
-  })
-
-  t.test(`${mode} get /ruby2.7`, t => {
+  t.test(`${mode} get /ruby3.2`, t => {
     t.plan(17)
-    let path = '/ruby2.7'
+    let path = '/ruby3.2'
     tiny.get({
       url: url + path
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /ruby2.7 (running ruby2.7)',
+          message: 'Hello from get /ruby3.2 (running ruby3.2)',
           resource: path,
           path,
           httpMethod: 'GET',
@@ -284,7 +290,7 @@ function runTests (runType, t) {
           isBase64Encoded: false,
           context: {
             aws_request_id: true, // Just check for presence
-            function_name: 'sandbox-get-ruby2_7',
+            function_name: 'sandbox-get-ruby3_2',
             function_version: '$LATEST',
             invoked_function_arn: 'sandbox',
             memory_limit_in_mb: 1152,

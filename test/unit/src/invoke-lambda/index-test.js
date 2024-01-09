@@ -72,6 +72,15 @@ test('Test runtime invocations', t => {
     t.deepEqual(result, event, 'Default runtime received event')
   })
 
+  lambda = get.http('get /nodejs20.x')
+  invoke({ lambda, ...params }, (err, result) => {
+    if (err) t.end(err)
+    let { options, timeout } = execPassedParams
+    t.equals(options.cwd, lambda.src, 'nodejs20.x passed correct path')
+    t.equals(timeout, 20000, 'nodejs20.x ran with correct timeout')
+    t.deepEqual(result, event, 'nodejs20.x received event')
+  })
+
   lambda = get.http('get /nodejs18.x')
   invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
@@ -81,13 +90,13 @@ test('Test runtime invocations', t => {
     t.deepEqual(result, event, 'nodejs18.x received event')
   })
 
-  lambda = get.http('get /nodejs14.x')
+  lambda = get.http('get /python3.11')
   invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
     let { options, timeout } = execPassedParams
-    t.equals(options.cwd, lambda.src, 'nodejs14.x passed correct path')
-    t.equals(timeout, 14000, 'nodejs14.x ran with correct timeout')
-    t.deepEqual(result, event, 'nodejs14.x received event')
+    t.equals(options.cwd, lambda.src, 'python3.11 passed correct path')
+    t.equals(timeout, 3000, 'python3.11 ran with correct timeout')
+    t.deepEqual(result, event, 'python3.11 received event')
   })
 
   lambda = get.http('get /python3.8')
@@ -99,22 +108,13 @@ test('Test runtime invocations', t => {
     t.deepEqual(result, event, 'python3.8 received event')
   })
 
-  lambda = get.http('get /python3.7')
+  lambda = get.http('get /ruby3.2')
   invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
     let { options, timeout } = execPassedParams
-    t.equals(options.cwd, lambda.src, 'python3.7 passed correct path')
-    t.equals(timeout, 3000, 'python3.7 ran with correct timeout')
-    t.deepEqual(result, event, 'python3.7 received event')
-  })
-
-  lambda = get.http('get /ruby2.7')
-  invoke({ lambda, ...params }, (err, result) => {
-    if (err) t.end(err)
-    let { options, timeout } = execPassedParams
-    t.equals(options.cwd, lambda.src, 'ruby2.7 passed correct path')
-    t.equals(timeout, 25000, 'ruby2.7 ran with correct timeout')
-    t.deepEqual(result, event, 'ruby2.7 received event')
+    t.equals(options.cwd, lambda.src, 'ruby3.2 passed correct path')
+    t.equals(timeout, 32000, 'ruby3.2 ran with correct timeout')
+    t.deepEqual(result, event, 'ruby3.2 received event')
   })
 
   lambda = get.http('get /deno')

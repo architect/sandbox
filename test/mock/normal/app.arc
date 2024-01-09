@@ -14,12 +14,12 @@ queue-custom
 @http
 get     / # runs default
 # Runtimes
+get     /nodejs20.x
 get     /nodejs18.x
-get     /nodejs14.x
 get     /node-esm
+get     /python3.11
 get     /python3.8
-get     /python3.7
-get     /ruby2.7
+get     /ruby3.2
 get     /deno
 # Path
 get     /get-p-c/:param/*

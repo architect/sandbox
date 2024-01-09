@@ -4,7 +4,7 @@ require 'json'
 
 def handler(event:, context:)
     body = event
-    body[:message] = 'Hello from get /ruby2.7 (running ruby2.7)'
+    body[:message] = 'Hello from get /ruby3.2 (running ruby3.2)'
     body[:context] = context
     {
         statusCode: 200,
