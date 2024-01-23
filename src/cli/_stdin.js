@@ -43,8 +43,7 @@ module.exports = function handleStdin (params) {
 
   async function end () {
     try {
-      if (watcher) await watcher.close()
-      await sandbox.end()
+      await Promise.all([ watcher?.close(), sandbox.end() ])
     }
     catch (err) {
       update.err(err)
