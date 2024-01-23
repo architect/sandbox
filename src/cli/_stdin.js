@@ -1,3 +1,4 @@
+let exitHook = require('exit-hook')
 let { emitKeypressEvents } = require('readline')
 let sandbox = require('../')
 
@@ -38,7 +39,7 @@ module.exports = function handleStdin (params) {
     }
   })
 
-  import('exit-hook').then(({ asyncExitHook }) => asyncExitHook(end, { wait: 5000 }))
+  exitHook(end)
 
   async function end () {
     try {
