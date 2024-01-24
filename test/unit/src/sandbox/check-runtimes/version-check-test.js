@@ -17,13 +17,13 @@ test('Project global runtime config', async t => {
 
   rawArc = basic
   inventory = await _inventory({ rawArc })
-  localRuntimes = { node: '16.0.0' }
+  localRuntimes = { node: '20.0.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
   t.notOk(result, 'Control: no runtime configuration did not return any issues')
 
   rawArc = basic + '\n@aws\nruntime node'
   inventory = await _inventory({ rawArc })
-  localRuntimes = { node: '16.0.0' }
+  localRuntimes = { node: '20.0.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
   t.notOk(result, 'Control: compatible runtime configuration did not return any issues')
 
@@ -109,7 +109,7 @@ test('Per-Lambda runtime config', async t => {
 
   rawArc = basic
   inventory = await _inventory({ rawArc })
-  localRuntimes = { node: '16.0.0' }
+  localRuntimes = { node: '20.0.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
   t.notOk(result, 'Control: no runtime configuration did not return any issues')
 
