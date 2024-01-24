@@ -8,8 +8,9 @@
 
 - Transitioned from `aws-sdk` to [`aws-lite`](https://aws-lite.org)
 - Breaking change: Sandbox no longer includes `aws-sdk` + `@aws-sdk/*` as dependencies; projects that rely on the AWS SDK should install those dependencies to their project directly
-- Added Node.js 20.x to test matrix
+- Breaking change: `nodejs20.x` and `python3.12` are now the default Node.js and Python Lambda runtimes, respectively
 - Breaking change: removed support for Node.js 14.x (now EOL, and no longer available to created in AWS Lambda)
+- Added Node.js 20.x to test matrix
 - Updated dependencies
 
 ---
