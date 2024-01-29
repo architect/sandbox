@@ -29,10 +29,7 @@ test('Set up env', async t => {
   t.ok(sandbox, 'Got Sandbox')
   let aws = await awsLite({
     ...credentials,
-    endpointPrefix: '/_arc/ssm',
-    host: 'localhost',
-    port: _arcPort,
-    protocol: 'http',
+    endpoint: `http://localhost:${_arcPort}/_arc/ssm`,
     region: 'us-west-2',
   })
   ssm = aws.SSM

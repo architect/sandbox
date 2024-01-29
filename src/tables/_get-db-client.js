@@ -10,10 +10,8 @@ module.exports = function initDynamoClient ({ creds, ports }, callback) {
   ]
   let config = {
     autoloadPlugins: false,
-    host: 'localhost',
+    endpoint: `http://localhost:${ports.tables}`,
     plugins,
-    port: ports.tables,
-    protocol: 'http',
     region: process.env.AWS_REGION || 'us-west-2',
     ...creds,
   }
