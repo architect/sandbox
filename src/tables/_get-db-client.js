@@ -1,7 +1,7 @@
 let { join } = require('path')
 let awsLite = require('@aws-lite/client')
 
-module.exports = function initDynamoClient ({ creds, ports }, callback) {
+module.exports = function initDynamoClient ({ creds, inventory, ports }, callback) {
   let plugins = [
     // Binary dist mode
     process.pkg
@@ -12,7 +12,8 @@ module.exports = function initDynamoClient ({ creds, ports }, callback) {
     autoloadPlugins: false,
     endpoint: `http://localhost:${ports.tables}`,
     plugins,
-    region: process.env.AWS_REGION || 'us-west-2',
+    profile: inventory.inv?.aws?.profile,
+    region: inventory.inv?.aws?.region || process.env.AWS_REGION || 'us-west-2',
     ...creds,
   }
   awsLite(config)

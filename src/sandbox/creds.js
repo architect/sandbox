@@ -4,7 +4,7 @@ module.exports = function loadCreds (params, callback) {
   awsLite({
     autoloadPlugins: false,
     profile: inventory.inv?.aws?.profile,
-    region: 'us-west-1',
+    region: 'us-west-1', // Region doesn't matter, we just need to get creds
   })
     .then(aws => {
       params.creds = {

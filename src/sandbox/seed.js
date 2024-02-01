@@ -54,7 +54,7 @@ module.exports = function startupSeedData (params, callback) {
       })
     }).filter(Boolean)
 
-    getDBClient({ creds, ports }, (err, aws) => {
+    getDBClient({ creds, inventory, ports }, (err, aws) => {
       if (err) callback(err)
       else {
         dynamo = aws.DynamoDB
