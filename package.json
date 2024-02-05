@@ -28,12 +28,12 @@
     "src/*"
   ],
   "dependencies": {
-    "@architect/asap": "~7.0.0",
+    "@architect/asap": "~7.0.4",
     "@architect/create": "~5.0.0",
-    "@architect/hydrate": "~4.0.0",
-    "@architect/inventory": "~4.0.0",
-    "@architect/utils": "~4.0.0",
-    "@aws-lite/client": "^0.15.2",
+    "@architect/hydrate": "~4.0.1",
+    "@architect/inventory": "~4.0.2",
+    "@architect/utils": "~4.0.1",
+    "@aws-lite/client": "^0.16.1",
     "@aws-lite/dynamodb": "^0.3.3",
     "@begin/hashid": "~1.0.0",
     "chalk": "4.1.2",
@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@architect/eslint-config": "~2.1.2",
-    "@architect/functions": "~8.0.0-RC.3",
+    "@architect/functions": "~8.0.0",
     "@architect/req-res-fixtures": "git+https://github.com/architect/req-res-fixtures.git",
     "@aws-lite/apigatewaymanagementapi": "~0.0.7",
     "@aws-lite/ssm": "~0.2.2",
