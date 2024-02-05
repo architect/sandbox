@@ -88,7 +88,7 @@ Methods may be passed an options object containing the following parameters:
 - `port` - **String or Number** - Specify HTTP port
   - Defaults to `3333`
 - `quiet` - **Boolean** - Disables (most) logging
-- `runStartupCommands` - **Boolean** - Disable `@sandbox-startup` commands
+- `runStartupCommands` - **Boolean** - Disable `@sandbox-start` commands
   - Defaults to `true`
 - `runtimeCheck` - **String** - Check for runtime version mismatches
   - If set to `warn` Sandbox will warn of mismatches in stdout
