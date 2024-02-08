@@ -31,6 +31,7 @@ test('Set up env', async t => {
     ...credentials,
     endpoint: `http://localhost:${_arcPort}/_arc/ssm`,
     region: 'us-west-2',
+    plugins: [ import('@aws-lite/ssm') ],
   })
   ssm = aws.SSM
   t.ok(ssm, 'Populated SSM client')

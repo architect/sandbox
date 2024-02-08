@@ -2,7 +2,6 @@ let awsLite = require('@aws-lite/client')
 module.exports = function loadCreds (params, callback) {
   let { inventory } = params
   awsLite({
-    autoloadPlugins: false,
     profile: inventory.inv?.aws?.profile,
     region: 'us-west-1', // Region doesn't matter, we just need to get creds
   })

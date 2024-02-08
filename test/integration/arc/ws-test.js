@@ -13,7 +13,12 @@ let apiGatewayManagementApi
 test('Set up env', async t => {
   t.plan(2)
   t.ok(sandbox, 'Got Sandbox')
-  let aws = await awsLite({ ...credentials, region: 'us-west-2', keepAlive: false })
+  let aws = await awsLite({
+    ...credentials,
+    region: 'us-west-2',
+    keepAlive: false,
+    plugins: [ import('@aws-lite/apigatewaymanagementapi') ],
+  })
   apiGatewayManagementApi = aws.ApiGatewayManagementApi
   t.ok(apiGatewayManagementApi, 'Populated ApiGatewayManagementApi client')
 })
