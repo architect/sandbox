@@ -112,7 +112,7 @@ function runTests (runType, t) {
     setup(t)
     arc.events.publish({
       name: 'invalid-event',
-      payload: {}
+      payload: {},
     },
     function done (err) {
       if (err) {
@@ -128,7 +128,7 @@ function runTests (runType, t) {
     let req = http.request({
       method: 'POST',
       port: eventsPort,
-      path: '/'
+      path: '/',
     }, function done (res) {
       let data = ''
       res.resume()
@@ -171,7 +171,7 @@ function runTests (runType, t) {
     setup(t)
     arc.queues.publish({
       name: 'invalid-queue',
-      payload: {}
+      payload: {},
     },
     function done (err) {
       if (err) {

@@ -11,7 +11,7 @@ let { b64dec, data } = require('./_lib')
 let msgs = {
   correct: 'Returned correct param',
   returned: 'Returned unverified param',
-  notReturned: 'Did not return'
+  notReturned: 'Did not return',
 }
 
 function checkHttpResult (t, result, checks) {
@@ -43,14 +43,14 @@ function checkHttpResult (t, result, checks) {
         if (!result[param].awsRequestId) t.fail('Missing awsRequestId!')
         t.deepEqual({
           ...checks[param],
-          awsRequestId: result[param].awsRequestId
+          awsRequestId: result[param].awsRequestId,
         }, result[param], 'Got correct Lambda context')
       }
       if (checks[param].aws_request_id) {
         if (!result[param].aws_request_id) t.fail('Missing aws_request_id!')
         t.deepEqual({
           ...checks[param],
-          aws_request_id: result[param].aws_request_id
+          aws_request_id: result[param].aws_request_id,
         }, result[param], 'Got correct Lambda context')
       }
     }
@@ -95,14 +95,14 @@ function checkRestResult (t, result, checks) {
         if (!result[param].awsRequestId) t.fail('Missing awsRequestId!')
         t.deepEqual({
           ...checks[param],
-          awsRequestId: result[param].awsRequestId
+          awsRequestId: result[param].awsRequestId,
         }, result[param], 'Got correct Lambda context')
       }
       if (checks[param].aws_request_id) {
         if (!result[param].aws_request_id) t.fail('Missing aws_request_id!')
         t.deepEqual({
           ...checks[param],
-          aws_request_id: result[param].aws_request_id
+          aws_request_id: result[param].aws_request_id,
         }, result[param], 'Got correct Lambda context')
       }
     }

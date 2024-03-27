@@ -12,7 +12,7 @@ module.exports = function responseValidator ({ res, result }, httpApi) {
     'body',
     'headers',
     'multiValueHeaders',
-    'isBase64Encoded'
+    'isBase64Encoded',
   ]
 
   // Malformed returns – must be an object

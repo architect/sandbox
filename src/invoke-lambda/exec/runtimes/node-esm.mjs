@@ -1,4 +1,4 @@
-/* eslint semi: [ 'error', 'always' ] */
+/* eslint @stylistic/js/semi: [ 'error', 'always' ] */
 let { __ARC_CONFIG__, __ARC_CONTEXT__, AWS_LAMBDA_RUNTIME_API: runtimeAPI } = process.env;
 let url = p => runtimeAPI + '/2018-06-01/runtime/' + p;
 
@@ -17,7 +17,7 @@ function client (method, params) {
       body = JSON.stringify(params.body);
       headers['content-length'] = Buffer.byteLength(body);
     }
-    let req = http.request(params.url, { method, headers, }, res => {
+    let req = http.request(params.url, { method, headers }, res => {
       let { statusCode } = res;
       if (statusCode < 200 || statusCode > 202) {
         return reject(Error('Runtime API error:', statusCode));
@@ -30,7 +30,7 @@ function client (method, params) {
           try {
             resolve({
               headers: res.headers,
-              body: JSON.parse(body)
+              body: JSON.parse(body),
             });
           }
           catch (err) {
@@ -58,7 +58,7 @@ function client (method, params) {
 
     let isPromise = obj => obj && typeof obj.then === 'function';
 
-    async function run (){
+    async function run () {
       let next = url('invocation/next');
       let invocation = await get({ url: next });
       let { headers, body: event } = invocation;

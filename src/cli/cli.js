@@ -16,8 +16,8 @@ update({ pkg, shouldNotifyInNpmScript: true })
       align: 'center',
       borderColor: 'green',
       borderStyle: 'round',
-      dimBorder: true
-    }
+      dimBorder: true,
+    },
   })
 
 // Hit it

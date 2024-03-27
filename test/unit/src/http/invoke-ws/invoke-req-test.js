@@ -5,7 +5,7 @@ function lambdaStub (params, callback) {
 }
 
 let invoke = proxyquire('../../../../../src/http/invoke-ws', {
-  '../../invoke-lambda': lambdaStub
+  '../../invoke-lambda': lambdaStub,
 })
 let { arc6 } = require('@architect/req-res-fixtures').http.req
 let str = i => JSON.stringify(i)
@@ -36,7 +36,7 @@ test('Internal WebSocket events: body (WS message), no req', t => {
   let params = {
     lambda: {
       name: 'default',
-      src: 'src/ws/default'
+      src: 'src/ws/default',
     }, // not a real action
     body,
     connectionId: 'much-unique-uuid',
@@ -69,10 +69,10 @@ test('WebSocket connect / disconnect event: get /', t => {
   let params = {
     lambda: {
       name: 'connect',
-      src: 'src/ws/connect'
+      src: 'src/ws/connect',
     }, // not a real action
     connectionId,
-    req: request
+    req: request,
   }
   invoke(params, function compare (err, result) {
     if (err) { /* linter */ }
@@ -92,7 +92,7 @@ test('WebSocket connect / disconnect event: get /?whats=up', t => {
   let params = {
     lambda: {
       name: 'connect',
-      src: 'src/ws/connect'
+      src: 'src/ws/connect',
     }, // not a real action
     req: request,
     connectionId,

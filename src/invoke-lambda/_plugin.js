@@ -27,7 +27,7 @@ module.exports = async function _invoke (params, options) {
         let msg = `Plugin invoke: @${pragma} ${name} missing Lambda handler file`
         update.warn(
           `${msg}\n` +
-          `Please create a handler file, or run [npx] arc init, or add 'autocreate true' to your project preferences file's '@create' pragma`
+          `Please create a handler file, or run [npx] arc init, or add 'autocreate true' to your project preferences file's '@create' pragma`,
         )
         err.message = msg
         return rej(err)

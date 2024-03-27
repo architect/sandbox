@@ -24,7 +24,7 @@ test('Header mangling & cookies (HTTP)', t => {
   let reqHeaders = {
     authorization: 'whatev',
     cookie: 'foo=bar; fiz=buz',
-    Foo: 'bar'
+    Foo: 'bar',
   }
   let { headers, cookies } = requestHeaderFormatter(reqHeaders, params)
   // Positive casing checks

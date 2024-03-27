@@ -59,7 +59,7 @@ function check (configured, localRuntimes) {
     return {
       local,
       ok: major(runtimeVer) <= major(local),
-      runtime: alias ? `${runtime} (aliased to ${configured})` : runtime
+      runtime: alias ? `${runtime} (aliased to ${configured})` : runtime,
     }
   }
   if (runtime.startsWith('python')) {
@@ -69,7 +69,7 @@ function check (configured, localRuntimes) {
       local,
       ok: major(runtimeVer) === major(local) &&
           minor(runtimeVer) === minor(local),
-      runtime: alias ? `${runtime} (aliased to ${configured})` : runtime
+      runtime: alias ? `${runtime} (aliased to ${configured})` : runtime,
     }
   }
   if (runtime.startsWith('ruby')) {

@@ -7,12 +7,12 @@ let getGSI = require(sut)
 function checkBoilerplate (t, gsi) {
   let boilerplate = {
     Projection: { ProjectionType: 'ALL' },
-    ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+    ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 },
   }
   gsi.forEach(i => {
     t.deepEqual({
       Projection: i.Projection,
-      ProvisionedThroughput: i.ProvisionedThroughput
+      ProvisionedThroughput: i.ProvisionedThroughput,
     }, boilerplate, 'Got back boilerplate projection + provisioned throughput params')
   })
 }
@@ -44,7 +44,7 @@ test('Get DynamoDB GSI (normal)', t => {
   t.deepEqual(
     gsi[0].KeySchema,
     [ { AttributeName: 'email', KeyType: 'HASH' } ],
-    'Got correct key schema'
+    'Got correct key schema',
   )
   t.equal(gsi[0].IndexName, 'email-index', `Got back correct index name: ${gsi[0].IndexName}`)
   checkBoilerplate(t, gsi)
@@ -55,16 +55,16 @@ test('Get DynamoDB GSI (normal)', t => {
   t.deepEqual(
     gsi[0].KeySchema,
     [ { AttributeName: 'petID', KeyType: 'HASH' } ],
-    'Got correct key schema'
+    'Got correct key schema',
   )
   t.equal(gsi[0].IndexName, 'petID-index', `Got back correct index name: ${gsi[0].IndexName}`)
   t.deepEqual(
     gsi[1].KeySchema,
     [
       { AttributeName: 'accountID', KeyType: 'HASH' },
-      { AttributeName: 'petID', KeyType: 'RANGE' }
+      { AttributeName: 'petID', KeyType: 'RANGE' },
     ],
-    'Got correct key schema'
+    'Got correct key schema',
   )
   t.equal(gsi[1].IndexName, 'accountID-petID-index', `Got back correct index name: ${gsi[0].IndexName}`)
   checkBoilerplate(t, gsi)
@@ -76,9 +76,9 @@ test('Get DynamoDB GSI (normal)', t => {
     gsi[0].KeySchema,
     [
       { AttributeName: 'location', KeyType: 'HASH' },
-      { AttributeName: 'altitude', KeyType: 'RANGE' }
+      { AttributeName: 'altitude', KeyType: 'RANGE' },
     ],
-    'Got correct key schema'
+    'Got correct key schema',
   )
   t.equal(gsi[0].IndexName, 'ByAltitude', `Got back correct user-specified index name: ${gsi[0].IndexName}`)
 })

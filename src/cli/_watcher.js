@@ -103,11 +103,11 @@ module.exports = function runWatcher (args, params) {
    * Watch for pertinent filesystem changes
    */
   watcher.on('all', function (event, filename) {
-    if (ignoredEvents.includes(event)){
+    if (ignoredEvents.includes(event)) {
       update.debug.status(`Watcher: ignored '${event}' on ${filename}`)
       return
     }
-    if (pluginsRunning || paused && existsSync(pauseFile)) {
+    if (pluginsRunning || (paused && existsSync(pauseFile))) {
       return
     }
     if (!paused && existsSync(pauseFile)) {
@@ -124,7 +124,7 @@ module.exports = function runWatcher (args, params) {
         rehydrate({
           timer: 'rehydrateAll',
           msg: 'Restoring shared file symlinks...',
-          force: true
+          force: true,
         }, liveReloadClients)
       }
     }
@@ -199,7 +199,7 @@ module.exports = function runWatcher (args, params) {
       rehydrate({
         timer: 'rehydrateShared',
         only: 'shared',
-        msg: 'Shared file changed, rehydrating functions...'
+        msg: 'Shared file changed, rehydrating functions...',
       }, liveReloadClients)
     }
 
@@ -211,7 +211,7 @@ module.exports = function runWatcher (args, params) {
       rehydrate({
         timer: 'rehydrateViews',
         only: 'views',
-        msg: 'Views file changed, rehydrating views...'
+        msg: 'Views file changed, rehydrating views...',
       }, liveReloadClients)
     }
 

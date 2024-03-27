@@ -15,7 +15,7 @@ module.exports = function getPorts (params, callback) {
     ARC_HTTP_PORT, PORT,
     ARC_EVENTS_PORT,
     ARC_TABLES_PORT, ARC_DB_EXTERNAL,
-    ARC_INTERNAL_PORT
+    ARC_INTERNAL_PORT,
   } = process.env
 
   let ports = {}

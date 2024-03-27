@@ -13,7 +13,7 @@ module.exports = function responseHeaderFormatter (normalizedHeaders) {
     'content-length',
     'date',
     'upgrade',
-    'transfer-encoding'
+    'transfer-encoding',
   ]
 
   for (let [ key, value ] of Object.entries(normalizedHeaders)) {

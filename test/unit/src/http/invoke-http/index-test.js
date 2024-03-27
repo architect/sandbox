@@ -6,7 +6,7 @@ let sut = join(process.cwd(), 'src', 'http', 'invoke-http')
 let invokeResult, headers = {}, body
 let lambdaStub = (params, callback) => callback(null, invokeResult)
 let invoke = proxyquire(sut, {
-  '../../invoke-lambda': lambdaStub
+  '../../invoke-lambda': lambdaStub,
 })
 let { headers: _headers } = require('@architect/req-res-fixtures').http.req
 
@@ -33,7 +33,7 @@ let input = {
   url: url(),
   body: {},
   headers: _headers,
-  params: {}
+  params: {},
 }
 
 test('Live reload passes through', t => {
@@ -61,7 +61,7 @@ test('Live reload passes through', t => {
   invokeResult = {
     statusCode: 200,
     headers: { 'content-type': 'text/html' },
-    body: 'hi'
+    body: 'hi',
   }
   handler(input, response)
   t.equal(body, invokeResult.body, 'HTML body is unmutated')
@@ -73,7 +73,7 @@ test('Live reload passes through', t => {
   invokeResult = {
     statusCode: 200,
     headers: { 'content-type': 'text/html' },
-    body: 'hi'
+    body: 'hi',
   }
   handler(input, response)
   t.equal(body, invokeResult.body, 'HTML body is unmutated with live reload enabled')
@@ -91,7 +91,7 @@ test('Live reload injects script when enabled', t => {
   invokeResult = {
     statusCode: 200,
     headers: { 'content-type': 'text/html' },
-    body: '<head></head>henlo'
+    body: '<head></head>henlo',
   }
   handler(input, response)
   t.notEqual(body, invokeResult.body, 'HTML body mutated with live reload enabled')

@@ -69,7 +69,7 @@ module.exports = function eventBusListener (params, req, res) {
         if (err?.message === 'lambda_not_found') {
           update.warn(
             `@${arcType} ${name} missing Lambda handler file\n` +
-            `Please create a handler file, or run [npx] arc init, or add 'autocreate true' to your project preferences file's '@create' pragma`
+            `Please create a handler file, or run [npx] arc init, or add 'autocreate true' to your project preferences file's '@create' pragma`,
           )
         }
         else if (err) {

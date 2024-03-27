@@ -29,7 +29,7 @@ test('Header mangling (HTTP + Lambda 1.0 payload)', t => {
     host: 'whatev',
     'user-agent': 'whatev',
     date: 'whatev',
-    Foo: 'bar'
+    Foo: 'bar',
   }
   let { headers, multiValueHeaders } = headerFormatter(reqHeaders, true, params)
   // Positive casing checks
@@ -97,7 +97,7 @@ test('Header mangling (REST)', t => {
     host: 'whatev',
     'user-agent': 'whatev',
     date: 'whatev',
-    Foo: 'bar'
+    Foo: 'bar',
   }
   let { headers, multiValueHeaders } = headerFormatter(reqHeaders, undefined, params)
   // Positive casing checks

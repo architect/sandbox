@@ -7,7 +7,7 @@ module.exports = function initDynamoClient ({ creds, inventory, ports }, callbac
     process.pkg
       // eslint-disable-next-line
       ? require(join(__dirname, '_aws-lite-dynamodb-vendor.js'))
-      : import('@aws-lite/dynamodb')
+      : import('@aws-lite/dynamodb'),
   ]
   let config = {
     autoloadPlugins: false,

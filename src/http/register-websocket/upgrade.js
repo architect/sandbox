@@ -33,7 +33,7 @@ module.exports = function upgrade (wss, params) {
         socket.destroy()
         return
       }
-      else if (statusCode >= 200 && statusCode <= 208 || statusCode === 226) {
+      else if ((statusCode >= 200 && statusCode <= 208) || statusCode === 226) {
         wss.handleUpgrade(req, socket, head, (ws) => {
           wss.emit('connection', connectionId, ws)
         })

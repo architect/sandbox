@@ -15,7 +15,7 @@ test('Services should populate with plugin variables', t => {
     plugins: { _methods: { deploy: { services: [
       pluginOne,
       pluginTwo,
-    ]
+    ],
     } } } } }
   services({ inventory }, (err, services) => {
     if (err) t.end(err)

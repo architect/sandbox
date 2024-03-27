@@ -20,7 +20,7 @@ module.exports = function exec (lambda, params, callback) {
       // `sandboxPath` named differently because `staticPath` was too vague within ASAP
       sandboxPath: context.staticPath,
       // Pick up SPA setting (which may be overridden by process ARC_STATIC_SPA within ASAP)
-      spa: context.inventory.inv?.static?.spa
+      spa: context.inventory.inv?.static?.spa,
     })
     asap(invocations[requestID].request)
       .then(result => {

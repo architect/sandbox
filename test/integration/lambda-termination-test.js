@@ -80,7 +80,7 @@ function runTests (runType, t) {
 
     arc.events.publish({
       name: 'event-does-not-timeout',
-      payload: { path: fine }
+      payload: { path: fine },
     },
     function done (err) {
       if (err) t.end(err)
@@ -98,7 +98,7 @@ function runTests (runType, t) {
     setup(t)
     arc.events.publish({
       name: 'event-timeout-async',
-      payload
+      payload,
     },
     function done (err) {
       if (err) t.end(err)
@@ -111,7 +111,7 @@ function runTests (runType, t) {
     setup(t)
     arc.events.publish({
       name: 'event-timeout-async-child',
-      payload
+      payload,
     },
     function done (err) {
       if (err) t.end(err)
@@ -125,7 +125,7 @@ function runTests (runType, t) {
     setup(t)
     arc.events.publish({
       name: 'event-timeout-async-settimeout',
-      payload
+      payload,
     },
     function done (err) {
       if (err) t.end(err)
@@ -138,7 +138,7 @@ function runTests (runType, t) {
     setup(t)
     arc.events.publish({
       name: 'event-timeout-sync',
-      payload
+      payload,
     },
     function done (err) {
       if (err) t.end(err)
@@ -151,7 +151,7 @@ function runTests (runType, t) {
     setup(t)
     arc.events.publish({
       name: 'event-timeout-sync-child',
-      payload
+      payload,
     },
     function done (err) {
       if (err) t.end(err)
@@ -164,7 +164,7 @@ function runTests (runType, t) {
     setup(t)
     arc.events.publish({
       name: 'event-no-exit-after-return',
-      payload
+      payload,
     },
     function done (err) {
       if (err) t.end(err)
@@ -180,7 +180,7 @@ function runTests (runType, t) {
       process.env.AWS_LAMBDA_FUNCTION_NAME = 'yep'
       arc.events.publish({
         name: 'event-timeout-sync-child',
-        payload
+        payload,
       },
       function done (err) {
         if (err) t.end(err)

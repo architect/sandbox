@@ -77,9 +77,9 @@ module.exports = function requestFormatter ({ method, path, req }, httpApi) {
       protocol: `HTTP/${req.httpVersion}`,
       identity: {
         sourceIp,
-        userAgent: headers['User-Agent'] || headers['user-agent'] || null
+        userAgent: headers['User-Agent'] || headers['user-agent'] || null,
       },
-    }
+    },
   }
 
   // Base64 encoding status set by binary handler middleware

@@ -37,7 +37,7 @@ module.exports = function requestFormatter (params) {
       stage: process.env.ARC_ENV || 'testing',
       identity: { sourceIp },
     },
-    isBase64Encoded: false
+    isBase64Encoded: false,
   }
 
   if (name === 'disconnect') {

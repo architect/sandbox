@@ -68,8 +68,8 @@ function runTests (runType, t) {
       TableName,
       Item: {
         accountID: 'mock-account-id',
-        email: 'person@email.lol'
-      }
+        email: 'person@email.lol',
+      },
     })
     t.ok(result, `Got result: ${str(result)}`)
     teardown(t)
@@ -79,7 +79,7 @@ function runTests (runType, t) {
     t.plan(1)
     setup(t)
     let result = await dynamo.DescribeTable({
-      TableName
+      TableName,
     })
     t.equal(result.Table.GlobalSecondaryIndexes[0].IndexName, 'email-index', 'Got index: email-index')
     teardown(t)
@@ -89,7 +89,7 @@ function runTests (runType, t) {
     t.plan(3)
     setup(t)
     let result = await dynamo.DescribeTable({
-      TableName: TableName2
+      TableName: TableName2,
     })
     let indexes = result.Table.GlobalSecondaryIndexes
     t.equal(indexes.length, 2, 'Got back two indexes')
@@ -104,8 +104,8 @@ function runTests (runType, t) {
     let result = await dynamo.GetItem({
       TableName,
       Key: {
-        accountID: 'fake-account-id'
-      }
+        accountID: 'fake-account-id',
+      },
     })
     t.ok(result, `Got result: ${str(result)}`)
     teardown(t)
@@ -120,9 +120,9 @@ function runTests (runType, t) {
       KeyConditions: {
         email: {
           AttributeValueList: [ { S: 'person@email.lol' } ],
-          ComparisonOperator: 'EQ'
-        }
-      }
+          ComparisonOperator: 'EQ',
+        },
+      },
     })
     t.ok(result, `Got result: ${str(result)}`)
     teardown(t)

@@ -17,8 +17,8 @@ module.exports = function _createTable (params, callback) {
         KeySchema: getKeySchema(table),
         ProvisionedThroughput: {
           ReadCapacityUnits: 5,
-          WriteCapacityUnits: 5
-        }
+          WriteCapacityUnits: 5,
+        },
       }
       // Handle global secondary index stuff
       let gsi = getGSI({ name, inventory })

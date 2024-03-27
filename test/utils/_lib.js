@@ -24,7 +24,7 @@ function isWindowsPythonStalling (err, t) {
       `Windows GitHub Actions sometimes fails to execute our Python script in a reasonable amount of ` +
       `time, failing to get past the import statements of builtins in multiple seconds. After dozens ` +
       `of attempts to pin down why, we are adding this highly specific and extremely disconcerting ` +
-      `workaround. Help wanted!`
+      `workaround. Help wanted!`,
     )
     return true
   }

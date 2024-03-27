@@ -33,7 +33,7 @@ function start (params, callback) {
 
     function (callback) {
       init(params, callback)
-    }
+    },
   ],
   function _started (err) {
     if (err) callback(err)

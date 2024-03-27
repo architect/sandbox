@@ -8,7 +8,7 @@ module.exports = function responseHeaderFormatter (normalizedHeaders, httpApi) {
   let headers = {}
   let drops = [
     'upgrade', // Technically not dropped, but header is validated by APIG and impl can cause HTTP issues, so we'll sidestep in Sandbox
-    'transfer-encoding'
+    'transfer-encoding',
   ]
 
   if (httpApi) {

@@ -18,7 +18,7 @@ module.exports = function getAttributeDefinitions (params) {
     if (!hasDef(partitionKey)) {
       defs.push({
         AttributeName: partitionKey,
-        AttributeType: convert(partitionKeyType)
+        AttributeType: convert(partitionKeyType),
       })
     }
 
@@ -26,7 +26,7 @@ module.exports = function getAttributeDefinitions (params) {
     if (sortKey && !hasDef(sortKey)) {
       defs.push({
         AttributeName: sortKey,
-        AttributeType: convert(sortKeyType)
+        AttributeType: convert(sortKeyType),
       })
     }
   })
@@ -37,6 +37,6 @@ module.exports = function getAttributeDefinitions (params) {
 function convert (v) {
   return ({
     'String': 'S',
-    'Number': 'N'
+    'Number': 'N',
   })[v]
 }

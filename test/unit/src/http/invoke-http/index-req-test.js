@@ -3,7 +3,7 @@ let proxyquire = require('proxyquire')
 let { join } = require('path')
 let sut = join(process.cwd(), 'src', 'http', 'invoke-http')
 let invoke = proxyquire(sut, {
-  '../../invoke-lambda': params => event = params.event
+  '../../invoke-lambda': params => event = params.event,
 })
 let { arc7, arc6, headers } = require('@architect/req-res-fixtures').http.req
 
@@ -72,7 +72,7 @@ function checkArcV7HttpResult (mock, t) {
     t.equal(
       str(event[param]),
       str(ref),
-      match(`${param}`, event[param])
+      match(`${param}`, event[param]),
     )
   })
   teardown()
@@ -206,7 +206,7 @@ test('Architect v7 (HTTP API mode): get /:activities/{proxy+} (/nature/hiking/wi
     headers,
     params: {
       activities: 'nature',
-      '0': mock.pathParameters.proxy
+      '0': mock.pathParameters.proxy,
     },
     httpVersion,
   }
@@ -394,7 +394,7 @@ function checkArcV6RestResult (params, mock, t) {
     t.equal(
       str(event[param]),
       str(mock[param]),
-      match(`${param}`, event[param])
+      match(`${param}`, event[param]),
     )
   })
   checkMultiValueHeaders(mock, t)
@@ -541,7 +541,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /:activities/{proxy+} (/natu
     headers,
     params: {
       activities: 'nature',
-      '0': mock.pathParameters.proxy
+      '0': mock.pathParameters.proxy,
     },
     httpVersion,
   }

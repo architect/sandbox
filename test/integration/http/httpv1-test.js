@@ -25,7 +25,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /`, t => {
     t.plan(17)
     tiny.get({
-      url
+      url,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -47,7 +47,7 @@ function runTests (runType, t) {
             functionVersion: '$LATEST',
             invokedFunctionArn: 'sandbox',
             memoryLimitInMB: 1152,
-          }
+          },
         })
       }
     })
@@ -56,7 +56,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /?whats=up`, t => {
     t.plan(16)
     tiny.get({
-      url: url + '/?whats=up'
+      url: url + '/?whats=up',
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -80,7 +80,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /?whats=up&whats=there`, t => {
     t.plan(16)
     tiny.get({
-      url: url + '/?whats=up&whats=there'
+      url: url + '/?whats=up&whats=there',
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -105,7 +105,7 @@ function runTests (runType, t) {
     t.plan(17)
     let path = '/binary'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -132,7 +132,7 @@ function runTests (runType, t) {
     t.plan(16)
     let path = '/nodejs20.x'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -157,7 +157,7 @@ function runTests (runType, t) {
     t.plan(16)
     let path = '/nodejs18.x'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -182,7 +182,7 @@ function runTests (runType, t) {
     t.plan(16)
     let path = '/node-esm'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -207,7 +207,7 @@ function runTests (runType, t) {
     t.plan(17)
     let path = '/python3.11'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (isWindowsPythonStalling(err, t)) return
       else if (err) t.end(err)
@@ -230,7 +230,7 @@ function runTests (runType, t) {
             function_version: '$LATEST',
             invoked_function_arn: 'sandbox',
             memory_limit_in_mb: 1152,
-          }
+          },
         })
       }
     })
@@ -239,7 +239,7 @@ function runTests (runType, t) {
     t.plan(17)
     let path = '/python3.8'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (isWindowsPythonStalling(err, t)) return
       else if (err) t.end(err)
@@ -262,7 +262,7 @@ function runTests (runType, t) {
             function_version: '$LATEST',
             invoked_function_arn: 'sandbox',
             memory_limit_in_mb: 1152,
-          }
+          },
         })
       }
     })
@@ -272,7 +272,7 @@ function runTests (runType, t) {
     t.plan(17)
     let path = '/ruby3.2'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -294,7 +294,7 @@ function runTests (runType, t) {
             function_version: '$LATEST',
             invoked_function_arn: 'sandbox',
             memory_limit_in_mb: 1152,
-          }
+          },
         })
       }
     })
@@ -304,7 +304,7 @@ function runTests (runType, t) {
     t.plan(16)
     let path = '/deno'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -329,7 +329,7 @@ function runTests (runType, t) {
     t.plan(16)
     let path = '/get-c/hello/there'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -354,7 +354,7 @@ function runTests (runType, t) {
     t.plan(16)
     let path = '/get-p-c/why/hello/there'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -369,7 +369,7 @@ function runTests (runType, t) {
           multiValueQueryStringParameters: null,
           pathParameters: {
             param: 'why',
-            proxy: 'hello/there'
+            proxy: 'hello/there',
           },
           body: null,
           isBase64Encoded: false,
@@ -381,7 +381,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /no-return (noop)`, t => {
     t.plan(2)
     tiny.get({
-      url: url + '/no-return'
+      url: url + '/no-return',
     }, function _got (err, result) {
       if (err) {
         let message = 'No response found'
@@ -396,7 +396,7 @@ function runTests (runType, t) {
     t.plan(16)
     let path = '/custom'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -526,7 +526,7 @@ function runTests (runType, t) {
     t.plan(16)
     let path = '/head'
     tiny.head({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -551,7 +551,7 @@ function runTests (runType, t) {
     t.plan(16)
     let path = '/options'
     tiny.options({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -805,7 +805,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /python-error should fail`, t => {
     t.plan(2)
     tiny.get({
-      url: url + '/python-error'
+      url: url + '/python-error',
     }, function _got (err) {
       if (isWindowsPythonStalling(err, t)) return
       else if (err) {
@@ -821,7 +821,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /ruby-error should fail`, t => {
     t.plan(2)
     tiny.get({
-      url: url + '/ruby-error'
+      url: url + '/ruby-error',
     }, function _got (err) {
       if (err) {
         t.equal(err.statusCode, 500, 'Got 500 for function error')
@@ -880,7 +880,7 @@ function runTests (runType, t) {
     t.plan(2)
     rmPublic(t)
     tiny.get({
-      url
+      url,
     }, function _got (err, result) {
       if (err) t.equal(err.statusCode, 404, 'Got 404 for missing file')
       else t.end(result)
@@ -901,7 +901,7 @@ function runTests (runType, t) {
   t.test(`${mode} get / without defining get / should succeed if index.html is present`, t => {
     t.plan(2)
     tiny.get({
-      url
+      url,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -926,7 +926,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /missing should fail if missing its handler file`, t => {
     t.plan(2)
     tiny.get({
-      url: url + '/missing'
+      url: url + '/missing',
     }, function _got (err, result) {
       if (err) {
         t.equal(err.statusCode, 502, 'Got 502 for missing file')

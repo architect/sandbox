@@ -9,7 +9,7 @@ let pool = {
   register (connectionId, ws) {
     pool.connections[connectionId] = {
       ws,
-      connectedAt: Date.now()
+      connectedAt: Date.now(),
     }
   },
   delete (connectionId) {
@@ -17,7 +17,7 @@ let pool = {
   },
   reset () {
     pool.connections = {}
-  }
+  },
 }
 
 module.exports = pool

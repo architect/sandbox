@@ -23,14 +23,14 @@ module.exports = function _getGSI (params) {
       // Always add the partition key (HASH)
       let KeySchema = [ {
         AttributeName: partitionKey,
-        KeyType: 'HASH'
+        KeyType: 'HASH',
       } ]
 
       // Maybe add the sort key (RANGE)
       if (sortKey) {
         KeySchema.push({
           AttributeName: sortKey,
-          KeyType: 'RANGE'
+          KeyType: 'RANGE',
         })
       }
 
@@ -38,12 +38,12 @@ module.exports = function _getGSI (params) {
         IndexName,
         KeySchema,
         Projection: {
-          ProjectionType: 'ALL'
+          ProjectionType: 'ALL',
         },
         ProvisionedThroughput: {
           ReadCapacityUnits: 5,
-          WriteCapacityUnits: 5
-        }
+          WriteCapacityUnits: 5,
+        },
       }
       return params
     })

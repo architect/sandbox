@@ -13,7 +13,7 @@ let runtimes = {
   deno: 0,
   node: 0,
   python: 0,
-  ruby: 0
+  ruby: 0,
 }
 let execPassedParams
 let exec = (lambda, params, callback) => {

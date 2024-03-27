@@ -62,7 +62,7 @@ function runTests (runType, t ) {
     t.plan(5)
     setup()
     tiny.get({
-      url: url + '/deps-in-lambda'
+      url: url + '/deps-in-lambda',
     }, function _got (err) {
       teardown()
       if (err) t.end(err)
@@ -82,7 +82,7 @@ function runTests (runType, t ) {
     t.plan(5)
     setup()
     tiny.get({
-      url: url + '/deps-in-root'
+      url: url + '/deps-in-root',
     }, function _got (err) {
       teardown()
       if (err) t.end(err)
@@ -102,7 +102,7 @@ function runTests (runType, t ) {
     t.plan(5)
     setup()
     tiny.get({
-      url: url + '/deps-in-shared'
+      url: url + '/deps-in-shared',
     }, function _got (err) {
       teardown()
       if (err) t.end(err)
@@ -122,7 +122,7 @@ function runTests (runType, t ) {
     t.plan(1)
     setup()
     tiny.get({
-      url: url + '/deps-found'
+      url: url + '/deps-found',
     }, function _got (err) {
       teardown()
       if (err) t.end(err)
@@ -136,7 +136,7 @@ function runTests (runType, t ) {
   t.test(`[Dependency warnings (basic) ${mode}] Deps missing`, t => {
     t.plan(2)
     tiny.get({
-      url: url + '/deps-missing'
+      url: url + '/deps-missing',
     }, function _got (err) {
       if (err) {
         t.ok(err, 'Got a failure')
@@ -159,7 +159,7 @@ function runTests (runType, t ) {
     t.plan(1)
     setup()
     tiny.get({
-      url: url + '/shared'
+      url: url + '/shared',
     }, function _got (err) {
       teardown()
       if (err) t.end(err)
@@ -174,7 +174,7 @@ function runTests (runType, t ) {
     t.plan(1)
     setup()
     tiny.get({
-      url: url + '/views'
+      url: url + '/views',
     }, function _got (err) {
       teardown()
       if (err) t.end(err)
@@ -198,7 +198,7 @@ function runTests (runType, t ) {
     t.plan(5)
     setup()
     tiny.get({
-      url: url + '/shared'
+      url: url + '/shared',
     }, function _got (err) {
       teardown()
       if (err) t.end(err)
@@ -218,7 +218,7 @@ function runTests (runType, t ) {
     t.plan(5)
     setup()
     tiny.get({
-      url: url + '/views'
+      url: url + '/views',
     }, function _got (err) {
       teardown()
       if (err) t.end(err)
@@ -247,7 +247,7 @@ function runTests (runType, t ) {
     t.plan(5)
     setup()
     tiny.get({
-      url: url + '/shared'
+      url: url + '/shared',
     }, function _got (err) {
       teardown()
       if (err) t.end(err)
@@ -267,7 +267,7 @@ function runTests (runType, t ) {
     t.plan(5)
     setup()
     tiny.get({
-      url: url + '/views'
+      url: url + '/views',
     }, function _got (err) {
       teardown()
       if (err) t.end(err)
@@ -296,7 +296,7 @@ function runTests (runType, t ) {
     t.plan(6)
     setup()
     tiny.get({
-      url: url + '/shared'
+      url: url + '/shared',
     }, function _got (err) {
       teardown()
       if (err) t.end(err)
@@ -318,7 +318,7 @@ function runTests (runType, t ) {
     t.plan(6)
     setup()
     tiny.get({
-      url: url + '/views'
+      url: url + '/views',
     }, function _got (err) {
       teardown()
       if (err) t.end(err)

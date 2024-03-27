@@ -21,8 +21,8 @@ module.exports = function invokeLambda (params, callback) {
   // Next check payload size is within limits
   let maxSize = 1000 * 6000
   let { body, Records } = event
-  let bodySize = body && JSON.stringify(body).length || 0
-  let payloadSize = Records && JSON.stringify(Records).length || 0
+  let bodySize = (body && JSON.stringify(body).length) || 0
+  let payloadSize = (Records && JSON.stringify(Records).length) || 0
   if (bodySize > maxSize || payloadSize > maxSize) {
     let err = Error('Maximum event body exceeded: Lambda allows up to 6MB payloads (base64-encoded)')
     return callback(err)

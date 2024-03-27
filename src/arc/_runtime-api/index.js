@@ -22,7 +22,7 @@ function runtimeAPI ({ body }, params, req, res) {
     `[${requestID}] Incoming runtime API request`,
     `URL: ${url}`,
     `Headers: ${JSON.stringify(req.headers)}`,
-    `Body: ${body ? `'${body}'` : '[no body]'} ${body ? `(${Buffer.byteLength(body)}b)` : ''}`
+    `Body: ${body ? `'${body}'` : '[no body]'} ${body ? `(${Buffer.byteLength(body)}b)` : ''}`,
   )
 
   // Don't respond to unknown request ID roots
@@ -80,7 +80,7 @@ function runtimeAPI ({ body }, params, req, res) {
       update.debug.status(`[${requestID}] Missing request ID in /response request`)
       return res.end()
     }
-    invocations[requestID].response = body && JSON.parse(body) || undefined
+    invocations[requestID].response = (body && JSON.parse(body)) || undefined
     res.statusCode = accepted
     res.end()
     update.debug.status(`[${requestID}] Received /response request`)

@@ -42,7 +42,7 @@ let makeSideChannel = async (port = 3433) => {
     },
     reset () {
       events = []
-    }
+    },
   }
 }
 

@@ -12,7 +12,7 @@ module.exports = function requestFormatter ({ method, path, req }) {
 
   // Here we go!
   let request = {
-    version: '2.0'
+    version: '2.0',
   }
 
   // Resource may be manually supplied via ASAP
@@ -73,7 +73,7 @@ module.exports = function requestFormatter ({ method, path, req }) {
     },
     // requestId // TODO add me maybe
     routeKey,
-    timeEpoch: Math.floor(Date.now() / 1000)
+    timeEpoch: Math.floor(Date.now() / 1000),
   }
 
   // Path parameters

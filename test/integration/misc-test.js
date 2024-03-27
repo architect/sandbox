@@ -25,12 +25,12 @@ function runTests (runType, t) {
     t.plan(6)
     let rawPath = '/deno/index.js'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /deno/index.js'
+          message: 'Hello from get /deno/index.js',
         })
       }
     })
@@ -40,12 +40,12 @@ function runTests (runType, t) {
     t.plan(6)
     let rawPath = '/deno/index.ts'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /deno/index.ts'
+          message: 'Hello from get /deno/index.ts',
         })
       }
     })
@@ -55,12 +55,12 @@ function runTests (runType, t) {
     t.plan(6)
     let rawPath = '/deno/index.tsx'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /deno/index.tsx'
+          message: 'Hello from get /deno/index.tsx',
         })
       }
     })
@@ -70,12 +70,12 @@ function runTests (runType, t) {
     t.plan(6)
     let rawPath = '/deno/mod.js'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /deno/mod.js'
+          message: 'Hello from get /deno/mod.js',
         })
       }
     })
@@ -85,12 +85,12 @@ function runTests (runType, t) {
     t.plan(6)
     let rawPath = '/deno/mod.ts'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /deno/mod.ts'
+          message: 'Hello from get /deno/mod.ts',
         })
       }
     })
@@ -100,12 +100,12 @@ function runTests (runType, t) {
     t.plan(6)
     let rawPath = '/deno/mod.tsx'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /deno/mod.tsx'
+          message: 'Hello from get /deno/mod.tsx',
         })
       }
     })
@@ -116,12 +116,12 @@ function runTests (runType, t) {
     t.plan(6)
     let rawPath = '/node/esm/index.js'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /node/esm/index.js'
+          message: 'Hello from get /node/esm/index.js',
         })
       }
     })
@@ -131,12 +131,12 @@ function runTests (runType, t) {
     t.plan(6)
     let rawPath = '/node/esm/index.mjs'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /node/esm/index.mjs'
+          message: 'Hello from get /node/esm/index.mjs',
         })
       }
     })
@@ -146,12 +146,12 @@ function runTests (runType, t) {
     t.plan(6)
     let rawPath = '/node/cjs/index.cjs'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /node/cjs/index.cjs'
+          message: 'Hello from get /node/cjs/index.cjs',
         })
       }
     })
@@ -161,12 +161,12 @@ function runTests (runType, t) {
     t.plan(6)
     let rawPath = '/node/cjs/index.js'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /node/cjs/index.js'
+          message: 'Hello from get /node/cjs/index.js',
         })
       }
     })
@@ -183,7 +183,7 @@ function runTests (runType, t) {
   t.test(`[Misc / ${runType}] Check multitenant Lambda on get /hello`, t => {
     t.plan(16)
     tiny.get({
-      url: url + '/hello'
+      url: url + '/hello',
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -204,7 +204,7 @@ function runTests (runType, t) {
             functionVersion: '$LATEST',
             invokedFunctionArn: 'sandbox',
             memoryLimitInMB: 1152,
-          }
+          },
         })
       }
     })
@@ -213,7 +213,7 @@ function runTests (runType, t) {
   t.test(`[Misc / ${runType}] Check multitenant Lambda on get /hi`, t => {
     t.plan(16)
     tiny.get({
-      url: url + '/hi'
+      url: url + '/hi',
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -234,7 +234,7 @@ function runTests (runType, t) {
             functionVersion: '$LATEST',
             invokedFunctionArn: 'sandbox',
             memoryLimitInMB: 1152,
-          }
+          },
         })
       }
     })

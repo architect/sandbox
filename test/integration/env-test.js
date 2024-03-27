@@ -10,10 +10,10 @@ let systemEnvVars = [
   'ARC_APP_NAME', 'ARC_ENV', 'ARC_ROLE',
   'ARC_SANDBOX', 'ARC_SESSION_TABLE_NAME',
   // Lambda + system stuff
-  'LAMBDA_TASK_ROOT', 'PATH', 'TZ'
+  'LAMBDA_TASK_ROOT', 'PATH', 'TZ',
 ]
 let shouldBeFiltered = [
-  '__ARC_CONTEXT__', '__ARC_CONFIG__'
+  '__ARC_CONTEXT__', '__ARC_CONFIG__',
 ]
 function checkSystemEnvVars (env, t) {
   systemEnvVars.forEach(v => {
@@ -102,7 +102,7 @@ function runTests (runType, t) {
         env: {
           DOTENV_USERLAND_ENV_VAR: 'Why hello there from overridden .env!',
           ENV_OPTION_USERLAND_ENV_VAR: 'Why hello there from env option!',
-        }
+        },
       })
     })
 

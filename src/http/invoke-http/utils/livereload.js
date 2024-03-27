@@ -73,7 +73,7 @@ function compressor (direction, type, body) {
   let exec = {
     gzip: compress ? gzipSync : gunzipSync,
     br: compress ? brotliCompressSync : brotliDecompressSync,
-    deflate: compress ? deflateSync : inflateSync
+    deflate: compress ? deflateSync : inflateSync,
   }
   if (!exec[type]) return body
 

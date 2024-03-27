@@ -18,11 +18,11 @@ let makeFakeSocket = () => {
 }
 
 let makePool = () => ({
-  getConnection (id){
+  getConnection (id) {
     console.log({ id, ws: pool.data[id]?.ws })
     return pool.data[id]?.ws
   },
-  getConnectedAt (id){
+  getConnectedAt (id) {
     console.log({ id, connectedAt: pool.data[id]?.connectedAt })
     return pool.data[id]?.connectedAt
   },
@@ -39,7 +39,7 @@ let makePool = () => ({
 let pool = makePool()
 
 let ws = proxyquire('../../../../../src/arc/_ws', {
-  '../../http/register-websocket/pool': pool
+  '../../http/register-websocket/pool': pool,
 })
 
 let req
@@ -55,7 +55,7 @@ function reset (t) {
       resBody = body
       t.pass('HTTP response end invoked')
     },
-    setHeader: () => {}
+    setHeader: () => {},
   }
 }
 

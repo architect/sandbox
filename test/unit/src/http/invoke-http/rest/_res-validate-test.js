@@ -5,7 +5,7 @@ let responseValidator = require(sut)
 
 function newRes () {
   return {
-    setHeader: () => {}
+    setHeader: () => {},
   }
 }
 
@@ -29,7 +29,7 @@ test('Arc v6 control response (HTTP + Lambda 1.0 payload)', t => {
     body: 'hi',
     headers: data,
     multiValueHeaders: { hi: [ 'there', 'friend' ] },
-    isBase64Encoded: true
+    isBase64Encoded: true,
   }
   let check = responseValidator({ res, result }, true)
   t.notOk(res.statusCode, `Valid response did not set error statusCode: ${res.statusCode}`)
@@ -164,7 +164,7 @@ test('Arc v6 control response (REST API mode)', t => {
     body: 'hi',
     headers: data,
     multiValueHeaders: { hi: [ 'there', 'friend' ] },
-    isBase64Encoded: true
+    isBase64Encoded: true,
   }
   let check = responseValidator({ res, result })
   t.notOk(res.statusCode, `Valid response did not set error statusCode: ${res.statusCode}`)

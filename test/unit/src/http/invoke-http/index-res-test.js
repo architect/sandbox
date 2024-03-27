@@ -8,7 +8,7 @@ let invoke = proxyquire(sut, {
   '../../invoke-lambda': (params, callback) => {
     if (returnError) return callback(returnError)
     else callback(null, response)
-  }
+  },
 })
 
 let b64dec = i => Buffer.from(i, 'base64').toString()
@@ -38,13 +38,13 @@ function getInvoker (params, _response, callback) {
     url,
     body: {},
     headers: { 'Accept-Encoding': 'gzip' },
-    params: {}
+    params: {},
   }
   // Mocked res object
   let output = {
     getHeaders: () => ({ 'content-type': 'application/json; charset=utf-8' }),
     setHeader: (header, value) => headers[header] = value,
-    end: i => body = i
+    end: i => body = i,
   }
   let handler = invoke(params)
   handler(input, output)

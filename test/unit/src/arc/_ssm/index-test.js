@@ -17,7 +17,7 @@ function reset (t) {
       resBody = body
       t.pass('HTTP response end invoked')
     },
-    setHeader: () => {}
+    setHeader: () => {},
   }
 }
 
@@ -40,8 +40,8 @@ test('ssm module should return JSON containing all parameters for a stack if onl
     body: '{"Path":"/MyAppTesting"}',
     services: {
       tables: { 'my-table': 'my-app-staging-my-table' },
-      someplugin: { pluginService: 'some:other:arn' }
-    }
+      someplugin: { pluginService: 'some:other:arn' },
+    },
   }, params, req, res)
   t.equals(res.statusCode, 200, 'response statuscode set to 200')
   let body = JSON.parse(resBody)
@@ -56,8 +56,8 @@ test('ssm module should return JSON containing all service type-specific paramet
     body: '{"Path":"/MyAppTesting/someplugin"}',
     services: {
       tables: { 'my-table': 'my-app-staging-my-table' },
-      someplugin: { pluginService: 'some:other:arn' }
-    }
+      someplugin: { pluginService: 'some:other:arn' },
+    },
   }, params, req, res)
   t.equals(res.statusCode, 200, 'response statuscode set to 200')
   let body = JSON.parse(resBody)

@@ -14,7 +14,7 @@ module.exports = function handleStdin (params) {
       rehydrate({
         timer: 'rehydrateAll',
         msg: 'Rehydrating all shared files...',
-        force: true
+        force: true,
       })
     }
     if (input === 'S') {
@@ -22,7 +22,7 @@ module.exports = function handleStdin (params) {
         timer: 'rehydrateShared',
         only: 'shared',
         msg: 'Rehydrating src/shared...',
-        force: true
+        force: true,
       })
     }
     if (input === 'V') {
@@ -30,7 +30,7 @@ module.exports = function handleStdin (params) {
         timer: 'rehydrateViews',
         only: 'views',
         msg: 'Rehydrating src/views...',
-        force: true
+        force: true,
       })
     }
     if (key.sequence === '\u0003' || key.sequence === '\u0004') {

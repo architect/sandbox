@@ -25,7 +25,7 @@ function runTests (runType, t) {
     t.plan(2)
     let path = '/path'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) {
         let message = '@http get /path'
@@ -40,7 +40,7 @@ function runTests (runType, t) {
     t.plan(3)
     let path = '/get-c/'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -56,7 +56,7 @@ function runTests (runType, t) {
     t.plan(3)
     let path = '/get-c/hi'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -72,7 +72,7 @@ function runTests (runType, t) {
     t.plan(3)
     let path = '/get-c/hi/'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -88,7 +88,7 @@ function runTests (runType, t) {
     t.plan(3)
     let path = '/get-c/hi/there/wonderful/person'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -104,7 +104,7 @@ function runTests (runType, t) {
   t.test(`[Timeout / ${runType}] get /times-out`, t => {
     t.plan(3)
     tiny.get({
-      url: url + '/times-out'
+      url: url + '/times-out',
     }, function _got (err, result) {
       if (err) {
         let message = 'Timeout error'
@@ -120,7 +120,7 @@ function runTests (runType, t) {
   t.test(`[context.getRemainingTimeInMillis() / ${runType}] get /context-remaining-ms-node-cjs`, t => {
     t.plan(1)
     tiny.get({
-      url: url + '/context-remaining-ms-node-cjs'
+      url: url + '/context-remaining-ms-node-cjs',
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -134,7 +134,7 @@ function runTests (runType, t) {
   t.test(`[context.getRemainingTimeInMillis() / ${runType}] get /context-remaining-ms-node-esm`, t => {
     t.plan(1)
     tiny.get({
-      url: url + '/context-remaining-ms-node-esm'
+      url: url + '/context-remaining-ms-node-esm',
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -148,7 +148,7 @@ function runTests (runType, t) {
   t.test(`[Big, but not oversized response / ${runType}] get /big`, t => {
     t.plan(1)
     tiny.get({
-      url: url + '/big'
+      url: url + '/big',
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -162,7 +162,7 @@ function runTests (runType, t) {
   t.test(`[Big, but not oversized response / ${runType}] get /big-unicode`, t => {
     t.plan(1)
     tiny.get({
-      url: url + '/big-unicode'
+      url: url + '/big-unicode',
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -176,7 +176,7 @@ function runTests (runType, t) {
   t.test(`[Oversized response / ${runType}] get /chonky`, t => {
     t.plan(2)
     tiny.get({
-      url: url + '/chonky'
+      url: url + '/chonky',
     }, function _got (err, result) {
       if (err) {
         let message = 'Invalid payload size'
@@ -193,7 +193,7 @@ function runTests (runType, t) {
     let body = { text: '.'.repeat(validSize) }
     tiny.post({
       url: url + '/big',
-      body
+      body,
     }, function _got (err, result) {
       if (err) t.end(err)
       else t.deepEqual(body, result.body, 'Did not fail on a very large request')
@@ -206,7 +206,7 @@ function runTests (runType, t) {
     let body = { text: '.'.repeat(validSize) }
     tiny.post({
       url: url + '/big',
-      body
+      body,
     }, function _got (err, result) {
       if (err) {
         let message = 'Maximum event body exceeded'
@@ -221,7 +221,7 @@ function runTests (runType, t) {
     t.plan(2)
     let path = '/_static/hi.txt'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -236,7 +236,7 @@ function runTests (runType, t) {
     t.plan(3)
     let path = '/_static/foo/hi.json'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err) {
       if (err) {
         let { body, statusCode } = err
@@ -260,7 +260,7 @@ function runTests (runType, t) {
     t.plan(2)
     let path = '/_static/foo/hi.txt'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -275,7 +275,7 @@ function runTests (runType, t) {
     t.plan(3)
     let path = '/_static/hi.txt'
     tiny.get({
-      url: url + path
+      url: url + path,
     }, function _got (err) {
       if (err) {
         let { body, statusCode } = err
@@ -335,7 +335,7 @@ function runTests (runType, t) {
       t.plan(2)
       let start = Date.now()
       tiny.get({
-        url: url + '/chonk'
+        url: url + '/chonk',
       }, function _got (err, result) {
         if (err) t.end(err)
         else {

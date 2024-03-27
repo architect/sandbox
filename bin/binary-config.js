@@ -11,7 +11,7 @@ let os = process.platform
 let config = {
   name: 'sandbox-binary',
   bin: {
-    cli: 'binary-entry.js'
+    cli: 'binary-entry.js',
   },
   pkg: {
     // Don't manually include runtimes/deno.js in scripts, as it fails on pkg#997
@@ -26,8 +26,8 @@ let config = {
       '../src/tables/_aws-lite-dynamodb-vendor.js',
     ],
     targets: [],
-    outputPath: 'bin'
-  }
+    outputPath: 'bin',
+  },
 }
 
 let nodeVer = `node18`
@@ -51,7 +51,7 @@ else {
   config.pkg.targets = [
     p('linux'),
     p('darwin'),
-    p('win32')
+    p('win32'),
   ].filter(Boolean)
 }
 

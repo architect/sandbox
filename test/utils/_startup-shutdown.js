@@ -35,8 +35,8 @@ let startup = {
       env: {
         ARC_API_TYPE: options.apigateway,
         PORT: port,
-        ...process.env
-      }
+        ...process.env,
+      },
     })
     t.ok(child, 'Sandbox child process started')
     let started = false
@@ -56,7 +56,7 @@ let startup = {
     child.on('error', err => {
       t.fail(err)
     })
-  }
+  },
 }
 
 let shutdown = {
@@ -95,7 +95,7 @@ let shutdown = {
       }
     }
     check()
-  }
+  },
 }
 
 let asyncify = obj => {
@@ -104,7 +104,7 @@ let asyncify = obj => {
       try {
         obj[type](...params, resolve)
       }
-      catch (err){
+      catch (err) {
         reject(err)
       }
     })
@@ -128,7 +128,7 @@ verifyShutdown.async = (...params) => new Promise((resolve, reject) => {
   try {
     verifyShutdown(...params, resolve)
   }
-  catch (err){
+  catch (err) {
     reject(err)
   }
 })

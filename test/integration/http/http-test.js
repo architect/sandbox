@@ -25,7 +25,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /`, t => {
     t.plan(16)
     tiny.get({
-      url
+      url,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -46,7 +46,7 @@ function runTests (runType, t) {
             functionVersion: '$LATEST',
             invokedFunctionArn: 'sandbox',
             memoryLimitInMB: 1152,
-          }
+          },
         })
       }
     })
@@ -56,7 +56,7 @@ function runTests (runType, t) {
     t.plan(15)
     let rawQueryString = 'whats=up'
     tiny.get({
-      url: url + '/?' + rawQueryString
+      url: url + '/?' + rawQueryString,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -80,7 +80,7 @@ function runTests (runType, t) {
     t.plan(15)
     let rawQueryString = 'whats=up&whats=there'
     tiny.get({
-      url: url + '/?' + rawQueryString
+      url: url + '/?' + rawQueryString,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -105,7 +105,7 @@ function runTests (runType, t) {
     let cookie = 'a=cookie'
     tiny.get({
       url,
-      headers: { cookie }
+      headers: { cookie },
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -128,14 +128,14 @@ function runTests (runType, t) {
   t.test(`${mode} get /multi-cookies-res`, t => {
     t.plan(1)
     tiny.get({
-      url: url + '/multi-cookies-res'
+      url: url + '/multi-cookies-res',
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
         t.deepEqual(
           result.headers['set-cookie'],
           [ 'c1=v1', 'c2=v2' ],
-          'Response contains 2 set-cookie headers'
+          'Response contains 2 set-cookie headers',
         )
       }
     })
@@ -145,7 +145,7 @@ function runTests (runType, t) {
     t.plan(15)
     let rawPath = '/binary'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -170,7 +170,7 @@ function runTests (runType, t) {
     t.plan(15)
     let rawPath = '/nodejs20.x'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -194,7 +194,7 @@ function runTests (runType, t) {
     t.plan(15)
     let rawPath = '/nodejs18.x'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -218,7 +218,7 @@ function runTests (runType, t) {
     t.plan(15)
     let rawPath = '/node-esm'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -242,7 +242,7 @@ function runTests (runType, t) {
     t.plan(16)
     let rawPath = '/python3.11'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (isWindowsPythonStalling(err, t)) return
       else if (err) t.end(err)
@@ -264,7 +264,7 @@ function runTests (runType, t) {
             function_version: '$LATEST',
             invoked_function_arn: 'sandbox',
             memory_limit_in_mb: 1152,
-          }
+          },
         })
       }
     })
@@ -274,7 +274,7 @@ function runTests (runType, t) {
     t.plan(16)
     let rawPath = '/python3.8'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (isWindowsPythonStalling(err, t)) return
       else if (err) t.end(err)
@@ -296,7 +296,7 @@ function runTests (runType, t) {
             function_version: '$LATEST',
             invoked_function_arn: 'sandbox',
             memory_limit_in_mb: 1152,
-          }
+          },
         })
       }
     })
@@ -306,7 +306,7 @@ function runTests (runType, t) {
     t.plan(16)
     let rawPath = '/ruby3.2'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -327,7 +327,7 @@ function runTests (runType, t) {
             function_version: '$LATEST',
             invoked_function_arn: 'sandbox',
             memory_limit_in_mb: 1152,
-          }
+          },
         })
       }
     })
@@ -337,7 +337,7 @@ function runTests (runType, t) {
     t.plan(15)
     let rawPath = '/deno'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -361,7 +361,7 @@ function runTests (runType, t) {
     t.plan(15)
     let rawPath = '/get-c/hello/there'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -385,7 +385,7 @@ function runTests (runType, t) {
     t.plan(15)
     let rawPath = '/get-p-c/why/hello/there'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -397,7 +397,7 @@ function runTests (runType, t) {
           queryStringParameters: undefined,
           pathParameters: {
             param: 'why',
-            proxy: 'hello/there'
+            proxy: 'hello/there',
           },
           rawQueryString: '',
           headers: '🤷🏽‍♀️',
@@ -412,7 +412,7 @@ function runTests (runType, t) {
     t.plan(3)
     let rawPath = '/no-return'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -429,7 +429,7 @@ function runTests (runType, t) {
     t.plan(2)
     let rawPath = '/promise-return'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -444,7 +444,7 @@ function runTests (runType, t) {
     t.plan(15)
     let rawPath = '/custom'
     tiny.get({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -596,7 +596,7 @@ function runTests (runType, t) {
     t.plan(15)
     let rawPath = '/head'
     tiny.head({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -620,7 +620,7 @@ function runTests (runType, t) {
     t.plan(15)
     let rawPath = '/options'
     tiny.options({
-      url: url + rawPath
+      url: url + rawPath,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -873,7 +873,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /reject-promise should fail`, t => {
     t.plan(2)
     tiny.get({
-      url: url + '/reject-promise'
+      url: url + '/reject-promise',
     }, function _got (err) {
       if (err) {
         t.equal(err.statusCode, 500, 'Got 500 for function error')
@@ -888,7 +888,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /throw-sync-error should fail`, t => {
     t.plan(2)
     tiny.get({
-      url: url + '/throw-sync-error'
+      url: url + '/throw-sync-error',
     }, function _got (err) {
       if (err) {
         t.equal(err.statusCode, 500, 'Got 500 for function error')
@@ -903,7 +903,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /python-error should fail`, t => {
     t.plan(2)
     tiny.get({
-      url: url + '/python-error'
+      url: url + '/python-error',
     }, function _got (err) {
       if (isWindowsPythonStalling(err, t)) return
       else if (err) {
@@ -919,7 +919,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /ruby-error should fail`, t => {
     t.plan(2)
     tiny.get({
-      url: url + '/ruby-error'
+      url: url + '/ruby-error',
     }, function _got (err) {
       if (err) {
         t.equal(err.statusCode, 500, 'Got 500 for function error')
@@ -978,7 +978,7 @@ function runTests (runType, t) {
     t.plan(2)
     rmPublic(t)
     tiny.get({
-      url
+      url,
     }, function _got (err, result) {
       if (err) t.equal(err.statusCode, 404, 'Got 404 for missing file')
       else t.end(result)
@@ -999,7 +999,7 @@ function runTests (runType, t) {
   t.test(`${mode} get / without defining get / should succeed if index.html is present`, t => {
     t.plan(2)
     tiny.get({
-      url
+      url,
     }, function _got (err, result) {
       if (err) t.end(err)
       else {
@@ -1024,7 +1024,7 @@ function runTests (runType, t) {
   t.test(`${mode} get /missing should fail if missing its handler file`, t => {
     t.plan(2)
     tiny.get({
-      url: url + '/missing'
+      url: url + '/missing',
     }, function _got (err, result) {
       if (err) {
         t.equal(err.statusCode, 502, 'Got 502 for missing file')

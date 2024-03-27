@@ -4,7 +4,7 @@ let proxyquire = require('proxyquire')
 let params = null
 let listener = proxyquire('../../../../src/arc/_listener', {
   './_ssm': (ps, p, req, res) => { params = ps; params.service = 'ssm'; res.end() },
-  './_ws': (ps, req, res) => { params = ps; params.service = 'ws'; res.end() }
+  './_ws': (ps, req, res) => { params = ps; params.service = 'ws'; res.end() },
 })
 let req
 let res

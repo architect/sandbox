@@ -58,7 +58,7 @@ module.exports = function _ssm ({ body, services }, params, req, res) {
       Type: 'String',
       Value,
       Version: 1,
-      ARN: 'Architect Sandbox'
+      ARN: 'Architect Sandbox',
     })
 
     // ssm.getParametersByPath()

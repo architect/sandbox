@@ -42,7 +42,7 @@ module.exports = function validateUserEnv (params, callback) {
   if (envOption) {
     let probs = []
     try {
-      Object.entries(envOption).forEach(([ key, /* value */ ]) => {
+      Object.entries(envOption).forEach(([ key /* value */ ]) => {
         if (!validName.test(key)) {
           probs.push(`- Env var '${key}' is invalid, must be [a-zA-Z0-9_]`)
         }
@@ -66,7 +66,7 @@ module.exports = function validateUserEnv (params, callback) {
     let dotEnv =    existsSync(dotEnvPath) && dotEnvPath
     let local =     proj?.localPreferences?.env?.[environment] && proj.localPreferencesFile
     let global =    proj?.globalPreferences?.env?.[environment] && proj.globalPreferencesFile
-    let filepath =  (dotEnv) && basename(dotEnv) ||
+    let filepath =  (dotEnv && basename(dotEnv)) ||
                     (local && basename(local)) ||
                     (global && `~${sep}${basename(global)}`)
     foundEnv = true

@@ -72,7 +72,7 @@ function start (params, callback) {
       let httpPort = params.ports.http
       // Node.js 17+ changed DNS lookup behavior for host binding; prefer host to be undefined unless manually specified
       httpServer.listen(httpPort, host, callback)
-    }
+    },
   ], callback)
 }
 

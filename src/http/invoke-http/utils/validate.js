@@ -27,7 +27,7 @@ autocreate true
   other: (title, body) => `${head}<h1>${title}</h1>
   <p>${body}<p>`,
   chonky: size => `<h1>Invalid payload size</h1>
-<p>Responses must be 6MB or less; this response is ${size}</p>`
+<p>Responses must be 6MB or less; this response is ${size}</p>`,
 }
 
 function invalid (res, body) {
@@ -36,12 +36,12 @@ function invalid (res, body) {
   res.setHeader('cache-control', 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0')
   return {
     valid: false,
-    body
+    body,
   }
 }
 
 module.exports = {
   isBuffer,
   errors,
-  invalid
+  invalid,
 }

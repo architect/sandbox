@@ -4,7 +4,7 @@ let hashkeys = [
   'HashString',
   'HashNumber',
   'PartitionString',
-  'PartitionNumber'
+  'PartitionNumber',
 ]
 let rangekeys = [
   'String',
@@ -12,7 +12,7 @@ let rangekeys = [
   'RangeString',
   'RangeNumber',
   'SortString',
-  'SortNumber'
+  'SortNumber',
 ]
 function validate (k, keys) {
   if (!keys.includes(k)) throw Error(`Unknown key type: ${k}`)
@@ -25,7 +25,7 @@ module.exports = function getKeySchema (table) {
   validate(partitionKeyType, hashkeys)
   let schema = [ {
     AttributeName: partitionKey,
-    KeyType: 'HASH'
+    KeyType: 'HASH',
   } ]
 
   // Handle sort key if necessary
@@ -33,7 +33,7 @@ module.exports = function getKeySchema (table) {
     validate(sortKeyType, rangekeys)
     schema.push({
       AttributeName: sortKey,
-      KeyType: 'RANGE'
+      KeyType: 'RANGE',
     })
   }
 
