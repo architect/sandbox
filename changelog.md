@@ -2,6 +2,16 @@
 
 ---
 
+## [6.0.4] 2024-03-27
+
+### Fixed
+
+- Make a best effort attempt to terminate the process via `SIGINT` + `SIGTERM` termination signals; should fix (or at least improve) #1479
+  - Sandbox running via CLI will now forcefully terminate itself after 5 seconds if the termination routine has stalled out or takes too long
+  - Thanks @lpsinger + @courey!
+
+---
+
 ## [6.0.3] 2024-03-25
 
 ### Changed

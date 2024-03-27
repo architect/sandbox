@@ -4,6 +4,9 @@ let sandbox = require('../')
 module.exports = function handleStdin (params) {
   let { rehydrate, update, watcher } = params
 
+  let ending = false
+  let timeout
+
   // Listen for important keystrokes
   emitKeypressEvents(process.stdin)
   if (process.stdin.isTTY) {
@@ -34,15 +37,29 @@ module.exports = function handleStdin (params) {
       })
     }
     if (key.sequence === '\u0003' || key.sequence === '\u0004') {
-      if (watcher) {
-        watcher.close().then(end)
-      }
-      else end()
+      terminate('ctrl^c')
     }
   })
 
+  process.on('SIGINT', terminate)
+  process.on('SIGTERM', terminate)
+
+  function terminate (via) {
+    if (ending) return
+    else ending = true
+
+    timeout = setTimeout(() => {
+      update.err(`Process failed to gracefully exit in 5 seconds via ${via}, forcefully terminated`)
+      process.exit(1)
+    }, 5000)
+
+    if (watcher) watcher.close().then(end)
+    else end()
+  }
+
   function end () {
     sandbox.end(function (err) {
+      if (timeout) clearTimeout(timeout)
       if (err) {
         update.err(err)
         process.exit(1)
