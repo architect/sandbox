@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "npm run lint && npm run test:integration && npm run coverage",
+    "test:nolint": "npm run test:integration && npm run coverage",
     "test:unit": "cross-env tape 'test/unit/**/*-test.js' | tap-arc",
     "test:integration": "cross-env tape 'test/integration/**/*-test.js' | tap-arc",
     "coverage": "nyc --reporter=lcov --reporter=text npm run test:unit",
