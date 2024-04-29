@@ -24,7 +24,7 @@ module.exports = function eventBusListener (params, req, res) {
     try {
       message = JSON.parse(body)
     }
-    catch (e) {
+    catch {
       res.statusCode = 400
       res.end('Sandbox @event bus exception parsing request body')
       return

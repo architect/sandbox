@@ -21,7 +21,7 @@ module.exports = function connection (params, connectionId, ws) {
       let payload = JSON.parse(msg)
       lambda = payload.action && get.ws(payload.action)
     }
-    catch (e) {
+    catch {
       // fallback to default
     }
     if (lambda) {

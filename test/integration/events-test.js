@@ -66,7 +66,6 @@ function verifyPublish ({ t, pragma, event, file, message }) {
 test('Set up env', t => {
   t.plan(2)
   setup(t)
-  // eslint-disable-next-line
   arc = require('@architect/functions')
   t.ok(sandbox, 'Got Sandbox')
 })

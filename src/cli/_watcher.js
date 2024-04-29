@@ -17,7 +17,6 @@ module.exports = function runWatcher (args, params) {
 
   // Live reload starts within Sandbox, so we can only load it within the watcher
   let livereload
-  // eslint-disable-next-line
   livereload = require('../arc').livereload
 
   try {
@@ -47,7 +46,6 @@ module.exports = function runWatcher (args, params) {
           let end = Date.now()
           update.done(`Sandbox reloaded in ${end - start}ms`)
           // Rewrite the livereload WS server, or connected clients will be orphaned
-          // eslint-disable-next-line
           livereload = require('../arc').livereload
         }
       })

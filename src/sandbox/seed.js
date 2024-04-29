@@ -29,10 +29,9 @@ module.exports = function startupSeedData (params, callback) {
     let data
     try {
       if (ext === 'json') data = JSON.parse(readFileSync(file))
-      // eslint-disable-next-line
       else data = require(file)
     }
-    catch (err) {
+    catch {
       return callback(Error(`Failed to load seed data from ${file}`))
     }
 

@@ -42,7 +42,6 @@ function check (t, altTimeout) {
 test('Set up env', t => {
   t.plan(2)
   setup(t)
-  // eslint-disable-next-line
   arc = require('@architect/functions')
   t.ok(sandbox, 'Sandbox is present')
 })

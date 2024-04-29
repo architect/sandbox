@@ -26,7 +26,7 @@ function start (params, callback) {
         if (err) {
           running._startupFailed = true
           try { end(() => rej(err)) }
-          catch (e) { rej(err) }
+          catch { rej(err) }
         }
         else res(result)
       }

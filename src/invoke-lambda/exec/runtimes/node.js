@@ -53,9 +53,7 @@ function client (method, params) {
   try {
     let { projectSrc, handlerFile, handlerMethod, shared, views } = JSON.parse(__ARC_CONFIG__);
     let context = JSON.parse(__ARC_CONTEXT__);
-    /* eslint-disable-next-line */
     let { join, sep } = require('path');
-    /* eslint-disable-next-line */
     let { existsSync: exists, readFileSync: read } = require('fs');
     let cwd = process.cwd();
     delete process.env.__ARC_CONFIG__;
@@ -65,7 +63,6 @@ function client (method, params) {
 
     async function run () {
       /* Require first to populate the require cache for missing dependency warnings */
-      /* eslint-disable-next-line */
       let handler = require(handlerFile)[handlerMethod];
 
       /* Enumerate package files */
@@ -183,7 +180,6 @@ function client (method, params) {
     await run();
   }
   catch (err) {
-    /* eslint-disable-next-line */
     (async function initError () {
       let unknown = 'Unknown init error';
       console.log('Lambda init error:', err.body || err.message || unknown);
