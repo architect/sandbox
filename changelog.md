@@ -2,6 +2,15 @@
 
 ---
 
+## [6.0.5] 2024-04-29
+
+### Changed
+
+- Updated dependencies
+- Updated `package.json` `engines.node` property to reflect changes from v6
+
+---
+
 ## [6.0.4] 2024-03-27
 
 ### Fixed

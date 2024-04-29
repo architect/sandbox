@@ -13,7 +13,7 @@
     "build": "node scripts/vendor.js && node bin/binary-config.js && npx pkg bin"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "repository": {
     "type": "git",
@@ -28,12 +28,12 @@
     "src/*"
   ],
   "dependencies": {
-    "@architect/asap": "~7.0.8",
-    "@architect/create": "~5.0.2",
-    "@architect/hydrate": "~4.0.3",
-    "@architect/inventory": "~4.0.4",
-    "@architect/utils": "~4.0.4",
-    "@aws-lite/client": "^0.20.0",
+    "@architect/asap": "~7.0.10",
+    "@architect/create": "~5.0.3",
+    "@architect/hydrate": "~4.0.6",
+    "@architect/inventory": "~4.0.5",
+    "@architect/utils": "~4.0.6",
+    "@aws-lite/client": "^0.21.1",
     "@aws-lite/dynamodb": "^0.3.4",
     "@begin/hashid": "~1.0.0",
     "chalk": "4.1.2",
@@ -41,7 +41,7 @@
     "depstatus": "~1.1.1",
     "dynalite": "~3.2.2",
     "finalhandler": "~1.2.0",
-    "glob": "~10.3.10",
+    "glob": "~10.3.12",
     "http-proxy": "~1.18.1",
     "lambda-runtimes": "~2.0.2",
     "minimist": "~1.2.8",
@@ -53,16 +53,16 @@
     "tmp": "~0.2.3",
     "tree-kill": "~1.2.2",
     "update-notifier-cjs": "~5.1.6",
-    "ws": "~8.16.0"
+    "ws": "~8.17.0"
   },
   "devDependencies": {
-    "@architect/eslint-config": "~3.0.0-RC.0",
-    "@architect/functions": "~8.1.0",
+    "@architect/eslint-config": "~3.0.0",
+    "@architect/functions": "~8.1.1",
     "@architect/req-res-fixtures": "git+https://github.com/architect/req-res-fixtures.git",
     "@aws-lite/apigatewaymanagementapi": "~0.0.8",
     "@aws-lite/ssm": "~0.2.3",
     "cross-env": "~7.0.3",
-    "eslint": "~8.57.0",
+    "eslint": "~9.1.1",
     "fs-extra": "~11.2.0",
     "nyc": "~15.1.0",
     "pkg": "~5.8.1",
@@ -70,8 +70,5 @@
     "tap-arc": "~1.2.2",
     "tape": "~5.7.5",
     "tiny-json-http": "~7.5.1"
-  },
-  "eslintConfig": {
-    "extends": "@architect/eslint-config"
   }
 }
