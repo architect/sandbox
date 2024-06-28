@@ -13,7 +13,7 @@ module.exports = function createLambdaContext (params) {
   let functionVersion = '$LATEST'
   let invokedFunctionArn = 'sandbox'
 
-  if (runtime.startsWith('node') || runtime.startsWith('deno')) {
+  if (runtime.startsWith('node') || runtime.startsWith('deno') || runtime.startsWith('bun')) {
     let lambdaContext = {
       awsRequestId: makeRequestId(),
       functionName,

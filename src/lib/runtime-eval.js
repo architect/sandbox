@@ -5,6 +5,10 @@ let pyCommandCache
  * Provides platform-specific runtime-specific commands for child_process spawns
  */
 module.exports = {
+  bun: (script) => ({
+    command: 'bun',
+    args: [ 'run', '-e', script ],
+  }),
   deno: function (script) {
     return {
       command: 'deno',

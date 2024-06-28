@@ -64,6 +64,7 @@ function getRuntime ({ config, handlerModuleSystem }) {
     if (handlerModuleSystem === 'esm') return 'node-esm'
     return 'node'
   }
+  else if (run.startsWith('bun'))   return 'bun'
   else if (run.startsWith('deno'))   return 'deno'
   else if (run.startsWith('ruby'))   return 'ruby'
   else if (run.startsWith('python')) return 'python'

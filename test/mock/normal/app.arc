@@ -21,6 +21,7 @@ get     /python3.11
 get     /python3.8
 get     /ruby3.2
 get     /deno
+get     /bun
 # Path
 get     /get-p-c/:param/*
 get     /get-c/*
