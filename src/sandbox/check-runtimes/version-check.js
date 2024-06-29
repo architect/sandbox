@@ -51,7 +51,9 @@ module.exports = function runtimeVersionCheck (params) {
 function check (configured, localRuntimes) {
   let alias = aliases[configured.toLowerCase()]
   let runtime = alias ? runtimes[alias][0] : configured
-  let major = ver => ver.split('.')[0]
+  let major = ver =>  {
+    return ver.split('.')[0]
+  }
   let minor = ver => ver.split('.')[1]
   if (runtime.startsWith('nodejs')) {
     let runtimeVer = runtimeVersions[runtime].wildcard

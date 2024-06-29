@@ -62,7 +62,7 @@ test('Get inventory', t => {
 })
 
 test('Test runtime invocations', t => {
-  t.plan(21)
+  t.plan(24)
   let lambda
 
   lambda = get.http('get /')
@@ -195,9 +195,10 @@ test('Test ASAP invocation', t => {
 })
 
 test('Verify call counts from runtime invocations', t => {
-  t.plan(5)
+  t.plan(6)
   t.equals(runtimes.asap, 1, 'ASAP called correct number of times')
   t.equals(runtimes.deno, 1, 'Deno called correct number of times')
+  t.equals(runtimes.deno, 1, 'Bun called correct number of times')
   t.equals(runtimes.node, 5, 'Node called correct number of times')
   t.equals(runtimes.python, 2, 'Python called correct number of times')
   t.equals(runtimes.ruby, 1, 'Ruby called correct number of times')
