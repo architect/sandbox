@@ -7,7 +7,7 @@ let handlers
 module.exports = function () {
   if (handlers) return handlers
   handlers = {}
-  let runtimes = [ 'deno.mjs', 'node.js', 'node-esm.mjs', 'python.py', 'ruby.rb' ]
+  let runtimes = [ 'bun.mjs', 'deno.mjs', 'node.js', 'node-esm.mjs', 'python.py', 'ruby.rb' ]
   runtimes.forEach(runtime => {
     try {
       let name = runtime.split('.')[0]

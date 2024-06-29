@@ -10,6 +10,7 @@ let { credentials: creds } = require(join(cwd, 'test', 'utils'))
 
 let runtimes = {
   asap: 0,
+  bun: 0,
   deno: 0,
   node: 0,
   python: 0,
@@ -21,6 +22,7 @@ let exec = (lambda, params, callback) => {
   let { runtime } = lambda.config
   let run
   if (runtime.startsWith('node')) run = 'node'
+  if (runtime.startsWith('bun')) run = 'bun'
   if (runtime.startsWith('deno')) run = 'deno'
   if (runtime.startsWith('python')) run = 'python'
   if (runtime.startsWith('ruby')) run = 'ruby'
@@ -60,7 +62,7 @@ test('Get inventory', t => {
 })
 
 test('Test runtime invocations', t => {
-  t.plan(21)
+  t.plan(24)
   let lambda
 
   lambda = get.http('get /')
@@ -125,6 +127,15 @@ test('Test runtime invocations', t => {
     t.equals(timeout, 10000, 'deno ran with correct timeout')
     t.deepEqual(result, event, 'deno received event')
   })
+
+  lambda = get.http('get /bun')
+  invoke({ lambda, ...params }, (err, result) => {
+    if (err) t.end(err)
+    let { options, timeout } = execPassedParams
+    t.equals(options.cwd, lambda.src, 'bun passed correct path')
+    t.equals(timeout, 10000, 'bun ran with correct timeout')
+    t.deepEqual(result, event, 'bun received event')
+  })
 })
 
 // This test will still hit the node call counter at least once
@@ -184,9 +195,10 @@ test('Test ASAP invocation', t => {
 })
 
 test('Verify call counts from runtime invocations', t => {
-  t.plan(5)
+  t.plan(6)
   t.equals(runtimes.asap, 1, 'ASAP called correct number of times')
   t.equals(runtimes.deno, 1, 'Deno called correct number of times')
+  t.equals(runtimes.deno, 1, 'Bun called correct number of times')
   t.equals(runtimes.node, 5, 'Node called correct number of times')
   t.equals(runtimes.python, 2, 'Python called correct number of times')
   t.equals(runtimes.ruby, 1, 'Ruby called correct number of times')

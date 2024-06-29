@@ -1,6 +1,13 @@
 # Architect Sandbox changelog
 
 ---
+## [6.0.5] 2024-06-29
+
+### Changed
+
+- Added bun support
+
+---
 
 ## [6.0.5] 2024-04-29
 

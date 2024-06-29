@@ -44,6 +44,11 @@ jobs:
       with:
         deno-version: v1.x
 
+    - name: Set up Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: v1.1.x
+
     - name: Env
       run: |
         echo "Event name: ${{ github.event_name }}"
@@ -55,6 +60,7 @@ jobs:
         VER=`python --version`; echo "Python ver: $VER"
         VER=`ruby --version`; echo "Ruby ver:   $VER"
         VER=`deno --version`; echo "Deno ver:   $VER"
+        VER=`bun --version`; echo "Bun ver:   $VER"
         echo "OS ver:     ${{ runner.os }}"
 
     - name: Install
