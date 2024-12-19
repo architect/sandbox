@@ -106,6 +106,12 @@ function _start (params, callback) {
       seed(params, callback)
     },
 
+    // Run post-seed scripts
+    function (callback) {
+      let options = { method: 'post-seed', name: 'post-seed' }
+      plugins(params, options, callback)
+    },
+
     // Run startup scripts (if present)
     function (callback) {
       startupScripts(params, callback)
