@@ -108,7 +108,7 @@ function _start (params, callback) {
 
     // Run post-seed scripts
     function (callback) {
-      let options = { method: 'post-seed', name: 'post-seed' }
+      let options = { method: 'postSeed', name: 'postSeed' }
       plugins(params, options, callback)
     },
 
