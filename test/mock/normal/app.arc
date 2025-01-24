@@ -14,6 +14,7 @@ queue-custom
 @http
 get     / # runs default
 # Runtimes
+get     /nodejs22.x
 get     /nodejs20.x
 get     /nodejs18.x
 get     /node-esm
