@@ -17,8 +17,8 @@ get     / # runs default
 get     /nodejs20.x
 get     /nodejs18.x
 get     /node-esm
-get     /python3.11
-get     /python3.8
+get     /python3.13
+get     /python3.9
 get     /ruby3.2
 get     /deno
 # Path
