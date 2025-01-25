@@ -14,6 +14,7 @@ let ports = { tables: tablesPort }
 let externalDBPort = 4567
 let dynaliteServer
 let confirmStarted = 'Seeded 2 tables with 4 rows'
+let inventory = {}
 
 // Because these tests use Arc Functions `tables`, that module needs a `ARC_TABLES_PORT` env var to run locally
 // That said, to prevent side-effects, destroy that env var immediately after use
@@ -45,7 +46,7 @@ function runTests (runType, t) {
 
   t.test(`${mode} Get client`, t => {
     t.plan(1)
-    getDBClient({ creds, ports }, function _gotDBClient (err, client) {
+    getDBClient({ creds, inventory, ports }, function _gotDBClient (err, client) {
       if (err) console.log(err) // Yes, but actually no
       dynamo = client.DynamoDB
       t.ok(dynamo, 'Got Dynamo client')
@@ -267,7 +268,7 @@ function runTests (runType, t) {
   t.test(`${mode} Get client (external DB)`, t => {
     t.plan(1)
     setup(t, externalDBPort)
-    getDBClient({ creds, ports: { tables: externalDBPort } }, function _gotDBClient (err, client) {
+    getDBClient({ creds, inventory, ports: { tables: externalDBPort } }, function _gotDBClient (err, client) {
       if (err) console.log(err) // Yes, but actually no
       dynamo = client.DynamoDB
       t.ok(dynamo, 'Got Dynamo client')

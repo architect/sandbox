@@ -128,6 +128,31 @@ function runTests (runType) {
     })
   })
 
+  test(`${mode} get /nodejs22.x`, t => {
+    t.plan(16)
+    let path = '/nodejs22.x'
+    tiny.get({
+      url: url + path,
+    }, function _got (err, result) {
+      if (err) t.end(err)
+      else {
+        checkResult(t, result.body, {
+          message: 'Hello from get /nodejs22.x (running nodejs22.x)',
+          resource: path,
+          path,
+          httpMethod: 'GET',
+          headers: '🤷🏽‍♀️',
+          multiValueHeaders: '🤷🏽‍♀️',
+          queryStringParameters: null,
+          multiValueQueryStringParameters: null,
+          pathParameters: null,
+          body: null,
+          isBase64Encoded: false,
+        })
+      }
+    })
+  })
+
   test(`${mode} get /nodejs20.x`, t => {
     t.plan(16)
     let path = '/nodejs20.x'
@@ -178,9 +203,9 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /python3.11`, t => {
+  test(`${mode} get /python3.13`, t => {
     t.plan(17)
-    let path = '/python3.11'
+    let path = '/python3.13'
     tiny.get({
       url: url + path,
     }, function _got (err, result) {
@@ -188,7 +213,7 @@ function runTests (runType) {
       else if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /python3.11 (running python3.11)',
+          message: 'Hello from get /python3.13 (running python3.13)',
           resource: path,
           path,
           httpMethod: 'GET',
@@ -201,7 +226,7 @@ function runTests (runType) {
           isBase64Encoded: false,
           context: {
             aws_request_id: true, // Just check for presence
-            function_name: 'sandbox-get-python3_11',
+            function_name: 'sandbox-get-python3_13',
             function_version: '$LATEST',
             invoked_function_arn: 'sandbox',
             memory_limit_in_mb: 1152,
@@ -211,9 +236,9 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /python3.8`, t => {
+  test(`${mode} get /python3.9`, t => {
     t.plan(17)
-    let path = '/python3.8'
+    let path = '/python3.9'
     tiny.get({
       url: url + path,
     }, function _got (err, result) {
@@ -221,7 +246,7 @@ function runTests (runType) {
       else if (err) t.end(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /python3.8 (running python3.8)',
+          message: 'Hello from get /python3.9 (running python3.9)',
           resource: path,
           path,
           httpMethod: 'GET',
@@ -234,7 +259,7 @@ function runTests (runType) {
           isBase64Encoded: false,
           context: {
             aws_request_id: true, // Just check for presence
-            function_name: 'sandbox-get-python3_8',
+            function_name: 'sandbox-get-python3_9',
             function_version: '$LATEST',
             invoked_function_arn: 'sandbox',
             memory_limit_in_mb: 1152,
