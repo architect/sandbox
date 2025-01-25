@@ -90,12 +90,15 @@ module.exports = function requestFormatter ({ method, path, req }, httpApi) {
 
   // Path parameters
   if (httpApi && params && Object.keys(params).length) {
-    // Try to work around router's '0' param jic someone actually used that
     if (hasCatchall) {
-      request.pathParameters = { ...params, proxy: params['0'] }
-      delete request.pathParameters['0']
+      // Router 2 no longer supports bare wildcards (`/*`), wildcards must now be "named", so they're now found at `/*_arc_catchall` (which returns an `_arc_catchall` property)
+      let proxy = params['_arc_catchall'].join('/')
+      request.pathParameters = { ...params, proxy }
+      delete request.pathParameters['_arc_catchall']
     }
     else request.pathParameters = params
+    // Router 2 also no longer catches trailing slashes at the trailing wildcard level, so we have to work around that as well
+    // However, REST APIs have not been supported in Arc for years now, so I am not doing the work to figure out if this behavior needs to be replicated
   }
 
   return request

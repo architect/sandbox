@@ -6,7 +6,7 @@ let headerFormatter = require('./_req-header-fmt')
  * - Mocks request object shape from API Gateway <> Lambda proxy integration
  * - Unlike the REST request formatter, we build this out as we go (instead of mostly in one big lump) because params are conditionally omitted
  */
-module.exports = function requestFormatter ({ method, path, req }) {
+module.exports = function requestFormatter ({ method, path, req, catchallTrailingSlash }) {
   let { body, params, resource, url } = req
   let { pathname, query } = URL.parse(url)
 
@@ -78,12 +78,19 @@ module.exports = function requestFormatter ({ method, path, req }) {
 
   // Path parameters
   if (Object.keys(params).length) {
-    // Try to work around router's '0' param jic someone actually used that
     if (hasCatchall) {
-      request.pathParameters = { ...params, proxy: params['0'] }
-      delete request.pathParameters['0']
+      // Router 2 no longer supports bare wildcards (`/*`), wildcards must now be "named", so they're now found at `/*_arc_catchall` (which returns an `_arc_catchall` property)
+      let proxy = params['_arc_catchall'].join('/')
+      request.pathParameters = { ...params, proxy }
+      delete request.pathParameters['_arc_catchall']
     }
     else request.pathParameters = params
+  }
+  // Router 2 also no longer catches trailing slashes at the trailing wildcard level, so we have to work around that as well
+  if (catchallTrailingSlash) {
+    request.pathParameters = request.pathParameters
+      ? { ...request.pathParameters, proxy: '' }
+      : { proxy: '' }
   }
 
   // Body

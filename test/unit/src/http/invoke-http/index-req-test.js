@@ -166,7 +166,7 @@ test('Architect v7 (HTTP API mode): get /{proxy+}', t => {
     url: url('/nature/hiking'),
     body: {},
     headers,
-    params: { '0': mock.pathParameters.proxy },
+    params: { _arc_catchall: mock.pathParameters.proxy.split('/') },
     httpVersion,
   }
   handler(input, response)
@@ -185,7 +185,7 @@ test('Architect v7 (HTTP API mode): get /path/* (/path/hi/there)', t => {
     url: url('/path/hi/there'),
     body: {},
     headers,
-    params: { '0': mock.pathParameters.proxy },
+    params: { _arc_catchall: mock.pathParameters.proxy.split('/') },
     httpVersion,
   }
   handler(input, response)
@@ -206,7 +206,7 @@ test('Architect v7 (HTTP API mode): get /:activities/{proxy+} (/nature/hiking/wi
     headers,
     params: {
       activities: 'nature',
-      '0': mock.pathParameters.proxy,
+      _arc_catchall: mock.pathParameters.proxy.split('/'),
     },
     httpVersion,
   }
@@ -499,7 +499,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /{proxy+}', t => {
     url: url('/nature/hiking'),
     body: {},
     headers,
-    params: { '0': mock.pathParameters.proxy },
+    params: { _arc_catchall: mock.pathParameters.proxy.split('/') },
     httpVersion,
   }
   handler(input, response)
@@ -519,7 +519,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /path/* (/path/hi/there)', t
     url: url('/path/hi/there'),
     body: {},
     headers,
-    params: { '0': mock.pathParameters.proxy },
+    params: { _arc_catchall: mock.pathParameters.proxy.split('/') },
     httpVersion,
   }
   handler(input, response)
@@ -541,7 +541,7 @@ test('Architect v7 (HTTP + Lambda 1.0 payload): get /:activities/{proxy+} (/natu
     headers,
     params: {
       activities: 'nature',
-      '0': mock.pathParameters.proxy,
+      _arc_catchall: mock.pathParameters.proxy.split('/'),
     },
     httpVersion,
   }
@@ -796,7 +796,7 @@ test('Architect v6 (REST API mode): get /{proxy+}', t => {
     resource: '/{proxy+}', // The only time we should be using this
     body: {},
     headers,
-    params: mock.pathParameters, // Would normally be { '0': ... }
+    params: mock.pathParameters, // Would normally be { _arc_catchall: ... }
     httpVersion,
   }
   handler(input, response)
