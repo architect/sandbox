@@ -49,7 +49,7 @@
     "router": "~2.0.0",
     "run-parallel": "~1.2.0",
     "run-series": "~1.1.9",
-    "send": "~0.18.0",
+    "send": "~1.1.0",
     "server-destroy": "~1.0.1",
     "tmp": "~0.2.3",
     "tree-kill": "~1.2.2",
