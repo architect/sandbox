@@ -17,7 +17,7 @@ let _livereload = require('./utils/livereload')
  * Formats and validates HTTP request and response event objects
  */
 module.exports = function invokeHTTP (params) {
-  let { apiType, inventory, lambda, ports } = params
+  let { apiType, inventory, lambda, ports, catchallTrailingSlash } = params
   let { method, path } = lambda
 
   method = method.toUpperCase()
@@ -30,7 +30,7 @@ module.exports = function invokeHTTP (params) {
       request = requestFormatterRest({ method, path, req }, httpApiV1)
     }
     else {
-      request = requestFormatterHttp({ method, path, req })
+      request = requestFormatterHttp({ method, path, req, catchallTrailingSlash })
     }
 
     // Run the Lambda sig locally

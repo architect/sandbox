@@ -2,6 +2,15 @@
 
 ---
 
+## [7.0.0] 2025-01-25
+
+### Changed
+
+- Upgrade to `router` v2; lots of related refactoring
+- Breaking change: removed support for Node.js 16.x (now EOL, and no longer available to created in AWS Lambda)
+
+---
+
 ## [6.0.5] 2024-04-29
 
 ### Changed
