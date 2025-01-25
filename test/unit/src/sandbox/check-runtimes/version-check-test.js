@@ -37,9 +37,9 @@ test('Project global runtime config', async t => {
   t.ok(result[1].includes('aliased to node'), 'Reported issue with alias')
 
   // Minor
-  rawArc = basic + '\n@aws\nruntime nodejs16.x'
+  rawArc = basic + '\n@aws\nruntime nodejs18.x'
   inventory = await _inventory({ rawArc })
-  localRuntimes = { node: '16.1.0' }
+  localRuntimes = { node: '18.1.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
   t.notOk(result, 'Compatible runtime configuration did not return any issues')
 
@@ -61,15 +61,15 @@ test('Project global runtime config', async t => {
   t.ok(result[1].includes('aliased to python'), 'Reported issue with alias')
 
   // Minor
-  rawArc = basic + '\n@aws\nruntime python3.8'
+  rawArc = basic + '\n@aws\nruntime python3.13'
   inventory = await _inventory({ rawArc })
-  localRuntimes = { python: '3.7.0' }
+  localRuntimes = { python: '3.11.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
   console.log(result[1])
   t.ok(result[1].includes('Project global runtime'), 'Reported issue with project global runtime')
 
   // Major
-  rawArc = basic + '\n@aws\nruntime python3.8'
+  rawArc = basic + '\n@aws\nruntime python3.13'
   inventory = await _inventory({ rawArc })
   localRuntimes = { python: '2.8.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
@@ -136,19 +136,19 @@ test('Per-Lambda runtime config', async t => {
 
   // Minor
   inventory = await _inventory({ rawArc })
-  inventory.inv.http[0].config.runtime = 'python3.8'
-  localRuntimes = { python: '3.7.0' }
+  inventory.inv.http[0].config.runtime = 'python3.13'
+  localRuntimes = { python: '3.9.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
   console.log(result[1])
-  t.ok(result[1].includes('python3.8'), 'Reported issue with Lambda runtime')
+  t.ok(result[1].includes('python3.13'), 'Reported issue with Lambda runtime')
 
   // Major
   inventory = await _inventory({ rawArc })
-  inventory.inv.http[0].config.runtime = 'python3.8'
+  inventory.inv.http[0].config.runtime = 'python3.13'
   localRuntimes = { python: '2.8.0' }
   result = versionCheck({ cwd, inventory, localRuntimes })
   console.log(result[1])
-  t.ok(result[1].includes('python3.8'), 'Reported issue with Lambda runtime')
+  t.ok(result[1].includes('python3.13'), 'Reported issue with Lambda runtime')
 
   // Minor
   inventory = await _inventory({ rawArc })

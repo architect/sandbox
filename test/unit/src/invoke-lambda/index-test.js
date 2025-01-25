@@ -90,22 +90,22 @@ test('Test runtime invocations', t => {
     t.deepEqual(result, event, 'nodejs18.x received event')
   })
 
-  lambda = get.http('get /python3.11')
+  lambda = get.http('get /python3.13')
   invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
     let { options, timeout } = execPassedParams
-    t.equals(options.cwd, lambda.src, 'python3.11 passed correct path')
-    t.equals(timeout, 3000, 'python3.11 ran with correct timeout')
-    t.deepEqual(result, event, 'python3.11 received event')
+    t.equals(options.cwd, lambda.src, 'python3.13 passed correct path')
+    t.equals(timeout, 3000, 'python3.13 ran with correct timeout')
+    t.deepEqual(result, event, 'python3.13 received event')
   })
 
-  lambda = get.http('get /python3.8')
+  lambda = get.http('get /python3.9')
   invoke({ lambda, ...params }, (err, result) => {
     if (err) t.end(err)
     let { options, timeout } = execPassedParams
-    t.equals(options.cwd, lambda.src, 'python3.8 passed correct path')
-    t.equals(timeout, 3000, 'python3.8 ran with correct timeout')
-    t.deepEqual(result, event, 'python3.8 received event')
+    t.equals(options.cwd, lambda.src, 'python3.9 passed correct path')
+    t.equals(timeout, 3000, 'python3.9 ran with correct timeout')
+    t.deepEqual(result, event, 'python3.9 received event')
   })
 
   lambda = get.http('get /ruby3.2')
