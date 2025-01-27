@@ -65,7 +65,8 @@ function runTests (runType, t) {
     let fine = join(tmp, 'fine-write-me')
     let timer
 
-    watcher = chokidar.watch(tmp)
+    // Chokidar 4 stalls this test by keeping the process open indefinitely without persistent: false; this appears to be a Chokidar bug or strange undocumented behavior, but I wasn't able to triangulate it in a reasonable amount of time
+    watcher = chokidar.watch(tmp, { persistent: false })
     watcher.on('add', function (added) {
       if (added === fine) {
         clearTimeout(timer)
