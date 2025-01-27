@@ -9,6 +9,7 @@
 - Upgrade to `router` v2; lots of related refactoring
 - Upgrade other deps to resolve CVE warnings
 - Breaking change: removed support for Node.js 16.x (now EOL, and no longer available to created in AWS Lambda)
+- Added Node.js 22.x to CI
 - Disabled binary builds: `pkg` is long since out of date (now with a moderate CVE), and binary builds of Sandbox have not been a priority
 
 ---
