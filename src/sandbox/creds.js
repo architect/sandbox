@@ -16,8 +16,8 @@ module.exports = function loadCreds (params, callback) {
     })
     .catch(() => {
       params.creds = {
-        accessKeyId: 'arc_dummy_access_key',
-        secretAccessKey: 'arc_dummy_secret_key',
+        accessKeyId: 'arcDummyAccessKey',
+        secretAccessKey: 'arcDummySecretKey',
       }
       callback()
     })
