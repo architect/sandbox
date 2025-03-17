@@ -167,7 +167,7 @@ test('Events port selection', async t => {
 })
 
 test('Tables port selection', async t => {
-  t.plan(6)
+  t.plan(7)
   let tables = 5555
 
   reset()
@@ -189,6 +189,15 @@ test('Tables port selection', async t => {
   params = { inventory, update }
   await getPorts(params)
   t.deepEqual(params.ports, { tables: port, ...always }, 'Got back tables port from prefs.arc')
+
+  reset()
+  inventory.inv.tables = []
+  inventory.inv._project.preferences.sandbox = { 'external-db': true, ports: { tables: port } }
+  params = { inventory, update }
+  await listen(t, port)
+  await getPorts(params)
+  t.deepEqual(params.ports, { tables: port, ...always }, 'Got back occupied tables port for external DB')
+  await stopListening(t)
 
   let envVar = 2345
   process.env.ARC_DB_EXTERNAL = true

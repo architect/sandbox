@@ -20,7 +20,7 @@ function start (params, callback) {
     return callback()
   }
 
-  hasExternalDb = process.env.ARC_DB_EXTERNAL
+  hasExternalDb = inv._project.preferences?.sandbox?.['external-db'] || process.env.ARC_DB_EXTERNAL
 
   series([
     function (callback) {

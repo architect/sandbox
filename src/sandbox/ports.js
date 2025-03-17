@@ -36,7 +36,7 @@ module.exports = function getPorts (params, callback) {
     },
     function (callback) {
       // TODO add support for prefs
-      if (prefs?.['external-db'] || ARC_DB_EXTERNAL) {
+      if (preferences?.sandbox?.['external-db'] || ARC_DB_EXTERNAL) {
         ports.tables = prefs?.tables || n(ARC_TABLES_PORT)
         if (ports.tables) callback()
         else callback(Error('Sandbox must be configured with a database port when relying on an external database'))
