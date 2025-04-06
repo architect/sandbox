@@ -37,7 +37,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '2.7'
+        ruby-version: '3.3'
 
     - name: Set up Deno
       uses: denoland/setup-deno@v1
@@ -60,14 +60,7 @@ jobs:
     - name: Install
       run: npm install
 
-    - name: Test (Node.js <= 16.x)
-      if: matrix.node-version <= '16.x'
-      run: npm run test:nolint
-      env:
-        CI: true
-
     - name: Test
-      if: matrix.node-version > '16.x'
       run: npm test
       env:
         CI: true
@@ -75,7 +68,7 @@ jobs:
     - name: Notify
       uses: sarisia/actions-status-discord@v1
       # Only fire alert once
-      if: github.ref == 'refs/heads/main' && failure() && matrix.node-version == '20.x' && matrix.os == 'ubuntu-latest'
+      if: github.ref == 'refs/heads/main' && failure() && matrix.node-version == '22.x' && matrix.os == 'ubuntu-latest'
       with:
         webhook: ${{ secrets.DISCORD_WEBHOOK }}
         title: "build and test"
