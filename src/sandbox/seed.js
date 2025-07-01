@@ -17,7 +17,7 @@ module.exports = function startupSeedData (params, callback) {
   let seedFilePref = prefs?.sandbox?.['seed-data'] && join(cwd, prefs.sandbox['seed-data'])
   let file
   if (seedFilePref && existsSync(seedFilePref)) {
-    file = seedFilePref.replace(`.${extname(seedFilePref)}`, '')
+    file = seedFilePref.replace(`${extname(seedFilePref)}`, '')
   }
   else {
     file = join(cwd, 'sandbox-seed')

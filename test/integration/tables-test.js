@@ -136,7 +136,7 @@ function runTests (runType, t) {
   /**
    * Seed data
    */
-  t.test(`${mode} Start Sandbox`, t => {
+  t.test(`${mode} Start Sandbox (w/ seed-data.js)`, t => {
     startup[runType](t, join('seed-data', 'js'), { confirmStarted })
   })
 
@@ -166,7 +166,7 @@ function runTests (runType, t) {
     shutdown[runType](t)
   })
 
-  t.test(`${mode} Start Sandbox`, t => {
+  t.test(`${mode} Start Sandbox (w/ seed-data.json)`, t => {
     startup[runType](t, join('seed-data', 'json'), { confirmStarted })
   })
 
@@ -196,7 +196,7 @@ function runTests (runType, t) {
     shutdown[runType](t)
   })
 
-  t.test(`${mode} Start Sandbox`, t => {
+  t.test(`${mode} Start Sandbox (w/ seed-data custom pref)`, t => {
     startup[runType](t, join('seed-data', 'custom'), { confirmStarted })
   })
 
