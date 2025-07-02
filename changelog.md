@@ -2,6 +2,16 @@
 
 ---
 
+## [7.1.0] 2025-07-01
+
+### Added
+
+- Added ability to load sandbox seed data from `.mjs` and `.cjs` files, and fixes loading of seed data files in `type: module` projects. Thanks @filmaj!
+
+### Fixed
+
+- Fixed lookup of `external-db` `@sandbox` preference. Thanks @lpsinger!
+
 ## [7.0.0] 2025-01-25
 
 ### Changed
