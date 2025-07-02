@@ -134,97 +134,40 @@ function runTests (runType, t) {
   })
 
   /**
-   * Seed data
+   * Seed data using different files
    */
-  t.test(`${mode} Start Sandbox`, t => {
-    startup[runType](t, join('seed-data', 'js'), { confirmStarted })
-  })
+  for (let filetype of [ 'js', 'json', 'mjs', 'cjs', 'custom' ]) {
+    let testNameSuffix = `(w/ ${filetype} seed-data)`
+    t.test(`${mode} Start Sandbox ${testNameSuffix}`, t => {
+      startup[runType](t, join('seed-data', filetype), { confirmStarted })
+    })
 
-  t.test(`${mode} Scan seeded rows from first table`, async t => {
-    t.plan(3)
-    setup(t)
-    let result = await dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
-    console.log(str(result))
-    t.equal(result.Count, 2, 'Got two results')
-    t.equal(result.Items[0].id, 'fiz', `Got expected row`)
-    t.equal(result.Items[1].id, 'foo', `Got expected row`)
-    teardown(t)
-  })
+    t.test(`${mode} Scan seeded rows from first table ${testNameSuffix}`, async t => {
+      t.plan(3)
+      setup(t)
+      let result = await dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
+      console.log(str(result))
+      t.equal(result.Count, 2, 'Got two results')
+      t.equal(result.Items[0].id, 'fiz', `Got expected row`)
+      t.equal(result.Items[1].id, 'foo', `Got expected row`)
+      teardown(t)
+    })
 
-  t.test(`${mode} Scan seeded rows from second table`, async t => {
-    t.plan(3)
-    setup(t)
-    let result = await dynamo.Scan({ TableName: 'seed-data-staging-things' })
-    console.log(str(result))
-    t.equal(result.Count, 2, 'Got two results')
-    t.equal(result.Items[0].id, 'foo', `Got expected row`)
-    t.equal(result.Items[1].id, 'foo', `Got expected row`)
-    teardown(t)
-  })
+    t.test(`${mode} Scan seeded rows from second table ${testNameSuffix}`, async t => {
+      t.plan(3)
+      setup(t)
+      let result = await dynamo.Scan({ TableName: 'seed-data-staging-things' })
+      console.log(str(result))
+      t.equal(result.Count, 2, 'Got two results')
+      t.equal(result.Items[0].id, 'foo', `Got expected row`)
+      t.equal(result.Items[1].id, 'foo', `Got expected row`)
+      teardown(t)
+    })
 
-  t.test(`${mode} Shut down Sandbox`, t => {
-    shutdown[runType](t)
-  })
-
-  t.test(`${mode} Start Sandbox`, t => {
-    startup[runType](t, join('seed-data', 'json'), { confirmStarted })
-  })
-
-  t.test(`${mode} Scan seeded rows from first table`, async t => {
-    t.plan(3)
-    setup(t)
-    let result = await dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
-    console.log(str(result))
-    t.equal(result.Count, 2, 'Got two results')
-    t.equal(result.Items[0].id, 'fiz', `Got expected row`)
-    t.equal(result.Items[1].id, 'foo', `Got expected row`)
-    teardown(t)
-  })
-
-  t.test(`${mode} Scan seeded rows from second table`, async t => {
-    t.plan(3)
-    setup(t)
-    let result = await dynamo.Scan({ TableName: 'seed-data-staging-things' })
-    console.log(str(result))
-    t.equal(result.Count, 2, 'Got two results')
-    t.equal(result.Items[0].id, 'foo', `Got expected row`)
-    t.equal(result.Items[1].id, 'foo', `Got expected row`)
-    teardown(t)
-  })
-
-  t.test(`${mode} Shut down Sandbox`, t => {
-    shutdown[runType](t)
-  })
-
-  t.test(`${mode} Start Sandbox`, t => {
-    startup[runType](t, join('seed-data', 'custom'), { confirmStarted })
-  })
-
-  t.test(`${mode} Scan seeded rows from first table`, async t => {
-    t.plan(3)
-    setup(t)
-    let result = await dynamo.Scan({ TableName: 'seed-data-staging-stuff' })
-    console.log(str(result))
-    t.equal(result.Count, 2, 'Got two results')
-    t.equal(result.Items[0].id, 'fiz', `Got expected row`)
-    t.equal(result.Items[1].id, 'foo', `Got expected row`)
-    teardown(t)
-  })
-
-  t.test(`${mode} Scan seeded rows from second table`, async t => {
-    t.plan(3)
-    setup(t)
-    let result = await dynamo.Scan({ TableName: 'seed-data-staging-things' })
-    console.log(str(result))
-    t.equal(result.Count, 2, 'Got two results')
-    t.equal(result.Items[0].id, 'foo', `Got expected row`)
-    t.equal(result.Items[1].id, 'foo', `Got expected row`)
-    teardown(t)
-  })
-
-  t.test(`${mode} Shut down Sandbox`, t => {
-    shutdown[runType](t)
-  })
+    t.test(`${mode} Shut down Sandbox ${testNameSuffix}`, t => {
+      shutdown[runType](t)
+    })
+  }
 
   t.test(`${mode} Start Sandbox`, t => {
     process.env.ARC_ENV = 'staging'

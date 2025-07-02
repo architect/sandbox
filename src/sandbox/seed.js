@@ -1,7 +1,9 @@
 let { extname, join } = require('path')
-let { existsSync, readFileSync } = require('fs')
+let { existsSync } = require('fs')
 let series = require('run-series')
+let { callbackify } = require('util')
 let getDBClient = require('../tables/_get-db-client')
+let { loadFileWithoutExtension } = require('../lib/load-file')
 
 module.exports = function startupSeedData (params, callback) {
   let { ARC_ENV } = process.env
@@ -10,30 +12,19 @@ module.exports = function startupSeedData (params, callback) {
   let { app, tables } = inv
   if (!tables || ARC_ENV !== 'testing') return callback()
 
-  // Seed files: seed-data.json, seed-data.js, or custom
+  // Seed files: sandbox-seed.[m|c]js[on], or custom
   let { preferences: prefs } = inventory.inv._project
-  let seedFile = prefs?.sandbox?.['seed-data'] && join(cwd, prefs.sandbox['seed-data'])
-  let seedJson = join(cwd, 'sandbox-seed.json')
-  let seedJs = join(cwd, 'sandbox-seed.js')
-
+  let seedFilePref = prefs?.sandbox?.['seed-data'] && join(cwd, prefs.sandbox['seed-data'])
   let file
-  /**/ if (existsSync(seedFile)) file = seedFile
-  else if (existsSync(seedJson)) file = seedJson
-  else if (existsSync(seedJs))   file = seedJs
-
-  if (file) {
-    let ext = extname(file).replace('.', '')
-    if (![ 'json', 'js' ].includes(ext)) {
-      return callback(ReferenceError('Seed data file must be valid .json or .js'))
-    }
-    let data
-    try {
-      if (ext === 'json') data = JSON.parse(readFileSync(file))
-      else data = require(file)
-    }
-    catch {
-      return callback(Error(`Failed to load seed data from ${file}`))
-    }
+  if (seedFilePref && existsSync(seedFilePref)) {
+    file = seedFilePref.replace(`${extname(seedFilePref)}`, '')
+  }
+  else {
+    file = join(cwd, 'sandbox-seed')
+  }
+  callbackify(loadFileWithoutExtension)(file, (err, data) => {
+    if (err) return callback(new Error(`Failed to load seed data from ${file}: ${err.message}`, { cause: err }))
+    if (!data) return callback()
 
     let dynamo
     let seeds = Object.entries(data).flatMap(([ table, rows ]) => {
@@ -69,6 +60,5 @@ module.exports = function startupSeedData (params, callback) {
         })
       }
     })
-  }
-  else callback()
+  })
 }
