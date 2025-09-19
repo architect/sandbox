@@ -1,6 +1,6 @@
 let { extname, join } = require('path')
 let { existsSync } = require('fs')
-let series = require('run-series')
+let series = require('@architect/utils/run-series')
 let { callbackify } = require('util')
 let getDBClient = require('../tables/_get-db-client')
 let { loadFileWithoutExtension } = require('../lib/load-file')

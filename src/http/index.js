@@ -4,11 +4,10 @@ let http = require('http')
 // 3rd party
 let Router = require('router')
 let finalhandler = require('finalhandler')
-let series = require('run-series')
 let destroyer = require('server-destroy')
 
 // Local
-let { fingerprint } = require('@architect/utils')
+let { fingerprint, series } = require('@architect/utils')
 let middleware = require('./middleware')
 let config = require('./_config')
 let registerHTTP = require('./register-http')

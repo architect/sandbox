@@ -1,4 +1,4 @@
-let series = require('run-series')
+let series = require('@architect/utils/run-series')
 let net = require('net')
 let n = idk => Number(idk)
 

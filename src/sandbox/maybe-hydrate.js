@@ -1,10 +1,8 @@
-let chalk = require('chalk')
 let depStatus = require('depstatus')
 let { existsSync: exists, readFileSync, rmSync } = require('fs')
 let { join } = require('path')
 let hydrate = require('@architect/hydrate')
-let series = require('run-series')
-let { chars } = require('@architect/utils')
+let { chalk, chars, series } = require('@architect/utils')
 
 /**
  * Checks for the existence of supported dependency manifests, and auto-hydrates dependencies as necessary

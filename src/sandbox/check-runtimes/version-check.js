@@ -1,5 +1,5 @@
 let { sep } = require('path')
-let { aliases, runtimeVersions, runtimes } = require('lambda-runtimes')
+let { aliases, runtimeVersions, runtimes } = require('@architect/utils/lambda-runtimes')
 
 /**
  * Runtime version compatibility checker

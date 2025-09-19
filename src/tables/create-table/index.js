@@ -1,5 +1,4 @@
-let series = require('run-series')
-let parallel = require('run-parallel')
+let { series, parallel } = require('@architect/utils')
 let create = require('./_create-table')
 
 /**

@@ -1,7 +1,7 @@
 let test = require('tape')
 let sandbox = require('../../../src')
 let { join } = require('path')
-let series = require('run-series')
+let series = require('@architect/utils/run-series')
 let mock = join(process.cwd(), 'test', 'mock')
 let { copy, port, quiet, verifyShutdown } = require(join(process.cwd(), 'test', 'utils'))
 

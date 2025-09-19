@@ -1,6 +1,6 @@
 let hydrate = require('@architect/hydrate')
-let series = require('run-series')
 let create = require('@architect/create')
+let series = require('@architect/utils/run-series')
 
 let env = require('./env')
 let creds = require('./creds')

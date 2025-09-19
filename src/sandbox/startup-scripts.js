@@ -1,5 +1,5 @@
 let { exec } = require('child_process')
-let series = require('run-series')
+let series = require('@architect/utils/run-series')
 let { userEnvVars } = require('../lib')
 
 module.exports = function startupScripts (params, callback) {

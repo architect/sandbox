@@ -1,6 +1,6 @@
 let { existsSync } = require('fs')
 let { randomUUID } = require('crypto')
-let chalk = require('chalk')
+let chalk = require('@architect/utils/chalk')
 
 let getEnv = require('./env')
 let exec = require('./exec')

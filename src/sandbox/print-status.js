@@ -1,7 +1,7 @@
 let { join, sep } = require('path')
 let { existsSync } = require('fs')
-let chalk = require('chalk')
-let { chars } = require('@architect/utils')
+let { chalk, chars } = require('@architect/utils')
+
 let httpConfig = require('../http/_config')
 
 /**

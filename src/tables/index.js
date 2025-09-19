@@ -1,6 +1,6 @@
 let init = require('./_init')
 let dynalite = require('dynalite')
-let series = require('run-series')
+let series = require('@architect/utils/run-series')
 
 // Global refs for .end
 let dynamo
