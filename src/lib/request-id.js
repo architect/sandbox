@@ -1,4 +1,4 @@
-let Hashid = require('@begin/hashid')
+let Hashid = require('@architect/utils/hashid')
 let hash = new Hashid('requestId')
 let counter = Date.now()
 
