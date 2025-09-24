@@ -1,6 +1,11 @@
 # Architect Sandbox changelog
 
 ---
+## [8.0.0] 2025-09-24
+
+- Updated deps and node > 20
+
+---
 
 ## [7.1.0] 2025-07-01
 
