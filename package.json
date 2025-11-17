@@ -23,7 +23,8 @@
   "author": "Brian LeRoux <b@brian.io>",
   "license": "Apache-2.0",
   "bin": {
-    "sandbox": "src/cli/cli.js"
+    "sandbox": "src/cli/cli.js",
+    "arc-sandbox": "src/cli/cli.js"
   },
   "files": [
     "src/*"
