@@ -1,6 +1,6 @@
 {
   "name": "@architect/sandbox",
-  "version": "8.0.0",
+  "version": "9.0.0",
   "description": "Architect dev server: run full Architect projects locally & offline",
   "main": "src/index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "build": "node scripts/vendor.js && node bin/binary-config.js && npx pkg bin"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "repository": {
     "type": "git",
@@ -31,10 +31,10 @@
   ],
   "dependencies": {
     "@architect/asap": "~7.0.10",
-    "@architect/create": "~6.0.0",
-    "@architect/hydrate": "~5.0.0",
-    "@architect/inventory": "~5.0.0",
-    "@architect/utils": "~5.0.0",
+    "@architect/create": "~7.0.0",
+    "@architect/hydrate": "~6.0.0",
+    "@architect/inventory": "~6.0.0",
+    "@architect/utils": "~6.0.0",
     "@aws-lite/client": "^0.23.2",
     "@aws-lite/dynamodb": "^0.3.9",
     "chokidar": "4.0.3",
