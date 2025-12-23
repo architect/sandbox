@@ -166,6 +166,30 @@ function runTests (runType, t) {
     })
   })
 
+  t.test(`${mode} get /nodejs24.x`, t => {
+    t.plan(15)
+    let rawPath = '/nodejs24.x'
+    tiny.get({
+      url: url + rawPath,
+    }, function _got (err, result) {
+      if (err) t.end(err)
+      else {
+        checkResult(t, result.body, {
+          message: 'Hello from get /nodejs24.x (running nodejs24.x)',
+          routeKey: 'GET /nodejs24.x',
+          rawPath,
+          pathParameters: undefined,
+          cookies: undefined,
+          queryStringParameters: undefined,
+          rawQueryString: '',
+          headers: '🤷🏽‍♀️',
+          isBase64Encoded: false,
+          body: undefined,
+        })
+      }
+    })
+  })
+
   t.test(`${mode} get /nodejs22.x`, t => {
     t.plan(15)
     let rawPath = '/nodejs22.x'
@@ -201,30 +225,6 @@ function runTests (runType, t) {
         checkResult(t, result.body, {
           message: 'Hello from get /nodejs20.x (running nodejs20.x)',
           routeKey: 'GET /nodejs20.x',
-          rawPath,
-          pathParameters: undefined,
-          cookies: undefined,
-          queryStringParameters: undefined,
-          rawQueryString: '',
-          headers: '🤷🏽‍♀️',
-          isBase64Encoded: false,
-          body: undefined,
-        })
-      }
-    })
-  })
-
-  t.test(`${mode} get /nodejs18.x`, t => {
-    t.plan(15)
-    let rawPath = '/nodejs18.x'
-    tiny.get({
-      url: url + rawPath,
-    }, function _got (err, result) {
-      if (err) t.end(err)
-      else {
-        checkResult(t, result.body, {
-          message: 'Hello from get /nodejs18.x (running nodejs18.x)',
-          routeKey: 'GET /nodejs18.x',
           rawPath,
           pathParameters: undefined,
           cookies: undefined,
