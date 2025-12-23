@@ -14,9 +14,9 @@ queue-custom
 @http
 get     / # runs default
 # Runtimes
+get     /nodejs24.x
 get     /nodejs22.x
 get     /nodejs20.x
-get     /nodejs18.x
 get     /node-esm
 get     /python3.13
 get     /python3.9
