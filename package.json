@@ -48,7 +48,7 @@
     "tmp": "0.2.4",
     "tree-kill": "1.2.2",
     "update-notifier-cjs": "5.1.7",
-    "ws": "8.18.0"
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@architect/eslint-config": "~3.0.0",
