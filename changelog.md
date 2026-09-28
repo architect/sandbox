@@ -1,5 +1,7 @@
 # Architect Sandbox changelog
 
+- Updated path.join to path.posix.join to resolve an issue where the resulting value of ARC_STATIC_BUCKET would be invalid on Windows
+
 ---
 ## [8.0.0] 2025-09-24
 

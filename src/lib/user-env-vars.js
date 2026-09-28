@@ -1,4 +1,4 @@
-let { join } = require('path')
+let { join } = require('path/posix')
 let { version } = require('../../package.json')
 
 // Assemble Architect + userland env vars
